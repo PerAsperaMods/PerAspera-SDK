@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- Import SDK versioning -->
+	<Import Project="..\Version.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>PerAspera.GameAPI.Events</AssemblyName>
+		<RootNamespace>PerAspera.GameAPI.Events</RootNamespace>
+		<PackageId>PerAspera.GameAPI.Events</PackageId>
+		<Description>Public event API for Per Aspera - Native and custom game events</Description>
+		<PackageTags>per-aspera;events;gameapi;modding;event-system</PackageTags>
+		<IsSharedLibrary>true</IsSharedLibrary>
+	</PropertyGroup>
+
+	<!-- Dependencies -->
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+	</ItemGroup>
+</Project>

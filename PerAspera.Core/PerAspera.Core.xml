@@ -1,0 +1,260 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.Core</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.Core.CargoQuantityHelper">
+            <summary>
+            Helper for creating and manipulating CargoQuantity objects
+            Provides safe IL2CPP access to the game's cargo/resource quantity system
+            </summary>
+        </member>
+        <member name="P:PerAspera.Core.CargoQuantityHelper.IsAvailable">
+            <summary>
+            Check if CargoQuantity system is available
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.EnsureInitialized">
+            <summary>
+            Initialize the CargoQuantity reflection bindings
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.CreateFromUnits(System.Single)">
+            <summary>
+            Create CargoQuantity from float units
+            </summary>
+            <param name="units">Amount in float units</param>
+            <returns>CargoQuantity instance or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.CreateFromMilli(System.Int64)">
+            <summary>
+            Create CargoQuantity from milli units
+            </summary>
+            <param name="milli">Amount in milli units</param>
+            <returns>CargoQuantity instance or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.GetEmpty">
+            <summary>
+            Get empty CargoQuantity instance
+            </summary>
+            <returns>Empty CargoQuantity or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.TryToFloat(System.Object,System.Single@)">
+            <summary>
+            Try to convert CargoQuantity to float
+            </summary>
+            <param name="cargoObj">CargoQuantity instance</param>
+            <param name="value">Output float value</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.TryToMilli(System.Object,System.Int64@)">
+            <summary>
+            Try to convert CargoQuantity to milli units
+            </summary>
+            <param name="cargoObj">CargoQuantity instance</param>
+            <param name="milli">Output milli value</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.ToDebugString(System.Object)">
+            <summary>
+            Convert CargoQuantity to debug string
+            </summary>
+            <param name="cargoObj">CargoQuantity instance</param>
+            <returns>String representation</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.IsCargoQuantity(System.Object)">
+            <summary>
+            Check if an object is a CargoQuantity
+            </summary>
+            <param name="obj">Object to check</param>
+            <returns>True if it's a CargoQuantity</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.GetCargoQuantityType">
+            <summary>
+            Get CargoQuantity type information
+            </summary>
+            <returns>Type info or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.Add(System.Object,System.Object)">
+            <summary>
+            Add two CargoQuantity objects if possible
+            </summary>
+            <param name="cargo1">First cargo</param>
+            <param name="cargo2">Second cargo</param>
+            <returns>Sum cargo or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.LocalLogError(System.String,System.String)">
+            <summary>
+            Minimal logging without external dependencies
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.CargoQuantityHelper.LocalLogDebug(System.String,System.String)">
+            <summary>
+            Minimal debug logging
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.LogAspera">
+            <summary>
+            Centralized logging system for Per Aspera mods
+            Provides both BepInEx console logging and file-based logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.#cctor">
+            <summary>
+            Static constructor to ensure log directory exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.#ctor(System.String)">
+            <summary>
+            Creates a LogAspera instance with a specific component name
+            </summary>
+            <param name="componentName">Component name to identify log source</param>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Info(System.String)">
+            <summary>
+            Logs an information message
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Debug(System.String)">
+            <summary>
+            Logs a debug message
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Warning(System.String)">
+            <summary>
+            Logs a warning message
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Error(System.String)">
+            <summary>
+            Logs an error message
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Fatal(System.String)">
+            <summary>
+            Logs a fatal message
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.Log(BepInEx.Logging.LogLevel,System.String)">
+            <summary>
+            Logs a message with custom level
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.WriteToFile(System.String)">
+            <summary>
+            Writes message to component-specific log file
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.CleanOldLogs(System.Int32)">
+            <summary>
+            Cleans old log files (call manually)
+            </summary>
+            <param name="daysToKeep">Number of days to keep logs</param>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.LogInfo(System.String)">
+            <summary>
+            Static convenience method for quick logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.LogDebug(System.String)">
+            <summary>
+            Static convenience method for debug logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.LogWarning(System.String)">
+            <summary>
+            Static convenience method for warning logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.LogError(System.String)">
+            <summary>
+            Static convenience method for error logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.LogAspera.LogFatal(System.String)">
+            <summary>
+            Static convenience method for fatal logging
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.Utilities">
+            <summary>
+            General utility functions for Per Aspera modding
+            Includes reflection helpers, type utilities, and common operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.Log(System.Action{System.String},System.String)">
+            <summary>
+            Thread-safe logging helper
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.SetFieldOrProp(System.Object,System.String,System.Object)">
+            <summary>
+            Sets a field or property value using reflection
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="fieldName">Field or property name</param>
+            <param name="value">Value to set</param>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.GetFloatFieldOrProp(System.Object,System.String,System.Single)">
+            <summary>
+            Gets a float value from field or property, with default fallback
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="fieldName">Field or property name</param>
+            <param name="defaultValue">Default value if not found</param>
+            <returns>Float value or default</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.GetMemberValue``1(System.Object,System.String[],System.Action{System.String})">
+            <summary>
+            Gets member value by trying multiple names (field/property/method)
+            </summary>
+            <typeparam name="T">Expected return type</typeparam>
+            <param name="instance">Target object instance</param>
+            <param name="names">Array of possible member names to try</param>
+            <param name="log">Optional logging callback</param>
+            <returns>Value cast to T or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.GetMemberValue(System.Object,System.String[],System.Action{System.String})">
+            <summary>
+            Gets member value by trying multiple names (field/property/method)
+            </summary>
+            <param name="instance">Target object instance</param>
+            <param name="names">Array of possible member names to try</param>
+            <param name="log">Optional logging callback</param>
+            <returns>Member value or null</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.FindTypeStatic(System.String,System.Action{System.String})">
+            <summary>
+            Finds a type by name across all loaded assemblies
+            </summary>
+            <param name="name">Type name (full or simple)</param>
+            <param name="log">Optional logging callback</param>
+            <returns>Type or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.ToFloat(System.Object,System.Single)">
+            <summary>
+            Safe conversion to float with fallback
+            </summary>
+            <param name="value">Value to convert</param>
+            <param name="defaultValue">Default if conversion fails</param>
+            <returns>Float value or default</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.ToInt(System.Object,System.Int32)">
+            <summary>
+            Safe conversion to int with fallback
+            </summary>
+            <param name="value">Value to convert</param>
+            <param name="defaultValue">Default if conversion fails</param>
+            <returns>Int value or default</returns>
+        </member>
+        <member name="M:PerAspera.Core.Utilities.ToString(System.Object,System.String)">
+            <summary>
+            Safe string conversion
+            </summary>
+            <param name="value">Value to convert</param>
+            <param name="defaultValue">Default if null</param>
+            <returns>String representation or default</returns>
+        </member>
+    </members>
+</doc>

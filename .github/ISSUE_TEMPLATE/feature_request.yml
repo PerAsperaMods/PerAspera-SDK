@@ -1,0 +1,167 @@
+name: Feature Request
+description: Proposer une nouvelle fonctionnalité pour les mods Per Aspera
+title: "[FEATURE] "
+labels: ["enhancement", "mod-help"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Demande de Fonctionnalité - Mod Per Aspera
+        
+        Proposez une nouvelle fonctionnalité ou amélioration pour les mods Per Aspera.
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Type de fonctionnalité
+      description: Quel type de fonctionnalité proposez-vous ?
+      options:
+        - Nouveau mod complet
+        - Amélioration d'un mod existant
+        - Outil de développement
+        - Modification des données du jeu (YAML)
+        - Interface utilisateur
+        - API/Framework
+        - Documentation
+        - Automatisation/CI-CD
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mod-target
+    attributes:
+      label: Mod concerné (si applicable)
+      description: Quel mod serait concerné par cette fonctionnalité ?
+      options:
+        - AtmosphereRelease
+        - MasterGui
+        - devToolkit
+        - SolarPowerOverride
+        - ReworkWaterLogic
+        - ImportRessources
+        - AsperaBaseGameProvider
+        - Framework commun
+        - Nouveau mod à créer
+        - Non spécifique
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description de la fonctionnalité
+      description: Décrivez en détail la fonctionnalité souhaitée
+      placeholder: |
+        Décrivez la fonctionnalité que vous aimeriez voir ajoutée...
+        
+        Cas d'utilisation :
+        - ...
+        - ...
+        
+        Comportement attendu :
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Pourquoi cette fonctionnalité serait-elle utile ?
+      placeholder: |
+        Expliquez pourquoi cette fonctionnalité améliorerait l'expérience de jeu ou de développement...
+        
+        Problèmes résolus :
+        - ...
+        
+        Avantages :
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Détails techniques
+      description: Si vous avez des idées sur l'implémentation
+      placeholder: |
+        Suggestions d'implémentation :
+        - Classes/méthodes à modifier
+        - APIs à utiliser
+        - Fichiers YAML concernés
+        - Patches Harmony nécessaires
+        
+        Contraintes techniques :
+        - ...
+        
+        Références utiles :
+        - ...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Complexité estimée
+      description: Selon vous, quelle serait la complexité de cette fonctionnalité ?
+      options:
+        - Simple (quelques heures)
+        - Modérée (quelques jours)
+        - Complexe (plusieurs semaines)
+        - Très complexe (refactoring majeur)
+        - Je ne sais pas
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Quelle importance accordez-vous à cette fonctionnalité ?
+      options:
+        - Critique (bloque l'utilisation)
+        - Haute (amélioration importante)
+        - Moyenne (serait bien d'avoir)
+        - Basse (nice to have)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Solutions alternatives
+      description: Avez-vous considéré d'autres approches ?
+      placeholder: |
+        Solutions de contournement actuelles :
+        - ...
+        
+        Alternatives possibles :
+        - ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: Je serais prêt(e) à contribuer au développement
+        - label: Je peux tester la fonctionnalité
+        - label: Je peux aider avec la documentation
+        - label: Je peux fournir des assets (YAML, textures, etc.)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ### 🎯 Conseils pour une bonne demande de fonctionnalité :
+        
+        1. **Soyez spécifique** : Plus votre description est précise, plus il sera facile de l'implémenter
+        2. **Justifiez l'utilité** : Expliquez comment cela améliorerait l'expérience
+        3. **Pensez compatibilité** : Considérez l'impact sur les sauvegardes et autres mods
+        4. **Proposez des détails techniques** : Si vous connaissez le code du jeu, partagez vos insights
+        
+        **Votre suggestion sera examinée par l'équipe de développement. Merci de contribuer ! 🚀**

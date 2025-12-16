@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "PerAspera.ModSDK": {
+      "commandName": "Project"
+    },
+    "AsperaBepinex": {
+      "commandName": "Executable",
+      "executablePath": "F:\\SteamLibrary\\steamapps\\common\\Per Aspera\\Per Aspera.exe",
+      "workingDirectory": "F:\\SteamLibrary\\steamapps\\common\\Per Aspera\\BepInEx\\plugins\\PerAspera-SDK",
+      "nativeDebugging": true
+    }
+  }
+}

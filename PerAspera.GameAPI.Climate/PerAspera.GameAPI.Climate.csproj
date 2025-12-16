@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- Import SDK versioning -->
+	<Import Project="..\Version.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>PerAspera.GameAPI.Climate</AssemblyName>
+		<RootNamespace>PerAspera.GameAPI.Climate</RootNamespace>
+		<PackageId>PerAspera.GameAPI.Climate</PackageId>
+		<Description>Climate simulation and analysis system for Per Aspera modding</Description>
+		<PackageTags>per-aspera;climate;atmosphere;terraforming;simulation</PackageTags>
+		<IsSharedLibrary>true</IsSharedLibrary>
+	</PropertyGroup>
+
+	<!-- Dependencies -->
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../DOC"
+		},
+		{
+			"path": "../Individual-Mods/PerAspera-MasterGui"
+		},
+		{
+			"path": "../Individual-Mods/MasterGui2"
+		},
+		{
+			"path": "../../SteamLibrary/steamapps/common/Per Aspera/Logs"
+		},
+		{
+			"path": "../../SteamLibrary/steamapps/common/Per Aspera/BepInEx"
+		},
+		{
+			"path": "../Tools"
+		},
+		{
+			"path": "../Individual-Mods/PerAspera-ImportRessources"
+		}
+	],
+	"settings": {}
+}

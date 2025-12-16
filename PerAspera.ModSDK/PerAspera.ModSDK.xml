@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.ModSDK</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.ModSDK.GameEvents">
+            <summary>
+            Game event constants mapped to actual Per Aspera GameEventType values
+            Based on Events-Raw-List.md documentation
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.ModSDKException">
+            <summary>
+            ModSDK-specific exception
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.ModSDK">
+            <summary>
+            PerAspera ModSDK - Your gateway to Per Aspera modding
+            Refactored for better maintainability and separation of concerns
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.ModSDK.Initialize(System.String,System.String)">
+            <summary>
+            Initialize the SDK for your mod
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.PerAsperaSDKPlugin">
+            <summary>
+            Plugin principal PerAspera SDK - Fournit l'infrastructure de modding complète
+            Uses new event architecture (PerAspera.GameAPI.Events v2)
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.PerAsperaSDKPlugin.InitializeNativeEventSystem">
+            <summary>
+            Initialise le système d'interception des événements natifs du jeu
+            Uses new PerAspera.GameAPI.Events architecture v2
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Properties.Resources">
+            <summary>
+              Une classe de ressource fortement typée destinée, entre autres, à la consultation des chaînes localisées.
+            </summary>
+        </member>
+        <member name="P:PerAspera.ModSDK.Properties.Resources.ResourceManager">
+            <summary>
+              Retourne l'instance ResourceManager mise en cache utilisée par cette classe.
+            </summary>
+        </member>
+        <member name="P:PerAspera.ModSDK.Properties.Resources.Culture">
+            <summary>
+              Remplace la propriété CurrentUICulture du thread actuel pour toutes
+              les recherches de ressources à l'aide de cette classe de ressource fortement typée.
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Systems.EventSystem">
+            <summary>
+            Event system - Custom mod event publishing and subscription
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.Initialize">
+            <summary>
+            Initialize the event system
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe to a game event
+            </summary>
+            <param name="eventName">Event name (use GameEvents.* constants)</param>
+            <param name="handler">Your event handler</param>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.Unsubscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Unsubscribe from a game event
+            </summary>
+            <param name="eventName">Event name</param>
+            <param name="handler">Your event handler</param>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.Publish(System.String,System.Object)">
+            <summary>
+            Publish a custom mod event
+            </summary>
+            <param name="eventName">Your custom event name (prefix with your mod name)</param>
+            <param name="eventData">Event data</param>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.GetStats">
+            <summary>
+            Get event subscription statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.UnsubscribeAll">
+            <summary>
+            Unsubscribe from all events (internal cleanup)
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.EventSystem.EnsureInitialized">
+            <summary>
+            Ensure the event system is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Systems.LoggingSystem">
+            <summary>
+            Logging utilities - Use this instead of Console.WriteLine
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.Initialize(System.String)">
+            <summary>
+            Initialize the logging system with mod name
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.Info(System.String)">
+            <summary>
+            Log info message
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.Warning(System.String)">
+            <summary>
+            Log warning message
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.Error(System.String)">
+            <summary>
+            Log error message
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.Debug(System.String)">
+            <summary>
+            Log debug message
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.LoggingSystem.CreateComponentLogger(System.String)">
+            <summary>
+            Create a prefixed logger for a specific component
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Systems.ComponentLogger">
+            <summary>
+            Component-specific logger
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Systems.OverrideSystem">
+            <summary>
+            Getter Override system - Modify game method return values dynamically
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.Initialize">
+            <summary>
+            Initialize the override system
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.Shutdown">
+            <summary>
+            Shutdown the override system
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.RegisterOverride(System.String,System.String,System.String,System.Single,System.Single,System.Single,System.String)">
+            <summary>
+            Register a new getter override (float)
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.RegisterOverride``1(System.String,System.String,System.String,``0,System.String)">
+            <summary>
+            Register a new getter override (generic)
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.SetOverride(System.String,System.String,System.Single,System.Boolean)">
+            <summary>
+            Set override value
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.GetOverrideValue(System.String,System.String)">
+            <summary>
+            Get override value
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.IsOverrideActive(System.String,System.String)">
+            <summary>
+            Check if override is active
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.GetOverridesByCategory(System.String)">
+            <summary>
+            Get all overrides in a category
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.GetActiveOverrides">
+            <summary>
+            Get all enabled overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.ClearAllOverrides">
+            <summary>
+            Clear all registered overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.GetStatistics">
+            <summary>
+            Get override system statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.OverrideSystem.EnsureInitialized">
+            <summary>
+            Ensure override system is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.ModSDK.Systems.VersionInfo">
+            <summary>
+            SDK version information and compatibility
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.VersionInfo.GetFullVersion">
+            <summary>
+            Get complete version information
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.VersionInfo.GetShortVersion">
+            <summary>
+            Get short version string
+            </summary>
+        </member>
+        <member name="M:PerAspera.ModSDK.Systems.VersionInfo.IsGameVersionCompatible(System.String)">
+            <summary>
+            Check if a game version is compatible
+            </summary>
+        </member>
+    </members>
+</doc>

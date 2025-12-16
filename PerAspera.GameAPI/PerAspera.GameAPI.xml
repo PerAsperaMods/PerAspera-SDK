@@ -1,0 +1,603 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Helpers.CargoQuantityHelper">
+            <summary>
+            Helper for working with native CargoQuantity instances
+            DOC REFERENCES: CargoQuantity.cs, CargoQuantityHelper.cs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.CreateFromFloat(System.Single)">
+            <summary>
+            TODO: Create CargoQuantity from float value
+            Uses CargoQuantity.FromUnitFloat() or similar
+            </summary>
+            <param name="value">Float value (in units)</param>
+            <returns>CargoQuantity instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.CreateFromMilli(System.Int64)">
+            <summary>
+            TODO: Create CargoQuantity from milli value  
+            Uses CargoQuantity.FromMilli() method
+            </summary>
+            <param name="milliValue">Value in milli units</param>
+            <returns>CargoQuantity instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.GetEmpty">
+            <summary>
+            TODO: Get CargoQuantity.Empty static instance
+            </summary>
+            <returns>Empty CargoQuantity</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.ToFloat(System.Object)">
+            <summary>
+            TODO: Convert CargoQuantity to float value
+            Uses ToFloat() method
+            </summary>
+            <param name="cargoQuantity">CargoQuantity instance</param>
+            <returns>Float value</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.ToMilli(System.Object)">
+            <summary>
+            TODO: Convert CargoQuantity to milli value
+            Uses ToMilli() method
+            </summary>
+            <param name="cargoQuantity">CargoQuantity instance</param>
+            <returns>Milli value</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.IsEmpty(System.Object)">
+            <summary>
+            TODO: Check if CargoQuantity is empty/zero
+            Uses isEmpty property
+            </summary>
+            <param name="cargoQuantity">CargoQuantity instance</param>
+            <returns>True if empty</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.IsValid(System.Object)">
+            <summary>
+            TODO: Check if CargoQuantity is valid
+            Uses isValid property
+            </summary>
+            <param name="cargoQuantity">CargoQuantity instance</param>
+            <returns>True if valid</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.Add(System.Object,System.Object)">
+            <summary>
+            TODO: Add two CargoQuantity instances
+            Uses operator+ or Add method
+            </summary>
+            <param name="quantity1">First CargoQuantity</param>
+            <param name="quantity2">Second CargoQuantity</param>
+            <returns>Sum of quantities</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.Subtract(System.Object,System.Object)">
+            <summary>
+            TODO: Subtract CargoQuantity instances
+            Uses operator- or Subtract method
+            </summary>
+            <param name="quantity1">First CargoQuantity</param>
+            <param name="quantity2">Second CargoQuantity</param>
+            <returns>Difference of quantities</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.Format(System.Object)">
+            <summary>
+            TODO: Format CargoQuantity for display
+            Uses ToString() method
+            </summary>
+            <param name="cargoQuantity">CargoQuantity instance</param>
+            <returns>Formatted string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.CargoQuantityHelper.Compare(System.Object,System.Object)">
+            <summary>
+            TODO: Compare two CargoQuantity instances
+            Uses CompareTo or comparison operators
+            </summary>
+            <param name="quantity1">First CargoQuantity</param>
+            <param name="quantity2">Second CargoQuantity</param>
+            <returns>Comparison result (-1, 0, 1)</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery">
+            <summary>
+            Helper for discovering and working with native ResourceType instances
+            DOC REFERENCES: ResourceType.md, MaterialType enum
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.GetAllResourceTypes">
+            <summary>
+            TODO: Get all ResourceType instances from the game
+            Should use ResourceType.ValueByIndex or similar static collection
+            </summary>
+            <returns>Collection of all game ResourceType instances</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.FindResourceTypeByName(System.String)">
+            <summary>
+            TODO: Find ResourceType by name (case-insensitive)
+            </summary>
+            <param name="resourceName">Name to search for</param>
+            <returns>ResourceType instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.GetAtmosphericGasResourceTypes">
+            <summary>
+            TODO: Get all atmospheric gas ResourceTypes
+            Filters by MaterialType.Released and IsGas() methods
+            </summary>
+            <returns>ResourceTypes that represent atmospheric gases</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.GetKnownAtmosphericGases">
+            <summary>
+            TODO: Find specific atmospheric gas ResourceTypes by known names
+            Based on ResourceType.md constants: OXYGEN_RELEASE, CARBON_DIOXIDE_RELEASE, etc.
+            </summary>
+            <returns>Dictionary mapping gas symbol to ResourceType</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.IsAtmosphericGas(System.Object)">
+            <summary>
+            TODO: Check if a ResourceType represents an atmospheric gas
+            </summary>
+            <param name="resourceType">ResourceType instance to check</param>
+            <returns>True if it's an atmospheric gas</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.GetResourceTypeName(System.Object)">
+            <summary>
+            TODO: Get ResourceType display name
+            </summary>
+            <param name="resourceType">ResourceType instance</param>
+            <returns>Display name or "Unknown"</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.GetMaterialType(System.Object)">
+            <summary>
+            TODO: Get MaterialType from ResourceType instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.IsMaterialTypeReleased(System.Object)">
+            <summary>
+            TODO: Check if MaterialType == MaterialType.Released
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.ResourceTypeDiscovery.CallIsGasMethod(System.Object)">
+            <summary>
+            TODO: Call IsGas() method on ResourceType instance
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Helpers.UnityGuiHelper">
+            <summary>
+            Helper pour Unity GUI avec IL2CPP
+            Simplifie la création d'interfaces utilisateur dans Per Aspera
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.RegisterMonoBehaviour``1">
+            <summary>
+            Enregistre un type MonoBehaviour pour IL2CPP
+            </summary>
+            <typeparam name="T">Type MonoBehaviour à enregistrer</typeparam>
+            <returns>True si réussi</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.CreatePersistentGameObject``1(System.String)">
+            <summary>
+            Crée un GameObject persistant avec MonoBehaviour
+            </summary>
+            <typeparam name="T">Type MonoBehaviour à attacher</typeparam>
+            <param name="name">Nom du GameObject</param>
+            <returns>Le composant T attaché, null si échec</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawCollapsibleCategory(System.String,System.String,System.Boolean)">
+            <summary>
+            Dessine une catégorie pliable
+            </summary>
+            <param name="categoryName">Nom de la catégorie</param>
+            <param name="icon">Icône (optionnel)</param>
+            <param name="isExpanded">État actuel (pliée/dépliée)</param>
+            <returns>Nouvel état après clic</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawBoxedSection(System.Action,UnityEngine.GUIStyle)">
+            <summary>
+            Dessine une section avec bordure
+            </summary>
+            <param name="content">Action pour dessiner le contenu</param>
+            <param name="style">Style optionnel (par défaut GUI.skin.box)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawLabeledControl(System.String,System.Action,System.Single)">
+            <summary>
+            Dessine un contrôle avec label et valeur sur la même ligne
+            </summary>
+            <param name="label">Label à afficher</param>
+            <param name="content">Action pour dessiner le contrôle</param>
+            <param name="labelWidth">Largeur du label (0 = auto)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawToggleSlider(System.String,System.Boolean,System.Single,System.Single,System.Single,System.String,System.Action{System.Boolean},System.Action{System.Single},System.Action)">
+            <summary>
+            Dessine un slider avec checkbox d'activation
+            </summary>
+            <param name="displayName">Nom à afficher</param>
+            <param name="isEnabled">État actuel (activé/désactivé)</param>
+            <param name="currentValue">Valeur actuelle</param>
+            <param name="minValue">Valeur minimum</param>
+            <param name="maxValue">Valeur maximum</param>
+            <param name="unit">Unité à afficher</param>
+            <param name="onEnabledChanged">Callback quand l'état change</param>
+            <param name="onValueChanged">Callback quand la valeur change</param>
+            <param name="onResetClicked">Callback pour reset</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawDraggableWindow(UnityEngine.Rect,System.String,System.Action,System.Boolean,UnityEngine.Vector2)">
+            <summary>
+            Dessine une fenêtre draggable
+            </summary>
+            <param name="windowRect">Rectangle de la fenêtre</param>
+            <param name="title">Titre de la fenêtre</param>
+            <param name="content">Action pour dessiner le contenu</param>
+            <param name="isDragging">État de drag actuel</param>
+            <param name="dragOffset">Offset du drag</param>
+            <returns>Nouveau rectangle et états de drag</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameTypeInitializer">
+            <summary>
+            Initialization system for Per Aspera game types
+            Provides safe access to game classes like BaseGame, Universe, Planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.Initialize">
+            <summary>
+            Initialize game type discovery system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.WaitForGameAssemblies">
+            <summary>
+            Wait for game assemblies to be loaded
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.DiscoverSingletonInstances">
+            <summary>
+            Discover singleton instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameInstance">
+            <summary>
+            Get BaseGame singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUniverseInstance">
+            <summary>
+            Get Universe singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameType">
+            <summary>
+            Get BaseGame type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUniverseType">
+            <summary>
+            Get Universe type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetPlanetType">
+            <summary>
+            Get Planet type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetFactionType">
+            <summary>
+            Get Faction type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetResourceType">
+            <summary>
+            Get Resource type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBuildingType">
+            <summary>
+            Get Building type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetTechnologyType">
+            <summary>
+            Get Technology type  
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBlackboardType">
+            <summary>
+            Get Blackboard type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetCommandBusType">
+            <summary>
+            Get CommandBus type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetDiscoveryStats">
+            <summary>
+            Get discovery statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.FindGameType(System.String)">
+            <summary>
+            Find a game type by name from multiple assemblies
+            </summary>
+            <param name="typeName">Name of the type to find</param>
+            <returns>Found type or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.FindType(System.String)">
+            <summary>
+            Find type by name using ReflectionHelpers
+            </summary>
+            <param name="typeName">Name of type to find</param>
+            <returns>Found type or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.AreAllCoreTypesAvailable">
+            <summary>
+            Check if all core types are available
+            </summary>
+            <returns>True if all core types found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.DiscoverGameTypes">
+            <summary>
+            Discover all game types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.CountFoundTypes">
+            <summary>
+            Count how many types were found
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.Reset">
+            <summary>
+            Reset all cached types (for testing/development)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.EnsureInitialized">
+            <summary>
+            Ensure initialization
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.TypeDiscoveryStats">
+            <summary>
+            Type discovery statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Models.AtmosphereData">
+            <summary>
+            Detailed atmospheric composition data
+            Provides gas-by-gas breakdown with ratios and analysis
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.AtmosphereData.GasPressures">
+            <summary>All gases with their partial pressures (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.AtmosphereData.TotalPressure">
+            <summary>Total atmospheric pressure (atm)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.AtmosphereData.Sol">
+            <summary>Martian sol when data was captured</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Models.AtmosphereData.GetRatio(System.String)">
+            <summary>Get pressure ratio for a specific gas (0-1)</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Models.AtmosphereData.GetPercentage(System.String)">
+            <summary>Get percentage for a specific gas (0-100)</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Models.AtmosphereData.HasGas(System.String)">
+            <summary>Is gas present in atmosphere?</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Models.AtmosphereData.GetGreenhouseGases">
+            <summary>Get all greenhouse gases and their contribution</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Models.AtmosphereData.CalculateGreenhouseEffect">
+            <summary>Calculate effective greenhouse warming potential</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Models.ClimateSnapshot">
+            <summary>
+            Immutable snapshot of planetary climate at specific moment
+            Captures all atmospheric and environmental parameters from Planet native data
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.TotalPressure">
+            <summary>Total atmospheric pressure (atm)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.CO2Pressure">
+            <summary>CO2 partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.O2Pressure">
+            <summary>O2 partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.N2Pressure">
+            <summary>N2 partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.GHGPressure">
+            <summary>Greenhouse gas partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.ArgonPressure">
+            <summary>Argon partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.H2OPressure">
+            <summary>Water vapor partial pressure (kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.O2Percentage">
+            <summary>Get O2 percentage in atmosphere (0-100)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.CO2Percentage">
+            <summary>Get CO2 percentage in atmosphere (0-100)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.N2Percentage">
+            <summary>Get N2 percentage in atmosphere (0-100)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.IsBreathable">
+            <summary>Is atmosphere breathable for humans?</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.ClimateSnapshot.TemperatureCelsius">
+            <summary>Temperature in Celsius</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Models.TerraformingStatus">
+            <summary>
+            Terraforming progress status
+            Tracks phase completion and habitability metrics
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.TemperaturePhase">
+            <summary>Current temperature phase</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.PressurePhase">
+            <summary>Current atmospheric pressure phase</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.OxygenPhase">
+            <summary>Current oxygenation phase</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.Habitability">
+            <summary>Overall habitability score (0-100%)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.TemperatureScore">
+            <summary>Temperature score component (0-100%)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.PressureScore">
+            <summary>Pressure score component (0-100%)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.OxygenScore">
+            <summary>Oxygen score component (0-100%)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.CO2SafetyScore">
+            <summary>CO2 safety score component (0-100%)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.IsHabitable">
+            <summary>Is planet currently habitable without life support?</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.RecommendedAction">
+            <summary>Recommended next action for terraforming</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.ModEventBus">
+            <summary>
+            ModEventBus - Proxy for event publishing from native event patches
+            GameAPI doesn't depend on ModSDK, so this provides a callback-based system
+            ModSDK will hook into these callbacks to integrate with its EventSystem
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.ModEventBus.Publish(System.String,System.Object)">
+            <summary>
+            Publish an event - called by NativeEventPatcher patches
+            ModSDK will hook this to forward to its EventSystem
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.NativeEventPatcher">
+            <summary>
+            Enhanced native event patching system for the GameAPI
+            Provides comprehensive hooks for native game events using Harmony IL2CPP patches
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Initialize">
+            <summary>
+            Initialize the native event patching system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupClimateEventHooks">
+            <summary>
+            Setup enhanced climate-related event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.CreateClimateMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create an enhanced hook for a climate method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for climate methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for climate methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentClimateValue(System.Object,System.String)">
+            <summary>
+            Get current climate value with enhanced detection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.ExtractNewValue(System.Object[])">
+            <summary>
+            Extract new value from method arguments
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupTimeEventHooks">
+            <summary>
+            Setup enhanced time/day progression hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedDayAdvancedPostfix(System.Object)">
+            <summary>
+            Enhanced day advancement postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupResourceEventHooks">
+            <summary>
+            Setup enhanced resource event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Object[],System.Reflection.MethodBase)">
+            <summary>
+            Enhanced resource prefix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Enhanced resource postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupGameStateEventHooks">
+            <summary>
+            Setup game state event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupBuildingEventHooks">
+            <summary>
+            Setup building event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GameStateChangedPostfix(System.Object,System.Object[],System.Reflection.MethodBase)">
+            <summary>
+            Game state changed postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentMartianSol">
+            <summary>
+            Get current Martian sol safely with fallbacks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Shutdown">
+            <summary>
+            Enhanced shutdown with proper cleanup
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetStats">
+            <summary>
+            Enhanced statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Patches.EnergyPatches">
+            <summary>
+            Harmony patches for Energy system getter methods
+            Uses new generic override system v2.0
+            NOTE: SolarPanel type must be available from Assembly-CSharp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Patches.EnergyPatches.InitializePatches">
+            <summary>
+            Initialize energy patches when SolarPanel type is available
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Patches.PlanetPatches">
+            <summary>
+            Harmony patches for Planet getter methods
+            Uses new generic override system v2.0
+            NOTE: Planet type must be available from Assembly-CSharp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Patches.PlanetPatches.InitializePatches">
+            <summary>
+            Initialize planet patches when Planet type is available
+            </summary>
+        </member>
+    </members>
+</doc>

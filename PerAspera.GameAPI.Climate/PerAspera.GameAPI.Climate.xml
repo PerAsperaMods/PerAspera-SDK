@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI.Climate</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Climate.Configuration.ClimateConfig">
+            <summary>
+            Configuration parameters for climate simulation
+            Based on Per Aspera's physical models and Mars terraforming constants
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.SolarConstant">
+            <summary>Solar constant at Mars orbit (W/m²)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.OrbitalPeriod">
+            <summary>Mars orbital period (Earth days)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.AxialTilt">
+            <summary>Mars axial tilt (degrees)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.BaseAlbedo">
+            <summary>Base planetary albedo (reflectivity 0-1)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.IceAlbedo">
+            <summary>Ice albedo modifier</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.VegetationAlbedo">
+            <summary>Vegetation albedo modifier</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.CO2GreenhouseEfficiency">
+            <summary>CO2 greenhouse efficiency (K per kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.GHGMultiplier">
+            <summary>Super-greenhouse gas efficiency multiplier</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.H2OGreenhouseEfficiency">
+            <summary>Water vapor greenhouse efficiency (K per kPa)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.GreenhouseEfficiency">
+            <summary>General greenhouse efficiency modifier (balancing)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.OutgassingRate">
+            <summary>Pressure buildup rate from outgassing (atm/sol)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.WaterEvaporationRate">
+            <summary>Water evaporation rate coefficient</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.AtmosphericEscapeRate">
+            <summary>Atmospheric escape rate (fraction per sol)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.ThermalInertia">
+            <summary>Thermal inertia (how quickly temperature changes)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.HeatCapacity">
+            <summary>Heat capacity of atmosphere (J/K)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.BlackbodyCoefficient">
+            <summary>Blackbody radiation coefficient</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.SimulationSpeed">
+            <summary>Simulation speed multiplier</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.RealisticMode">
+            <summary>Enable realistic physics (vs game-balanced)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Configuration.ClimateConfig.DebugLogging">
+            <summary>Debug logging enabled</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants">
+            <summary>
+            Terraforming constants and milestone thresholds
+            Defines game-specific targets for Mars habitability
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_WATER_FREEZE">
+            <summary>Water freezing point</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_MIN_HABITABLE">
+            <summary>Minimum comfortable human temperature</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_OPTIMAL">
+            <summary>Optimal human temperature</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_MAX_HABITABLE">
+            <summary>Maximum comfortable human temperature</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_MARS_CURRENT">
+            <summary>Current average Mars temperature</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TEMP_GREENHOUSE_THRESHOLD">
+            <summary>Mars greenhouse threshold (rapid warming starts)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.PRESSURE_MARS_CURRENT">
+            <summary>Current Mars atmospheric pressure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.PRESSURE_LIQUID_WATER">
+            <summary>Minimum for liquid water (Armstrong limit)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.PRESSURE_MIN_BREATHABLE">
+            <summary>Minimum breathable pressure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.PRESSURE_EARTH">
+            <summary>Earth-like pressure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.PRESSURE_MAX_SAFE">
+            <summary>Maximum safe pressure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.O2_MIN_BREATHABLE">
+            <summary>Minimum O2 for breathing</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.O2_OPTIMAL">
+            <summary>Optimal O2 percentage</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.O2_MAX_SAFE">
+            <summary>Maximum safe O2 (fire risk)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.CO2_MAX_SAFE">
+            <summary>Maximum safe CO2 for long-term exposure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.CO2_TOXIC">
+            <summary>Toxic CO2 threshold</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WATER_MIN_LIFE">
+            <summary>Minimum water stock for basic life</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WATER_MIN_HYDROSPHERE">
+            <summary>Minimum water stock for stable hydrosphere</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WATER_EARTH_EQUIVALENT">
+            <summary>Target water stock for Earth-like oceans</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WEIGHT_TEMPERATURE">
+            <summary>Temperature contribution to habitability score</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WEIGHT_PRESSURE">
+            <summary>Pressure contribution to habitability score</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WEIGHT_OXYGEN">
+            <summary>Oxygen contribution to habitability score</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.WEIGHT_CO2_SAFETY">
+            <summary>CO2 safety contribution to habitability score</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.GetPhase(System.Single)">
+            <summary>Get terraforming phase from habitability percentage</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.GetPhaseDescription(PerAspera.GameAPI.Climate.Configuration.TerraformingConstants.TerraformingPhase)">
+            <summary>Get phase description</summary>
+        </member>
+    </members>
+</doc>

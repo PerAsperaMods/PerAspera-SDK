@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.Abstractions.Events.GameEventData">
+            <summary>
+            Base event data for game events
+            Autonomous alternative to GameAPI event system
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Events.ClimateChangeEventData">
+            <summary>
+            Climate change event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Events.BuildingEventData">
+            <summary>
+            Building construction event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Events.TimeProgressionEventData">
+            <summary>
+            Time progression event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Events.IEventBus">
+            <summary>
+            Autonomous event bus for SDK
+            Replaces dependency on GameAPI event system
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Game.IPlanet">
+            <summary>
+            Abstraction for game planet instance
+            Replaces direct Planet class dependencies
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Game.IGameUniverse">
+            <summary>
+            Abstraction for game universe/world state
+            Replaces direct Universe class dependencies  
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Game.IBlackboard">
+            <summary>
+            Abstraction for Blackboard game state
+            Replaces direct Blackboard class dependencies
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Game.IPlanetClimate">
+            <summary>
+            Climate and environmental data abstraction
+            </summary>
+        </member>
+        <member name="T:PerAspera.Abstractions.Types.Vector2Wrapper">
+            <summary>
+            Autonomous wrapper for Unity Vector2 type
+            Replaces direct UnityEngine.Vector2 dependencies
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,190 @@
+name: Aide au Développement
+description: Demander de l'aide pour développer un mod Per Aspera
+title: "[HELP] "
+labels: ["question", "mod-help"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🆘 Aide au Développement - Mod Per Aspera
+        
+        Besoin d'aide pour développer votre mod ? L'assistant automatique et la communauté sont là pour vous aider !
+
+  - type: dropdown
+    id: help-type
+    attributes:
+      label: Type d'aide demandée
+      description: Dans quel domaine avez-vous besoin d'aide ?
+      options:
+        - Configuration BepInEx / IL2CPP
+        - Création d'un nouveau projet de mod
+        - Patches Harmony (Prefix/Postfix/Transpiler)
+        - Accès aux données du jeu (Assembly-CSharp)
+        - Modification des fichiers YAML
+        - Interface utilisateur / GUI
+        - Logique de gameplay
+        - Performance et optimisation
+        - Debugging et logs
+        - Distribution et packaging
+    validations:
+      required: true
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: Niveau d'expérience
+      description: Quel est votre niveau en modding Per Aspera ?
+      options:
+        - Débutant complet
+        - Quelques notions de C#
+        - Expérience en modding Unity
+        - Développeur C# expérimenté
+        - Expert en modding/reverse engineering
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objectif
+      description: Que cherchez-vous à accomplir ?
+      placeholder: |
+        Décrivez ce que vous voulez créer ou modifier...
+        
+        Fonctionnalité souhaitée :
+        - ...
+        
+        Inspiration (si applicable) :
+        - Mod existant similaire
+        - Fonctionnalité du jeu de base
+        - Autre jeu
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-state
+    attributes:
+      label: État actuel
+      description: Où en êtes-vous dans votre développement ?
+      placeholder: |
+        Ce que vous avez déjà fait :
+        - Configuration de l'environnement
+        - Code existant
+        - Tests effectués
+        
+        Problèmes rencontrés :
+        - ...
+        
+        Code pertinent (si applicable) :
+        ```csharp
+        // Votre code ici
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: specific-question
+    attributes:
+      label: Question spécifique
+      description: Quelle est votre question précise ?
+      placeholder: |
+        Questions spécifiques :
+        1. ...
+        2. ...
+        
+        Points de blocage :
+        - ...
+    validations:
+      required: true
+
+  - type: input
+    id: related-files
+    attributes:
+      label: Classes/fichiers concernés
+      description: Quelles classes du jeu ou fichiers de config sont impliqués ?
+      placeholder: "ex: BuildingController, datamodel/building.yaml, TerraformingManager"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: mod-reference
+    attributes:
+      label: Mod de référence
+      description: Y a-t-il un mod existant dans le projet qui fait quelque chose de similaire ?
+      options:
+        - AtmosphereRelease
+        - MasterGui
+        - devToolkit
+        - SolarPowerOverride
+        - ReworkWaterLogic
+        - ImportRessources
+        - AsperaBaseGameProvider
+        - Aucun / Je ne sais pas
+    validations:
+      required: false
+
+  - type: textarea
+    id: research-done
+    attributes:
+      label: Recherches effectuées
+      description: Qu'avez-vous déjà essayé ou consulté ?
+      placeholder: |
+        Documentation consultée :
+        - ...
+        
+        Code examiné :
+        - ...
+        
+        Tentatives effectuées :
+        - ...
+        
+        Ressources externes consultées :
+        - ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: environment-setup
+    attributes:
+      label: Configuration de l'environnement
+      options:
+        - label: BepInEx IL2CPP est installé et fonctionnel
+        - label: Visual Studio / VS Code configuré
+        - label: Projet C# créé avec les bonnes références
+        - label: Tâches post-build configurées
+        - label: Assemblies interop générées
+
+  - type: textarea
+    id: logs-errors
+    attributes:
+      label: Logs et erreurs
+      description: Partagez les logs pertinents si vous rencontrez des erreurs
+      render: text
+      placeholder: |
+        Logs BepInEx/LogOutput.log :
+        
+        Erreurs de compilation :
+        
+        Exceptions runtime :
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ### 📚 Ressources utiles avant de demander :
+        
+        1. **[Documentation du projet](../Documentation/)** - Guides détaillés
+        2. **[Exemples de mods](../working/)** - Code de référence  
+        3. **[Harmony Documentation](https://harmony.pardeike.net/)** - Pour les patches
+        4. **[BepInEx Docs](https://docs.bepinex.dev/)** - Configuration IL2CPP
+        
+        ### 🤖 Assistant automatique :
+        
+        L'assistant analysera automatiquement votre demande et proposera des solutions et ressources pertinentes.
+        
+        **Pour obtenir la meilleure aide possible, soyez aussi précis que possible ! 🎯**

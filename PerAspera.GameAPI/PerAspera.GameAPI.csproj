@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- Import SDK versioning -->
+	<Import Project="..\Version.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>PerAspera.GameAPI</AssemblyName>
+		<RootNamespace>PerAspera.GameAPI</RootNamespace>
+		<PackageId>PerAspera.GameAPI</PackageId>
+		<Description>Per Aspera Game API - IL2CPP game class wrappers, mirrors and event system</Description>
+		<PackageTags>per-aspera;gameapi;wrappers;mirrors;events</PackageTags>
+		<IsSharedLibrary>true</IsSharedLibrary>
+	</PropertyGroup>
+
+	<!-- BepInEx packages -->
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+	</ItemGroup>
+
+
+	<!-- Prevent local copy of game DLLs -->
+	<ItemDefinitionGroup>
+		<Reference>
+			<Private>false</Private>
+		</Reference>
+	</ItemDefinitionGroup>
+
+	<!-- Dependencies -->
+	<ItemGroup>
+		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Overrides\PerAspera.GameAPI.Overrides.csproj" />
+	</ItemGroup>
+</Project>

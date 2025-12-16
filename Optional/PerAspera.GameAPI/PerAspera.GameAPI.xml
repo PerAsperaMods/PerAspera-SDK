@@ -1,0 +1,2214 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Climate.AtmosphericComposition">
+            <summary>
+            Atmospheric composition management system
+            Integrated from ClimatAspera plugin into PerAspera SDK
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Climate.AtmosphericComposition.CompositionChanged">
+            <summary>
+            Event fired when atmospheric composition changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.InitializeFromGameData">
+            <summary>
+            Initialize atmospheric composition from game resources
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.RegisterGas(System.String,System.String,System.Single,System.Boolean)">
+            <summary>
+            Register a gas component in the atmosphere
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.SetGasConcentration(System.String,System.Single)">
+            <summary>
+            Update gas concentration
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.AddGas(System.String,System.Single)">
+            <summary>
+            Add gas to atmosphere
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.RemoveGas(System.String,System.Single)">
+            <summary>
+            Remove gas from atmosphere
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.GetTotalPressure">
+            <summary>
+            Get total atmospheric pressure
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.GetTerraformingGases">
+            <summary>
+            Get terraforming-relevant gases
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.CalculateGreenhouseEffect">
+            <summary>
+            Calculate greenhouse effect from current composition
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.CalculateBreathabilityIndex">
+            <summary>
+            Calculate atmospheric breathability index (0-1)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericComposition.GetAtmosphereSummary">
+            <summary>
+            Get atmospheric summary for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.AtmosphericGas">
+            <summary>
+            Represents a gas component in the atmosphere
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.AtmosphericGas.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Represents a gas component in the atmosphere
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem">
+            <summary>
+            Building atmosphere interaction system
+            Integrated from ClimatAspera plugin - tracks building outputs that affect atmosphere
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.BuildingOutputRegistered">
+            <summary>
+            Event fired when building atmosphere output is registered or updated
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.AtmosphereCalculated">
+            <summary>
+            Event fired when atmospheric calculations are updated
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.RegisterBuildingOutput(System.String,System.String,System.Single,System.Single,System.Single)">
+            <summary>
+            Register a building's atmospheric output
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.GetBuildingOutput(System.String)">
+            <summary>
+            Get atmospheric output for specific building type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.GetBuildingsProducingResource(System.String)">
+            <summary>
+            Get all buildings that produce specific resource
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.CalculateAtmosphericImpact">
+            <summary>
+            Calculate total atmospheric impact from all registered buildings
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.GetImpactRate">
+            <summary>
+            Get atmospheric impact per game time unit (day/sol)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.InitializeDefaultBuildingOutputs">
+            <summary>
+            Register common Per Aspera building atmospheric outputs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.ClearAllOutputs">
+            <summary>
+            Clear all registered building outputs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereSystem.GetOutputSummary">
+            <summary>
+            Get summary of all registered building outputs
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.BuildingAtmosphereOutput">
+            <summary>
+            Represents atmospheric output from a building type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.BuildingAtmosphereOutput.#ctor(System.String,System.String,System.Single,System.Single,System.Single)">
+            <summary>
+            Represents atmospheric output from a building type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.AtmosphereCalculationResult">
+            <summary>
+            Result of atmospheric impact calculation
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.AtmosphereImpactRate">
+            <summary>
+            Atmospheric impact rates per second
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.ClimateUpdateHandler">
+            <summary>
+            Delegate for climate update events
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.ClimateSimulation">
+            <summary>
+            Advanced climate simulation system
+            Integrated from ClimatAspera plugin into PerAspera SDK
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Climate.ClimateSimulation.ClimateUpdated">
+            <summary>
+            Event fired when climate simulation updates
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Climate.ClimateSimulation.SignificantClimateChange">
+            <summary>
+            Event fired when significant climate change detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.Initialize">
+            <summary>
+            Initialize the climate simulation system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.RegisterClimateOverrides">
+            <summary>
+            Register climate-related overrides with the override system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.UpdateSimulation">
+            <summary>
+            Update climate simulation - should be called regularly
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.UpdateParametersFromOverrides">
+            <summary>
+            Update climate parameters from override system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.ProcessClimateInteractions">
+            <summary>
+            Process climate interactions and feedback loops
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.CalculateWaterVaporFromConditions">
+            <summary>
+            Calculate water vapor concentration from current conditions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.ApplyClimateChanges">
+            <summary>
+            Apply calculated climate changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.OnAtmosphericCompositionChanged(PerAspera.GameAPI.Climate.AtmosphericComposition)">
+            <summary>
+            Handle atmospheric composition changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.GetCurrentStatus">
+            <summary>
+            Get current climate status summary
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.Reset">
+            <summary>
+            Reset climate simulation to default values
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Climate.ClimateSimulation.Shutdown">
+            <summary>
+            Shutdown climate simulation system
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.ClimateParameters">
+            <summary>
+            Climate simulation parameters
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.ClimateStatus">
+            <summary>
+            Climate status snapshot
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.ClimateChangeEvent">
+            <summary>
+            Climate change event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent">
+            <summary>
+            Climate analysis event containing detailed atmospheric analysis
+            Integrated from ClimatAspera plugin into PerAspera SDK
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.AnalysisType">
+            <summary>
+            Type of climate analysis performed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.OriginalData">
+            <summary>
+            Original climate data that triggered the analysis
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.ImpactLevel">
+            <summary>
+            Calculated impact level from analysis
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.Recommendations">
+            <summary>
+            Generated recommendations from analysis
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.Prediction">
+            <summary>
+            Climate predictions based on current trends
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.ConfidenceLevel">
+            <summary>
+            Confidence level of the analysis (0.0 to 1.0)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.Timestamp">
+            <summary>
+            Timestamp when analysis was performed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimateAnalysisEvent.AdditionalData">
+            <summary>
+            Additional analysis data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.ClimateEventData">
+            <summary>
+            Climate event data structure
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.ClimatePrediction">
+            <summary>
+            Climate prediction results
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.PredictedO2In10Sols">
+            <summary>
+            Predicted oxygen level in 10 sols
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.PredictedTempIn10Sols">
+            <summary>
+            Predicted temperature in 10 sols
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.PredictedPressureIn10Sols">
+            <summary>
+            Predicted atmospheric pressure in 10 sols
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.PredictedCO2In10Sols">
+            <summary>
+            Predicted CO2 level in 10 sols
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.TerraformingAdvice">
+            <summary>
+            Terraforming advice based on predictions
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.EstimatedSolsToBreathableAtmosphere">
+            <summary>
+            Estimated time to reach breathable atmosphere (in sols)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Climate.Events.ClimatePrediction.Warnings">
+            <summary>
+            Critical warnings about climate trajectory
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.TerraformingMilestoneEvent">
+            <summary>
+            Terraforming milestone achieved event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.DailyClimateUpdateEvent">
+            <summary>
+            Daily climate update event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.ClimateAnalysisType">
+            <summary>
+            Types of climate analysis
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.ClimateImpactLevel">
+            <summary>
+            Impact levels for climate changes
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Climate.Events.TerraformingMilestone">
+            <summary>
+            Terraforming milestones
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameInstanceDetector">
+            <summary>
+            Automatic game instance detection system
+            CORRECTED: Uses GameEventBus instead of Events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.Initialize">
+            <summary>
+            Initialize the automatic detection system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.ApplyDetectionPatches">
+            <summary>
+            Apply Harmony patches for automatic detection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.GetUniverse_Postfix(System.Object,System.Object)">
+            <summary>
+            Harmony postfix for BaseGame.GetUniverse - Early initialization
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.OnFinishLoading_Postfix(System.Object)">
+            <summary>
+            Harmony postfix for BaseGame.OnFinishLoading - Full initialization
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.ManualDetection(System.Object)">
+            <summary>
+            Manual trigger for detection (if patches fail)
+            </summary>
+            <param name="baseGameInstance">BaseGame instance to process</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.GetDetectionStatus">
+            <summary>
+            Check if specific components are detected - CORRECTED based on documentation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.Shutdown">
+            <summary>
+            Shutdown the detection system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameInstanceDetector.ForceRedetection">
+            <summary>
+            Force re-detection (useful for development)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameDetectionStatus">
+            <summary>
+            Game detection status information
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.ClimateEventData">
+            <summary>
+            Climate change event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.ModEventBus">
+            <summary>
+            Static event bus for GameAPI - RENAMED to avoid conflicts with game's native GameEventBus
+            Provides unified event publishing and subscription system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.ModEventBus.Initialize">
+            <summary>
+            Initialize the event bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.ModEventBus.Publish(System.String,System.Object)">
+            <summary>
+            Publish an event with data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.ModEventBus.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe to an event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.ModEventBus.GetEventStats">
+            <summary>
+            Get event statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.ModEventBus.Shutdown">
+            <summary>
+            Shutdown the event bus
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.GameEventBase">
+            <summary>
+            Base class for all game events
+            Provides common properties and functionality
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.GameEventBase.EventType">
+            <summary>
+            Type of the event (must be implemented by derived classes)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.GameEventBase.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.GameEventBase.Source">
+            <summary>
+            Source object that triggered the event (optional)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.GameEventBase.Metadata">
+            <summary>
+            Additional metadata for the event (optional)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.GameEventBase.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.GameEventBase.#ctor(System.Object)">
+            <summary>
+            Constructor with source
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.GameEventBase.AddMetadata(System.String,System.Object)">
+            <summary>
+            Add metadata to the event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.GameEventBase.GetMetadata``1(System.String)">
+            <summary>
+            Get metadata from the event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.GameEventBase.ToString">
+            <summary>
+            Default string representation
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.IGameEvent">
+            <summary>
+            Base interface for all game events
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.IGameEvent.EventType">
+            <summary>
+            Type of the event (used for routing and handling)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.IGameEvent.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.MartianDayEventData">
+            <summary>
+            Martian day change event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.NativeGameEventBase">
+            <summary>
+            Base class for all native game events - CORRECTED to inherit from GameEventBase
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.ResourceEventData">
+            <summary>
+            Resource change event from native systems
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.GameStateEventData">
+            <summary>
+            Game state change event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.BuildingEventData">
+            <summary>
+            Building event data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.ClimateAnalysisCompleteEvent">
+            <summary>
+            Climate analysis completion event for ClimatAspera compatibility
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.BaseGameDetectedEvent">
+            <summary>
+            Event triggered when BaseGame and Universe are detected
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameFullyLoadedEvent">
+            <summary>
+            Event triggered when game is fully loaded (BaseGame + Universe + Planet)
+            Equivalent to legacy GameFullyLoadedEvent
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameLoadedEvent">
+            <summary>
+            Event triggered when a game save is loaded
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.BlackboardInitializedEvent">
+            <summary>
+            Event triggered when the main Blackboard is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.PlanetInitializedEvent">
+            <summary>
+            Event triggered when the Mars planet is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.DayPassedEvent">
+            <summary>
+            Event triggered each in-game day
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceAddedEvent">
+            <summary>
+            Event triggered when resources are added
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.PlayerFactionDetectedEvent">
+            <summary>
+            Event triggered when player faction is detected
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.PlayerActionExecutedEvent">
+            <summary>
+            Event triggered when player executes an action
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ModSystemInitializedEvent">
+            <summary>
+            Event triggered when a mod system is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ModSystemShutdownEvent">
+            <summary>
+            Event triggered when a mod system shuts down
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.CommandSystemReadyEvent">
+            <summary>
+            Event triggered when command system is ready
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MartianDayChangedEvent">
+            <summary>
+            Event triggered when Martian day changes (climate-aware)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ClimateAnalysisCompleteEvent">
+            <summary>
+            Event triggered when climate analysis is complete
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MartianDayEventData">
+            <summary>
+            Event data structure for Martian day events  
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ClimateEventData">
+            <summary>
+            Event data structure for climate events  
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Examples.ClimateSystemExample">
+            <summary>
+            Example usage of the integrated Climate System
+            Shows how to use climate simulation features from PerAspera SDK
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.ClimateSystemExample.BasicClimateExample">
+            <summary>
+            Example: Basic climate system usage
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.ClimateSystemExample.AtmosphericCompositionExample">
+            <summary>
+            Example: Atmospheric composition management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.ClimateSystemExample.ClimateEventExample">
+            <summary>
+            Example: Climate event handling
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.ClimateSystemExample.ClimateOverrideExample">
+            <summary>
+            Example: Climate override integration
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.ClimateSystemExample.RunAllExamples">
+            <summary>
+            Run all climate system examples
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Examples.OverrideSystemExample">
+            <summary>
+            Example usage of the GetterOverride system
+            Shows how to use the integrated system from PerAspera SDK
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.BasicOverrideExample">
+            <summary>
+            Example: Basic override usage
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.BuiltInOverrideExample">
+            <summary>
+            Example: Using built-in overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.EventHandlingExample">
+            <summary>
+            Example: Event handling
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.MultipleOverrideExample">
+            <summary>
+            Example: Managing multiple overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.ResetExample">
+            <summary>
+            Example: Reset and cleanup
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Examples.OverrideSystemExample.RunAllExamples">
+            <summary>
+            Run all examples
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPI">
+            <summary>
+            Game API initialization and management system
+            CORRECTED: Uses GameEventBus consistently throughout
+            UPDATED: Includes integrated GetterOverride system from GetterOverrideSystem plugin
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPI.Overrides">
+            <summary>
+            Access to getter override system - integrated from GetterOverrideSystem plugin
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.Register(PerAspera.GameAPI.Overrides.GetterOverride)">
+            <summary>
+            Register a new getter override
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.Get(System.String)">
+            <summary>
+            Get override by key
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.Get(System.String,System.String)">
+            <summary>
+            Get override by class and method name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.IsActive(System.String,System.String)">
+            <summary>
+            Check if override exists and is active
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.GetValue(System.String,System.String,System.Single)">
+            <summary>
+            Get override value or default
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.ResetAll">
+            <summary>
+            Reset all overrides to defaults
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Overrides.GetStatistics">
+            <summary>
+            Get system statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPI.Climate">
+            <summary>
+            Access to climate simulation system - integrated from ClimatAspera plugin
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.GameAPI.Climate.Atmosphere">
+            <summary>
+            Get current atmospheric composition
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.GameAPI.Climate.Parameters">
+            <summary>
+            Get current climate parameters
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.GameAPI.Climate.IsInitialized">
+            <summary>
+            Check if climate system is initialized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.GetStatus">
+            <summary>
+            Get current climate status
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Update">
+            <summary>
+            Update climate simulation manually
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Reset">
+            <summary>
+            Reset climate to default values
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPI.Climate.Buildings">
+            <summary>
+            Access to building atmosphere system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Buildings.RegisterOutput(System.String,System.String,System.Single,System.Single,System.Single)">
+            <summary>
+            Register building atmospheric output
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Buildings.CalculateImpact">
+            <summary>
+            Get atmospheric impact calculation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Buildings.GetImpactRate">
+            <summary>
+            Get impact rates per second
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Climate.Buildings.GetSummary">
+            <summary>
+            Get summary of all building outputs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Initialize">
+            <summary>
+            Initialize the Game API system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.Shutdown">
+            <summary>
+            Shutdown the Game API system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterBaseGame(System.Object)">
+            <summary>
+            Register BaseGame instance when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterUniverse(System.Object)">
+            <summary>
+            Register Universe instance when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterPlanet(System.Object)">
+            <summary>
+            Register Planet instance when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterBlackboard(System.Object)">
+            <summary>
+            Register Blackboard instance when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterEventBus(System.Object)">
+            <summary>
+            Register EventBus instance when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.RegisterPlayerFaction(System.Object)">
+            <summary>
+            Register Player Faction when detected
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.OnNativeEvent(System.Object)">
+            <summary>
+            Handle native game event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.OnGameLoaded(System.String)">
+            <summary>
+            Handle game load event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.OnDayPassed(System.Int32,System.Int32)">
+            <summary>
+            Handle daily progress event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.OnResourceAdded(System.String,System.Single,System.String,System.Object)">
+            <summary>
+            Handle resource addition event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.GetStatus">
+            <summary>
+            Get GameAPI status information
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.EnsureInitialized">
+            <summary>
+            Ensure GameAPI is initialized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameAPI.OnGameFullyLoaded(System.Object,System.Object,System.Object)">
+            <summary>
+            Handle game fully loaded event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPIStatus">
+            <summary>
+            GameAPI status information
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameAPIException">
+            <summary>
+            GameAPI-specific exception
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.CommandHelper">
+            <summary>
+            Command helper utilities for game operations
+            Provides safe command dispatching and resource management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.IsCommandSystemReady">
+            <summary>
+            Check if command system is ready
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.DispatchCommand(System.Object)">
+            <summary>
+            Dispatch a command through the game's command system
+            </summary>
+            <param name="command">Command instance to dispatch</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.DispatchCommandRemote(System.Object)">
+            <summary>
+            Dispatch a command remotely (multiplayer)
+            </summary>
+            <param name="command">Command instance to dispatch</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.GiveResource(System.Object,System.String,System.Single,System.Int32)">
+            <summary>
+            Give resources to a specific faction
+            </summary>
+            <param name="faction">Target faction</param>
+            <param name="resourceKey">Resource identifier</param>
+            <param name="amount">Amount to give</param>
+            <param name="category">Resource category</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.GiveResourceToPlayer(System.String,System.Single,System.Int32)">
+            <summary>
+            Give resources to the player faction
+            </summary>
+            <param name="resourceKey">Resource identifier</param>
+            <param name="amount">Amount to give</param>
+            <param name="category">Resource category</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.CreateCommand(System.String,System.Object[])">
+            <summary>
+            Create a custom command instance
+            </summary>
+            <param name="commandTypeName">Command type name</param>
+            <param name="parameters">Constructor parameters</param>
+            <returns>Command instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.ExecuteDirectCommand(System.Object,System.String,System.Object[])">
+            <summary>
+            Execute a command directly on a target object
+            </summary>
+            <param name="target">Target object</param>
+            <param name="commandMethodName">Command method name</param>
+            <param name="parameters">Method parameters</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.CommandHelper.GetAvailableCommandTypes">
+            <summary>
+            Get available command types in the game
+            </summary>
+            <returns>Array of command type names</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.MirrorHelper">
+            <summary>
+            Mirror class utilities - Provides safe value extraction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MirrorHelper.GetFloatValue(System.Object,System.Single)">
+            <summary>
+            Safely get float value with fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MirrorHelper.GetIntValue(System.Object,System.Int32)">
+            <summary>
+            Safely get int value with fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MirrorHelper.GetBoolValue(System.Object,System.Boolean)">
+            <summary>
+            Safely get bool value with fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MirrorHelper.GetStringValue(System.Object,System.String)">
+            <summary>
+            Safely get string value with fallback
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceHelper">
+            <summary>
+            Resource management utilities for the GameAPI
+            Provides safe access to game resources and operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.GetResourceType(System.Object,System.String)">
+            <summary>
+            Get a resource type by key from a faction
+            </summary>
+            <param name="faction">Faction instance</param>
+            <param name="resourceKey">Resource key to find</param>
+            <returns>ResourceType instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.GetAllResources(System.Object)">
+            <summary>
+            Get all resources from a faction
+            </summary>
+            <param name="faction">Faction instance</param>
+            <returns>Collection of resource instances</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.GetAllResourceKeys(System.Object)">
+            <summary>
+            Get all resource keys from a faction
+            </summary>
+            <param name="faction">Faction instance</param>
+            <returns>Array of resource keys</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.GetAllResourceNames(System.Object)">
+            <summary>
+            Get all resource names from a faction
+            </summary>
+            <param name="faction">Faction instance</param>
+            <returns>Array of resource names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.TryGiveResourceToFaction(System.Object,System.String,System.Single)">
+            <summary>
+            Try to give resource to a faction
+            </summary>
+            <param name="faction">Target faction</param>
+            <param name="resourceKey">Resource key</param>
+            <param name="units">Amount to give</param>
+            <returns>True if successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.GetResourceStock(System.Object,System.String)">
+            <summary>
+            Get resource stock from faction
+            </summary>
+            <param name="faction">Faction instance</param>
+            <param name="resourceKey">Resource key</param>
+            <returns>Current stock amount or 0</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.ResourceHelper.CreateCargoQuantity(System.Single)">
+            <summary>
+            Create a cargo quantity object
+            </summary>
+            <param name="units">Number of units</param>
+            <returns>Cargo quantity object or null</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.GameTypeInitializer">
+            <summary>
+            Initialization system for Per Aspera game types
+            Provides safe access to game classes like BaseGame, Universe, Planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.Initialize">
+            <summary>
+            Initialize game type discovery system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.WaitForGameAssemblies">
+            <summary>
+            Wait for game assemblies to be loaded
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.DiscoverSingletonInstances">
+            <summary>
+            Discover singleton instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameInstance">
+            <summary>
+            Get BaseGame singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUniverseInstance">
+            <summary>
+            Get Universe singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameType">
+            <summary>
+            Get BaseGame type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUniverseType">
+            <summary>
+            Get Universe type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetPlanetType">
+            <summary>
+            Get Planet type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetFactionType">
+            <summary>
+            Get Faction type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetResourceType">
+            <summary>
+            Get Resource type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBuildingType">
+            <summary>
+            Get Building type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetTechnologyType">
+            <summary>
+            Get Technology type  
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBlackboardType">
+            <summary>
+            Get Blackboard type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetCommandBusType">
+            <summary>
+            Get CommandBus type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetDiscoveryStats">
+            <summary>
+            Get discovery statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.FindGameType(System.String)">
+            <summary>
+            Find a game type by name from multiple assemblies
+            </summary>
+            <param name="typeName">Name of the type to find</param>
+            <returns>Found type or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.FindType(System.String)">
+            <summary>
+            Find type by name using ReflectionHelpers
+            </summary>
+            <param name="typeName">Name of type to find</param>
+            <returns>Found type or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.AreAllCoreTypesAvailable">
+            <summary>
+            Check if all core types are available
+            </summary>
+            <returns>True if all core types found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.DiscoverGameTypes">
+            <summary>
+            Discover all game types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.CountFoundTypes">
+            <summary>
+            Count how many types were found
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.Reset">
+            <summary>
+            Reset all cached types (for testing/development)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.EnsureInitialized">
+            <summary>
+            Ensure initialization
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.TypeDiscoveryStats">
+            <summary>
+            Type discovery statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.Mirror`1">
+            <summary>
+            Base Mirror class for wrapping IL2CPP instances
+            CORRECTED: Uses IL2CPP native extensions instead of custom ones
+            </summary>
+            <typeparam name="T">Type of the wrapped instance</typeparam>
+        </member>
+        <member name="P:PerAspera.GameAPI.Mirror.Mirror`1.Instance">
+            <summary>
+            The wrapped native instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Mirror.Mirror`1.IsValid">
+            <summary>
+            Check if the mirror has a valid instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.Mirror`1.Invoke``1(System.String,System.Object[])">
+            <summary>
+            Invoke a method on the wrapped instance - USES IL2CPP NATIVE EXTENSIONS
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.Mirror`1.Get``1(System.String)">
+            <summary>
+            Get a field/property value from the wrapped instance - USES IL2CPP NATIVE EXTENSIONS
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.Mirror`1.Set``1(System.String,``0)">
+            <summary>
+            Set a field/property value on the wrapped instance - USES IL2CPP NATIVE EXTENSIONS
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.Mirror`1.GetDebugInfo">
+            <summary>
+            Get debug information about the wrapped instance
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorBaseGame">
+            <summary>
+            Mirror wrapper for BaseGame singleton
+            Basé sur F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame\BaseGame.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBaseGame.RegisterNativeInstance(System.Object)">
+            <summary>
+            Register the BaseGame instance when discovered by NativeEventPatcher
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBaseGame.GetUniverse">
+            <summary>
+            Get the Universe instance from BaseGame - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBaseGame.IsGameReady">
+            <summary>
+            Check if BaseGame is ready and valid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBaseGame.IsInitialized">
+            <summary>
+            Get game initialization state - ❌ MÉTHODE NON TROUVÉE dans BaseGame.md
+            Cette méthode n'existe pas dans l'API IL2CPP
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorBlackboard">
+            <summary>
+            Mirror wrapper for Blackboard instances
+            CORRECTED: All nullable errors fixed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBlackboard.GetBool(System.String)">
+            <summary>
+            Get a boolean value from the blackboard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBlackboard.SetBool(System.String,System.Boolean)">
+            <summary>
+            Set a boolean value in the blackboard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBlackboard.GetFloat(System.String)">
+            <summary>
+            Get a float value from the blackboard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBlackboard.SetFloat(System.String,System.Single)">
+            <summary>
+            Set a float value in the blackboard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorBlackboard.HasKey(System.String)">
+            <summary>
+            Check if key exists in blackboard - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorEventBus">
+            <summary>
+            Mirror wrapper for EventBus - COMPLETED with missing methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.GetStats">
+            <summary>
+            Get event bus statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe method - ADDED MISSING METHOD
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.GetEventStats">
+            <summary>
+            Get event statistics - ADDED MISSING METHOD
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.Initialize">
+            <summary>
+            Initialize the event bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.Shutdown">
+            <summary>
+            Shutdown the event bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.OnNativeEvent(System.String,System.Object)">
+            <summary>
+            Handle native event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorEventBus.IsNativeEventBusAvailable">
+            <summary>
+            Check if native event bus is available
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorPlanet">
+            <summary>
+            Mirror wrapper for Planet instances
+            CORRECTED: All nullable errors fixed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetAverageTemperature">
+            <summary>
+            Get current average temperature - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetCO2Pressure">
+            <summary>
+            Get current CO2 pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetO2Pressure">
+            <summary>
+            Get current O2 pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetN2Pressure">
+            <summary>
+            Get current N2 pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetGHGPressure">
+            <summary>
+            Get current GHG pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetTotalPressure">
+            <summary>
+            Get total atmospheric pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetOtherPressure">
+            <summary>
+            Get other gas pressure - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetWaterStock">
+            <summary>
+            Get current water stock - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetLatitude(UnityEngine.Vector2)">
+            <summary>
+            Get latitude from position - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetLongitude(UnityEngine.Vector2)">
+            <summary>
+            Get longitude from position - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetPosition(System.Single,System.Single)">
+            <summary>
+            Get position from longitude/latitude - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetLongitudeLatitude(UnityEngine.Vector2)">
+            <summary>
+            Get longitude and latitude from position - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetBearing(UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            Get bearing between two positions - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetRadius">
+            <summary>
+            Get planet radius - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetMapWidth">
+            <summary>
+            Get map width - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetMapHeight">
+            <summary>
+            Get map height - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetAltitude(UnityEngine.Vector2)">
+            <summary>
+            Get altitude at position - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetAltitudeWithWater(UnityEngine.Vector2)">
+            <summary>
+            Get altitude with water at position - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetRealTerrainHeight(UnityEngine.Vector2)">
+            <summary>
+            Get real terrain height - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetMaxSlope(UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            Get maximum slope between positions - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetMaxWaterArea">
+            <summary>
+            Get maximum water area - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetBlackBodyTemperature">
+            <summary>
+            Get black body temperature - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetCurrentPolarTemperature">
+            <summary>
+            Get current polar temperature - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetGHGTemperatureIncrease">
+            <summary>
+            Get GHG temperature increase - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetEolicPowerFactor(System.Single)">
+            <summary>
+            Get eolic power factor - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetTerraformingProgress">
+            <summary>
+            Get terraforming progress - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetFaunaAmount">
+            <summary>
+            Get fauna amount - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.GetName">
+            <summary>
+            Get planet name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanet.IsHabitable">
+            <summary>
+            Check if planet conditions are potentially habitable
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorPlanetSetup">
+            <summary>
+            Mirror wrapper for Planet setup parameters
+            CORRECTED: All nullable errors fixed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetMinTemperature">
+            <summary>
+            Get minimum temperature - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetMaxTemperature">
+            <summary>
+            Get maximum temperature - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetInitialPressure">
+            <summary>
+            Get initial atmospheric pressure - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetInitialWaterStock">
+            <summary>
+            Get initial water stock - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetRadius">
+            <summary>
+            Get planet radius - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.GetName">
+            <summary>
+            Get setup name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorPlanetSetup.HasAtmosphere">
+            <summary>
+            Check if setup has atmospheric simulation - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorResourceType">
+            <summary>
+            Mirror wrapper for ResourceType enum/class
+            CORRECTED: All nullable errors fixed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetName">
+            <summary>
+            Get resource name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetDisplayName">
+            <summary>
+            Get resource display name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetDescription">
+            <summary>
+            Get resource description
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetCategory">
+            <summary>
+            Get resource category
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.IsTradable">
+            <summary>
+            Check if resource is tradable - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetDensity">
+            <summary>
+            Get resource density - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetMarketValue">
+            <summary>
+            Get resource market value - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.IsLiquid">
+            <summary>
+            Check if resource is liquid - NULLABLE CORRECTED
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.GetId">
+            <summary>
+            Get resource ID/index
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorResourceType.Equals(PerAspera.GameAPI.Mirror.MirrorResourceType)">
+            <summary>
+            Compare resource types
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.MirrorUniverse">
+            <summary>
+            Mirror wrapper for Universe singleton
+            Basé sur F:\ModPeraspera\CleanedScriptAssemblyClass\Universe\Universe.md
+            CORRECTED: Toutes les erreurs nullable corrigées
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetPlanet">
+            <summary>
+            Get current planet from Universe - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetPlayerFaction">
+            <summary>
+            Get player faction - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetFactions">
+            <summary>
+            Get all factions - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetFaction(System.String)">
+            <summary>
+            Get specific faction by name - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetBlackboard">
+            <summary>
+            Get main Blackboard - ✅ CONFIRMÉE (champ public)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetMartianSol">
+            <summary>
+            Get current Martian sol - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetMartianYear">
+            <summary>
+            Get current Martian year - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetMartianMonth">
+            <summary>
+            Get current Martian month - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetMartianSolOfYear">
+            <summary>
+            Get Martian sol of current year - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.DaysNow">
+            <summary>
+            Get current days (float) - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.DaysPrevious">
+            <summary>
+            Get previous days (float) - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetMartianDateString">
+            <summary>
+            Get Martian date string - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetGameSpeed">
+            <summary>
+            Get current game speed - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetNormalizedGameSpeed">
+            <summary>
+            Get normalized game speed - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetGamePaused">
+            <summary>
+            Check if game is paused - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.SetGameSpeed(System.Single)">
+            <summary>
+            Set game speed - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.SetNormalizedGameSpeed(System.Single)">
+            <summary>
+            Set normalized game speed - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.SetGamePaused(System.Boolean)">
+            <summary>
+            Set game paused state - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.ToggleGamePaused">
+            <summary>
+            Toggle game paused state - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetSpecialProject(System.Object)">
+            <summary>
+            Get special project - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetSpecialProjectProgress(System.Object)">
+            <summary>
+            Get special project progress - ✅ CONFIRMÉE
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.IsUniverseReady">
+            <summary>
+            Check if Universe is ready
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.GetCurrentMartianSol">
+            <summary>
+            Get current Martian sol (static wrapper)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.MirrorUniverse.Initialize">
+            <summary>
+            Initialize Universe subsystems
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Mirror.SingletonMirror`2">
+            <summary>
+            Base class for singleton game object mirrors
+            Automatically handles the singleton pattern for game objects like BaseGame, Universe
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Mirror.SingletonMirror`2.Shared">
+            <summary>
+            Shared singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.SingletonMirror`2.RegisterInstance(`1)">
+            <summary>
+            Register the native game instance
+            </summary>
+            <param name="gameInstance">Native game instance</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Mirror.SingletonMirror`2.Shutdown">
+            <summary>
+            Shutdown and reset the singleton
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.NativeEventPatcher">
+            <summary>
+            Enhanced native event patching system for the GameAPI
+            Provides comprehensive hooks for native game events using Harmony IL2CPP patches
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Initialize">
+            <summary>
+            Initialize the native event patching system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupClimateEventHooks">
+            <summary>
+            Setup enhanced climate-related event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.CreateClimateMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create an enhanced hook for a climate method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for climate methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for climate methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentClimateValue(System.Object,System.String)">
+            <summary>
+            Get current climate value with enhanced detection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.ExtractNewValue(System.Object[])">
+            <summary>
+            Extract new value from method arguments
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupTimeEventHooks">
+            <summary>
+            Setup enhanced time/day progression hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedDayAdvancedPostfix(System.Object)">
+            <summary>
+            Enhanced day advancement postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupResourceEventHooks">
+            <summary>
+            Setup enhanced resource event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Object[],System.Reflection.MethodBase)">
+            <summary>
+            Enhanced resource prefix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Enhanced resource postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupGameStateEventHooks">
+            <summary>
+            Setup game state event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupBuildingEventHooks">
+            <summary>
+            Setup building event hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GameStateChangedPostfix(System.Object,System.Object[],System.Reflection.MethodBase)">
+            <summary>
+            Game state changed postfix
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.BridgeClimateEvent(PerAspera.GameAPI.ClimateEventData,System.String)">
+            <summary>
+            Enhanced climate event bridging
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentMartianSol">
+            <summary>
+            Get current Martian sol safely with fallbacks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Shutdown">
+            <summary>
+            Enhanced shutdown with proper cleanup
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetStats">
+            <summary>
+            Enhanced statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.NativeInstanceManager">
+            <summary>
+            Centralized manager for native game instances
+            Handles discovery and registration of IL2CPP game objects
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.Initialize">
+            <summary>
+            Initialize the native instance manager
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.DiscoverGameInstances">
+            <summary>
+            Discover and register native game instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.DiscoverBaseGameInstance">
+            <summary>
+            Discover BaseGame singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.DiscoverUniverseInstance">
+            <summary>
+            Discover Universe instance from BaseGame
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.DiscoverPlanetInstance">
+            <summary>
+            Discover Planet instance from Universe
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.DiscoverBlackboardInstance">
+            <summary>
+            Discover Blackboard instance from Universe
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.RegisterInstance(System.String,System.Object)">
+            <summary>
+            Register a native instance
+            </summary>
+            <param name="key">Instance key</param>
+            <param name="instance">Native instance</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.GetInstance(System.String)">
+            <summary>
+            Get a registered native instance
+            </summary>
+            <param name="key">Instance key</param>
+            <returns>Native instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.GetInstance``1(System.String)">
+            <summary>
+            Get a typed native instance
+            </summary>
+            <typeparam name="T">Expected type</typeparam>
+            <param name="key">Instance key</param>
+            <returns>Typed instance or default</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.HasInstance(System.String)">
+            <summary>
+            Check if an instance is registered
+            </summary>
+            <param name="key">Instance key</param>
+            <returns>True if registered</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.GetRegisteredKeys">
+            <summary>
+            Get all registered instance keys
+            </summary>
+            <returns>List of keys</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.RefreshInstances">
+            <summary>
+            Force re-discovery of all instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.Clear">
+            <summary>
+            Clear all registered instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.NativeInstanceManager.GetStats">
+            <summary>
+            Get instance manager statistics
+            </summary>
+            <returns>Statistics dictionary</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.NativeEventSubscriptions">
+            <summary>
+            Helper class for subscribing to native game events
+            CORRECTED: Fixed all missing references and imports
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.Initialize">
+            <summary>
+            Initialize native event subscriptions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnTemperatureChanged(System.Action{PerAspera.GameAPI.ClimateEventData})">
+            <summary>
+            Subscribe to temperature change events
+            </summary>
+            <param name="handler">Event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnO2PressureChanged(System.Action{PerAspera.GameAPI.ClimateEventData})">
+            <summary>
+            Subscribe to O2 pressure change events
+            </summary>
+            <param name="handler">Event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnCO2PressureChanged(System.Action{PerAspera.GameAPI.ClimateEventData})">
+            <summary>
+            Subscribe to CO2 pressure change events
+            </summary>
+            <param name="handler">Event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnWaterStockChanged(System.Action{PerAspera.GameAPI.ClimateEventData})">
+            <summary>
+            Subscribe to water stock change events
+            </summary>
+            <param name="handler">Event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnMartianDayPassed(System.Action{PerAspera.GameAPI.MartianDayEventData})">
+            <summary>
+            Subscribe to Martian day progression events
+            </summary>
+            <param name="handler">Event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnAnyClimateEvent(System.Action{PerAspera.GameAPI.ClimateEventData})">
+            <summary>
+            Subscribe to all climate events with a single handler - FINAL CORRECTION
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnResourceChanged(System.Action{PerAspera.GameAPI.ResourceAddedEvent})">
+            <summary>
+            Subscribe to resource change events - FINAL CORRECTION
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.OnGameFullyLoaded(System.Action{PerAspera.GameAPI.GameFullyLoadedEvent})">
+            <summary>
+            Subscribe to game fully loaded events - FINAL CORRECTION
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.CreateClimateMonitor(System.Action{PerAspera.GameAPI.ClimateEventData},System.Action{PerAspera.GameAPI.MartianDayEventData})">
+            <summary>
+            Create a comprehensive climate monitoring subscription
+            Perfect for ClimatAspera integration
+            </summary>
+            <param name="climateHandler">Handler for climate events</param>
+            <param name="dayHandler">Handler for daily events</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.CreateEventLogger">
+            <summary>
+            Create a simple event logger for debugging
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.EnsureInitialized">
+            <summary>
+            Ensure the system is initialized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.Shutdown">
+            <summary>
+            Cleanup all subscriptions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.NativeEventSubscriptions.GetStats">
+            <summary>
+            Get subscription statistics - CORRECTED
+            </summary>
+            <returns>Subscription stats</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Overrides.GetterOverride">
+            <summary>
+            Configuration for overriding a game getter method
+            Integrated from GetterOverrideSystem into PerAspera SDK
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Overrides.GetterOverride.ValueChanged">
+            <summary>
+            Event fired when override value changes
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Overrides.GetterOverride.EnabledChanged">
+            <summary>
+            Event fired when override is enabled/disabled
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverride.SetValue(System.Single)">
+            <summary>
+            Set override value and fire change event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverride.SetEnabled(System.Boolean)">
+            <summary>
+            Enable/disable override and fire change event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverride.ResetToDefault">
+            <summary>
+            Reset to default value
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Overrides.GetterOverrideRegistry">
+            <summary>
+            Registry system for managing game getter overrides
+            Integrated from GetterOverrideSystem into PerAspera SDK
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.OverrideRegistered">
+            <summary>
+            Event fired when any override is registered
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.OverrideUnregistered">
+            <summary>
+            Event fired when any override is unregistered
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.OverrideValueChanged">
+            <summary>
+            Event fired when any override value changes
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.Overrides">
+            <summary>
+            Get all registered overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.RegisterOverride(PerAspera.GameAPI.Overrides.GetterOverride)">
+            <summary>
+            Register a new getter override
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.UnregisterOverride(System.String)">
+            <summary>
+            Unregister an override
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetOverride(System.String)">
+            <summary>
+            Get override by key
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetOverride(System.String,System.String)">
+            <summary>
+            Get override by class and method name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.HasOverride(System.String)">
+            <summary>
+            Check if specific override exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetOverridesByCategory(System.String)">
+            <summary>
+            Get all overrides in a category
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetEnabledOverrides">
+            <summary>
+            Get all enabled overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetOverrideValue(System.String,System.String,System.Single)">
+            <summary>
+            Get value for override, returns default if not found or disabled
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.IsOverrideActive(System.String,System.String)">
+            <summary>
+            Check if override is active (exists and enabled)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.ResetAllOverrides">
+            <summary>
+            Reset all overrides to default
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.ClearAllOverrides">
+            <summary>
+            Clear all registered overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.GetStatistics">
+            <summary>
+            Get override statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.GetterOverrideRegistry.InitializeDefaultOverrides">
+            <summary>
+            Initialize default overrides for common game systems
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Overrides.OverridePatchSystem">
+            <summary>
+            Harmony patch system for getter overrides
+            Integrated from GetterOverrideSystem into PerAspera SDK
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.OverridePatchSystem.ApplyPatches(System.String)">
+            <summary>
+            Apply Harmony patches for getter overrides
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.OverridePatchSystem.RemovePatches">
+            <summary>
+            Remove all applied patches
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Overrides.OverridePatchSystem.IsPatched">
+            <summary>
+            Check if patches are currently applied
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Overrides.OverridePatchSystem.HarmonyInstance">
+            <summary>
+            Get Harmony instance (for advanced operations)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Overrides.EnhancedPatchSystem">
+            <summary>
+            Enhanced patch system using HarmonyX transpilers
+            Based on: https://github.com/BepInEx/HarmonyX/wiki/Transpiler-helpers
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Overrides.EnhancedPatchSystem.ApplyOptimizedPatches">
+            <summary>
+            Apply optimized getter override patches using transpilers
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Patches.EnergyPatches">
+            <summary>
+            Harmony patches for Energy system getter methods
+            Integrated from GetterOverrideSystem into PerAspera SDK
+            NOTE: SolarPanel type must be available from Assembly-CSharp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Patches.EnergyPatches.InitializePatches">
+            <summary>
+            Initialize energy patches when SolarPanel type is available
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Patches.PlanetPatches">
+            <summary>
+            Harmony patches for Planet getter methods
+            Integrated from GetterOverrideSystem into PerAspera SDK
+            NOTE: Planet type must be available from Assembly-CSharp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Patches.PlanetPatches.InitializePatches">
+            <summary>
+            Initialize planet patches when Planet type is available
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Universe">
+            <summary>
+            Universe API - Provides access to game universe data
+            Updated to use MirrorUniverse and MirrorPlanet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.Initialize">
+            <summary>
+            Initialize Universe API
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.Shutdown">
+            <summary>
+            Shutdown Universe API
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.GetMartianSol">
+            <summary>
+            Get current Martian sol (day)
+            </summary>
+            <returns>Current sol number</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.GetPlanet">
+            <summary>
+            Get current planet instance
+            </summary>
+            <returns>Planet instance wrapped in MirrorPlanet</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.GetRawPlanet">
+            <summary>
+            Get raw planet instance (for compatibility)
+            </summary>
+            <returns>Raw planet instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.Isready">
+            <summary>
+            Check if game is fully loaded and ready
+            </summary>
+            <returns>True if game is ready</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.GetPlayerFaction">
+            <summary>
+            Get player faction instance
+            </summary>
+            <returns>Player faction instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.RegisterUniverse(System.Object)">
+            <summary>
+            Register the universe instance (called by game hooks)
+            </summary>
+            <param name="universeInstance">Universe instance from the game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Universe.GetClimateData">
+            <summary>
+            Get planetary climate summary
+            </summary>
+            <returns>Climate data summary</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.PlanetClimateData">
+            <summary>
+            Comprehensive planetary climate data
+            </summary>
+        </member>
+    </members>
+</doc>

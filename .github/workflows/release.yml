@@ -1,0 +1,106 @@
+name: Release Mods
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+    
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        $version = "${{ github.ref_name }}".TrimStart('v')
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+    
+    - name: Restore and build
+      run: |
+        dotnet restore PerAsperaMod.sln
+        dotnet build PerAsperaMod.sln --configuration Release --no-restore
+    
+    - name: Package mods
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        New-Item -ItemType Directory -Path "release" -Force
+        
+        # Package each mod project
+        $projects = @(
+          "AtmosphereRelease",
+          "MasterGui", 
+          "devToolkit",
+          "SolarPowerOverride",
+          "ReworkWaterLogig",
+          "ImportRessources",
+          "AsperaBaseGameProvider"
+        )
+        
+        foreach ($project in $projects) {
+          if (Test-Path "$project/bin/Release") {
+            $zipName = "release/$project-v$version.zip"
+            Compress-Archive -Path "$project/bin/Release/*" -DestinationPath $zipName -Force
+            echo "✓ Created $zipName"
+          }
+        }
+        
+        # Create complete mod pack
+        Compress-Archive -Path "*/bin/Release/*.dll" -DestinationPath "release/PerAspera-ModPack-v$version.zip" -Force
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        $notes = @"
+        # Per Aspera Mod Pack v$version
+        
+        ## Mods inclus :
+        - **AtmosphereRelease** : Gestion avancée de l'atmosphère
+        - **MasterGui** : Interface utilisateur améliorée
+        - **devToolkit** : Outils de développement
+        - **SolarPowerOverride** : Modification de l'énergie solaire
+        - **ReworkWaterLogic** : Refonte de la logique de l'eau
+        - **ImportRessources** : Import de ressources personnalisées
+        - **AsperaBaseGameProvider** : Fournisseur de données de base
+        
+        ## Installation :
+        1. Téléchargez le mod pack complet ou les mods individuels
+        2. Extraire dans le dossier `BepInEx/plugins/` de votre installation Per Aspera
+        3. Redémarrer le jeu
+        
+        ## Prérequis :
+        - BepInEx 6.x pour IL2CPP
+        - Per Aspera (version compatible)
+        
+        ## Support :
+        - Consultez la [documentation](Documentation/) pour plus de détails
+        - Reportez les bugs dans les [Issues](../../issues)
+        "@
+        
+        $notes | Out-File -FilePath "release_notes.md" -Encoding utf8
+        echo "NOTES_FILE=release_notes.md" >> $env:GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        body_path: ${{ steps.release_notes.outputs.NOTES_FILE }}
+        draft: false
+        prerelease: ${{ contains(github.ref_name, '-') }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

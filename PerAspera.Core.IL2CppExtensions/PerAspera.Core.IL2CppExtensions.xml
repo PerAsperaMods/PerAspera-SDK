@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.Core.IL2CppExtensions</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppExtensions">
+            <summary>
+            Extension methods for safe IL2CPP object manipulation
+            Uses Il2CppInterop for proper IL2CPP support in BepInEx 6.x
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.GetMemberValue``1(System.Object,System.String)">
+            <summary>
+            Safely get a member value from an IL2CPP object
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.SetMemberValue(System.Object,System.String,System.Object)">
+            <summary>
+            Safely set a member value on an IL2CPP object
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.InvokeMethod(System.Object,System.String,System.Object[])">
+            <summary>
+            Safely invoke a void method on an IL2CPP object
+            </summary>
+            <returns>True if method was found and invoked successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.InvokeMethod``1(System.Object,System.String,System.Object[])">
+            <summary>
+            Safely invoke a method on an IL2CPP object with return value
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.SafeInvoke(System.Object,System.String,System.Object[])">
+            <summary>
+            Safe invoke with fallback for IL2CPP objects
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.GetIl2CppType(System.Object)">
+            <summary>
+            Get the IL2CPP type of an object
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.ConvertValue``1(System.Object)">
+            <summary>
+            Convert values safely between IL2CPP and managed types
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.GetFieldValue``1(System.Object,System.String)">
+            <summary>
+            Alias for GetMemberValue - specifically for field access
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.GetPropertyValue``1(System.Object,System.String)">
+            <summary>
+            Alias for GetMemberValue - specifically for property access
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.SetFieldValue(System.Object,System.String,System.Object)">
+            <summary>
+            Alias for SetMemberValue - specifically for field access
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.SetPropertyValue(System.Object,System.String,System.Object)">
+            <summary>
+            Alias for SetMemberValue - specifically for property access
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.ReflectionHelpers">
+            <summary>
+            Reflection helpers for IL2CPP environments
+            Centralizes type discovery functions for decompiled assemblies
+            CORRECTED: Removed duplicated extension methods (use IL2CPP native extensions instead)
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.FindType(System.String)">
+            <summary>
+            Finds a type by name across all loaded assemblies
+            </summary>
+            <param name="typeName">Full or simple type name</param>
+            <returns>Type if found, null otherwise</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.FindTypes(System.Func{System.Type,System.Boolean})">
+            <summary>
+            Finds all types matching the given predicate
+            </summary>
+            <param name="predicate">Condition to match types</param>
+            <returns>Array of matching types</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.TypeExists(System.String)">
+            <summary>
+            Checks if a type exists without throwing exceptions
+            </summary>
+            <param name="typeName">Type name to check</param>
+            <returns>True if type exists</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.GetTypesInNamespace(System.String)">
+            <summary>
+            Gets all types in a specific namespace
+            </summary>
+            <param name="namespaceName">Namespace to search</param>
+            <returns>Types in the namespace</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.GetDerivedTypes(System.Type)">
+            <summary>
+            Gets all types that inherit from a specific base type
+            </summary>
+            <param name="baseType">Base type to search for</param>
+            <returns>Derived types</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.SafeInvoke(System.Object,System.String,System.Object[])">
+            <summary>
+            Safe method invocation with error handling
+            </summary>
+            <param name="instance">Target instance</param>
+            <param name="methodName">Method name</param>
+            <param name="parameters">Method parameters</param>
+            <returns>Method result or null if failed</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.SafeGetValue(System.Object,System.String)">
+            <summary>
+            Safe field/property access
+            </summary>
+            <param name="instance">Target instance</param>
+            <param name="memberName">Field or property name</param>
+            <returns>Value or null if failed</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.GetSingletonInstance``1">
+            <summary>
+            Get singleton instance of specified type
+            </summary>
+            <typeparam name="T">Type to get instance for</typeparam>
+            <returns>Singleton instance if found</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.GetSingletonInstance(System.Type)">
+            <summary>
+            Get singleton instance by type
+            </summary>
+            <param name="type">Type to get instance for</param>
+            <returns>Singleton instance if found</returns>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.TypeExtensions">
+            <summary>
+            Extension methods to simplify reflection operations
+            Provides safe member access and invocation
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.SafeInvoke(System.Object,System.String,System.Object[])">
+            <summary>
+            Safely invokes a method by name with error handling
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="methodName">Method name to invoke</param>
+            <param name="args">Method arguments</param>
+            <returns>Method result or null if failed</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.GetMemberValue(System.Object,System.String)">
+            <summary>
+            Gets a property or field value by name
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="memberName">Property or field name</param>
+            <returns>Member value or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.HasMember(System.Object,System.String)">
+            <summary>
+            Checks if a member (property or field) exists on the object
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="memberName">Member name to check</param>
+            <returns>True if member exists</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.GetMemberValue``1(System.Object,System.String,``0)">
+            <summary>
+            Gets strongly typed member value with fallback
+            </summary>
+            <typeparam name="T">Expected type</typeparam>
+            <param name="obj">Target object</param>
+            <param name="memberName">Member name</param>
+            <param name="defaultValue">Default value if not found or wrong type</param>
+            <returns>Typed value or default</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.HasMethod(System.Object,System.String)">
+            <summary>
+            Checks if object has a method with specific name
+            </summary>
+            <param name="obj">Target object</param>
+            <param name="methodName">Method name to check</param>
+            <returns>True if method exists</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.TypeExtensions.SafeCast``1(System.Object)">
+            <summary>
+            Safe type casting with error handling
+            </summary>
+            <typeparam name="T">Target type</typeparam>
+            <param name="obj">Object to cast</param>
+            <returns>Casted object or default(T)</returns>
+        </member>
+    </members>
+</doc>

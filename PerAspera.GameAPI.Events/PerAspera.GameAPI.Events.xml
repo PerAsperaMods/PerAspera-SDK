@@ -1,0 +1,673 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI.Events</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Events.Constants.NativeEventConstants">
+            <summary>
+            Event name constants for all native game events.
+            Use these instead of magic strings when subscribing to events.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingSpawned">
+            <summary>Event: Building spawned/created</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingDespawned">
+            <summary>Event: Building destroyed/despawned</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingUpgraded">
+            <summary>Event: Building upgraded or type changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingScrapped">
+            <summary>Event: Building finished scrapping</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingStateChanged">
+            <summary>Event: Building state changed (operative/broken/powered)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DroneSpawned">
+            <summary>Event: Drone spawned/created</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DroneDespawned">
+            <summary>Event: Drone destroyed/despawned</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DroneStartedWork">
+            <summary>Event: Drone started working on task</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DroneFinishedWork">
+            <summary>Event: Drone finished working on task</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.ClimateChanged">
+            <summary>Event: Any climate parameter changed (temperature, pressure, water)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.TemperatureChanged">
+            <summary>Event: Temperature changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.CO2PressureChanged">
+            <summary>Event: CO2 pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.O2PressureChanged">
+            <summary>Event: O2 pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.N2PressureChanged">
+            <summary>Event: N2 pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.TotalPressureChanged">
+            <summary>Event: Total atmospheric pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.WaterStockChanged">
+            <summary>Event: Water stock changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.GHGPressureChanged">
+            <summary>Event: Greenhouse gas pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.ArgonPressureChanged">
+            <summary>Event: Argon pressure changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.MartianDayChanged">
+            <summary>Event: Martian day advanced (sol incremented)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DayProgressed">
+            <summary>Event: Day progressed (time advanced)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.ResourceAdded">
+            <summary>Event: Resource added to faction stockpile</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.ResourceConsumed">
+            <summary>Event: Resource consumed from faction stockpile</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.ResourceChanged">
+            <summary>Event: Any resource change (add/remove)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.GameSpeedChanged">
+            <summary>Event: Game speed changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.GamePauseChanged">
+            <summary>Event: Game paused or unpaused</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.GameStateChanged">
+            <summary>Event: Any game state changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.FactionCreated">
+            <summary>Event: Faction created</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.FactionDestroyed">
+            <summary>Event: Faction destroyed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.FactionRelationChanged">
+            <summary>Event: Faction relation changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.TechnologyResearched">
+            <summary>Event: Technology researched</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.TechnologyResearchStarted">
+            <summary>Event: Technology research started</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.POIDiscovered">
+            <summary>Event: Point of Interest discovered</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.POIExplored">
+            <summary>Event: Point of Interest explored</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Constants.SDKEventConstants">
+            <summary>
+            Event name constants for SDK custom events.
+            These are events created by the SDK itself for modder convenience.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BaseGameDetected">
+            <summary>Event: Base game finished loading</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.SDKInitialized">
+            <summary>Event: SDK initialized and ready</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.ModsLoaded">
+            <summary>Event: All mods finished loading</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.PlayerUIInteraction">
+            <summary>Event: Player interacted with UI element</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.PlayerSelectedBuilding">
+            <summary>Event: Player selected a building</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.PlayerCameraMoved">
+            <summary>Event: Player camera moved</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.ModConfigChanged">
+            <summary>Event: Mod configuration changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.ModRegistered">
+            <summary>Event: Mod registered successfully</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.ModError">
+            <summary>Event: Mod encountered an error</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.GameEventBase">
+            <summary>
+            Base class for all game events
+            Provides common properties and functionality
+            Supports both SDK events and native game events
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.GameEventBase.EventType">
+            <summary>
+            Type of the event (must be implemented by derived classes)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.GameEventBase.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.GameEventBase.Source">
+            <summary>
+            Source object that triggered the event (optional)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.GameEventBase.Metadata">
+            <summary>
+            Additional metadata for the event (optional)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.GameEventBase.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.GameEventBase.#ctor(System.Object)">
+            <summary>
+            Constructor with source
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.GameEventBase.AddMetadata(System.String,System.Object)">
+            <summary>
+            Add metadata to the event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.GameEventBase.GetMetadata``1(System.String)">
+            <summary>
+            Get metadata from the event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.GameEventBase.ToString">
+            <summary>
+            Default string representation
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.IGameEvent">
+            <summary>
+            Base interface for all game events (Native and SDK)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.IGameEvent.EventType">
+            <summary>
+            Type of the event (used for routing and handling)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.IGameEvent.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.NativeGameEventBase">
+            <summary>
+            Base class for all native game events from Universe.gameEventBus
+            Wraps native GameEvent struct with SDK-friendly interface
+            DOC: GameEvent.md - struct with sender/target/type/payload
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.NativeGameEvent">
+            <summary>Native GameEvent struct (sender, target, type, payload)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.Sender">
+            <summary>Sender Handle from native event</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.Target">
+            <summary>Target Handle from native event</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.NativeEventType">
+            <summary>GameEventType from native event</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.Payload">
+            <summary>GameEventPayload from native event</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.NativeGameEventBase.MartianSol">
+            <summary>Current Martian sol when event was triggered</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.SDKEventBase">
+            <summary>
+            Base class for SDK custom events (non-native)
+            Used for mod-to-mod communication and SDK internal events
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.SDKEventBase.IsPersistent">
+            <summary>
+            Indicates if this event should be persisted/logged
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.SDKEventBase.Priority">
+            <summary>
+            Priority for event processing (higher = processed first)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Core.SDKEventBase.ModId">
+            <summary>
+            Optional mod identifier that created this event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Data.BuildingEventData">
+            <summary>
+            Building event data
+            Contains information about building-related events
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Data.ClimateEventData">
+            <summary>
+            Climate change event data
+            Uses the Atmosphere wrapper for current atmospheric state
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Data.ClimateEventData.AtmosphericState">
+            <summary>
+            Current atmospheric state (from Wrappers.Atmosphere)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Data.MartianDayEventData">
+            <summary>
+            Martian day change event data
+            Fired when a new Martian sol begins (GevUniverseDayPassed)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Helpers.ClimateHelpers">
+            <summary>
+            Helper utilities for working with climate events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsSignificantChange(PerAspera.GameAPI.Events.Data.ClimateEventData,System.Single)">
+            <summary>
+            Check if climate value changed significantly (> threshold)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.GetClimateDelta(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Get climate change delta (positive = increase, negative = decrease)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsClimateIncrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Check if climate parameter increased
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsClimateDecrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Check if climate parameter decreased
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.ClimateThresholdFilter(System.Single)">
+            <summary>
+            Create a filter function for climate events above threshold
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Helpers.EventHelpers">
+            <summary>
+            General helper utilities for working with game events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.TryGetEventData``1(System.Object,``0@)">
+            <summary>
+            Check if event data is of a specific type and cast it
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.AsEventData``1(System.Object)">
+            <summary>
+            Safely cast event data to expected type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsResourceAddition(System.String)">
+            <summary>
+            Check if resource operation is an addition
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsResourceRemoval(System.String)">
+            <summary>
+            Check if resource operation is a removal
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.BuildingTypeFilter(System.String[])">
+            <summary>
+            Create a filter function for specific building types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.LogClimateEvent(PerAspera.GameAPI.Events.Data.ClimateEventData,System.String)">
+            <summary>
+            Log climate event with formatted output
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.LogDayEvent(PerAspera.GameAPI.Events.Data.MartianDayEventData,System.String)">
+            <summary>
+            Log Martian day event with year calculation
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Helpers.TimeHelpers">
+            <summary>
+            Helper utilities for working with time and Martian calendar events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.TimeHelpers.GetMartianYear(System.Int32)">
+            <summary>
+            Calculate Martian year from sol
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.TimeHelpers.GetDayInYear(System.Int32)">
+            <summary>
+            Calculate day within Martian year (0-686)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.TimeHelpers.IsNewMartianYear(System.Int32)">
+            <summary>
+            Check if sol marks start of new Martian year
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.TimeHelpers.IsMilestone(System.Int32,System.Int32)">
+            <summary>
+            Check if sol marks a milestone (every N sols)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.TimeHelpers.MilestoneFilter(System.Int32)">
+            <summary>
+            Create a filter function for milestone sols
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent">
+            <summary>
+            Native event: Building spawned/created
+            DOC: BaseGame.md - OnEvent_BuildingDespawned (Building sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.Building">
+            <summary>Building instance that was spawned</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.BuildingTypeKey">
+            <summary>Building type key (e.g., "SolarPanel", "Mine")</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.OwnerFaction">
+            <summary>Owner faction of the building</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.PositionX">
+            <summary>Position X coordinate</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.PositionY">
+            <summary>Position Y coordinate</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDespawnedNativeEvent">
+            <summary>
+            Native event: Building destroyed/despawned
+            DOC: BaseGame.md - OnEvent_BuildingDespawned (Building sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradedNativeEvent">
+            <summary>
+            Native event: Building upgraded or type changed
+            DOC: BaseGame.md - OnEvent_BuildingChangeBuildingTypeOrDeferredUpgradedTo (Building sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingScrappedNativeEvent">
+            <summary>
+            Native event: Building finished scrapping
+            DOC: BaseGame.md - OnEvent_BuildingFinishScrapping (Building sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingScrappedNativeEvent.ResourcesReturned">
+            <summary>Resources returned from scrapping (if any)</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingPreRemoveNativeEvent">
+            <summary>
+            Native event: Building pre-removal (before despawn)
+            DOC: Universe.md - OnEvent_BuildingPreRemove (Building sender, ref GameEvent evt)
+            Triggered BEFORE building is actually removed (cleanup phase)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingSpawnedSpatialAddNativeEvent">
+            <summary>
+            Native event: Building spawned spatial add (routing/pathfinding system)
+            DOC: Universe.md - OnEvent_BuildingSpawnedSpatialAdd (Building sender, ref GameEvent evt)
+            Triggered when building added to spatial grid (may differ from UI spawn)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedSpatialAddNativeEvent.AddedToSpatialGrid">
+            <summary>Added to spatial grid</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.ClimateEvents">
+            <summary>
+            Native climate events from Planet class
+            Triggered by NativeEventPatcher when Planet setter methods are called
+            DOC: Planet.md - climate fields and setter methods
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.TemperatureChanged">
+            <summary>Event key for temperature changes (SetAverageTemperature, SetTemperature)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.CO2PressureChanged">
+            <summary>Event key for CO2 pressure changes (SetCO2Pressure)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.O2PressureChanged">
+            <summary>Event key for O2 pressure changes (SetO2Pressure, SetOxygenPressure)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.N2PressureChanged">
+            <summary>Event key for N2 pressure changes (SetN2Pressure, SetNitrogenPressure)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.GHGPressureChanged">
+            <summary>Event key for GHG pressure changes (SetGHGPressure, SetGreenhouseGasPressure)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.TotalPressureChanged">
+            <summary>Event key for total pressure changes (SetTotalPressure, SetPressure)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.WaterStockChanged">
+            <summary>Event key for water stock changes (SetWaterStock, SetWater)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.ArgonPressureChanged">
+            <summary>Event key for argon pressure changes (SetArgonPressure)</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateTemperatureEvent(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for temperature change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateCO2Event(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for CO2 pressure change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateO2Event(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for O2 pressure change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateN2Event(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for N2 pressure change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateGHGEvent(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for GHG pressure change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateWaterStockEvent(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for water stock change
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateTotalPressureEvent(System.Single,System.Single,System.Int32)">
+            <summary>
+            Create climate event data for total pressure change
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.DroneSpawnedNativeEvent">
+            <summary>
+            Native event: Drone spawned/created
+            DOC: BaseGame.md - Drone event handlers (lambda subscriptions)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.DroneDespawnedNativeEvent">
+            <summary>
+            Native event: Drone despawned/destroyed
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.FactionCloseAllWindowsNativeEvent">
+            <summary>
+            Native event: Faction requested close all windows
+            DOC: BaseGame.md - OnEvent_FactionCloseAllWindows (Faction sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.VeinOrSiteRevealedNativeEvent">
+            <summary>
+            Native event: Vein or site revealed to faction
+            DOC: BaseGame.md - OnEvent_OnVeinOrSiteRevealed (Faction sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.GameStateChangedNativeEvent">
+            <summary>
+            Native event: Game state changed (pause/speed/load/etc.)
+            DOC: Universe.md - Game state management methods
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.ResourceChangedNativeEvent">
+            <summary>
+            Native event: Resource amount changed (added/removed/set)
+            DOC: GameEventPayload.md - payload with resource data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseExplosionNativeEvent">
+            <summary>
+            Native event: Explosion in universe
+            DOC: BaseGame.md - OnEvent_UniverseExplosion (Universe sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseHideVeinNativeEvent">
+            <summary>
+            Native event: Vein hidden in universe
+            DOC: BaseGame.md - OnEvent_UniverseHideVein (Universe sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseStatsUpdatedNativeEvent">
+            <summary>
+            Native event: Universe stats updated
+            DOC: Universe.md - GevUniverseStatsUpdated
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseSwapFactionNativeEvent">
+            <summary>
+            Native event: Faction swapped
+            DOC: Universe.md - GevUniverseSwapFaction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseGameOverNativeEvent">
+            <summary>
+            Native event: Game over
+            DOC: Universe.md - GevUniverseGameOver
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent">
+            <summary>
+            Native event: New game started
+            DOC: Universe.md - GevUniverseNewGameStarted
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent">
+            <summary>
+            Native event: Continue ended game
+            DOC: Universe.md - GevUniverseContinueEndedGame
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.WayDespawnedNativeEvent">
+            <summary>
+            Native event: Way (road/path) despawned
+            DOC: BaseGame.md - OnEvent_WayDespawned (Way sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.WayUpgradedNativeEvent">
+            <summary>
+            Native event: Way upgraded
+            DOC: BaseGame.md - OnEvent_WayUpgraded (Way sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.WayOperativeChangedNativeEvent">
+            <summary>
+            Native event: Way operative status changed (active/inactive)
+            DOC: BaseGame.md - OnEvent_WayOperativeChanged (Way sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemInitializedEvent">
+            <summary>
+            Event triggered when a mod system is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemShutdownEvent">
+            <summary>
+            Event triggered when a mod system shuts down
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.CommandSystemReadyEvent">
+            <summary>
+            Event triggered when command system is ready
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.PlayerFactionDetectedEvent">
+            <summary>
+            Event triggered when player faction is detected
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.PlayerActionExecutedEvent">
+            <summary>
+            Event triggered when player executes an action
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent">
+            <summary>
+            Event triggered when BaseGame and Universe are detected
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent">
+            <summary>
+            Event triggered when game is fully loaded (BaseGame + Universe + Planet)
+            Equivalent to legacy GameFullyLoadedEvent
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameLoadedEvent">
+            <summary>
+            Event triggered when a game save is loaded
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.BlackboardInitializedEvent">
+            <summary>
+            Event triggered when the main Blackboard is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.PlanetInitializedEvent">
+            <summary>
+            Event triggered when the Mars planet is initialized
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.DayPassedEvent">
+            <summary>
+            Event triggered each in-game day
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ResourceAddedEvent">
+            <summary>
+            Event triggered when resources are added
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.MartianDayChangedEvent">
+            <summary>
+            Event triggered when Martian day changes (climate-aware)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ClimateAnalysisCompleteEvent">
+            <summary>
+            Event triggered when climate analysis is complete
+            </summary>
+        </member>
+    </members>
+</doc>

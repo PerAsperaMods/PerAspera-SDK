@@ -1,0 +1,129 @@
+name: Bug Report
+description: Signaler un bug dans un mod Per Aspera
+title: "[BUG] "
+labels: ["bug", "mod-help"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Rapport de Bug - Mod Per Aspera
+        
+        Merci de prendre le temps de signaler ce bug. Plus vous fournirez d'informations, plus il sera facile de résoudre le problème.
+
+  - type: dropdown
+    id: mod-affected
+    attributes:
+      label: Mod concerné
+      description: Quel mod rencontre le problème ?
+      options:
+        - AtmosphereRelease
+        - MasterGui
+        - devToolkit
+        - SolarPowerOverride
+        - ReworkWaterLogic
+        - ImportRessources
+        - AsperaBaseGameProvider
+        - Plusieurs mods
+        - Nouveau mod en développement
+    validations:
+      required: true
+
+  - type: input
+    id: game-version
+    attributes:
+      label: Version de Per Aspera
+      description: Quelle version du jeu utilisez-vous ?
+      placeholder: "ex: 1.4.2"
+    validations:
+      required: true
+
+  - type: input
+    id: bepinex-version
+    attributes:
+      label: Version de BepInEx
+      description: Quelle version de BepInEx IL2CPP utilisez-vous ?
+      placeholder: "ex: 6.0.0-be.668"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Système d'exploitation
+      options:
+        - Windows 10
+        - Windows 11
+        - Linux (Proton/Wine)
+        - macOS
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      description: Décrivez clairement le problème rencontré
+      placeholder: |
+        Décrivez ce qui s'est passé...
+        
+        Étapes pour reproduire :
+        1. ...
+        2. ...
+        3. ...
+        
+        Comportement attendu :
+        ...
+        
+        Comportement observé :
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs d'erreur
+      description: Copiez les logs pertinents de BepInEx/LogOutput.log
+      placeholder: |
+        [Error  : Unity Log] ...
+        [Error  : BepInEx] ...
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Partagez votre configuration si pertinente (BepInEx.cfg, fichiers modifiés)
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: troubleshooting
+    attributes:
+      label: Étapes de dépannage déjà effectuées
+      options:
+        - label: J'ai vérifié les logs BepInEx/LogOutput.log
+        - label: J'ai testé sans autres mods installés
+        - label: J'ai vérifié que BepInEx est correctement installé
+        - label: J'ai vérifié la compatibilité de version
+        - label: J'ai redémarré le jeu
+        - label: J'ai consulté la documentation
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ### 💡 Conseils avant de soumettre :
+        
+        1. **Vérifiez les logs** : `BepInEx/LogOutput.log` contient souvent la cause du problème
+        2. **Testez isolément** : Désactivez les autres mods pour isoler le problème
+        3. **Versions compatibles** : Vérifiez que votre version de BepInEx est compatible avec le jeu
+        4. **Consultez la documentation** : Les [instructions de configuration](../Documentation/) peuvent résoudre votre problème
+        
+        **L'assistant automatique analysera votre rapport et proposera des solutions. Merci ! 🚀**

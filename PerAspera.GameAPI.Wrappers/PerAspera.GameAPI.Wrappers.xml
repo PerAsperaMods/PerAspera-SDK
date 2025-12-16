@@ -1,0 +1,538 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI.Wrappers</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericGas">
+            <summary>
+            Represents a single atmospheric gas component
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.PartialPressure">
+            <summary>
+            Partial pressure of this gas (kPa)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.Percentage">
+            <summary>
+            Percentage in total atmosphere (0-100%)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.IsReadOnly">
+            <summary>
+            Check if this gas can be modified
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.TerraformingEffect">
+            <summary>
+            Represents a terraforming effect on climate
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TerraformingEffect.TemperatureEffect">
+            <summary>
+            Temperature effect in Kelvin
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericComposition">
+            <summary>
+            Collection of atmospheric gases with dynamic composition
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.Item(System.String)">
+            <summary>
+            Get gas by symbol (CO2, O2, N2, H2O)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.AllGases">
+            <summary>
+            All atmospheric gases
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.UpdatePercentages">
+            <summary>
+            Update percentages based on total pressure
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Atmosphere">
+            <summary>
+            Wrapper for Planet atmosphere properties
+            Provides type-safe access to atmospheric composition and climate data
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Composition">
+            <summary>
+            Atmospheric gas composition (CO2, O2, N2, H2O)
+            Access via: Atmosphere.Composition["CO2"].PartialPressure
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TotalPressure">
+            <summary>
+            Total atmospheric pressure (sum of all partial pressures, kPa)
+            Property: totalPressure (READ-ONLY - calculated by game)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Temperature">
+            <summary>
+            Current surface temperature (Kelvin)
+            Property: temperature
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.MinTemperature">
+            <summary>
+            Minimum temperature recorded (Kelvin)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.MaxTemperature">
+            <summary>
+            Maximum temperature recorded (Kelvin)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TemperatureCelsius">
+            <summary>
+            Temperature in Celsius (convenience property)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.GreenhouseEffect">
+            <summary>
+            Greenhouse effect contribution (Kelvin)
+            Property: greenhouseEffect (READ-ONLY - calculated by game)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Albedo">
+            <summary>
+            Planetary albedo (reflectivity, 0-1)
+            Property: albedo (READ-ONLY - calculated by game)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Effects">
+            <summary>
+            Terraforming effects on climate (polar nukes, dust, comets, Deimos)
+            Access via: Atmosphere.Effects["PolarNuke"].TemperatureEffect
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.WaterStock">
+            <summary>
+            Available water stock (kilotons)
+            Property: waterStock
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.PermafrostDeposits">
+            <summary>
+            Permafrost deposits (kilotons)
+            Property: permafrostDeposits (READ-ONLY)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsBreathable">
+            <summary>
+            Check if atmosphere is breathable (O2 > 15%, pressure > 50kPa)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsTemperatureHabitable">
+            <summary>
+            Check if temperature is habitable (273-310K = 0-37°C)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsPressureHabitable">
+            <summary>
+            Check if pressure is habitable (50-150kPa)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.HabitabilityScore">
+            <summary>
+            Overall habitability score (0-100%)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.BaseGame">
+            <summary>
+            Wrapper for BaseGame singleton
+            Provides type-safe access to main game systems
+            DOC: BaseGame.md - Main game controller and singleton
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent">
+            <summary>
+            Get current BaseGame singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetKeeper">
+            <summary>
+            Get Keeper instance (entity registry and manager)
+            Property: keeper { get; private set; }
+            Backing field: _keeper_k__BackingField
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetUniverse">
+            <summary>
+            Get Universe instance (time, factions, planet)
+            Property: universe { get; }
+            Backing field: _universe_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.IsQuitting">
+            <summary>
+            Check if game is in quitting state
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.IsEnding">
+            <summary>
+            Check if game is ending (credits/end sequence)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.MainSceneFinishedInit">
+            <summary>
+            Check if main scene has finished initialization
+            Field: MainSceneHasFinishedInit
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.IsLoading">
+            <summary>
+            Check if game is currently loading
+            Field: isLoading
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.LoadedSave">
+            <summary>
+            Get loaded save file name
+            Field: loadedSave
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.HasCheats">
+            <summary>
+            Check if game has cheats enabled
+            Field: hasCheats
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.HasMods">
+            <summary>
+            Check if game has mods enabled
+            Field: hasMods
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.Difficulty">
+            <summary>
+            Get current difficulty level
+            Field: difficulty
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.OnFinishLoading">
+            <summary>
+            Trigger OnFinishLoading callback
+            Method: OnFinishLoading()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.ExitToMainMenu">
+            <summary>
+            Exit to main menu
+            Method: ExitToMainMenu()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.ForceExit">
+            <summary>
+            Force exit game
+            Method: ForceExit()
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Building">
+            <summary>
+            Wrapper for the native Building class
+            Provides safe access to building properties and methods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native building object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.Number">
+            <summary>
+            Building unique number/ID
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.TypeKey">
+            <summary>
+            Building type key (e.g., "SolarPanel", "Mine")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.Position">
+            <summary>
+            2D position on the planet surface
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsAlive">
+            <summary>
+            Is the building alive (not destroyed)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsOperative">
+            <summary>
+            Is the building operational
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsBuilt">
+            <summary>
+            Is the building fully built (not under construction)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsPowered">
+            <summary>
+            Is the building powered
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsBroken">
+            <summary>
+            Is the building broken
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.Health">
+            <summary>
+            Current health (0.0 to 1.0)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.GetFaction">
+            <summary>
+            Get the faction that owns this building
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.GetStockpile">
+            <summary>
+            Get the building's stockpile
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.GetResourceStock(System.String)">
+            <summary>
+            Get resource quantity in stockpile
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_water")</param>
+            <returns>Current quantity in stockpile or 0 if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.ToggleOperative">
+            <summary>
+            Toggle operative state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.StartScrapping">
+            <summary>
+            Start scrapping the building
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.CancelScrapping">
+            <summary>
+            Cancel scrapping
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry">
+            <summary>
+            Central registry for accessing Keeper-managed game entities
+            Provides type-safe, stateless access to Planet, Universe, and entity handles
+            DOC: See DOC/SDK/Core/Keeper-Instance-Access.md for architecture
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.IsInitialized">
+            <summary>
+            Check if Keeper systems are available
+            Returns true after BaseGame.Awake() completes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.ValidateInitialized">
+            <summary>
+            Validate Keeper is ready (throws if not initialized)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetKeeper">
+            <summary>
+            Get Keeper instance (entity registry)
+            Safe to call after BaseGame.Awake()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetUniverse">
+            <summary>
+            Get Universe instance (time, factions, planet container)
+            Safe to call after BaseGame.Awake()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetPlanet">
+            <summary>
+            Get Planet instance (climate, resources, buildings)
+            Safe to call after BaseGame.Start() completes
+            Returns null if called too early in lifecycle
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceType(System.String)">
+            <summary>
+            Get ResourceType by key (e.g., "resource_water", "resource_silicon")
+            Uses StaticDataCollectionItem&lt;ResourceType&gt;.Get(key) pattern
+            Returns null if not found
+            </summary>
+            <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
+            <returns>ResourceType instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetBuildingType(System.String)">
+            <summary>
+            Get BuildingType by key (e.g., "building_solar_panel")
+            Uses StaticDataCollectionItem&lt;BuildingType&gt;.Get(key) pattern
+            Returns null if not found
+            </summary>
+            <param name="buildingKey">Building key from YAML</param>
+            <returns>BuildingType instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetTechnologyType(System.String)">
+            <summary>
+            Get TechnologyType by key (e.g., "tech_basic_chemistry")
+            Uses StaticDataCollectionItem&lt;TechnologyType&gt;.Get(key) pattern
+            Returns null if not found
+            </summary>
+            <param name="technologyKey">Technology key from YAML</param>
+            <returns>TechnologyType instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetByHandle(System.Object)">
+            <summary>
+            Find entity by handle using KeeperMap
+            Keeper.Find(handle) wrapper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetByHandle``1(System.Object)">
+            <summary>
+            Find entity by handle (type-safe with wrapper)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetStatus">
+            <summary>
+            Get initialization status report for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Planet">
+            <summary>
+            Wrapper for the native Planet class
+            Provides safe access to planetary properties and climate data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetCurrent">
+            <summary>
+            Get the current planet instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.Atmosphere">
+            <summary>
+            Planet atmosphere (composition, temperature, pressure, effects)
+            Access via: Planet.Atmosphere.Composition["CO2"].PartialPressure
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.WaterStock">
+            <summary>
+            Water stock on the planet (direct access for convenience)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetResourceStock(System.String)">
+            <summary>
+            Get stock of a specific resource
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
+            <returns>Current stock amount or 0 if resource not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.AddResource(System.String,System.Single)">
+            <summary>
+            Add resource to planet stock
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
+            <param name="amount">Amount to add (can be negative to remove)</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Universe">
+            <summary>
+            Wrapper for the native Universe class
+            Provides safe access to time, game state and universe-level properties
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetCurrent">
+            <summary>
+            Get the current universe instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Universe.CurrentSol">
+            <summary>
+            Get current Martian sol (days passed)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Universe.GameSpeed">
+            <summary>
+            Get current game speed multiplier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Universe.IsPaused">
+            <summary>
+            Check if game is paused
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetPlanet">
+            <summary>
+            Get the planet instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBaseGame">
+            <summary>
+            Get the base game instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.Pause">
+            <summary>
+            Pause the game
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.Unpause">
+            <summary>
+            Unpause the game
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.TogglePause">
+            <summary>
+            Toggle pause state
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.WrapperBase">
+            <summary>
+            Base class for all game object wrappers
+            Provides common functionality for wrapping native IL2CPP game objects
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.NativeObject">
+            <summary>
+            The native IL2CPP game object being wrapped
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid">
+            <summary>
+            Check if the native object is valid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
+            <summary>
+            Constructor with native object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.ValidateNativeObject(System.String)">
+            <summary>
+            Validate that the native object exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvoke``1(System.String,System.Object[])">
+            <summary>
+            Safely invoke a method on the native object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvokeVoid(System.String,System.Object[])">
+            <summary>
+            Safely invoke a void method on the native object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeGetField``1(System.String)">
+            <summary>
+            Safely get a field value from the native object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeSetField``1(System.String,``0)">
+            <summary>
+            Safely set a field value on the native object
+            </summary>
+        </member>
+    </members>
+</doc>

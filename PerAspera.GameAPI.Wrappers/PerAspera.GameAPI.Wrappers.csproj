@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- Import SDK versioning -->
+	<Import Project="..\Version.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>PerAspera.GameAPI.Wrappers</AssemblyName>
+		<RootNamespace>PerAspera.GameAPI.Wrappers</RootNamespace>
+		<PackageId>PerAspera.GameAPI.Wrappers</PackageId>
+		<Description>Public API wrappers for Per Aspera game classes - Safe abstraction layer for modders</Description>
+		<PackageTags>per-aspera;wrappers;api;modding;public-api</PackageTags>
+		<IsSharedLibrary>true</IsSharedLibrary>
+	</PropertyGroup>
+
+	<!-- Dependencies -->
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
+	</ItemGroup>
+	
+	<!-- Game assemblies reference -->
+	<Import Project="..\GameLibs\GameLibs.props" />
+</Project>

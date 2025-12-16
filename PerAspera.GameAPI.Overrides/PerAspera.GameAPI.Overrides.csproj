@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    
+    <!-- Package Info -->
+    <AssemblyName>PerAspera.GameAPI.Overrides</AssemblyName>
+    <RootNamespace>PerAspera.GameAPI.Overrides</RootNamespace>
+    <Product>Per Aspera Modding SDK - Generic Overrides System</Product>
+    <Description>Generic getter override system with type-safe patching, strategies, and auto-discovery for Per Aspera modding.</Description>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Harmony for runtime patching -->
+    <PackageReference Include="HarmonyX" Version="2.10.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- SDK Dependencies -->
+    <ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+    <ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
+  </ItemGroup>
+
+</Project>

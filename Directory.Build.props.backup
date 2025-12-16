@@ -1,0 +1,42 @@
+<Project>
+  <!-- 🎮 Per Aspera SDK - Global Configuration -->
+  
+  <PropertyGroup>
+    <!-- SDK Global Settings -->
+    <SdkRoot>$(MSBuildThisFileDirectory)</SdkRoot>
+    
+    <!-- CI/CD vs Local Development Detection -->
+    <IsCIBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</IsCIBuild>
+    <IsCIBuild Condition="'$(IsCIBuild)' == ''">false</IsCIBuild>
+    
+    <!-- NuGet Sources -->
+    <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
+    
+    <!-- Per Aspera Game Detection -->
+    <PerAsperaGamePath Condition="'$(PerAsperaGamePath)' == '' AND Exists('$(USERPROFILE)\.steam\steam\steamapps\common\Per Aspera')">$(USERPROFILE)\.steam\steam\steamapps\common\Per Aspera</PerAsperaGamePath>
+    <PerAsperaGamePath Condition="'$(PerAsperaGamePath)' == '' AND Exists('C:\Program Files (x86)\Steam\steamapps\common\Per Aspera')">C:\Program Files (x86)\Steam\steamapps\common\Per Aspera</PerAsperaGamePath>
+    
+    <!-- GameLibs Detection - CI/CD vs Local -->
+    <PerAsperaGameLibs Condition="'$(IsCIBuild)' == 'true'">$(SdkRoot)GameLibs-Stripped</PerAsperaGameLibs>
+    <PerAsperaGameLibs Condition="'$(IsCIBuild)' != 'true' AND '$(PerAsperaGameLibs)' == '' AND '$(CustomGameLibs)' != ''">$(CustomGameLibs)</PerAsperaGameLibs>
+    <PerAsperaGameLibs Condition="'$(IsCIBuild)' != 'true' AND '$(PerAsperaGameLibs)' == '' AND '$(PerAsperaGamePath)' != '' AND Exists('$(PerAsperaGamePath)\BepInEx\interop')">$(PerAsperaGamePath)\BepInEx\interop</PerAsperaGameLibs>
+    <PerAsperaGameLibs Condition="'$(IsCIBuild)' != 'true' AND '$(PerAsperaGameLibs)' == ''">$(SdkRoot)GameLibs</PerAsperaGameLibs>
+  </PropertyGroup>
+  
+  <!-- 📋 Help Message -->
+  <Target Name="ShowSDKInfo" BeforeTargets="Build" Condition="!Exists('$(PerAsperaGameLibs)\Assembly-CSharp.dll')">
+    <Message Text="🎮 Per Aspera SDK - Configuration Required" Importance="high" />
+    <Message Text="" Importance="high" />
+    <Message Text="📁 Game Detection:" Importance="high" />
+    <Message Text="   Game Path: $(PerAsperaGamePath)" Importance="high" Condition="'$(PerAsperaGamePath)' != ''" />
+    <Message Text="   Game Path: ❌ Not found" Importance="high" Condition="'$(PerAsperaGamePath)' == ''" />
+    <Message Text="   GameLibs: $(PerAsperaGameLibs)" Importance="high" />
+    <Message Text="" Importance="high" />
+    <Message Text="🔧 Setup Options:" Importance="high" />
+    <Message Text="   1. Custom game path: -p:PerAsperaGamePath='C:\Path\To\Per Aspera'" Importance="high" />
+    <Message Text="   2. Custom GameLibs: -p:CustomGameLibs='C:\Path\To\GameLibs'" Importance="high" />
+    <Message Text="   3. Install Per Aspera + BepInEx (auto-detected)" Importance="high" />
+    <Message Text="" Importance="high" />
+    <Error Text="❌ Assembly-CSharp.dll not found. SDK needs game assemblies to compile." />
+  </Target>
+</Project>

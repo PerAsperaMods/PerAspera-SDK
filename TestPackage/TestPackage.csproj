@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-pre.1" />
+    <PackageReference Include="PerAspera.GameLibs" Version="1.5.0-r.0" />
+  </ItemGroup>
+
+</Project>

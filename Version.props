@@ -1,0 +1,75 @@
+﻿<Project>
+  <PropertyGroup>
+    <!-- PerAspera SDK Version Information -->
+    <SDKVersion>1.1.0</SDKVersion>
+    <SDKVersionPrefix>1.1.0</SDKVersionPrefix>
+    <SDKVersionSuffix></SDKVersionSuffix>
+    <InformationalVersion>$(SDKVersion)+$(GitCommitId)</InformationalVersion>
+    
+    <!-- Target Framework -->
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    
+    <!-- Release Information -->
+    <Authors>PerAspera Modding Community</Authors>
+    <Company>PerAsperaMods</Company>
+    <Product>PerAspera Modding SDK</Product>
+    <Copyright>Copyright Â© 2024-2025 PerAspera Modding Community</Copyright>
+    
+    <!-- Repository Information -->
+    <RepositoryUrl>https://github.com/PerAsperaMods/PerAspera-SDK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>main</RepositoryBranch>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    
+    <!-- NuGet Package Settings -->
+    <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    
+    <!-- Per Aspera Game Version Compatibility -->
+    <GameVersion>1.5.0</GameVersion>
+    <GameVersionCompatibility>1.5.x</GameVersionCompatibility>
+    
+    <!-- BepInEx Compatibility -->
+    <BepInExVersion>6.0.0</BepInExVersion>
+    <BepInExCompatibility>6.0.x</BepInExCompatibility>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <VersionSuffix>debug-$(SDKVersionSuffix)</VersionSuffix>
+    <DefineConstants>$(DefineConstants);DEBUG_SDK</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <VersionSuffix>$(SDKVersionSuffix)</VersionSuffix>
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- Generate Git information -->
+  <PropertyGroup>
+    <GitCommitId Condition="'$(GitCommitId)' == ''">unknown</GitCommitId>
+    <GitBranch Condition="'$(GitBranch)' == ''">unknown</GitBranch>
+    <BuildDate>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>
+  </PropertyGroup>
+
+  <!-- Assembly Information -->
+  <PropertyGroup>
+    <AssemblyVersion>$(SDKVersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(SDKVersionPrefix).0</FileVersion>
+    <Version>$(SDKVersion)</Version>
+  </PropertyGroup>
+
+  <!-- SDK Documentation -->
+  <PropertyGroup>
+    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>
+
+
+

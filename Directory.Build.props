@@ -1,0 +1,43 @@
+<Project>
+  <!-- Per Aspera SDK - AssemblyPublicizer Test Configuration -->
+  
+  <PropertyGroup>
+    <SdkRoot>$(MSBuildThisFileDirectory)</SdkRoot>
+    <IsCIBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</IsCIBuild>
+    <IsCIBuild Condition="'$(IsCIBuild)' == ''">false</IsCIBuild>
+    
+    <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
+    
+    <!-- Per Aspera Game Detection -->
+    <PerAsperaGamePath Condition="'$(PerAsperaGamePath)' == '' AND Exists('F:\SteamLibrary\steamapps\common\Per Aspera')">F:\SteamLibrary\steamapps\common\Per Aspera</PerAsperaGamePath>
+  </PropertyGroup>
+  
+  <!-- Modern AssemblyPublicizer for CI/CD -->
+  <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <!-- Reference game assemblies directly with auto-publicization -->
+  <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
+    <Reference Include="$(PerAsperaGamePath)\Assembly-CSharp.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\ScriptsAssembly.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.CoreModule.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.IMGUIModule.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\Il2Cppmscorlib.dll" Publicize="true" />
+    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\Il2CppSystem.dll" Publicize="true" />
+  </ItemGroup>
+  
+  <!-- Local development: use existing GameLibs -->
+  <PropertyGroup Condition="'$(IsCIBuild)' != 'true'">
+    <PerAsperaGameLibs>$(SdkRoot)GameLibs</PerAsperaGameLibs>
+  </PropertyGroup>
+  
+  <!-- Local development import -->
+  <Import Project="$(SdkRoot)GameLibs\GameLibs.props" Condition="'$(IsCIBuild)' != 'true' AND Exists('$(SdkRoot)GameLibs\GameLibs.props')" />
+  
+  <!-- Help Message for missing assemblies -->
+  <Target Name="ShowSDKInfo" BeforeTargets="Build" Condition="'$(IsCIBuild)' != 'true' AND !Exists('$(PerAsperaGameLibs)\Assembly-CSharp.dll')">
+    <Error Text="Assembly-CSharp.dll not found. SDK needs game assemblies to compile." />
+  </Target>
+</Project>

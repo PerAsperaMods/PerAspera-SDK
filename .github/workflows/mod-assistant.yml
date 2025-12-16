@@ -1,0 +1,150 @@
+name: Mod Development Assistant
+
+on:
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  mod-assistant:
+    if: contains(github.event.issue.labels.*.name, 'mod-help') || contains(github.event.comment.body, '@mod-assistant')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Analyze issue for mod help
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const comment = context.payload.comment;
+          
+          // Patterns pour identifier les types de problèmes
+          const patterns = {
+            'compilation-error': /error|compilation|build|compile/i,
+            'bepinex-setup': /bepinex|installation|setup|install/i,
+            'harmony-patch': /harmony|patch|postfix|prefix/i,
+            'il2cpp-issue': /il2cpp|interop|assembly/i,
+            'yaml-modding': /yaml|building|resource|technology/i,
+            'debugging': /debug|log|crash|exception/i
+          };
+          
+          const body = issue ? issue.body : comment.body;
+          const title = issue ? issue.title : '';
+          const content = (title + ' ' + body).toLowerCase();
+          
+          let detectedType = 'general';
+          let suggestions = [];
+          
+          for (const [type, pattern] of Object.entries(patterns)) {
+            if (pattern.test(content)) {
+              detectedType = type;
+              break;
+            }
+          }
+          
+          // Générer des suggestions basées sur le type détecté
+          switch(detectedType) {
+            case 'compilation-error':
+              suggestions = [
+                '🔧 Vérifiez que vous utilisez .NET 6.0 ou .NET Framework 4.7.2',
+                '📦 Assurez-vous que les références BepInEx sont correctement configurées',
+                '📁 Vérifiez que GameLibs.props pointe vers le bon dossier',
+                '🔍 Consultez le fichier [working/PerAsperaMod.csproj](working/PerAsperaMod.csproj) pour un exemple'
+              ];
+              break;
+              
+            case 'bepinex-setup':
+              suggestions = [
+                '📥 Téléchargez BepInEx 6.x IL2CPP depuis https://github.com/BepInEx/BepInEx/releases',
+                '📂 Placez les DLLs dans `BepInEx/plugins/`',
+                '⚙️ Configurez `doorstop_config.ini` pour pointer vers BepInEx',
+                '📋 Consultez les [instructions d\'installation](Documentation/) pour plus de détails'
+              ];
+              break;
+              
+            case 'harmony-patch':
+              suggestions = [
+                '🎯 Utilisez `[HarmonyPatch]` pour cibler la méthode',
+                '⚡ Préférez `Postfix` pour modifier les valeurs de retour',
+                '🔄 Utilisez `Prefix` pour empêcher l\'exécution originale',
+                '📚 Consultez la [documentation Harmony](https://harmony.pardeike.net/)'
+              ];
+              break;
+              
+            case 'il2cpp-issue':
+              suggestions = [
+                '🔗 Vérifiez que les assemblies interop sont générées dans `BepInEx/interop/`',
+                '🏗️ Utilisez `BasePlugin` au lieu de `BaseUnityPlugin`',
+                '⚠️ Attention aux types `Il2Cpp*` pour les objets Unity',
+                '🔍 Vérifiez les logs BepInEx pour les erreurs d\'interop'
+              ];
+              break;
+              
+            case 'yaml-modding':
+              suggestions = [
+                '📄 Modifiez les fichiers dans `datamodel/` avec précaution',
+                '🔗 Respectez la syntaxe `!resource resource_name`',
+                '💾 Testez la compatibilité des sauvegardes',
+                '📖 Consultez les [exemples YAML](Documentation/Hardpoint/)'
+              ];
+              break;
+              
+            case 'debugging':
+              suggestions = [
+                '📊 Vérifiez `BepInEx/LogOutput.log` pour les erreurs',
+                '⚙️ Activez les logs détaillés dans `BepInEx.cfg`',
+                '🔍 Utilisez `ManualLogSource` pour logger dans vos mods',
+                '🐛 Testez avec un mod minimal pour isoler le problème'
+              ];
+              break;
+              
+            default:
+              suggestions = [
+                '📚 Consultez la [documentation](Documentation/) du projet',
+                '🔍 Recherchez dans les [issues existantes](../../issues)',
+                '💬 Décrivez votre environnement (OS, version du jeu, BepInEx)',
+                '📋 Partagez les logs pertinents'
+              ];
+          }
+          
+          const responseBody = `## 🤖 Assistant Mod Per Aspera
+          
+          J'ai détecté que votre problème concerne : **${detectedType.replace('-', ' ')}**
+          
+          ### 💡 Suggestions :
+          ${suggestions.map(s => `- ${s}`).join('\n')}
+          
+          ### 📋 Informations utiles à fournir :
+          - Version de Per Aspera
+          - Version de BepInEx utilisée
+          - Système d'exploitation
+          - Logs d'erreur complets (\`BepInEx/LogOutput.log\`)
+          - Fichiers de configuration modifiés
+          
+          ### 🔗 Ressources utiles :
+          - [Documentation du projet](Documentation/)
+          - [Exemples de mods](working/)
+          - [Configuration BepInEx](Documentation/.roo/)
+          - [GitHub Actions pour CI/CD](.github/workflows/)
+          
+          ---
+          *Cet assistant automatique analyse votre problème pour vous orienter. Pour une aide personnalisée, mentionnez \`@mod-assistant\` dans vos commentaires.*`;
+          
+          if (issue) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: responseBody
+            });
+            
+            // Ajouter des labels appropriés
+            const labels = ['mod-help', `type:${detectedType}`];
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: labels
+            });
+          }

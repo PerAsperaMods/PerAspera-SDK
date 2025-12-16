@@ -1,0 +1,336 @@
+name: SDK Version & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type de version'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - custom
+      custom_version:
+        description: 'Version personnalisée (ex: 1.2.0-beta.1)'
+        required: false
+        type: string
+      pre_release:
+        description: 'Pre-release (alpha, beta, rc)'
+        required: false
+        type: choice
+        options:
+          - none
+          - alpha
+          - beta
+          - rc
+        default: none
+      create_release:
+        description: 'Créer une GitHub Release'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  DOTNET_VERSION: '6.0.x'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  version-and-release:
+    runs-on: windows-latest
+    
+    outputs:
+      version: ${{ steps.compute_version.outputs.version }}
+      tag: ${{ steps.compute_version.outputs.tag }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "actions@github.com"
+        
+    - name: Compute new version
+      id: compute_version
+      shell: pwsh
+      run: |
+        # Lire la version actuelle depuis Version.props
+        $versionFile = "Version.props"
+        $content = Get-Content $versionFile -Raw
+        $currentVersionMatch = [regex]::Match($content, '<SDKVersion>([^<]+)</SDKVersion>')
+        $currentVersion = $currentVersionMatch.Groups[1].Value
+        
+        Write-Host "📦 Current version: $currentVersion" -ForegroundColor Cyan
+        
+        # Parser la version actuelle
+        if ($currentVersion -match '^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$') {
+            $major = [int]$Matches[1]
+            $minor = [int]$Matches[2]
+            $patch = [int]$Matches[3]
+            $suffix = $Matches[4]
+        } else {
+            throw "Invalid current version format: $currentVersion"
+        }
+        
+        # Calculer la nouvelle version
+        $versionType = "${{ inputs.version_type }}"
+        $customVersion = "${{ inputs.custom_version }}"
+        $preRelease = "${{ inputs.pre_release }}"
+        
+        if ($versionType -eq "custom" -and $customVersion) {
+            $newVersion = $customVersion
+        } else {
+            switch ($versionType) {
+                "major" { $major++; $minor = 0; $patch = 0 }
+                "minor" { $minor++; $patch = 0 }
+                "patch" { $patch++ }
+            }
+            $newVersion = "$major.$minor.$patch"
+        }
+        
+        # Ajouter le suffixe pre-release si spécifié
+        if ($preRelease -and $preRelease -ne "none") {
+            # Obtenir le numéro de build depuis le compteur de commits
+            $buildNumber = (git rev-list --count HEAD)
+            $newVersion = "$newVersion-$preRelease.$buildNumber"
+        }
+        
+        Write-Host "🚀 New version: $newVersion" -ForegroundColor Green
+        
+        echo "version=$newVersion" >> $env:GITHUB_OUTPUT
+        echo "tag=v$newVersion" >> $env:GITHUB_OUTPUT
+        echo "major=$major" >> $env:GITHUB_OUTPUT
+        echo "minor=$minor" >> $env:GITHUB_OUTPUT
+        echo "patch=$patch" >> $env:GITHUB_OUTPUT
+        
+    - name: Update Version.props
+      shell: pwsh
+      run: |
+        $newVersion = "${{ steps.compute_version.outputs.version }}"
+        $major = "${{ steps.compute_version.outputs.major }}"
+        $minor = "${{ steps.compute_version.outputs.minor }}"
+        $patch = "${{ steps.compute_version.outputs.patch }}"
+        
+        $versionFile = "Version.props"
+        $content = Get-Content $versionFile -Raw
+        
+        # Parse version pour extraire prefix et suffix
+        if ($newVersion -match '^(\d+\.\d+\.\d+)(?:-(.+))?$') {
+            $versionPrefix = $Matches[1]
+            $versionSuffix = $Matches[2]
+        }
+        
+        # Mise à jour des propriétés
+        $content = $content -replace '<SDKVersion>[^<]+</SDKVersion>', "<SDKVersion>$newVersion</SDKVersion>"
+        $content = $content -replace '<SDKVersionPrefix>[^<]+</SDKVersionPrefix>', "<SDKVersionPrefix>$versionPrefix</SDKVersionPrefix>"
+        
+        if ($versionSuffix) {
+            $content = $content -replace '<SDKVersionSuffix>[^<]*</SDKVersionSuffix>', "<SDKVersionSuffix>$versionSuffix</SDKVersionSuffix>"
+        } else {
+            $content = $content -replace '<SDKVersionSuffix>[^<]*</SDKVersionSuffix>', "<SDKVersionSuffix></SDKVersionSuffix>"
+        }
+        
+        Set-Content $versionFile $content -Encoding UTF8
+        Write-Host "✅ Version.props updated to $newVersion" -ForegroundColor Green
+        
+    - name: Update CHANGELOG.md
+      shell: pwsh
+      run: |
+        $newVersion = "${{ steps.compute_version.outputs.version }}"
+        $date = Get-Date -Format "yyyy-MM-dd"
+        
+        $changelogFile = "CHANGELOG.md"
+        $content = Get-Content $changelogFile -Raw
+        
+        # Remplacer [Unreleased] par la nouvelle version
+        $content = $content -replace '\[Unreleased\]', "[$newVersion] - $date"
+        
+        # Ajouter une nouvelle section [Unreleased]
+        $unreleasedSection = @"
+
+## [Unreleased]
+
+### Added
+- 
+
+### Changed
+- 
+
+### Fixed
+- 
+
+---
+
+"@
+        
+        $content = $content -replace '(# Changelog[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*\n)', "`$1$unreleasedSection"
+        
+        Set-Content $changelogFile $content -Encoding UTF8
+        Write-Host "✅ CHANGELOG.md updated" -ForegroundColor Green
+        
+    - name: Commit version changes
+      run: |
+        git add Version.props CHANGELOG.md
+        git commit -m "chore: bump version to ${{ steps.compute_version.outputs.version }}"
+        
+    - name: Create and push tag
+      run: |
+        $tag = "${{ steps.compute_version.outputs.tag }}"
+        git tag -a $tag -m "Release $tag"
+        git push origin main
+        git push origin $tag
+        
+    - name: Restore Stripped GameLibs from Cache
+      id: cache-gamelibs
+      uses: actions/cache@v4
+      with:
+        path: GameLibs-Stripped
+        key: per-aspera-gamelibs-stripped-${{ runner.os }}-v1
+        
+    - name: Build SDK Projects
+      shell: pwsh
+      run: |
+        Write-Host "🔨 Building SDK projects..." -ForegroundColor Cyan
+        
+        # Build solution
+        dotnet restore PerAspera.SDK.sln
+        dotnet build PerAspera.SDK.sln --configuration Release --no-restore
+        
+        Write-Host "✅ Build completed successfully" -ForegroundColor Green
+        
+    - name: Run Tests
+      shell: pwsh
+      run: |
+        Write-Host "🧪 Running SDK tests..." -ForegroundColor Cyan
+        
+        # Run tests if test projects exist
+        $testProjects = Get-ChildItem -Path . -Recurse -Filter "*.Tests.csproj"
+        
+        if ($testProjects) {
+            dotnet test PerAspera.SDK.sln --configuration Release --no-build --verbosity normal
+        } else {
+            Write-Host "⚠️ No test projects found, skipping..." -ForegroundColor Yellow
+        }
+        
+    - name: Create NuGet Packages
+      shell: pwsh
+      run: |
+        Write-Host "📦 Creating NuGet packages..." -ForegroundColor Cyan
+        
+        # Pack all SDK projects
+        $projects = @(
+            "PerAspera.Core/PerAspera.Core.csproj",
+            "PerAspera.GameAPI/PerAspera.GameAPI.csproj",
+            "PerAspera.ModSDK/PerAspera.ModSDK.csproj"
+        )
+        
+        New-Item -Path "packages" -ItemType Directory -Force
+        
+        foreach ($project in $projects) {
+            if (Test-Path $project) {
+                dotnet pack $project --configuration Release --no-build --output packages
+            }
+        }
+        
+        Write-Host "✅ NuGet packages created" -ForegroundColor Green
+        
+    - name: Create Release Archive
+      shell: pwsh
+      run: |
+        $version = "${{ steps.compute_version.outputs.version }}"
+        
+        Write-Host "📦 Creating release archive..." -ForegroundColor Cyan
+        
+        New-Item -Path "release" -ItemType Directory -Force
+        
+        # Collect all DLLs
+        $dlls = Get-ChildItem -Path . -Recurse -Filter "*.dll" | Where-Object { 
+            $_.FullName -match "\\bin\\Release\\" -and 
+            $_.FullName -notmatch "\\ref\\" -and
+            $_.Name -notmatch "^(System\.|Microsoft\.|netstandard|mscorlib)"
+        }
+        
+        # Create DLL archive
+        $dllArchive = "release/PerAspera.SDK-$version-dlls.zip"
+        $dlls | Compress-Archive -DestinationPath $dllArchive -Force
+        
+        # Create full SDK archive with documentation
+        $fullArchive = "release/PerAspera.SDK-$version-full.zip"
+        $itemsToArchive = @(
+            "bin/Release/net6.0/*.dll",
+            "Documentation",
+            "Examples",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
+        )
+        
+        Compress-Archive -Path $itemsToArchive -DestinationPath $fullArchive -Force -ErrorAction SilentlyContinue
+        
+        Write-Host "✅ Release archives created" -ForegroundColor Green
+        
+    - name: Extract Release Notes from CHANGELOG
+      id: extract_notes
+      shell: pwsh
+      run: |
+        $version = "${{ steps.compute_version.outputs.version }}"
+        $changelogContent = Get-Content "CHANGELOG.md" -Raw
+        
+        # Extract notes for current version
+        $pattern = "## \[$version\][^\n]*\n((?:(?!## \[).)*)"
+        $match = [regex]::Match($changelogContent, $pattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        
+        if ($match.Success) {
+            $releaseNotes = $match.Groups[1].Value.Trim()
+        } else {
+            $releaseNotes = "Release $version`n`nSee CHANGELOG.md for details."
+        }
+        
+        # Save to file
+        $releaseNotes | Out-File -FilePath "release_notes.md" -Encoding UTF8
+        
+        # Also save for GitHub output (single line)
+        $notesOneLine = $releaseNotes -replace "`r?`n", "%0A"
+        echo "notes=$notesOneLine" >> $env:GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      if: inputs.create_release == true
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.compute_version.outputs.tag }}
+        name: PerAspera SDK ${{ steps.compute_version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ inputs.pre_release != 'none' }}
+        files: |
+          release/*.zip
+          packages/*.nupkg
+          packages/*.snupkg
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Summary
+      shell: pwsh
+      run: |
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Green
+        Write-Host "✅ SDK Release Pipeline Completed" -ForegroundColor Green
+        Write-Host "========================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📦 Version: ${{ steps.compute_version.outputs.version }}" -ForegroundColor Cyan
+        Write-Host "🏷️  Tag: ${{ steps.compute_version.outputs.tag }}" -ForegroundColor Cyan
+        Write-Host "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.compute_version.outputs.tag }}" -ForegroundColor Cyan
+        Write-Host ""
