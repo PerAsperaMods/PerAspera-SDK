@@ -10,14 +10,19 @@
 		<PackageTags>per-aspera;modding;sdk;bepinex;unity;il2cpp;event-driven</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
 		<IsMainSDKPackage>true</IsMainSDKPackage>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\Livrable\Nuggets'))</PackageOutputPath>
 		<!-- Temporarily disable XML documentation warnings during refactoring -->
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
 
-	<!-- Packages BepInEx -->
+	<!-- Packages BepInEx and Game Libraries -->
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+		<PackageReference Include="PerAspera.GameLibs" Version="1.5.0-r.*" />
 	</ItemGroup>
 
 	<!-- SDK Dependencies -->
@@ -25,10 +30,9 @@
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
-	
-	<!-- Game assemblies reference -->
-	<Import Project="..\GameLibs\GameLibs.props" />
 	
 	<!-- Auto-deploy SDK to BepInEx plugins folder -->
 	<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">

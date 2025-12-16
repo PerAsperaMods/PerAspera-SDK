@@ -79,13 +79,49 @@ namespace PerAspera.GameAPI.Events.Helpers
         // ==================== LOGGING HELPERS ====================
         
         /// <summary>
+        /// Check if climate value changed significantly (> threshold)
+        /// </summary>
+        public static bool IsSignificantClimateChange(ClimateEventData climate, float threshold = 0.1f)
+        {
+            if (climate.PreviousValue == null) return true;
+            
+            float delta = Math.Abs(climate.CurrentValue - (float)climate.PreviousValue.Value);
+            return delta >= threshold;
+        }
+        
+        /// <summary>
+        /// Get climate change delta (positive = increase, negative = decrease)
+        /// </summary>
+        public static float GetClimateDelta(ClimateEventData climate)
+        {
+            if (climate.PreviousValue == null) return 0f;
+            return climate.CurrentValue - (float)climate.PreviousValue.Value;
+        }
+        
+        /// <summary>
+        /// Check if climate parameter increased
+        /// </summary>
+        public static bool IsClimateIncrease(ClimateEventData climate)
+        {
+            return GetClimateDelta(climate) > 0f;
+        }
+        
+        /// <summary>
+        /// Check if climate parameter decreased
+        /// </summary>
+        public static bool IsClimateDecrease(ClimateEventData climate)
+        {
+            return GetClimateDelta(climate) < 0f;
+        }
+        
+        /// <summary>
         /// Log climate event with formatted output
         /// </summary>
         public static void LogClimateEvent(ClimateEventData climate, string prefix = "")
         {
-            string arrow = ClimateHelpers.IsClimateIncrease(climate) ? "↑" : 
-                          ClimateHelpers.IsClimateDecrease(climate) ? "↓" : "=";
-            float delta = ClimateHelpers.GetClimateDelta(climate);
+            string arrow = IsClimateIncrease(climate) ? "↑" : 
+                          IsClimateDecrease(climate) ? "↓" : "=";
+            float delta = GetClimateDelta(climate);
             
             string message = string.IsNullOrEmpty(prefix) 
                 ? $"{climate.EventType}: {climate.PreviousValue:F2} {arrow} {climate.CurrentValue:F2} (Δ{delta:+0.00;-0.00}) - Sol {climate.MartianSol}"

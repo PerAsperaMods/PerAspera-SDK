@@ -32,9 +32,17 @@ namespace PerAspera.GameAPI.Models
         /// <summary>Water vapor partial pressure (kPa)</summary>
         public float H2OPressure { get; init; }
         
-        // === WATER (Gigatons) ===
+        // === WATER (Gigatons & Pressure) ===
         public float WaterStock { get; init; }
         public float PermafrostDeposits { get; init; }
+        /// <summary>Water vapor partial pressure (kPa)</summary>
+        public float WaterVaporPressure { get; init; }
+        
+        // === PLANETARY EFFECTS ===
+        /// <summary>Greenhouse effect coefficient (multiplier on temperature)</summary>
+        public float GreenhouseEffect { get; init; }
+        /// <summary>Planetary albedo - reflectivity (0-1)</summary>
+        public float Albedo { get; init; }
         
         // === SPECIAL EFFECTS (Temperature modifiers) ===
         public float PolarNukeEffect { get; init; }

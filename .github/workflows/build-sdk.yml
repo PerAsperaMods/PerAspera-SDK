@@ -1,0 +1,51 @@
+name: Build and Publish SDK
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'SDK/**'
+      - '.github/workflows/build-sdk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore SDK/PerAspera.SDK.sln
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build
+      run: dotnet build SDK/PerAspera.SDK.sln --configuration Release --no-restore
+
+    - name: Pack NuGet packages
+      run: dotnet pack SDK/PerAspera.SDK.sln --configuration Release --no-build --output ./nupkgs
+
+    - name: Upload NuGet packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: nupkg-artifacts
+        path: ./nupkgs/*.nupkg
+
+    - name: Publish to nuget.org
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: dotnet nuget push "./nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      continue-on-error: true
+
+    - name: Publish to BepInEx (if applicable)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        echo "Future: Publish to BepInEx NuGet when key is available"
+      continue-on-error: true

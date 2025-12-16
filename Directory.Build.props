@@ -8,6 +8,10 @@
     
     <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
     
+    <!-- Only pack PerAspera.ModSDK (main facade) and GameLibs, not sub-projects -->
+    <PackageOutputPath>$(SdkRoot)..\Livrable\Nuggets</PackageOutputPath>
+    <IsPackable Condition="'$(ProjectName)' != 'PerAspera.ModSDK' AND '$(ProjectName)' != 'PerAspera.GameLibs'">false</IsPackable>
+    
     <!-- Per Aspera Game Detection -->
     <PerAsperaGamePath Condition="'$(PerAsperaGamePath)' == '' AND Exists('F:\SteamLibrary\steamapps\common\Per Aspera')">F:\SteamLibrary\steamapps\common\Per Aspera</PerAsperaGamePath>
   </PropertyGroup>
@@ -33,11 +37,7 @@
     <PerAsperaGameLibs>$(SdkRoot)GameLibs</PerAsperaGameLibs>
   </PropertyGroup>
   
-  <!-- Local development import -->
-  <Import Project="$(SdkRoot)GameLibs\GameLibs.props" Condition="'$(IsCIBuild)' != 'true' AND Exists('$(SdkRoot)GameLibs\GameLibs.props')" />
+  <!-- Game libraries are now consumed via NuGet package -->
+  <!-- No longer need local GameLibs.props - using PerAspera.GameLibs NuGet package instead -->
   
-  <!-- Help Message for missing assemblies -->
-  <Target Name="ShowSDKInfo" BeforeTargets="Build" Condition="'$(IsCIBuild)' != 'true' AND !Exists('$(PerAsperaGameLibs)\Assembly-CSharp.dll')">
-    <Error Text="Assembly-CSharp.dll not found. SDK needs game assemblies to compile." />
-  </Target>
 </Project>

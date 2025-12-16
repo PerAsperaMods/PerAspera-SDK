@@ -278,36 +278,6 @@
             Fired when a new Martian sol begins (GevUniverseDayPassed)
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Helpers.ClimateHelpers">
-            <summary>
-            Helper utilities for working with climate events
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsSignificantChange(PerAspera.GameAPI.Events.Data.ClimateEventData,System.Single)">
-            <summary>
-            Check if climate value changed significantly (> threshold)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.GetClimateDelta(PerAspera.GameAPI.Events.Data.ClimateEventData)">
-            <summary>
-            Get climate change delta (positive = increase, negative = decrease)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsClimateIncrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
-            <summary>
-            Check if climate parameter increased
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.IsClimateDecrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
-            <summary>
-            Check if climate parameter decreased
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.ClimateHelpers.ClimateThresholdFilter(System.Single)">
-            <summary>
-            Create a filter function for climate events above threshold
-            </summary>
-        </member>
         <member name="T:PerAspera.GameAPI.Events.Helpers.EventHelpers">
             <summary>
             General helper utilities for working with game events
@@ -336,6 +306,26 @@
         <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.BuildingTypeFilter(System.String[])">
             <summary>
             Create a filter function for specific building types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsSignificantClimateChange(PerAspera.GameAPI.Events.Data.ClimateEventData,System.Single)">
+            <summary>
+            Check if climate value changed significantly (> threshold)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.GetClimateDelta(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Get climate change delta (positive = increase, negative = decrease)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsClimateIncrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Check if climate parameter increased
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsClimateDecrease(PerAspera.GameAPI.Events.Data.ClimateEventData)">
+            <summary>
+            Check if climate parameter decreased
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.LogClimateEvent(PerAspera.GameAPI.Events.Data.ClimateEventData,System.String)">
