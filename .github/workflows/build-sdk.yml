@@ -20,18 +20,18 @@ jobs:
         dotnet-version: '6.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore SDK/PerAspera.SDK.sln
+      run: dotnet restore PerAspera.SDK.sln
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build
-      run: dotnet build SDK/PerAspera.SDK.sln --configuration Release --no-restore
+      run: dotnet build PerAspera.SDK.sln --configuration Release --no-restore
 
     - name: Pack NuGet packages
-      run: dotnet pack SDK/PerAspera.SDK.sln --configuration Release --no-build --output ./nupkgs
+      run: dotnet pack PerAspera.SDK.sln --configuration Release --no-build --output ./nupkgs
 
     - name: Upload NuGet packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: nupkg-artifacts
         path: ./nupkgs/*.nupkg
