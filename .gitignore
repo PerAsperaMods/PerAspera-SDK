@@ -1,18 +1,83 @@
-﻿bin/
+﻿# Build output
+bin/
 obj/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
 packages/
+.nuget/
 *.nupkg
 *.snupkg
+.nupkg.metadata
+.nupkg.props
+.nupkg.targets
+
+# Visual Studio
 .vs/
 .vscode/
+*.suo
 *.user
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# JetBrains IDEs
 .idea/
+.idea_modules/
+*.iml
+*.iws
+*.ipr
 _ReSharper*/
+riderModule.iml
+
+# Build results
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Test Results
 TestResults/
-GameLibs-Stripped/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Archives & Temp
 _Archive/
+GameLibs-Stripped/
+GameLibs-Minimal/
 test-game-manual/
+
+# Temp files
 *.log
 *.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# Game Libs (moved to NuGet package)
+GameLibs/
+GameLibs-Package/
+
+# Documentation (except README)
+*.md
+!README.md
+
+# Scripts (except those in scripts/ folder)
+*.ps1
+!/scripts/*.ps1
+
+# Old/obsolete files
+Directory.Build.props.backup
+*.csproj.bak
+*.props.bak
