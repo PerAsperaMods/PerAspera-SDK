@@ -99,6 +99,9 @@ namespace PerAspera.GameAPI.Commands.Constants
         // Common parameters
         public const string Faction = "faction";
         public const string Quantity = "quantity";
+        public const string Amount = "amount";
+        public const string Duration = "duration";
+        public const string Message = "message";
         public const string Resource = "resource";
         public const string Building = "building";
         public const string Technology = "technology";

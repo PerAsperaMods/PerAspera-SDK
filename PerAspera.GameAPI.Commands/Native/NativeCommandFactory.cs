@@ -408,3 +408,4 @@ namespace PerAspera.GameAPI.Commands.Native
         #endregion
     }
 }
+

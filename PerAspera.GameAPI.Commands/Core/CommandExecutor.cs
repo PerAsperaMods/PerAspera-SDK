@@ -66,7 +66,7 @@ namespace PerAspera.GameAPI.Commands.Core
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.Error($"Exception executing command {command.GetDescription()}: {ex.Message}");
+                _logger.LogError($"Exception executing command {command.GetDescription()}: {ex.Message}");
                 return CommandResult.CreateFailure(command, ex.Message, stopwatch.ElapsedMilliseconds);
             }
         }
@@ -92,7 +92,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
                 
                 // Log batch progress
-                _logger.Info($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
+                _logger.LogInfo($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
             }
             
             return new BatchCommandResult(results);
@@ -270,3 +270,4 @@ namespace PerAspera.GameAPI.Commands.Core
         }
     }
 }
+

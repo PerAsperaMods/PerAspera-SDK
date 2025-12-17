@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using PerAspera.Core;
@@ -12,10 +12,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
     public class CommandBaseWrapper
     {
         private readonly object _nativeCommand;
-        private readonly System.Type _commandType; // ✅ CORRECTION: Utiliser System.Type pour éviter l'ambiguïté
+        private readonly System.Type _commandType; // ? CORRECTION: Utiliser System.Type pour �viter l'ambigu�t�
         private readonly MethodInfo? _isValidMethod;
         private readonly MethodInfo? _toTabbedStringMethod;
-        private static readonly LogAspera _logger = new LogAspera("GameAPI.Commands.Wrapper"); // ✅ AJOUT
+        private static readonly LogAspera _logger = new LogAspera("GameAPI.Commands.Wrapper"); // ? AJOUT
 
         /// <summary>
         /// Initialize wrapper with native Command instance
@@ -31,7 +31,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             _toTabbedStringMethod = GetToTabbedStringMethod();
 
             ValidateCommandType();
-        } // ✅ CORRECTION: Accolade fermante manquante
+        } // ? CORRECTION: Accolade fermante manquante
 
         /// <summary>
         /// Native Command instance (for direct IL2CPP access)
@@ -41,7 +41,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         /// <summary>
         /// Type of the native command
         /// </summary>
-        public System.Type CommandType => _commandType; // ✅ CORRECTION: System.Type pour éviter l'ambiguïté
+        public System.Type CommandType => _commandType; // ? CORRECTION: System.Type pour �viter l'ambigu�t�
         
         /// <summary>
         /// Command name (derived from type)
@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 if (_isValidMethod == null)
                 {
-                    _logger.Debug("IsValid method not available, assuming valid");
+                    _logger.LogDebug("IsValid method not available, assuming valid");
                     return true; // Assume valid if method not available
                 }
                 
@@ -67,10 +67,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error calling IsValid: {ex.Message}");
+                _logger.LogError($"Error calling IsValid: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get human-readable string representation via ToTabbedString()
@@ -90,10 +90,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting description: {ex.Message}");
+                _logger.LogError($"Error getting description: {ex.Message}");
                 return $"{CommandName}(error)";
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get Faction property if available
@@ -113,10 +113,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting faction: {ex.Message}");
+                _logger.LogError($"Error getting faction: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Set Faction property if available
@@ -130,7 +130,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var factionProperty = _commandType.GetProperty("Faction", BindingFlags.Public | BindingFlags.Instance);
                 if (factionProperty == null || !factionProperty.CanWrite)
                 {
-                    _logger.Warning("Faction property not available or not writable");
+                    _logger.LogWarning("Faction property not available or not writable");
                     return false;
                 }
                 
@@ -139,10 +139,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error setting faction: {ex.Message}");
+                _logger.LogError($"Error setting faction: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get property value by name via reflection
@@ -163,10 +163,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting property {propertyName}: {ex.Message}");
+                _logger.LogError($"Error getting property {propertyName}: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Set property value by name via reflection
@@ -181,7 +181,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var property = _commandType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite)
                 {
-                    _logger.Warning($"Property {propertyName} not available or not writable");
+                    _logger.LogWarning($"Property {propertyName} not available or not writable");
                     return false;
                 }
                 
@@ -190,10 +190,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error setting property {propertyName}: {ex.Message}");
+                _logger.LogError($"Error setting property {propertyName}: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Invoke method on native command via reflection
@@ -208,7 +208,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var method = _commandType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
                 {
-                    _logger.Warning($"Method {methodName} not found");
+                    _logger.LogWarning($"Method {methodName} not found");
                     return null;
                 }
                 
@@ -216,10 +216,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error invoking method {methodName}: {ex.Message}");
+                _logger.LogError($"Error invoking method {methodName}: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Check if command is a specific type (e.g., "CmdImportResource")
@@ -243,9 +243,9 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                            
             if (!isCommand)
             {
-                _logger.Warning($"Type {_commandType.Name} does not appear to be a command type");
+                _logger.LogWarning($"Type {_commandType.Name} does not appear to be a command type");
             }
-        } // ✅ CORRECTION: Accolade fermante manquante
+        } // ? CORRECTION: Accolade fermante manquante
         
         /// <summary>
         /// Get IsValid method via reflection
@@ -255,16 +255,16 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             try
             {
-                // ✅ CORRECTION: Utiliser System.Type[] et méthodes simplifiées
+                // ? CORRECTION: Utiliser System.Type[] et m�thodes simplifi�es
                 return _commandType.GetMethod("isValid", BindingFlags.Public | BindingFlags.Instance) ??
                        _commandType.GetMethod("IsValid", BindingFlags.Public | BindingFlags.Instance);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting IsValid method: {ex.Message}");
+                _logger.LogError($"Error getting IsValid method: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get ToTabbedString method via reflection
@@ -274,15 +274,15 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             try
             {
-                // ✅ CORRECTION: Méthode simplifiée
+                // ? CORRECTION: M�thode simplifi�e
                 return _commandType.GetMethod("ToTabbedString", BindingFlags.Public | BindingFlags.Instance);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting ToTabbedString method: {ex.Message}");
+                _logger.LogError($"Error getting ToTabbedString method: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Returns string representation of the command
@@ -294,3 +294,4 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         }
     }
 }
+

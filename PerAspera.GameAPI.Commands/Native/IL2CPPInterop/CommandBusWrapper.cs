@@ -31,12 +31,12 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             // Validate that the provided instance matches the expected type
             if (!_commandBusType.IsInstanceOfType(nativeCommandBus))
             {
-                _logger.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
+                _logger.LogWarning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
                 _commandBusType = nativeCommandBus.GetType(); // Fallback to runtime type
             }
             
             ValidateCommandBusType();
-            _logger.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
+            _logger.LogInfo($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
         }
         
         /// <summary>
@@ -62,7 +62,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
+                _logger.LogError($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
                 return false;
             }
         }
@@ -259,3 +259,4 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
         }    }
 }
+

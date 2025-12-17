@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using PerAspera.Core;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
@@ -15,7 +15,7 @@ namespace PerAspera.GameAPI.Commands.Native
         private readonly KeeperWrapper? _keeperWrapper;
         private readonly NativeCommandFactory _factory;
         private static CommandBusAccessor? _instance;
-        private static readonly LogAspera _logger = new LogAspera("GameAPI.Commands.BusAccessor"); // ✅ AJOUT
+        private static readonly LogAspera _logger = new LogAspera("GameAPI.Commands.BusAccessor"); // ? AJOUT
         
         /// <summary>
         /// Singleton instance for global access
@@ -41,7 +41,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 throw new InvalidOperationException("CommandBusAccessor already initialized.");
 
             _instance = new CommandBusAccessor(nativeCommandBus, nativeKeeper);
-        } // ✅ CORRECTION: Accolade fermante manquante
+        } // ? CORRECTION: Accolade fermante manquante
 
         /// <summary>
         /// Auto-initialize using GameTypeInitializer (Phase 1.1 integration)
@@ -140,7 +140,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Auto-initialization failed: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Reset global instance (for testing)
@@ -168,12 +168,12 @@ namespace PerAspera.GameAPI.Commands.Native
             {
                 _keeperWrapper = null;
                 _logger.Warning("Keeper instance not available");
-            } // ✅ CORRECTION: Accolade fermante et else corrigé
+            } // ? CORRECTION: Accolade fermante et else corrig�
 
             _factory = NativeCommandFactory.Instance;
 
             ValidateInitialization();
-        } // ✅ CORRECTION: Accolade fermante manquante
+        } // ? CORRECTION: Accolade fermante manquante
         
         /// <summary>
         /// Execute command via native CommandBus.Dispatch()
@@ -224,7 +224,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Exception executing command: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Create and execute command in one call
@@ -252,7 +252,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Exception creating/executing command {commandTypeName}: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Register object with Keeper
@@ -282,7 +282,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Exception registering with keeper: {ex.Message}");
                 return null;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Unregister object from Keeper
@@ -312,7 +312,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Exception unregistering from keeper: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Check if CommandBus and Keeper are available
@@ -339,7 +339,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Error getting supported command types: {ex.Message}");
                 return Array.Empty<string>();
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get available command types from factory
@@ -356,7 +356,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Error getting available command types: {ex.Message}");
                 return Array.Empty<string>();
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Access CommandBus wrapper for advanced scenarios
@@ -408,7 +408,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 _logger.Error($"Exception executing raw command: {ex.Message}");
                 return false;
             }
-        } // ✅ CORRECTION: Toutes les branches retournent une valeur
+        } // ? CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get system information for debugging
@@ -455,6 +455,7 @@ namespace PerAspera.GameAPI.Commands.Native
             {
                 _logger.Warning("No available commands detected - command factory may not be ready");
             }
-        } // ✅ CORRECTION: Accolade fermante manquante
+        } // ? CORRECTION: Accolade fermante manquante
     }
 }
+

@@ -51,7 +51,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Call Keeper.Register(IHandleable) -> returns Handle
                 var handle = _registerMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                _logger.Debug($"Registered handleable object: {handleableObject.GetType().Name}");
+                _logger.LogDebug($"Registered handleable object: {handleableObject.GetType().Name}");
                 return handle;
             }
             catch (Exception ex)
@@ -77,7 +77,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Call Keeper.Unregister(IHandleable)
                 _unregisterMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                _logger.Debug($"Unregistered handleable object: {handleableObject.GetType().Name}");
+                _logger.LogDebug($"Unregistered handleable object: {handleableObject.GetType().Name}");
                 return true;
             }
             catch (Exception ex)
@@ -208,3 +208,4 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         }
     }
 }
+

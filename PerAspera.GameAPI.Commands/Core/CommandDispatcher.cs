@@ -66,7 +66,7 @@ namespace PerAspera.GameAPI.Commands.Core
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
                 
-            _logger.Debug($"Dispatching command: {command.GetDescription()}");
+            _logger.LogDebug($"Dispatching command: {command.GetDescription()}");
             
             try
             {
@@ -115,7 +115,7 @@ namespace PerAspera.GameAPI.Commands.Core
         public BatchCommandResult DispatchBatchUntilFailure(IEnumerable<IGameCommand> commands)
         {
             var commandList = commands.ToList();
-            _logger.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
+            _logger.LogInfo($"Dispatching batch (stop on failure) of {commandList.Count} commands");
             
             var results = new List<CommandResult>();
             
@@ -130,7 +130,7 @@ namespace PerAspera.GameAPI.Commands.Core
             }
             
             var batchResult = new BatchCommandResult(results);
-            _logger.Info($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
+            _logger.LogInfo($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
             
             return batchResult;
         }
@@ -176,3 +176,4 @@ namespace PerAspera.GameAPI.Commands.Core
         }
     }
 }
+

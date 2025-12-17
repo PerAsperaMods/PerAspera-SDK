@@ -25,3 +25,4 @@ namespace PerAspera.GameAPI.Commands
         bool CanExecute();
     }
 }
+

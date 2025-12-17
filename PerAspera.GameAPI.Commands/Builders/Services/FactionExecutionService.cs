@@ -1,4 +1,4 @@
-﻿using Il2CppSystem.Runtime.Remoting.Messaging;
+using Il2CppSystem.Runtime.Remoting.Messaging;
 using PerAspera.GameAPI.Commands.Core;
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
 
                     if (!result.Success && stopOnFailure)
                     {
-                        // ✅ CORRECTION: Utilise seulement les results
+                        // ? CORRECTION: Utilise seulement les results
                         return new BatchCommandResult(results);
                     }
                 }
@@ -42,13 +42,13 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
 
                     if (stopOnFailure)
                     {
-                        // ✅ CORRECTION: Utilise seulement les results
+                        // ? CORRECTION: Utilise seulement les results
                         return new BatchCommandResult(results);
                     }
                 }
             }
 
-            // ✅ CORRECTION: À la fin aussi
+            // ? CORRECTION: � la fin aussi
             return new  (results);
         }
 
