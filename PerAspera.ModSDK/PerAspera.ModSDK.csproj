@@ -13,10 +13,19 @@
 		<!-- Auto-generate package on build -->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<!-- Package output path -->
-		<PackageOutputPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\Livrable\Nuggets'))</PackageOutputPath>
+		<PackageOutputPath>F:/ModPeraspera/nuget-packages</PackageOutputPath>
 		<!-- Temporarily disable XML documentation warnings during refactoring -->
 		<NoWarn>$(NoWarn);1591</NoWarn>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<NuGetAuditMode>all</NuGetAuditMode>
 	</PropertyGroup>
+	
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<!-- Packages BepInEx and Game Libraries -->
 	<ItemGroup>
@@ -33,16 +42,37 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
-	
 	<!-- Auto-deploy SDK to BepInEx plugins folder -->
 	<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">
 		<PropertyGroup>
 			<SDKDeployPath>$(PerAsperaGamePath)\BepInEx\plugins\PerAspera-SDK</SDKDeployPath>
 		</PropertyGroup>
 		<MakeDir Directories="$(SDKDeployPath)" />
-		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.Core.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.Core.IL2CppExtensions.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Climate.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Events.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
 	</Target>
+
+	<Target Name="SDK_DLL" AfterTargets="Build">
+		<PropertyGroup>
+			<SDKDeployPath>F:\ModPeraspera\SDK_DLL</SDKDeployPath>
+		</PropertyGroup>
+		<MakeDir Directories="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.Core.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.Core.IL2CppExtensions.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Climate.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Events.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
+	</Target>
+
 </Project>

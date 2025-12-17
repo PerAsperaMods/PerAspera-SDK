@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- Target framework pour le packaging -->
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+		<PerAsperaGamePath>F:\SteamLibrary\steamapps\common\Per Aspera</PerAsperaGamePath>
+		<PackageOutputPath>F:\ModPeraspera\nuget-packages</PackageOutputPath>
+	</PropertyGroup>
+
+	<!-- Références vers tous les projets de la solution -->
+	<ItemGroup>
+		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+		<ProjectReference Include="..\PerAspera.ModSDK\PerAspera.ModSDK.csproj" />
+	</ItemGroup>
+
+	<!-- Wildcard pour toutes les DLLs compilées en Release -->
+	<ItemGroup>
+		<SDKDlls Include="..\**\bin\Release\net6.0\*.dll"
+				 Exclude="..\**\Tests\bin\Release\net6.0\*.dll" />
+	</ItemGroup>
+
+	<!-- Déploiement des DLLs dans BepInEx/plugins -->
+	<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">
+		<PropertyGroup>
+			<SDKDeployPath>$(PerAsperaGamePath)\BepInEx\plugins\PerAspera-SDK</SDKDeployPath>
+		</PropertyGroup>
+		<MakeDir Directories="$(SDKDeployPath)" />
+		<Copy SourceFiles="@(SDKDlls)" DestinationFolder="$(SDKDeployPath)" />
+		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
+	</Target>
+
+	<!-- Déploiement du NuGet après pack -->
+	<Target Name="DeployNuGet" AfterTargets="Pack" Condition="'$(PerAsperaGamePath)' != ''">
+		<MakeDir Directories="$(PerAsperaGamePath)\BepInEx\nuget-packages" />
+		<Copy SourceFiles="$(PackageOutputPath)\PerAspera.ModSDK.*.nupkg"
+			  DestinationFolder="$(PerAsperaGamePath)\BepInEx\nuget-packages" />
+		<Message Text="📦 NuGet deployed to: $(PerAsperaGamePath)\BepInEx\nuget-packages" Importance="high" />
+	</Target>
+
+</Project>

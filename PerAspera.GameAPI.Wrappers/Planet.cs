@@ -83,6 +83,11 @@ namespace PerAspera.GameAPI.Wrappers
         
         // ==================== INFO ====================
         
+        /// <summary>
+        /// Get the native game object (for Harmony patches)
+        /// </summary>
+        public object? GetNativeObject() => NativeObject;
+        
         public override string ToString()
         {
             if (NativeObject == null || _atmosphere == null)

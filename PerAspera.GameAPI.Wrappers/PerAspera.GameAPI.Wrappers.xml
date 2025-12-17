@@ -358,33 +358,9 @@
             Returns null if called too early in lifecycle
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceType(System.String)">
-            <summary>
-            Get ResourceType by key (e.g., "resource_water", "resource_silicon")
-            Uses StaticDataCollectionItem&lt;ResourceType&gt;.Get(key) pattern
-            Returns null if not found
-            </summary>
-            <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
-            <returns>ResourceType instance or null</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetBuildingType(System.String)">
-            <summary>
-            Get BuildingType by key (e.g., "building_solar_panel")
-            Uses StaticDataCollectionItem&lt;BuildingType&gt;.Get(key) pattern
-            Returns null if not found
-            </summary>
-            <param name="buildingKey">Building key from YAML</param>
-            <returns>BuildingType instance or null</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetTechnologyType(System.String)">
-            <summary>
-            Get TechnologyType by key (e.g., "tech_basic_chemistry")
-            Uses StaticDataCollectionItem&lt;TechnologyType&gt;.Get(key) pattern
-            Returns null if not found
-            </summary>
-            <param name="technologyKey">Technology key from YAML</param>
-            <returns>TechnologyType instance or null</returns>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceType(System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetBuildingType(System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetTechnologyType(System.String)" -->
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetByHandle(System.Object)">
             <summary>
             Find entity by handle using KeeperMap
@@ -436,6 +412,11 @@
             </summary>
             <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
             <param name="amount">Amount to add (can be negative to remove)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Universe">
             <summary>

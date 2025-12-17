@@ -2,7 +2,7 @@
 
 **The official Per Aspera modding SDK** - Transform complex IL2CPP modding into simple, event-driven development.
 
-[![Version](https://img.shields.io/badge/version-1.0.0--beta-blue.svg)](https://github.com/PerAsperaMods/PerAspera-SDK/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/PerAsperaMods/PerAspera-SDK/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![BepInEx](https://img.shields.io/badge/BepInEx-6.0.x-orange.svg)](https://github.com/BepInEx/BepInEx)
 [![Per Aspera](https://img.shields.io/badge/Per%20Aspera-1.5.x-red.svg)](https://store.steampowered.com/app/944260/Per_Aspera/)
@@ -23,19 +23,28 @@ A comprehensive, beginner-friendly SDK that makes Per Aspera modding **10x simpl
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| **PerAspera.Core** | Low-level utilities and IL2CPP extensions | 1.0.0-beta |
-| **PerAspera.GameAPI** | IL2CPP game class wrappers and mirrors | 1.0.0-beta |
-| **PerAspera.ModSDK** | High-level event-driven SDK (main package) | 1.0.0-beta |
+| **PerAspera.Core** | Low-level utilities and IL2CPP extensions | 1.1.0 |
+| **PerAspera.Core.IL2CppExtensions** | Extended IL2CPP utilities and helpers | 1.1.0 |
+| **PerAspera.GameAPI** | IL2CPP game class wrappers and native access | 1.1.0 |
+| **PerAspera.GameAPI.Wrappers** | Type-safe wrappers for game objects | 1.1.0 |
+| **PerAspera.GameAPI.Events** | Event system integration and typed subscriptions | 1.1.0 |
+| **PerAspera.GameAPI.Commands** | Command system integration | 1.1.0 |
+| **PerAspera.GameAPI.Climate** | Climate system helpers and data models | 1.1.0 |
+| **PerAspera.GameAPI.Overrides** | Game behavior override utilities | 1.1.0 |
+| **PerAspera.ModSDK** | High-level event-driven SDK (main package) | 1.1.0 |
 
 ### Architecture
 
 ```
 PerAspera.ModSDK (Your Interface)
-├── PerAspera.ModSDK.Events (Event Constants & Helpers)
+├── PerAspera.GameAPI.Events (Event Constants & Typed Subscriptions)
 │   └── PerAspera.GameAPI (Native Event System)
-├── PerAspera.GameAPI.Wrappers (Public Game Object API)
-│   ├── PerAspera.GameAPI (Native Wrappers)
+├── PerAspera.GameAPI.Wrappers (Type-Safe Game Object Wrappers)
+│   ├── PerAspera.GameAPI (Native Access Layer)
 │   └── PerAspera.Core (IL2CPP Utilities)
+├── PerAspera.GameAPI.Commands (Command System Integration)
+├── PerAspera.GameAPI.Climate (Climate System Helpers)
+├── PerAspera.GameAPI.Overrides (Behavior Override Utilities)
 └── BepInEx.Unity.IL2CPP (Framework)
 ```
 
@@ -544,5 +553,6 @@ public class AdvancedMod : BasePlugin
 
 Check out [Examples/ExampleMod.cs](Examples/ExampleMod.cs) for a complete working example, then dive into the [SDK documentation](PerAspera.ModSDK/README.md)!
 
-**?? Mars awaits your creativity!**#   G i t H u b   A c t i o n s   T e s t i n g  
+**?? Mars awaits your creativity!**#   G i t H u b   A c t i o n s   T e s t i n g 
+ 
  

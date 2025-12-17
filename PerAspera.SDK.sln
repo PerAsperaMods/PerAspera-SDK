@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerAspera.GameAPI.Climate",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerAspera.GameAPI.Overrides", "PerAspera.GameAPI.Overrides\PerAspera.GameAPI.Overrides.csproj", "{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerAspera.GameAPI.Commands", "PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj", "{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerAspera.GameAPI.Commands", "PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj", "{1A2B3C4D-5E6F-7890-ABCD-123456789012}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,18 +127,18 @@ Global
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x64.Build.0 = Release|Any CPU
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x86.ActiveCfg = Release|Any CPU
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x86.Build.0 = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|x64.Build.0 = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Debug|x86.Build.0 = Debug|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|x64.ActiveCfg = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|x64.Build.0 = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|x86.ActiveCfg = Release|Any CPU
-		{01EE6CE9-75E6-4F0B-9978-F7232EDAD3DA}.Release|x86.Build.0 = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x64.Build.0 = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x86.Build.0 = Debug|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x64.ActiveCfg = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x64.Build.0 = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x86.ActiveCfg = Release|Any CPU
+		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,8 +6,8 @@
 		<AssemblyName>PerAspera.GameAPI.Commands</AssemblyName>
 		<RootNamespace>PerAspera.GameAPI.Commands</RootNamespace>
 		<PackageId>PerAspera.GameAPI.Commands</PackageId>
-		<Description>Command handling system for Per Aspera - Access and execute game commands</Description>
-		<PackageTags>per-aspera;commands;gameapi;modding;command-bus</PackageTags>
+		<Description>Per Aspera Commands API - Type-safe command execution and custom command extension system</Description>
+		<PackageTags>per-aspera;commands;gameapi;commandbus;modding;fluent-api</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
 	</PropertyGroup>
 
@@ -15,6 +15,7 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+		<PackageReference Include="HarmonyX" Version="2.16.0" />
 	</ItemGroup>
 
 	<!-- Project References -->
@@ -22,5 +23,6 @@
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
 </Project>

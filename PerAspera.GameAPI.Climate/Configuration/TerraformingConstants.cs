@@ -43,13 +43,17 @@ namespace PerAspera.GameAPI.Climate.Configuration
         /// <summary>Maximum safe pressure</summary>
         public const float PRESSURE_MAX_SAFE = 1.5f;
         
-        // === GAS COMPOSITION THRESHOLDS (% of total atmosphere) ===
+        // === GAS COMPOSITION THRESHOLDS (% of total PerAspera.GameAPI.Wrappers.Atmosphere) ===
         
         /// <summary>Minimum O2 for breathing</summary>
         public const float O2_MIN_BREATHABLE = 16f; // 16%
         
         /// <summary>Optimal O2 percentage</summary>
         public const float O2_OPTIMAL = 21f; // Earth-like
+        
+        /// <summary>Earth-like O2 level (alias for O2_OPTIMAL)</summary>
+        public const float O2_EARTH_LEVEL = 21f; // Same as O2_OPTIMAL
+
         
         /// <summary>Maximum safe O2 (fire risk)</summary>
         public const float O2_MAX_SAFE = 25f;
@@ -124,3 +128,8 @@ namespace PerAspera.GameAPI.Climate.Configuration
         }
     }
 }
+
+
+
+
+
