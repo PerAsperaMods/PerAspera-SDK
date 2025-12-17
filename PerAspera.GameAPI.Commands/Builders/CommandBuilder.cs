@@ -37,7 +37,8 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (faction == null)
                 throw new ArgumentNullException(nameof(faction));
                 
-            _parameters[ParameterNames.Faction] = faction; // Logging disabledreturn this;
+            _parameters[ParameterNames.Faction] = faction;
+            return this;
         }
         
         /// <summary>
@@ -48,7 +49,8 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("Parameter name cannot be null or empty", nameof(name));
                 
-            _parameters[name] = value; // Logging disabledreturn this;
+            _parameters[name] = value;
+            return this;
         }
         
         /// <summary>

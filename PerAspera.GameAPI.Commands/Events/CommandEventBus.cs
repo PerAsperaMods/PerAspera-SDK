@@ -60,8 +60,6 @@ namespace PerAspera.GameAPI.Commands.Events
             {
                 // Error handling
             }
-            }
-
         }
 
         /// <summary>
@@ -75,9 +73,12 @@ namespace PerAspera.GameAPI.Commands.Events
                 UpdateStatistics(eventData.Command.CommandType, eventData.ExecutionTimeMs, false);
 
                 // Fire event
-                CommandFailed?.Invoke(eventData); // Logging disabled}
+                CommandFailed?.Invoke(eventData);
             }
             catch (Exception ex)
+            {
+                // Error handling
+            }
             { // Logging disabled}
             }
         }

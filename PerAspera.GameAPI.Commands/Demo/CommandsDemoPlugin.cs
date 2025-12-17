@@ -20,6 +20,15 @@ namespace PerAspera.GameAPI.Commands.Demo
         internal new static ManualLogSource Logger { get; private set; }
         
         /// <summary>
+        /// Required Load() method for BasePlugin
+        /// </summary>
+        public override void Load()
+        {
+            Logger = Log;
+            Logger.LogInfo("Commands Demo Plugin Loaded");
+        }
+        
+        /// <summary>
         /// Plugin initialization - register event handlers and schedule demo
         /// </summary>
         private void Awake()

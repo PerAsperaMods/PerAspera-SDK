@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using PerAspera.GameAPI.Commands.Core;
 using PerAspera.GameAPI.Commands.Constants;
 using PerAspera.GameAPI.Commands.NativeCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands;
 
 namespace PerAspera.GameAPI.Commands.NativeCommands
 {

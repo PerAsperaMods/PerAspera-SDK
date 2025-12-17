@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.GameAPI.Commands.Native;
+using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
@@ -72,9 +73,9 @@ namespace PerAspera.GameAPI.Commands.Core
         /// <summary>
         /// Execute a single command asynchronously
         /// </summary>
-        public async Task<CommandResult> ExecuteAsync(IGameCommand command)
+        public async System.Threading.Tasks.Task<CommandResult> ExecuteAsync(IGameCommand command)
         {
-            return await Task.Run(() => Execute(command));
+            return await System.Threading.Tasks.Task.Run(() => Execute(command));
         }
         
         /// <summary>
@@ -115,7 +116,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 }
             });
             
-            var results = await Task.WhenAll(tasks);
+            var results = await System.Threading.Tasks.Task.WhenAll(tasks);
             return new BatchCommandResult(results);
         }
         
