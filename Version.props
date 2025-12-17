@@ -41,9 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <VersionSuffix>debug-$(SDKVersionSuffix)</VersionSuffix>
     <DefineConstants>$(DefineConstants);DEBUG_SDK</DefineConstants>
+          <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
     <VersionSuffix>$(SDKVersionSuffix)</VersionSuffix>
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
@@ -69,6 +73,8 @@
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+
 </Project>
 
 

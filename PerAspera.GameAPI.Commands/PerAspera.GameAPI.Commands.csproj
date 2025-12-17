@@ -1,0 +1,28 @@
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+	&lt;!-- Import SDK versioning --&gt;
+	&lt;Import Project="..\Version.props" /&gt;
+	
+	&lt;PropertyGroup&gt;
+		&lt;AssemblyName&gt;PerAspera.GameAPI.Commands&lt;/AssemblyName&gt;
+		&lt;RootNamespace&gt;PerAspera.GameAPI.Commands&lt;/RootNamespace&gt;
+		&lt;PackageId&gt;PerAspera.GameAPI.Commands&lt;/PackageId&gt;
+		&lt;Description&gt;Per Aspera Commands API - Type-safe command execution and custom command extension system&lt;/Description&gt;
+		&lt;PackageTags&gt;per-aspera;commands;gameapi;commandbus;modding;fluent-api&lt;/PackageTags&gt;
+		&lt;IsSharedLibrary&gt;true&lt;/IsSharedLibrary&gt;
+	&lt;/PropertyGroup&gt;
+
+	&lt;!-- Dependencies --&gt;
+	&lt;ItemGroup&gt;
+		&lt;PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" /&gt;
+		&lt;PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" /&gt;
+		&lt;PackageReference Include="HarmonyX" Version="2.13.0" /&gt;
+	&lt;/ItemGroup&gt;
+
+	&lt;!-- Project References --&gt;
+	&lt;ItemGroup&gt;
+		&lt;ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" /&gt;
+		&lt;ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" /&gt;
+		&lt;ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" /&gt;
+		&lt;ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" /&gt;
+	&lt;/ItemGroup&gt;
+&lt;/Project&gt;

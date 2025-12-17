@@ -544,5 +544,6 @@ public class AdvancedMod : BasePlugin
 
 Check out [Examples/ExampleMod.cs](Examples/ExampleMod.cs) for a complete working example, then dive into the [SDK documentation](PerAspera.ModSDK/README.md)!
 
-**?? Mars awaits your creativity!**#   G i t H u b   A c t i o n s   T e s t i n g  
+**?? Mars awaits your creativity!**#   G i t H u b   A c t i o n s   T e s t i n g 
+ 
  
