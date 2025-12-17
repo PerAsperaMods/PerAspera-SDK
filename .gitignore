@@ -69,9 +69,10 @@ Desktop.ini
 GameLibs/
 GameLibs-Package/
 
-# Documentation (except README)
+# Documentation (except README and doc/)
 *.md
 !README.md
+!doc/**/*.md
 
 # Scripts (except those in scripts/ folder)
 *.ps1
