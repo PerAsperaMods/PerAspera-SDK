@@ -19,7 +19,15 @@ namespace PerAspera.GameAPI.Commands
         /// </summary>
         protected CommandBase()
         {
-            Logger = new LogAspera($"Command.{CommandName}");
+            Logger = new LogAspera("Command");
+        }
+        
+        /// <summary>
+        /// Initialize the command with a specific logger name
+        /// </summary>
+        protected CommandBase(string loggerName)
+        {
+            Logger = new LogAspera(loggerName);
         }
 
         /// <summary>

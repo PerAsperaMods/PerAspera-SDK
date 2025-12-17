@@ -132,7 +132,7 @@ public class MyCustomCommand : CommandBase
     
     public override object? Execute()
     {
-        Logger.Info("Executing my custom command!");
+        Logger.LogInfo("Executing my custom command!");
         // Command logic here
         return null;
     }

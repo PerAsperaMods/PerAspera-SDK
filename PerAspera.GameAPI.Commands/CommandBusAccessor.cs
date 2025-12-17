@@ -128,7 +128,7 @@ namespace PerAspera.GameAPI.Commands
                 }
 
                 // Execute the command
-                var result = command.Execute();
+                command.Execute();
 
                 _log.Debug($"Command '{command.CommandName}' executed successfully");
             }
@@ -261,8 +261,9 @@ namespace PerAspera.GameAPI.Commands
         {
             try
             {
-                // This would require the event system to be available
-                // For now, just log
+                // Note: Event publishing requires the event bus to be initialized
+                // which may not be available at this point in the initialization sequence.
+                // Event integration should be handled at the ModSDK level.
                 _log.Info("📢 Command system is ready");
             }
             catch (Exception ex)
