@@ -77,20 +77,25 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Find command type
                 var commandType = FindCommandType(commandTypeName);
                 if (commandType == null)
-                { // Logging disabledreturn false;
+                { // Logging disabled
+                return false;
                 }
                 
                 // Get dispatch method for this type
                 var dispatchMethod = GetDispatchMethod(commandType);
                 if (dispatchMethod == null)
-                { // Logging disabledreturn false;
+                { // Logging disabled
+                return false;
                 }
                 
                 // Invoke dispatch
-                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command }); // Logging disabledreturn true;
+                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
+                // Logging disabled
+                return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            { // Logging disabled
+                return false;
             }
         }
         
@@ -135,7 +140,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 };
             }
             catch (Exception ex)
-            { // Logging disabledreturn new string[0];
+            { // Logging disabled
+                return new string[0];
             }
         }
         
@@ -161,7 +167,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
                 
                 // Get first generic Dispatch method and make it concrete for our command type
@@ -169,7 +176,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return genericMethod.MakeGenericMethod(commandType);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         
@@ -200,7 +208,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return null;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         /// <summary>
@@ -217,14 +226,16 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Get BaseGame instance
                 var baseGameType = GameTypeInitializer.GetBaseGameType();
                 if (baseGameType == null)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
 
                 var baseGameInstance = baseGameType.GetProperty("Instance", 
                     BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
 
                 if (baseGameInstance == null)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
 
                 // Try to find CommandBus on BaseGame instance
@@ -235,7 +246,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 {
                     var commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
                     if (commandBusInstance != null)
-                    { // Logging disabledreturn new CommandBusWrapper(commandBusInstance);
+                    { // Logging disabled
+                return new CommandBusWrapper(commandBusInstance);
                     }
                 }
 
@@ -249,13 +261,16 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     {
                         var commandBusInstance = field.GetValue(baseGameInstance);
                         if (commandBusInstance != null)
-                        { // Logging disabledreturn new CommandBusWrapper(commandBusInstance);
+                        { // Logging disabled
+                return new CommandBusWrapper(commandBusInstance);
                         }
                     }
-                } // Logging disabledreturn null;
+                } // Logging disabled
+                return null;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }    }
 }

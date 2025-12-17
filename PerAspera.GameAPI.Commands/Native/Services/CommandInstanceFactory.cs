@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
@@ -30,13 +30,15 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public object CreateNativeInstance(System.Type commandType, object[] parameters)
         {
             if (commandType == null)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
 
             try
             { // Logging disabled// Validate parameters first
                 if (!ValidateConstructorParameters(commandType, parameters))
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
 
                 // Use cached reflection for fast instantiation
@@ -53,7 +55,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return instance;
             }
             catch (Exception ex)
-            { // Logging disabledreturn CreateInstanceFallback(commandType, parameters);
+            { // Logging disabled
+                return CreateInstanceFallback(commandType, parameters);
             }
         }
 
@@ -70,7 +73,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 var constructors = commandType.GetConstructors();
                 
                 if (constructors.Length == 0)
-                { // Logging disabledreturn false;
+                { // Logging disabled
+                return false;
                 }
 
                 // Check if any constructor matches the parameters
@@ -85,7 +89,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return hasMatchingConstructor;
             }
             catch (Exception ex)
-            { // Logging disabledreturn true; // Allow fallback creation to attempt
+            { // Logging disabled
+                return true; // Allow fallback creation to attempt
             }
         }
 
@@ -107,7 +112,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return Activator.CreateInstance(commandType, parameters);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
 
@@ -138,7 +144,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Error validating created instance: {ex.Message}");
-            } // ✅ CORRECTION: Accolade fermante manquante
+            } // ? CORRECTION: Accolade fermante manquante
         }
 
         /// <summary>
@@ -233,7 +239,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return null;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
 
@@ -262,7 +269,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return null; // Placeholder for refactoring structure
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
 
@@ -274,21 +282,25 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public bool ValidateCommand(CommandBaseWrapper commandWrapper)
         {
             if (commandWrapper == null)
-            { // Logging disabledreturn false;
+            { // Logging disabled
+                return false;
             }
 
             try
             {
                 // Basic validation checks
                 if (string.IsNullOrEmpty(commandWrapper.CommandName))
-                { // Logging disabledreturn false;
+                { // Logging disabled
+                return false;
                 }
 
                 // Check for required properties or methods
-                // This would be expanded based on Per Aspera command requirements // Logging disabledreturn true;
+                // This would be expanded based on Per Aspera command requirements // Logging disabled
+                return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            { // Logging disabled
+                return false;
             }
         }
 

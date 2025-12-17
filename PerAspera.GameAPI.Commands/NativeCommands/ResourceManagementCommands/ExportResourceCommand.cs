@@ -47,5 +47,26 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
         {
             return Faction != null && ResourceType != null && Amount > 0;
         }
+
+        /// <summary>
+        /// Create ExportResourceCommand from parameters dictionary
+        /// </summary>
+        public static ExportResourceCommand FromParameters(object[] parameters)
+        {
+            var command = new ExportResourceCommand();
+            
+            if (parameters?.Length >= 3)
+            {
+                command.Faction = parameters[0];
+                command.ResourceType = parameters[1];
+                command.Amount = Convert.ToInt32(parameters[2]);
+                if (parameters.Length > 3)
+                {
+                    command.Destination = parameters[3]?.ToString();
+                }
+            }
+            
+            return command;
+        }
     }
 }

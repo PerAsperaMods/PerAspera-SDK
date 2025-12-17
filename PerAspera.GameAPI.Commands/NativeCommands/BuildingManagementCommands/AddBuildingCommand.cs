@@ -48,5 +48,21 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             
             return true;
         }
+        /// <summary>
+        /// Create AddBuildingCommand from parameters array
+        /// </summary>
+        public static AddBuildingCommand FromParameters(object[] parameters)
+        {
+            var command = new AddBuildingCommand();
+            
+            if (parameters?.Length >= 3)
+            {
+                command.Faction = parameters[0];
+                command.BuildingType = parameters[1];
+                command.Position = parameters[2];
+            }
+            
+            return command;
+        }
     }
 }

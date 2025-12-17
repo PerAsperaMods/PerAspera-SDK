@@ -49,5 +49,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             
             return true;
         }
+        /// <summary>
+        /// Create RemoveBuildingCommand from parameters array
+        /// </summary>
+        public static RemoveBuildingCommand FromParameters(object[] parameters)
+        {
+            var command = new RemoveBuildingCommand();
+            
+            if (parameters?.Length >= 2)
+            {
+                command.Faction = parameters[0];
+                command.BuildingId = parameters[1];
+            }
+            
+            return command;
+        }
     }
 }

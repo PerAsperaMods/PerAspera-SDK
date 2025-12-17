@@ -170,12 +170,14 @@ namespace PerAspera.GameAPI.Commands.Core
                 {
                     // Try to extract resource and amount from command
                     if (TryExtractImportResourceParameters(command, out string resourceName, out float amount))
-                    { // Logging disable
-                      return factory.CreateImportResourceCommand(resourceName, amount);
+                    {
+                        // Logging disabled
+                        return factory.CreateImportResourceCommand(resourceName, amount);
                     }
                     else
-                    { // Logging disabled}
-                       throw new InvalidOperationException("Failed to extract parameters for ImportResource command");
+                    {
+                        // Logging disabled
+                        throw new InvalidOperationException("Failed to extract parameters for ImportResource command");
                     }
                 }
                 
@@ -183,14 +185,17 @@ namespace PerAspera.GameAPI.Commands.Core
                 var parameters = ExtractCommandParameters(command);
                 var nativeCommand = factory.CreateCommand(command.CommandType, parameters);
 
-                    if (nativeCommand == null)
-                    { // Logging disabled}
+                if (nativeCommand == null)
+                {
+                    // Logging disabled
+                    throw new InvalidOperationException($"Failed to create native command for type {command.CommandType}");
+                }
 
-                        return nativeCommand;
-                    }
+                return nativeCommand;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                // Logging disabled
                 throw new Exception($"Error converting command {command.CommandType} to native: {ex.Message}", ex);
             }
         }

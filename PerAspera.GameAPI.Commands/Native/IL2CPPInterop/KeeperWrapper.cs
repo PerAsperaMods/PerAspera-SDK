@@ -59,7 +59,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return handle;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         
@@ -138,7 +139,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return method.Invoke(_nativeKeeper, parameters);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         
@@ -151,13 +153,15 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var property = _keeperType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
                 
                 return property.GetValue(_nativeKeeper);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         
@@ -187,14 +191,16 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
                 
                 // Return first Register method found
                 return methods[0];
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
         
@@ -208,14 +214,16 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                { // Logging disabledreturn null;
+                { // Logging disabled
+                return null;
                 }
                 
                 // Return first Unregister method found
                 return methods[0];
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+                return null;
             }
         }
     }

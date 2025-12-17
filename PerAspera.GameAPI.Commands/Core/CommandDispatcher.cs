@@ -98,7 +98,9 @@ namespace PerAspera.GameAPI.Commands.Core
         /// </summary>
         public BatchCommandResult DispatchBatch(IEnumerable<IGameCommand> commands)
         {
-            var commandList = commands.ToList(); // Logging disabledvar results = new List<CommandResult>();
+            var commandList = commands.ToList();
+            // Logging disabled
+            var results = new List<CommandResult>();
             
             foreach (var command in commandList)
             {
@@ -106,7 +108,9 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
             }
             
-            var batchResult = new BatchCommandResult(results); // Logging disabledreturn batchResult;
+            var batchResult = new BatchCommandResult(results);
+            // Logging disabled
+            return batchResult;
         }
         
         /// <summary>
