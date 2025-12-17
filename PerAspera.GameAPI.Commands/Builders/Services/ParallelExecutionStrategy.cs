@@ -119,7 +119,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             {
                 var index = i; // Capture loop variable
 
-                var task = Task.Run(async () =>
+                var task = System.Threading.Tasks.Task.Run(async () =>
                 {
                     // Check condition
                     try
@@ -160,7 +160,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             {
                 try
                 {
-                    var completedTasks = await Task.WhenAll(tasks).WaitAsync(_globalTimeout.Value);
+                    var completedTasks = await System.Threading.Tasks.Task.WhenAll(tasks).WaitAsync(_globalTimeout.Value);
                     results = new CommandResult[tasks.Count];
                     foreach (var (index, result) in completedTasks)
                     {
@@ -187,7 +187,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             }
             else
             {
-                var completedTasks = await Task.WhenAll(tasks);
+                var completedTasks = await System.Threading.Tasks.Task.WhenAll(tasks);
                 results = new CommandResult[tasks.Count];
                 foreach (var (index, result) in completedTasks)
                 {
