@@ -41,11 +41,15 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             try
             {
                 if (handleableObject == null)
-                { // Logging disabledreturn null;
+                {
+                    // Logging disabled
+                    return null;
                 }
                 
                 if (_registerMethod == null)
-                { // Logging disabledreturn null;
+                {
+                    // Logging disabled
+                    return null;
                 }
                 
                 // Call Keeper.Register(IHandleable) -> returns Handle
@@ -67,11 +71,15 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             try
             {
                 if (handleableObject == null)
-                { // Logging disabledreturn false;
+                {
+                    // Logging disabled
+                    return false;
                 }
                 
                 if (_unregisterMethod == null)
-                { // Logging disabledreturn false;
+                {
+                    // Logging disabled
+                    return false;
                 }
                 
                 // Call Keeper.Unregister(IHandleable)
@@ -81,7 +89,9 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                // Logging disabled
+                return false;
             }
         }
         
@@ -120,7 +130,9 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var method = _keeperType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
-                { // Logging disabledreturn null;
+                {
+                    // Logging disabled
+                    return null;
                 }
                 
                 return method.Invoke(_nativeKeeper, parameters);

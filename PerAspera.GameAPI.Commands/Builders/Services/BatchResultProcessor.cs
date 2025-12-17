@@ -75,7 +75,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                 else
                 {
                     // Fill gaps with error results
-                    validatedResults[i] = new CommandResult(false, fillErrorMessage, null);
+                    var errorCommand = new ErrorCommand("BatchGap", null);
+                    validatedResults[i] = new CommandResult(errorCommand, fillErrorMessage, 0);
                 }
             }
 

@@ -90,12 +90,14 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             {
                 if (!conditions[index]())
                 {
-                    return new CommandResult(true, "Skipped due to condition", null);
+                    var command = commands[index].BuildCommand();
+                    return new CommandResult(command, "Skipped due to condition", 0);
                 }
             }
             catch (Exception conditionEx)
             {
-                return new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, $"Condition evaluation failed: {conditionEx.Message}", 0);
             }
 
             // Execute command
@@ -105,7 +107,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             }
             catch (Exception ex)
             {
-                return new CommandResult(false, ex.Message, ex);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, ex.Message, 0);
             }
         }
 
@@ -126,12 +129,14 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                     {
                         if (!conditions[index]())
                         {
-                            return (index, new CommandResult(true, "Skipped due to condition", null));
+                            var command = commands[index].BuildCommand();
+                            return (index, new CommandResult(command, "Skipped due to condition", 0));
                         }
                     }
                     catch (Exception conditionEx)
                     {
-                        return (index, new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx));
+                        var command = commands[index].BuildCommand();
+                        return (index, new CommandResult(command, $"Condition evaluation failed: {conditionEx.Message}", 0));
                     }
 
                     // Execute command
@@ -142,7 +147,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                     }
                     catch (Exception ex)
                     {
-                        return (index, new CommandResult(false, ex.Message, ex));
+                        var command = commands[index].BuildCommand();
+                        return (index, new CommandResult(command, ex.Message, 0));
                     }
                 });
 
@@ -180,7 +186,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                         }
                         else
                         {
-                            results[i] = new CommandResult(false, "Task timed out or faulted", null);
+                            var errorCommand = new ErrorCommand("TaskTimeout", null);
+                            results[i] = new CommandResult(errorCommand, "Task timed out or faulted", 0);
                         }
                     }
                 }

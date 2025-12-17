@@ -95,12 +95,14 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             {
                 if (!conditions[index]())
                 {
-                    return new CommandResult(true, "Skipped due to condition", null);
+                    var command = commands[index].BuildCommand();
+                    return new CommandResult(command, "Skipped due to condition", 0);
                 }
             }
             catch (Exception conditionEx)
             {
-                return new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, $"Condition evaluation failed: {conditionEx.Message}", 0);
             }
 
             // Execute command
@@ -110,7 +112,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             }
             catch (Exception ex)
             {
-                return new CommandResult(false, ex.Message, ex);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, ex.Message, 0);
             }
         }
 
@@ -121,12 +124,14 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             {
                 if (!conditions[index]())
                 {
-                    return new CommandResult(true, "Skipped due to condition", null);
+                    var command = commands[index].BuildCommand();
+                    return new CommandResult(command, "Skipped due to condition", 0);
                 }
             }
             catch (Exception conditionEx)
             {
-                return new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, $"Condition evaluation failed: {conditionEx.Message}", 0);
             }
 
             // Execute command
@@ -136,7 +141,8 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             }
             catch (Exception ex)
             {
-                return CommandResult(errorCommand, ex.Message, 0);
+                var command = commands[index].BuildCommand();
+                return new CommandResult(command, ex.Message, 0);
             }
         }
 

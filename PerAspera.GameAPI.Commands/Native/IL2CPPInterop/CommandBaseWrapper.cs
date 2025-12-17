@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 if (_isValidMethod == null)
                 {
-                    _logger.LogDebug("IsValid method not available, assuming valid");
+                    _logger.Debug("IsValid method not available, assuming valid");
                     return true; // Assume valid if method not available
                 }
                 
@@ -67,7 +67,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error calling IsValid: {ex.Message}");
+                _logger.Error($"Error calling IsValid: {ex.Message}");
                 return false;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -90,7 +90,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting description: {ex.Message}");
+                _logger.Error($"Error getting description: {ex.Message}");
                 return $"{CommandName}(error)";
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -113,7 +113,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting faction: {ex.Message}");
+                _logger.Error($"Error getting faction: {ex.Message}");
                 return null;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -130,7 +130,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var factionProperty = _commandType.GetProperty("Faction", BindingFlags.Public | BindingFlags.Instance);
                 if (factionProperty == null || !factionProperty.CanWrite)
                 {
-                    _logger.LogWarning("Faction property not available or not writable");
+                    _logger.Warning("Faction property not available or not writable");
                     return false;
                 }
                 
@@ -139,7 +139,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error setting faction: {ex.Message}");
+                _logger.Error($"Error setting faction: {ex.Message}");
                 return false;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -163,7 +163,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting property {propertyName}: {ex.Message}");
+                _logger.Error($"Error getting property {propertyName}: {ex.Message}");
                 return null;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -181,7 +181,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var property = _commandType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite)
                 {
-                    _logger.LogWarning($"Property {propertyName} not available or not writable");
+                    _logger.Warning($"Property {propertyName} not available or not writable");
                     return false;
                 }
                 
@@ -190,7 +190,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error setting property {propertyName}: {ex.Message}");
+                _logger.Error($"Error setting property {propertyName}: {ex.Message}");
                 return false;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -208,7 +208,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var method = _commandType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
                 {
-                    _logger.LogWarning($"Method {methodName} not found");
+                    _logger.Warning($"Method {methodName} not found");
                     return null;
                 }
                 
@@ -216,7 +216,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error invoking method {methodName}: {ex.Message}");
+                _logger.Error($"Error invoking method {methodName}: {ex.Message}");
                 return null;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -243,7 +243,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                            
             if (!isCommand)
             {
-                _logger.LogWarning($"Type {_commandType.Name} does not appear to be a command type");
+                _logger.Warning($"Type {_commandType.Name} does not appear to be a command type");
             }
         } // ? CORRECTION: Accolade fermante manquante
         
@@ -261,7 +261,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting IsValid method: {ex.Message}");
+                _logger.Error($"Error getting IsValid method: {ex.Message}");
                 return null;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
@@ -279,7 +279,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting ToTabbedString method: {ex.Message}");
+                _logger.Error($"Error getting ToTabbedString method: {ex.Message}");
                 return null;
             }
         } // ? CORRECTION: Toutes les branches retournent une valeur
