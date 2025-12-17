@@ -60,6 +60,22 @@
             Provides type-safe access to atmospheric composition and climate data
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.InitializeCoreGases(System.Collections.Generic.Dictionary{System.String,PerAspera.GameAPI.Wrappers.AtmosphericGas})">
+            <summary>
+            Initialize core atmospheric gases that are always present
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.DiscoverModdedAtmosphericResources(System.Collections.Generic.Dictionary{System.String,PerAspera.GameAPI.Wrappers.AtmosphericGas})">
+            <summary>
+            🎯 MODABLE: Discover atmospheric resources from ResourceType system
+            TODO: Implementation complete when ResourceType integration finished
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.InitializeTerraformingEffects">
+            <summary>
+            Initialize terraforming effects (potentially modable)
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Composition">
             <summary>
             Atmospheric gas composition (CO2, O2, N2, H2O)
@@ -69,13 +85,13 @@
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TotalPressure">
             <summary>
             Total atmospheric pressure (sum of all partial pressures, kPa)
-            Property: totalPressure (READ-ONLY - calculated by game)
+            Property: GetTotalPressure (READ-ONLY - calculated by game)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Temperature">
             <summary>
-            Current surface temperature (Kelvin)
-            Property: temperature
+            Current average surface temperature (Kelvin)
+            Property: GetAverageTemperature (READ-ONLY - calculated by game)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.MinTemperature">
@@ -114,7 +130,7 @@
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.WaterStock">
             <summary>
             Available water stock (kilotons)
-            Property: waterStock
+            Property: GetWaterStock (READ-ONLY - use IncreaseWater/DecreaseWater pour modifications)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.PermafrostDeposits">
@@ -142,6 +158,33 @@
             <summary>
             Overall habitability score (0-100%)
             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ModifyGas(System.String,System.Single)">
+            <summary>
+            🎯 MODABLE: Modify atmospheric gas by ResourceType ID
+            Supports both core gases (CO2, O2) and mod-added gases
+            </summary>
+            <param name="gasId">Gas identifier (CO2, O2, N2, or mod ResourceType ID)</param>
+            <param name="amount">Amount to add (positive) or remove (negative)</param>
+            <returns>Actual amount changed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ConvertGas(System.String,System.String,System.Single)">
+            <summary>
+            🎯 MODABLE: Convert one gas to another (for atmospheric chemistry mods)
+            </summary>
+            <param name="fromGas">Source gas to convert</param>
+            <param name="toGas">Target gas to produce</param>
+            <param name="amount">Amount to convert</param>
+            <returns>Actual amount converted</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.RegisterModdedGas(System.String,System.String,System.String)">
+            <summary>
+            🎯 MODABLE: Register new atmospheric ResourceType (for mods)
+            TODO: Implementation when ResourceType system integrated
+            </summary>
+            <param name="resourceId">ResourceType identifier</param>
+            <param name="gasName">Human-readable name</param>
+            <param name="symbol">Chemical symbol</param>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGame">
             <summary>
@@ -520,6 +563,627 @@
         <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Working">
             <summary>Drone is actively working on a task</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleConversionUtils">
+            <summary>
+            Handle type conversion and transformation utilities
+            Provides safe type casting, Handle→Entity resolution, and IL2CPP compatibility helpers
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.ResolveHandle``1(System.Object,System.Func{``0,System.Boolean})">
+            <summary>
+            Resolve Handle to strongly-typed entity with validation
+            Safe alternative to direct KeeperMap.Find{T} with error handling
+            Performance: O(1) with validation overhead
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handle">Handle to resolve</param>
+            <param name="validator">Optional custom validation function</param>
+            <returns>Strongly-typed entity or null if conversion failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.ResolveHandleBase(System.Object)">
+            <summary>
+            Resolve Handle to base object type (IHandleable)
+            Use when exact entity type is unknown
+            </summary>
+            <param name="handle">Handle to resolve</param>
+            <returns>Base entity object or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.ResolveHandles``1(System.Collections.Generic.IEnumerable{System.Object},System.Boolean)">
+            <summary>
+            Resolve multiple Handles to entities efficiently
+            Optimized for bulk operations with shared KeeperMap access
+            Returns: Dictionary with Handle as key, Entity as value for successful resolutions only
+            </summary>
+            <typeparam name="T">Expected entity type for all Handles</typeparam>
+            <param name="handles">Collection of Handles to resolve</param>
+            <param name="continueOnError">If false, stops on first error</param>
+            <returns>Dictionary mapping Handles to resolved entities</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.HandlesToEntities``1(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Convert Handle collection to Entity collection
+            Filters out invalid/non-convertible Handles automatically
+            Performance: O(n) with validation per Handle
+            </summary>
+            <typeparam name="T">Target entity type</typeparam>
+            <param name="handles">Source Handle collection</param>
+            <returns>Filtered collection of resolved entities</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.ExtractHandle(System.Object)">
+            <summary>
+            Extract Handle from entity object
+            Searches for Handle property/field in entity
+            Performance: O(1) reflection lookup (cached)
+            </summary>
+            <param name="entity">Entity object to extract Handle from</param>
+            <returns>Handle object or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.EntitiesToHandles(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Convert entity collection to Handle collection
+            Extracts Handles from each entity and filters out nulls
+            </summary>
+            <param name="entities">Source entity collection</param>
+            <returns>Collection of extracted Handles</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.SafeCast``2(``0)">
+            <summary>
+            Safe type cast with Handle validation
+            Attempts to cast entity to target type with Handle integrity check
+            </summary>
+            <typeparam name="TSource">Source entity type</typeparam>
+            <typeparam name="TTarget">Target entity type</typeparam>
+            <param name="sourceEntity">Source entity to convert</param>
+            <returns>Converted entity or null if cast failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.HandleToBuilding``1(System.Object,System.Nullable{UnityEngine.Vector3},System.Single)">
+            <summary>
+            Convert Handle to specific building type with position validation
+            Specialized conversion for building entities with spatial constraints
+            </summary>
+            <typeparam name="T">Target building type</typeparam>
+            <param name="handle">Building Handle</param>
+            <param name="expectedPosition">Optional position validation</param>
+            <param name="positionTolerance">Position tolerance for validation</param>
+            <returns>Building entity or null if conversion/validation failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.ValidateConversionSystem(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Validate Handle→Entity conversion chain integrity
+            Comprehensive test of Handle system functionality
+            Use for debugging and system health checks
+            </summary>
+            <param name="testHandles">Collection of Handles to test (optional)</param>
+            <returns>Conversion system diagnostics</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.CreateHandleLookup``1(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Create Handle→Entity lookup dictionary for performance optimization
+            Pre-resolves all Handles for repeated access scenarios
+            Use when multiple lookups are needed for same Handle set
+            </summary>
+            <typeparam name="T">Target entity type</typeparam>
+            <param name="handles">Handles to pre-resolve</param>
+            <returns>Lookup dictionary for O(1) access</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleConversionUtils.IsHandleOfType``1(System.Object)">
+            <summary>
+            Check if Handle represents entity of specific type
+            Type checking without full entity resolution
+            </summary>
+            <typeparam name="T">Type to check for</typeparam>
+            <param name="handle">Handle to check</param>
+            <returns>True if Handle resolves to entity of type T</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ConversionDiagnostics">
+            <summary>
+            Diagnostics for Handle conversion system health
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.KeeperMapAvailable">
+            <summary>
+            Whether KeeperMap instance is currently available for conversion operations
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.TestHandleCount">
+            <summary>
+            Number of handles tested in last diagnostic run
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.ValidationSuccessRate">
+            <summary>
+            Success rate of handle validation operations (0.0 to 100.0)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.ConversionSuccessRate">
+            <summary>
+            Success rate of handle to entity conversion operations (0.0 to 100.0)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.RoundTripSuccessRate">
+            <summary>
+            Success rate of round-trip conversions (handle → entity → handle) (0.0 to 100.0)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.IsHealthy">
+            <summary>
+            Overall system health indicator
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.ErrorMessage">
+            <summary>
+            Current system error message, if any
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConversionDiagnostics.ToString">
+            <summary>
+            Returns a string representation of the conversion system diagnostics
+            </summary>
+            <returns>Formatted string with conversion statistics and health status</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleHelper">
+            <summary>
+            Central API for Handle-based entity access in Per Aspera
+            Provides type-safe, validated access to game entities via Handle system
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.IsAvailable">
+            <summary>
+            Check if Handle system is available
+            Returns true after BaseGame.Awake() and Keeper initialization
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.FindSafe``1(System.Object)">
+            <summary>
+            Find entity by Handle with type safety and null protection
+            Performance: O(1) Dictionary lookup via KeeperMap
+            Thread Safety: Safe - Handle is value type, validation before access
+            </summary>
+            <typeparam name="T">Expected entity type (Building, Faction, etc.)</typeparam>
+            <param name="handle">Entity Handle (from game events, UI, etc.)</param>
+            <returns>Typed entity instance or null if not found/invalid</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.IsValid(System.Object)">
+            <summary>
+            Validate Handle exists and is accessible
+            Fast check before attempting FindSafe operations
+            Performance: O(1) Dictionary.ContainsKey operation
+            </summary>
+            <param name="handle">Handle to validate</param>
+            <returns>True if Handle is valid and entity exists</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.TryFind``1(System.Object,``0@)">
+            <summary>
+            Attempt Handle resolution with try-pattern
+            Combines validation and access in single call
+            Recommended pattern for performance-critical code
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handle">Entity Handle</param>
+            <param name="result">Output entity instance</param>
+            <returns>True if resolution successful</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.FindAll``1">
+            <summary>
+            Get all entities of specified type from KeeperMap
+            Efficient enumeration of all registered entities by type
+            Performance: O(n) where n = total entities in KeeperMap
+            </summary>
+            <typeparam name="T">Entity type to enumerate</typeparam>
+            <returns>All entities of type T currently in game</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.FindMany``1(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Get entities by Handle list with batch validation
+            Optimized for processing multiple Handles efficiently
+            Skips invalid Handles rather than throwing exceptions
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handles">Collection of Handles to resolve</param>
+            <returns>Valid entities (skips invalid Handles)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.FindBuildingsByType(System.String)">
+            <summary>
+            Find Buildings by type name (e.g., "SolarPanel", "WaterExtractor")
+            Convenience method for common building queries
+            Performance: O(n) where n = total buildings
+            </summary>
+            <param name="buildingTypeName">BuildingType.name from YAML</param>
+            <returns>All buildings matching type name</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.FindBuildingsNear(UnityEngine.Vector3,System.Single)">
+            <summary>
+            Find Buildings within radius of position
+            Spatial query using Handle system + position filtering
+            Performance: O(n) where n = total buildings
+            </summary>
+            <param name="center">Center position for search</param>
+            <param name="radius">Search radius in game units</param>
+            <returns>Buildings within specified area</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.GetKeeperMapInternal">
+            <summary>
+            Get KeeperMap instance from BaseGame.Instance.keeper.map
+            Internal method with error handling and validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.IsBuilding(System.Object)">
+            <summary>
+            Check if entity is a Building type
+            Uses duck typing approach for IL2CPP compatibility
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.GetBuildingPosition(System.Object)">
+            <summary>
+            Extract position from building entity
+            Safe accessor for building.position property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleHelper.GetMetrics">
+            <summary>
+            Get Handle system performance metrics
+            Debug information for optimization and monitoring
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleSystemMetrics">
+            <summary>
+            Handle system performance and status metrics
+            Used for debugging and monitoring Handle operations
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleSystemMetrics.IsAvailable">
+            <summary>
+            Gets or sets whether the Handle system is available and functioning
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleSystemMetrics.TotalEntities">
+            <summary>
+            Gets or sets the total number of entities tracked in the Handle system
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleSystemMetrics.ErrorMessage">
+            <summary>
+            Gets or sets the error message if Handle system access failed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleSystemMetrics.ToString">
+            <summary>
+            Returns a string representation of the Handle system metrics
+            </summary>
+            <returns>Formatted metrics string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleValidator">
+            <summary>
+            Robust Handle validation and error recovery system
+            Provides comprehensive Handle integrity checking with performance optimization
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.IsValidHandle(System.Object,PerAspera.GameAPI.Wrappers.KeeperMapWrapper)">
+            <summary>
+            Comprehensive Handle validation with caching
+            Checks: null, KeeperMap existence, Handle registration
+            Performance: O(1) cached, O(log n) uncached
+            </summary>
+            <param name="handle">Handle to validate</param>
+            <param name="keeperMap">Optional KeeperMap instance (auto-retrieved if null)</param>
+            <returns>True if Handle is valid and registered</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.ValidateHandleInternal(System.Object,PerAspera.GameAPI.Wrappers.KeeperMapWrapper)">
+            <summary>
+            Internal validation logic without caching
+            Actual KeeperMap lookup and Handle verification
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.ValidateWithType(System.Object,System.Type)">
+            <summary>
+            Validate Handle and return entity type information
+            Extended validation with type safety checking
+            </summary>
+            <param name="handle">Handle to validate</param>
+            <param name="expectedType">Expected entity type (optional)</param>
+            <returns>Validation result with type information</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.ValidateMany(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Validate multiple Handles efficiently
+            Optimized for bulk operations with shared KeeperMap access
+            Performance: O(n) with single KeeperMap retrieval
+            </summary>
+            <param name="handles">Collection of Handles to validate</param>
+            <returns>Dictionary mapping Handles to validation results</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.FilterValidHandles(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Filter collection to only valid Handles
+            Performance-optimized for large collections
+            </summary>
+            <param name="handles">Input Handle collection</param>
+            <returns>Filtered collection with only valid Handles</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.AttemptRecovery(System.Object,PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy)">
+            <summary>
+            Attempt to recover or suggest alternatives for invalid Handle
+            Useful for degraded state recovery in complex systems
+            </summary>
+            <param name="invalidHandle">Handle that failed validation</param>
+            <param name="fallbackStrategies">Recovery strategies to attempt</param>
+            <returns>Recovery result with alternative Handle or failure info</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.CacheValidHandle(System.Object)">
+            <summary>
+            Add Handle to validation cache for performance optimization
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.ClearHandleCache(System.Object)">
+            <summary>
+            Remove specific Handle from all caches
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.ClearAllCaches">
+            <summary>
+            Clear all validation caches
+            Use when KeeperMap state might have changed significantly
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.CleanupCacheIfNeeded">
+            <summary>
+            Periodic cache cleanup for memory management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidator.GetDiagnostics">
+            <summary>
+            Get Handle validation system diagnostics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleValidationResult">
+            <summary>
+            Result of Handle validation with detailed information
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.IsValid">
+            <summary>
+            Whether the handle validation was successful
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.ErrorCode">
+            <summary>
+            Error code if validation failed, None if successful
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.ErrorMessage">
+            <summary>
+            Human-readable error message if validation failed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.EntityType">
+            <summary>
+            Type of the entity associated with the handle
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.Handle">
+            <summary>
+            The handle object being validated
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidationResult.Entity">
+            <summary>
+            The entity retrieved from the handle, if validation succeeded
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidationResult.ToString">
+            <summary>
+            Returns a string representation of the validation result
+            </summary>
+            <returns>Formatted string with validation status and details</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ValidationError">
+            <summary>
+            Handle validation error classification
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.None">
+            <summary>No error - validation successful</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.NullHandle">
+            <summary>Handle is null or invalid</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.KeeperMapUnavailable">
+            <summary>KeeperMap instance is not available</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.HandleNotFound">
+            <summary>Handle does not exist in KeeperMap</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.EntityRetrievalFailed">
+            <summary>Failed to retrieve entity from valid handle</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.TypeMismatch">
+            <summary>Retrieved entity type does not match expected type</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ValidationError.ValidationException">
+            <summary>Exception occurred during validation process</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleRecoveryResult">
+            <summary>
+            Handle recovery attempt result
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleRecoveryResult.Success">
+            <summary>
+            Whether the handle recovery attempt was successful
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleRecoveryResult.RecoveredHandle">
+            <summary>
+            The recovered handle if recovery was successful
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleRecoveryResult.RecoveryMethod">
+            <summary>
+            Description of the recovery method used
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleRecoveryResult.ErrorMessage">
+            <summary>
+            Error message if recovery failed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleRecoveryResult.ToString">
+            <summary>
+            Returns a string representation of the recovery result
+            </summary>
+            <returns>Formatted string with recovery status and details</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy">
+            <summary>
+            Handle recovery strategies
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy.None">
+            <summary>No recovery strategy - accept failure</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy.Revalidate">
+            <summary>Attempt to revalidate the same handle</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy.FindSimilar">
+            <summary>Attempt to find similar valid handle</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.HandleRecoveryStrategy.Default">
+            <summary>Default recovery strategy - revalidate and find similar</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics">
+            <summary>
+            HandleValidator system diagnostics
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.ValidCacheSize">
+            <summary>
+            Number of valid handles in cache
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.InvalidCacheSize">
+            <summary>
+            Number of invalid handles in cache
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.CacheHitRate">
+            <summary>
+            Cache hit rate percentage (0.0 to 100.0)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.LastCleanup">
+            <summary>
+            Timestamp of last cache cleanup operation
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.KeeperMapAvailable">
+            <summary>
+            Whether KeeperMap instance is currently available
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.ErrorMessage">
+            <summary>
+            Current error message, if any
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleValidatorDiagnostics.ToString">
+            <summary>
+            Returns a string representation of the validator diagnostics
+            </summary>
+            <returns>Formatted string with cache statistics and system status</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperMapWrapper">
+            <summary>
+            Direct wrapper around native KeeperMap class
+            Provides raw Handle→Object mapping with IL2CPP safety
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize KeeperMapWrapper with native KeeperMap instance
+            </summary>
+            <param name="nativeKeeperMap">Native KeeperMap from BaseGame.keeper.map</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetCurrent">
+            <summary>
+            Get current KeeperMap from BaseGame.keeper.map
+            Factory method for wrapper creation
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.Find``1(System.Object)" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.Contains(System.Object)">
+            <summary>
+            Direct native Contains method access
+            Handle existence validation
+            Performance: O(1) Dictionary.ContainsKey
+            </summary>
+            <param name="handle">Handle to check</param>
+            <returns>True if Handle exists in KeeperMap</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.FindBase(System.Object)">
+            <summary>
+            Non-generic Find method for base IHandleable access
+            Returns base interface type for unknown entity types
+            </summary>
+            <param name="handle">Entity Handle</param>
+            <returns>IHandleable instance or null</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetObjectsDict" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetKeeper">
+            <summary>
+            Get Keeper instance that owns this KeeperMap
+            Back-reference to parent Keeper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetEntityCount">
+            <summary>
+            Get total entity count in KeeperMap
+            Diagnostic method for monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.EnumerateHandles">
+            <summary>
+            Enumerate all Handles in KeeperMap
+            Performance: O(n) where n = total entities
+            Use for bulk operations or complete system analysis
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.EnumerateEntities">
+            <summary>
+            Enumerate all entities in KeeperMap
+            Performance: O(n) where n = total entities
+            Returns raw IHandleable objects
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.EnumerateEntitiesByType(System.Func{System.Object,System.Boolean})">
+            <summary>
+            Enumerate entities filtered by type predicate
+            Performance: O(n) with type checking overhead
+            Flexible filtering for specialized queries
+            </summary>
+            <param name="typePredicate">Function to test entity type</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetDiagnostics">
+            <summary>
+            Get detailed KeeperMap diagnostics
+            Useful for debugging and performance monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.TestFunctionality">
+            <summary>
+            Test KeeperMap functionality with known Handle
+            Validates that Find/Contains operations work correctly
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperMapDiagnostics">
+            <summary>
+            KeeperMap diagnostic information
+            Used for monitoring and debugging Handle system health
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry">
             <summary>
             Central registry for accessing Keeper-managed game entities
@@ -669,6 +1333,403 @@
             Returns detailed planet status as formatted string
             </summary>
             <returns>Planet status with atmosphere and resource information</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader">
+            <summary>
+            Unity GUI Loader - charge les vraies DLLs Unity depuis unity-libs
+            DÉCOUVERTE: Les unity-libs contiennent les vraies implémentations Unity !
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.IsReady">
+            <summary>
+            Test si le loader est prêt
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.GetGuiEnabled">
+            <summary>
+            GET GUI.enabled depuis les vraies DLLs Unity
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.SetGuiEnabled(System.Boolean)">
+            <summary>
+            SET GUI.enabled depuis les vraies DLLs Unity
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.CallBeginVertical">
+            <summary>
+            Appelle GUILayout.BeginVertical depuis les vraies DLLs Unity
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.CallEndVertical">
+            <summary>
+            Appelle GUILayout.EndVertical depuis les vraies DLLs Unity
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper">
+            <summary>
+            Wrapper simple utilisant le vrai loader Unity
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeBeginVertical">
+            <summary>
+            Wrapper pour GUILayout.BeginVertical avec les vraies DLLs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeEndVertical">
+            <summary>
+            Wrapper pour GUILayout.EndVertical avec les vraies DLLs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeSetGuiEnabled(System.Boolean)">
+            <summary>
+            Sauvegarde et définit GUI.enabled avec les vraies DLLs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeRestoreGuiEnabled">
+            <summary>
+            Restaure GUI.enabled avec les vraies DLLs
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.IsReady">
+            <summary>
+            Statut du loader pour debug
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Scene">
+            <summary>
+            Type-safe wrapper for Unity Scene struct
+            Provides safe access to Unity scene data via IL2CPP
+            DOC: Scene wrapper for Unity SceneManagement system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Scene.#ctor(UnityEngine.SceneManagement.Scene)">
+            <summary>
+            Create wrapper from native Unity Scene
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.NativeScene">
+            <summary>
+            Get native Unity Scene struct (for internal SDK use)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.Name">
+            <summary>
+            Scene name (filename without extension)
+            Property: name { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.Path">
+            <summary>
+            Scene file path
+            Property: path { get; }  
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.BuildIndex">
+            <summary>
+            Scene build index (-1 if not in build settings)
+            Property: buildIndex { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.Handle">
+            <summary>
+            Scene handle (internal Unity identifier)
+            Property: handle { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.IsLoaded">
+            <summary>
+            Check if scene is currently loaded
+            Property: isLoaded { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.LoadingState">
+            <summary>
+            Current scene loading state
+            Unity 2020.3 compatibility: Scene struct doesn't have loadingState property
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.RootCount">
+            <summary>
+            Number of root GameObjects in scene
+            Property: rootCount { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Scene.Guid">
+            <summary>
+            Scene GUID (unique identifier) - Unity 2020.3 compatibility
+            Property: Alternative to guid property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Scene.IsValid">
+            <summary>
+            Check if scene is valid (has valid handle)
+            Method: IsValid()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Scene.GetRootGameObjects">
+            <summary>
+            Get all root GameObjects in this scene
+            Method: GetRootGameObjects() -> GameObject[]
+            Safe IL2CPP conversion with error handling
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.Scene.GetRootGameObjects(System.Collections.Generic.List{UnityEngine.GameObject})" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.Scene.Equals(PerAspera.GameAPI.Wrappers.Scene)">
+            <summary>
+            Check if this scene equals another
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.SceneManager">
+            <summary>
+            Type-safe wrapper for Unity SceneManager static class
+            Provides safe access to scene management operations
+            DOC: SceneManager wrapper for Unity SceneManagement system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.GetActiveScene">
+            <summary>
+            Get currently active scene
+            Static Method: SceneManager.GetActiveScene() -> Scene
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.GetSceneByName(System.String)">
+            <summary>
+            Get scene by name
+            Static Method: SceneManager.GetSceneByName(string) -> Scene
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.GetSceneAt(System.Int32)">
+            <summary>
+            Get scene by build index
+            Static Method: SceneManager.GetSceneAt(int) -> Scene
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.GetSceneByBuildIndex(System.Int32)">
+            <summary>
+            Get scene by build index in build settings
+            Unity 2020.3 compatibility: Use GetSceneAt with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.GetAllScenes">
+            <summary>
+            Get all currently loaded scenes
+            Returns array of all loaded Scene wrappers
+            NOTE: Unity GetAllScenes() throws NotSupportedException in IL2CPP,
+                  so we enumerate manually via GetSceneAt()
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SceneManager.SceneCount">
+            <summary>
+            Number of currently loaded scenes
+            Static Property: SceneManager.sceneCount { get; }
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SceneManager.SceneCountInBuildSettings">
+            <summary>
+            Number of scenes in build settings
+            Static Property: SceneManager.sceneCountInBuildSettings { get; }
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.SetActiveScene(PerAspera.GameAPI.Wrappers.Scene)">
+            <summary>
+            Set active scene
+            Static Method: SceneManager.SetActiveScene(Scene) -> bool
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.CreateScene(System.String)">
+            <summary>
+            Create new empty scene
+            Static Method: SceneManager.CreateScene(string) -> Scene
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.MoveGameObjectToScene(UnityEngine.GameObject,PerAspera.GameAPI.Wrappers.Scene)">
+            <summary>
+            Move GameObject to scene
+            Unity 2020.3 compatibility: Alternative approach using Transform
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadSceneAsync(System.String)">
+            <summary>
+            Load scene asynchronously by name
+            Static Method: SceneManager.LoadSceneAsync(string) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadSceneAsync(System.String,UnityEngine.SceneManagement.LoadSceneMode)">
+            <summary>
+            Load scene asynchronously by name with mode
+            Static Method: SceneManager.LoadSceneAsync(string, LoadSceneMode) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadSceneAsync(System.Int32)">
+            <summary>
+            Load scene asynchronously by build index
+            Static Method: SceneManager.LoadSceneAsync(int) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadSceneAsync(System.Int32,UnityEngine.SceneManagement.LoadSceneMode)">
+            <summary>
+            Load scene asynchronously by build index with mode
+            Static Method: SceneManager.LoadSceneAsync(int, LoadSceneMode) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.UnloadSceneAsync(PerAspera.GameAPI.Wrappers.Scene)">
+            <summary>
+            Unload scene asynchronously
+            Static Method: SceneManager.UnloadSceneAsync(Scene) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.UnloadSceneAsync(System.String)">
+            <summary>
+            Unload scene asynchronously by name
+            Static Method: SceneManager.UnloadSceneAsync(string) -> AsyncOperation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadScene(System.String)">
+            <summary>
+            Load scene synchronously by name
+            Static Method: SceneManager.LoadScene(string)
+            WARNING: This blocks the main thread
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadScene(System.String,UnityEngine.SceneManagement.LoadSceneMode)">
+            <summary>
+            Load scene synchronously by name with mode
+            Static Method: SceneManager.LoadScene(string, LoadSceneMode)
+            WARNING: This blocks the main thread
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadScene(System.Int32)">
+            <summary>
+            Load scene synchronously by build index
+            Static Method: SceneManager.LoadScene(int)
+            WARNING: This blocks the main thread
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneManager.LoadScene(System.Int32,UnityEngine.SceneManagement.LoadSceneMode)">
+            <summary>
+            Load scene synchronously by build index with mode
+            Static Method: SceneManager.LoadScene(int, LoadSceneMode)
+            WARNING: This blocks the main thread
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.SceneUtility">
+            <summary>
+            Unity 2020.3.49f1 Compatible Scene Utility Wrapper
+            COMPATIBILITY: SceneUtility doesn't exist in Unity 2020.3, providing alternative implementation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.GetBuildIndexByScenePath(System.String)">
+            <summary>
+            Get scene build index from scene path
+            Unity 2020.3 compatibility: Alternative implementation since SceneUtility doesn't exist
+            Returns -1 if scene not found in build settings
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.GetScenePathByBuildIndex(System.Int32)">
+            <summary>
+            Get scene path from build index
+            Unity 2020.3 compatibility: Alternative implementation since SceneUtility doesn't exist
+            Returns null if build index is invalid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.IsSceneInBuild(System.String)">
+            <summary>
+            Check if a scene path exists in build settings
+            Returns true if scene is configured in build
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.IsBuildIndexValid(System.Int32)">
+            <summary>
+            Check if a build index is valid
+            Unity 2020.3 compatibility: Check against SceneManager.sceneCountInBuildSettings
+            Returns true if build index exists in build settings
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.GetSceneNameFromPath(System.String)">
+            <summary>
+            Get scene name from scene path
+            Extracts filename without extension from full path
+            Example: "Assets/Scenes/MainMenu.unity" -> "MainMenu"
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.GetAllScenePathsInBuild">
+            <summary>
+            Get all scene paths from build settings
+            Unity 2020.3 compatibility: Enumerate through SceneManager.sceneCountInBuildSettings
+            Returns array of all scene paths configured in build
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.GetAllSceneNamesInBuild">
+            <summary>
+            Get all scene names from build settings
+            Returns array of all scene names (without paths) configured in build
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.FindBuildIndexBySceneName(System.String)">
+            <summary>
+            Find scene build index by scene name (without path)
+            Searches through all scenes in build settings
+            Returns -1 if not found
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.FindScenePathBySceneName(System.String)">
+            <summary>
+            Find scene path by scene name (without path)  
+            Searches through all scenes in build settings
+            Returns null if not found
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.LogBuildSettingsInfo">
+            <summary>
+            Log detailed information about all scenes in build settings
+            Useful for debugging scene configuration
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SceneUtility.ValidateSceneConfiguration">
+            <summary>
+            Validate scene configuration and log any issues
+            Useful for troubleshooting scene setup
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">
+            <summary>
+            Wrapper Unity GUI basique - utilise RealUnityGuiLoader pour accès aux vraies DLLs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeBeginVertical">
+            <summary>
+            Wrapper sécurisé pour GUILayout.BeginVertical
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeEndVertical">
+            <summary>
+            Wrapper sécurisé pour GUILayout.EndVertical
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeSetGuiEnabled(System.Boolean)">
+            <summary>
+            Wrapper sécurisé pour définir GUI.enabled
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeRestoreGuiEnabled">
+            <summary>
+            Wrapper sécurisé pour restaurer GUI.enabled
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeToggle(System.Boolean,System.String,System.Single)">
+            <summary>
+            Wrapper sécurisé pour GUILayout.Toggle - placeholder
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeHorizontalSlider(System.Single,System.Single,System.Single)">
+            <summary>
+            Wrapper sécurisé pour GUILayout.HorizontalSlider - placeholder 
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.IsReady">
+            <summary>
+            Statut du système Unity GUI
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Universe">
             <summary>

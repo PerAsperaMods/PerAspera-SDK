@@ -102,9 +102,9 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 try
                 {
-                    // Unity 2020.3 doesn't have guid property, use path as fallback
-                    var pathProperty = _nativeScene.GetPropertyValue<object>("path");
-                    return pathProperty?.ToString() ?? _nativeScene.GetHashCode().ToString();
+                    // Unity 2020.3 compatibility: Scene struct doesn't have guid or path properties
+                    // Use scene name and build index as unique identifier
+                    return $"{_nativeScene.name}_{_nativeScene.buildIndex}_{_nativeScene.GetHashCode()}";
                 }
                 catch
                 {

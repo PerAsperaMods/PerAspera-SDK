@@ -29,19 +29,16 @@ namespace PerAspera.GameAPI.Wrappers
                     return -1;
                 }
                 
-                // Unity 2020.3 alternative: Use Application.CanStreamedLevelBeLoaded
-                for (int i = 0; i < Application.levelCount; i++)
+                // Unity 2020.3 alternative: Use SceneManager.sceneCountInBuildSettings
+                var sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
+                for (int i = 0; i < sceneCount; i++)
                 {
-                    // Check if scene exists in build settings
-                    if (Application.CanStreamedLevelBeLoaded(i))
+                    // Simple path matching - very limited without SceneUtility in Unity 2020.3
+                    var levelName = $"level{i}";
+                    if (scenePath.ToLower().Contains(levelName) || scenePath.Contains($"scene{i}"))
                     {
-                        // Simple path matching (limited in Unity 2020.3)
-                        var levelName = $"level{i}"; // Unity 2020.3 limitation
-                        if (scenePath.Contains(levelName))
-                        {
-                            Log.Debug($"Scene path '{scenePath}' -> build index {i} (approximate match)");
-                            return i;
-                        }
+                        Log.Debug($"Scene path '{scenePath}' -> build index {i} (approximate match)");
+                        return i;
                     }
                 }
                 
@@ -64,24 +61,17 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                if (buildIndex < 0 || buildIndex >= Application.levelCount)
+                var sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
+                if (buildIndex < 0 || buildIndex >= sceneCount)
                 {
-                    Log.Warning($"Build index {buildIndex} is out of range (0-{Application.levelCount - 1})");
+                    Log.Warning($"Build index {buildIndex} is out of range (0-{sceneCount - 1})");
                     return null;
                 }
                 
-                // Unity 2020.3 alternative: Simple approximation (limited availability)
-                if (Application.CanStreamedLevelBeLoaded(buildIndex))
-                {
-                    var scenePath = $"Scenes/Level{buildIndex}.unity"; // Standard Unity naming convention
-                    Log.Debug($"Build index {buildIndex} -> estimated scene path '{scenePath}'");
-                    return scenePath;
-                }
-                else
-                {
-                    Log.Debug($"Build index {buildIndex} not available in build settings");
-                    return null;
-                }
+                // Unity 2020.3 alternative: Generate standard path (very limited)
+                var scenePath = $"Assets/Scenes/Level{buildIndex}.unity";
+                Log.Debug($"Build index {buildIndex} -> estimated scene path '{scenePath}'");
+                return scenePath;
             }
             catch (Exception ex)
             {
@@ -103,22 +93,22 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Check if a build index is valid
-        /// Unity 2020.3 compatibility: Check against Application.levelCount
+        /// Unity 2020.3 compatibility: Check against SceneManager.sceneCountInBuildSettings
         /// Returns true if build index exists in build settings
         /// </summary>
         public static bool IsBuildIndexValid(int buildIndex)
         {
             try
             {
-                if (buildIndex < 0 || buildIndex >= Application.levelCount)
+                var sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
+                if (buildIndex < 0 || buildIndex >= sceneCount)
                 {
                     return false;
                 }
                 
-                // Use Application.CanStreamedLevelBeLoaded for validation
-                var isValid = Application.CanStreamedLevelBeLoaded(buildIndex);
-                Log.Debug($"Build index {buildIndex} validity: {isValid}");
-                return isValid;
+                // Simple validation - if index is within range, assume valid in Unity 2020.3
+                Log.Debug($"Build index {buildIndex} validity: {buildIndex >= 0 && buildIndex < sceneCount}");
+                return true;
             }
             catch (Exception ex)
             {
@@ -157,25 +147,22 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get all scene paths from build settings
-        /// Unity 2020.3 compatibility: Enumerate through Application.levelCount
+        /// Unity 2020.3 compatibility: Enumerate through SceneManager.sceneCountInBuildSettings
         /// Returns array of all scene paths configured in build
         /// </summary>
         public static string[] GetAllScenePathsInBuild()
         {
             try
             {
-                var sceneCount = Application.levelCount;
+                var sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
                 var validScenes = new System.Collections.Generic.List<string>();
                 
                 for (int i = 0; i < sceneCount; i++)
                 {
-                    if (Application.CanStreamedLevelBeLoaded(i))
+                    var scenePath = GetScenePathByBuildIndex(i);
+                    if (!string.IsNullOrEmpty(scenePath))
                     {
-                        var scenePath = GetScenePathByBuildIndex(i);
-                        if (!string.IsNullOrEmpty(scenePath))
-                        {
-                            validScenes.Add(scenePath);
-                        }
+                        validScenes.Add(scenePath);
                     }
                 }
                 
