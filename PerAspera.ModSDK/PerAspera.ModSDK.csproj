@@ -39,6 +39,7 @@
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
@@ -53,6 +54,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Climate.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Events.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
@@ -70,6 +72,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Climate.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Events.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />

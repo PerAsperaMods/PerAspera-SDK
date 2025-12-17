@@ -1,0 +1,3164 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI.Commands</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder">
+            <summary>
+            Builder for executing multiple commands in batch with various execution strategies
+            Supports sequential, parallel, conditional execution with failure handling
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddCommand(PerAspera.GameAPI.Commands.Builders.CommandBuilder)">
+            <summary>
+            Add a command to the batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddCommand(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean})">
+            <summary>
+            Add a command with a condition
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddCommands(PerAspera.GameAPI.Commands.Builders.CommandBuilder[])">
+            <summary>
+            Add multiple commands to the batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddCommands(System.Collections.Generic.IEnumerable{System.ValueTuple{PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean}}})">
+            <summary>
+            Add multiple commands with conditions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.StopOnFailure(System.Boolean)">
+            <summary>
+            Set whether to stop execution on first failure (default: true)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.ExecuteInParallel(System.Boolean)">
+            <summary>
+            Set whether to execute commands in parallel (default: false)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.WithMaxParallelism(System.Int32)">
+            <summary>
+            Set maximum number of parallel operations (only used when ExecuteInParallel is true)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.WithTimeout(System.TimeSpan)">
+            <summary>
+            Set global timeout for the entire batch operation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddConditionalBlock(System.Func{System.Boolean},System.Action{PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder})">
+            <summary>
+            Add a conditional block of commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.AddFromFactionBuilder(PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder)">
+            <summary>
+            Add commands from a FactionCommandBuilder
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.Execute">
+            <summary>
+            Execute all commands according to the configured strategy
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.ExecuteAsync">
+            <summary>
+            Execute all commands asynchronously
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.Count">
+            <summary>
+            Get count of commands in the batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.Clear">
+            <summary>
+            Clear all commands from the batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.RemoveAt(System.Int32)">
+            <summary>
+            Remove command at specified index
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.InsertAt(System.Int32,PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean})">
+            <summary>
+            Insert command at specified index
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.BatchCommandBuilder.Clone">
+            <summary>
+            Create a copy of this builder
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.CommandBuilder">
+            <summary>
+            Main fluent builder for creating and executing commands with method chaining
+            Provides type-safe parameter validation and execution through CommandDispatcher
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.#ctor(System.String)">
+            <summary>
+            Initialize builder with command type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithFaction(System.Object)">
+            <summary>
+            Set faction for this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithParameter``1(System.String,``0)">
+            <summary>
+            Add parameter with type-safe validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithParameter(System.String,System.Object)">
+            <summary>
+            Add parameter without generic constraint
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithParameters(System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Add multiple parameters from dictionary
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithValidation(System.Func{PerAspera.GameAPI.Commands.Core.IGameCommand,System.Boolean})">
+            <summary>
+            Add custom validation rule for the command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.WithTimeout(System.TimeSpan)">
+            <summary>
+            Set execution timeout for this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.SkipValidation">
+            <summary>
+            Skip validation before execution (use with caution)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.ValidateParameters">
+            <summary>
+            Validate parameters without executing (for testing)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.Execute">
+            <summary>
+            Execute the command and return result
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.ExecuteAsync">
+            <summary>
+            Execute the command asynchronously
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.BuildCommand">
+            <summary>
+            Build the command without executing (for advanced scenarios)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.GetParameters">
+            <summary>
+            Get copy of current parameters (for debugging)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.ClearParameters">
+            <summary>
+            Clear all parameters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.RemoveParameter(System.String)">
+            <summary>
+            Remove specific parameter
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.HasParameter(System.String)">
+            <summary>
+            Check if parameter exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.CommandBuilder.GetParameter``1(System.String,``0)">
+            <summary>
+            Get parameter value
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.BuiltCommand">
+            <summary>
+            Internal command implementation built by CommandBuilder
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder">
+            <summary>
+            Specialized builder for faction-based commands with chainable methods for common faction operations
+            Provides a fluent API optimized for faction-specific commands like resource management, technology unlocks, etc.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.WithTimeout(System.TimeSpan)">
+            <summary>
+            Set global timeout for all commands in this faction builder
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.StopOnFailure(System.Boolean)">
+            <summary>
+            Set whether to stop execution on first failure (default: true)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ImportResource(System.Object,System.Int32)">
+            <summary>
+            Import resource for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ExportResource(System.Object,System.Int32)">
+            <summary>
+            Export resource from this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.SetResourceAmount(System.Object,System.Single)">
+            <summary>
+            Set resource amount for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.UnlockBuilding(System.Object)">
+            <summary>
+            Unlock building for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.LockBuilding(System.Object)">
+            <summary>
+            Lock building for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.AddBuilding(System.Object,System.Single,System.Single,System.Single)">
+            <summary>
+            Add building to faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.RemoveBuilding(System.Object)">
+            <summary>
+            Remove building from faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ResearchTechnology(System.Object)">
+            <summary>
+            Research technology for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.UnlockKnowledge(System.Object)">
+            <summary>
+            Unlock knowledge for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.LockKnowledge(System.Object)">
+            <summary>
+            Lock knowledge for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.StartDialogue(System.Object,System.Object)">
+            <summary>
+            Start dialogue for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.SkipDialogue(System.Object)">
+            <summary>
+            Skip dialogue for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.EnableKeeperMode">
+            <summary>
+            Enable keeper mode for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.DisableKeeperMode">
+            <summary>
+            Disable keeper mode for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.SpawnResourceVein(System.Object,System.Single,System.Single,System.Single)">
+            <summary>
+            Spawn resource vein for this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Sabotage">
+            <summary>
+            Sabotage this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ShowMessage(System.String)">
+            <summary>
+            Show message to this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ShowTutorialMessage(System.String)">
+            <summary>
+            Show tutorial message to this faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.CustomCommand(System.String,System.Action{PerAspera.GameAPI.Commands.Builders.ParameterBuilder})">
+            <summary>
+            Add custom command with parameters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Execute">
+            <summary>
+            Execute all commands synchronously
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ExecuteAsync">
+            <summary>
+            Execute all commands asynchronously
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Count">
+            <summary>
+            Get count of commands to be executed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Faction">
+            <summary>
+            Get the faction this builder is configured for
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Clear">
+            <summary>
+            Clear all commands from this builder
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.Clone">
+            <summary>
+            Create a copy of this builder with the same faction and settings
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.ToBatchBuilder">
+            <summary>
+            Convert to BatchCommandBuilder for more advanced batch operations
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.ParameterBuilder">
+            <summary>
+            Type-safe parameter builder with validation and conversion for all Per Aspera types
+            Provides fluent API for building and validating command parameters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Add(System.String,System.Object)">
+            <summary>
+            Add a parameter with automatic type validation and conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Resource(System.Object)">
+            <summary>
+            Add resource parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Quantity(System.Int32)">
+            <summary>
+            Add quantity parameter with validation (must be positive)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Building(System.Object)">
+            <summary>
+            Add building parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Technology(System.Object)">
+            <summary>
+            Add technology parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Knowledge(System.Object)">
+            <summary>
+            Add knowledge parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Person(System.Object)">
+            <summary>
+            Add person parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Dialogue(System.Object)">
+            <summary>
+            Add dialogue parameter with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Position(System.Single,System.Single,System.Single)">
+            <summary>
+            Add position parameters (X, Y, Z) with validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Position(System.Object)">
+            <summary>
+            Add position from Vector3-like object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.KeyValue(System.String,System.Object)">
+            <summary>
+            Add key-value pair for generic parameters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Amount(System.Single)">
+            <summary>
+            Add amount parameter with validation (must be non-negative)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Duration(System.Single)">
+            <summary>
+            Add duration parameter with validation (must be positive)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Message(System.String)">
+            <summary>
+            Add message parameter with validation (must not be empty)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.WithValidator(System.String,System.Func{System.Object,System.Boolean})">
+            <summary>
+            Add custom validator for a parameter
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.WithConverter(System.String,System.Func{System.Object,System.Object})">
+            <summary>
+            Add custom converter for a parameter
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.HasParameter(System.String)">
+            <summary>
+            Check if parameter exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.GetParameter``1(System.String)">
+            <summary>
+            Get parameter value
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Build">
+            <summary>
+            Get all parameters as dictionary
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Clear">
+            <summary>
+            Clear all parameters
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Count">
+            <summary>
+            Get parameter count
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.ParameterBuilder.Validate(System.Collections.Generic.List{System.String}@)">
+            <summary>
+            Validate all parameters against their registered validators
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities">
+            <summary>
+            Utilities for managing batch command collections and operations
+            Handles cloning, manipulation, and collection management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.CloneCommandLists(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Create a deep copy of command and condition lists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.ValidateListsSynchronization(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Validate that commands and conditions lists are synchronized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.RemoveAt(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},System.Int32)">
+            <summary>
+            Remove command at specified index from both lists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.InsertAt(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},System.Int32,PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean})">
+            <summary>
+            Insert command at specified index in both lists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.AddCommand(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean})">
+            <summary>
+            Add command to both lists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.AddCommands(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},System.Collections.Generic.IEnumerable{PerAspera.GameAPI.Commands.Builders.CommandBuilder})">
+            <summary>
+            Add multiple commands with default condition
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.AddCommandsWithConditions(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},System.Collections.Generic.IEnumerable{System.ValueTuple{PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Func{System.Boolean}}})">
+            <summary>
+            Add multiple commands with specific conditions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.Clear(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}})">
+            <summary>
+            Clear both command and condition lists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.CombineConditions(System.Func{System.Boolean},System.Func{System.Boolean})">
+            <summary>
+            Combine conditional block logic with existing conditions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchCommandUtilities.AddConditionalBlock(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}},System.Func{System.Boolean},System.Action{System.Collections.Generic.List{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.List{System.Func{System.Boolean}}})">
+            <summary>
+            Add conditional block of commands
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor">
+            <summary>
+            Processor for batch command results with aggregation and analysis capabilities
+            Handles result validation, error reporting, and success metrics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.CreateFinalResult(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult},System.String)">
+            <summary>
+            Create final batch result with success analysis
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.CreateTimeoutResult(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult},System.String)">
+            <summary>
+            Create timeout result with partial results
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.CreateFailureResult(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult},System.Int32,System.String)">
+            <summary>
+            Create failure result for specific command index
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.CreateConditionFailureResult(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult},System.String)">
+            <summary>
+            Create result for condition evaluation failure
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.ValidateAndFillPartialResults(PerAspera.GameAPI.Commands.Core.CommandResult[],System.Int32,System.String)">
+            <summary>
+            Validate partial results from parallel execution and fill gaps
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.AnalyzeResults(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult})">
+            <summary>
+            Analyze results and provide detailed statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.HandleParallelFailure(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Core.CommandResult},System.Boolean,System.String)">
+            <summary>
+            Handle parallel execution failure with stop-on-failure logic
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.BatchResultProcessor.ProcessIndexedResults(System.Collections.Generic.IEnumerable{System.ValueTuple{System.Int32,PerAspera.GameAPI.Commands.Core.CommandResult}},System.Int32)">
+            <summary>
+            Process results from indexed parallel execution
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.BatchResultStatistics">
+            <summary>
+            Statistical analysis of batch command execution results
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionBuildingCommands">
+            <summary>
+            Service for building-related faction commands
+            Handles building unlocking, locking, placement, and removal operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionBuildingCommands.UnlockBuilding(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create unlock building command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionBuildingCommands.LockBuilding(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create lock building command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionBuildingCommands.AddBuilding(System.Object,System.Object,System.Single,System.Single,System.Single,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create add building command for faction with position
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionBuildingCommands.RemoveBuilding(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create remove building command for faction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService">
+            <summary>
+            Service for faction command execution with shared logic
+            Handles synchronous and asynchronous execution patterns for faction command sequences
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.ExecuteCommands(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Boolean)">
+            <summary>
+            Execute commands sequentially with stop-on-failure logic
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.ExecuteCommandsAsync(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Boolean)">
+            <summary>
+            Execute commands sequentially asynchronously with stop-on-failure logic
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.CreateCustomCommand(System.Object,System.String,System.Nullable{System.TimeSpan},System.Action{PerAspera.GameAPI.Commands.Builders.ParameterBuilder})">
+            <summary>
+            Create custom command with parameters for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.CloneCommandList(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder})">
+            <summary>
+            Clone command list for faction builder copying
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.ValidateFaction(System.Object)">
+            <summary>
+            Validate faction object for command operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.GetCommandCount(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder})">
+            <summary>
+            Get command count safely
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionExecutionService.IsEmpty(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder})">
+            <summary>
+            Check if command list is empty
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands">
+            <summary>
+            Service for interaction and messaging faction commands
+            Handles dialogues, messages, keeper mode, and environmental sabotage operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.StartDialogue(System.Object,System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create start dialogue command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.SkipDialogue(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create skip dialogue command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.EnableKeeperMode(System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create enable keeper mode command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.DisableKeeperMode(System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create disable keeper mode command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.Sabotage(System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create sabotage command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.ShowMessage(System.Object,System.String,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create show message command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionInteractionCommands.ShowTutorialMessage(System.Object,System.String,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create show tutorial message command for faction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionResourceCommands">
+            <summary>
+            Service for resource-related faction commands
+            Handles resource import, export, allocation, and vein spawning operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionResourceCommands.ImportResource(System.Object,System.Object,System.Int32,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create import resource command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionResourceCommands.ExportResource(System.Object,System.Object,System.Int32,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create export resource command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionResourceCommands.SetResourceAmount(System.Object,System.Object,System.Single,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create set resource amount command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionResourceCommands.SpawnResourceVein(System.Object,System.Object,System.Single,System.Single,System.Single,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create spawn resource vein command for faction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionTechnologyCommands">
+            <summary>
+            Service for technology and knowledge-related faction commands
+            Handles technology research, knowledge unlocking, and research progress management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionTechnologyCommands.ResearchTechnology(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create research technology command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionTechnologyCommands.UnlockKnowledge(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create unlock knowledge command for faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionTechnologyCommands.LockKnowledge(System.Object,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create lock knowledge command for faction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.ParallelExecutionStrategy">
+            <summary>
+            Execution strategy for parallel command processing
+            Handles parallel execution with degree control, timeout management, and error aggregation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.ParallelExecutionStrategy.Execute(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Execute commands in parallel using Parallel.For
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.ParallelExecutionStrategy.ExecuteAsync(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Execute commands in parallel asynchronously using Task.Run
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.SequentialExecutionStrategy">
+            <summary>
+            Execution strategy for sequential command processing
+            Handles command conditions, error management, and timeout control
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.SequentialExecutionStrategy.Execute(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Execute commands sequentially with condition checking
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.SequentialExecutionStrategy.ExecuteAsync(System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.Commands.Builders.CommandBuilder},System.Collections.Generic.IReadOnlyList{System.Func{System.Boolean}})">
+            <summary>
+            Execute commands sequentially asynchronously
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CommandBase">
+            <summary>
+            Abstract base class for command implementations
+            Provides common functionality like logging
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.CommandBase.Logger">
+            <summary>
+            Logger instance for this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.#ctor">
+            <summary>
+            Initialize the command with logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.#ctor(System.String)">
+            <summary>
+            Initialize the command with a specific logger name
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.CommandBase.CommandName">
+            <summary>
+            The name/identifier of the command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.Execute">
+            <summary>
+            Execute the command
+            </summary>
+            <returns>Result of command execution, or null if no result</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.CanExecute">
+            <summary>
+            Check if the command can be executed in the current state
+            Default implementation returns true
+            </summary>
+            <returns>True if command can be executed, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.Validate">
+            <summary>
+            Validate command before execution
+            </summary>
+            <returns>True if validation passed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBase.ExecuteSafe">
+            <summary>
+            Execute command with validation and error handling
+            </summary>
+            <returns>Result of command execution</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CommandBusAccessor">
+            <summary>
+            Provides access to the game's command bus system
+            Allows mods to execute commands and interact with the game's command infrastructure
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.Initialize">
+            <summary>
+            Initialize the command bus accessor
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.GetCommandBus">
+            <summary>
+            Get the command bus instance from the game
+            </summary>
+            <returns>Command bus instance, or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.IsCommandBusAvailable">
+            <summary>
+            Check if the command bus is available
+            </summary>
+            <returns>True if command bus is available, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.ExecuteCommand(PerAspera.GameAPI.Commands.ICommand)">
+            <summary>
+            Execute a command on the command bus
+            </summary>
+            <param name="command">The command to execute</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if command bus is not available</exception>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.TryExecuteCommand(PerAspera.GameAPI.Commands.ICommand)">
+            <summary>
+            Try to execute a command, returning false on failure instead of throwing
+            </summary>
+            <param name="command">The command to execute</param>
+            <returns>True if command was executed, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.GetCommandBusType">
+            <summary>
+            Get command bus type
+            </summary>
+            <returns>Command bus type, or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.Reset">
+            <summary>
+            Reset the command bus accessor (for testing)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.GetCommandBusInstance">
+            <summary>
+            Get command bus instance using reflection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.EnsureInitialized">
+            <summary>
+            Ensure the accessor is initialized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandBusAccessor.PublishCommandSystemReadyEvent">
+            <summary>
+            Publish command system ready event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CommandExecutor">
+            <summary>
+            Handles command execution with validation, error handling, and logging
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandExecutor.ExecuteCommand(PerAspera.GameAPI.Commands.ICommand)">
+            <summary>
+            Execute a command immediately
+            </summary>
+            <param name="command">Command to execute</param>
+            <returns>Result of command execution</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandExecutor.TryExecuteCommand(PerAspera.GameAPI.Commands.ICommand,System.Object@)">
+            <summary>
+            Try to execute a command without throwing exceptions
+            </summary>
+            <param name="command">Command to execute</param>
+            <param name="result">Result of command execution</param>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandExecutor.QueueCommand(PerAspera.GameAPI.Commands.ICommand)">
+            <summary>
+            Queue a command for later execution
+            </summary>
+            <param name="command">Command to queue</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandExecutor.ExecuteQueuedCommands">
+            <summary>
+            Execute all queued commands
+            </summary>
+            <returns>Number of commands executed</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.CommandExecutor.QueuedCommandCount">
+            <summary>
+            Get the number of queued commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CommandExecutor.ClearQueue">
+            <summary>
+            Clear all queued commands
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CommandExecutionException">
+            <summary>
+            Exception thrown when command execution fails
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Commands">
+            <summary>
+            Main static entry point for Commands API with fluent builder pattern
+            Provides convenient methods for creating and executing Per Aspera commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.Create(System.String)">
+            <summary>
+            Create a new command builder for the specified command type
+            </summary>
+            <param name="commandType">Type of command to create (e.g., "ImportResource")</param>
+            <returns>CommandBuilder for fluent configuration</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.ForFaction(System.Object)">
+            <summary>
+            Create a faction-specific command builder for chaining faction commands
+            </summary>
+            <param name="faction">Faction to execute commands for</param>
+            <returns>FactionCommandBuilder for faction-specific fluent API</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.CreateBatch">
+            <summary>
+            Create a batch command builder for executing multiple commands
+            </summary>
+            <returns>BatchCommandBuilder for batch execution</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.ImportResource(System.Object,System.Object,System.Int32)">
+            <summary>
+            Import resource for faction (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.UnlockBuilding(System.Object,System.Object)">
+            <summary>
+            Unlock building for faction (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.ResearchTechnology(System.Object,System.Object)">
+            <summary>
+            Research technology for faction (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.UnlockKnowledge(System.Object,System.Object)">
+            <summary>
+            Unlock knowledge for faction (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.StartDialogue(System.Object,System.Object,System.Object)">
+            <summary>
+            Start dialogue (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.SetOverride(System.String,System.Object)">
+            <summary>
+            Set override value (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.Sabotage(System.Object)">
+            <summary>
+            Sabotage faction (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.SpawnResourceVein(System.Object,System.Object,System.Single,System.Single,System.Single)">
+            <summary>
+            Spawn resource vein (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.GameOver">
+            <summary>
+            Game over command (convenience method)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.IsCommandTypeSupported(System.String)">
+            <summary>
+            Check if command type is supported
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.GetSupportedCommandTypes">
+            <summary>
+            Get all supported command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.OnCommandExecuted(System.Action{PerAspera.GameAPI.Commands.Events.CommandExecutedEvent})">
+            <summary>
+            Subscribe to command execution events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.OnCommandFailed(System.Action{PerAspera.GameAPI.Commands.Events.CommandFailedEvent})">
+            <summary>
+            Subscribe to command failure events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.OffCommandExecuted(System.Action{PerAspera.GameAPI.Commands.Events.CommandExecutedEvent})">
+            <summary>
+            Unsubscribe from command execution events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.OffCommandFailed(System.Action{PerAspera.GameAPI.Commands.Events.CommandFailedEvent})">
+            <summary>
+            Unsubscribe from command failure events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.GetStatistics">
+            <summary>
+            Get command execution statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes">
+            <summary>
+            Types of native Per Aspera commands
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes.AllNativeTypes">
+            <summary>
+            Get all native command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes.IsNativeCommandType(System.String)">
+            <summary>
+            Check if command type is a native Per Aspera command
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Constants.ParameterNames">
+            <summary>
+            Parameter names used in commands
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Constants.ErrorCodes">
+            <summary>
+            Error codes for command execution
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Constants.CommandConstants">
+            <summary>
+            Constants for command system configuration
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.CommandConstants.DefaultTimeoutMs">
+            <summary>
+            Default timeout for command execution in milliseconds
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.CommandConstants.MaxBatchSize">
+            <summary>
+            Maximum number of commands in a batch
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.CommandConstants.MaxConcurrentCommands">
+            <summary>
+            Maximum number of concurrent commands in parallel execution
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.CommandConstants.DefaultRetryCount">
+            <summary>
+            Default retry count for failed commands
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Constants.CommandConstants.ApiVersion">
+            <summary>
+            Version of the command system API
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.CommandDispatcher">
+            <summary>
+            Main orchestrator for command system - provides high-level API and manages execution
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandDispatcher.Instance">
+            <summary>
+            Global instance for static API access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.Initialize(System.Object,System.Object)">
+            <summary>
+            Initialize global dispatcher instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.Reset">
+            <summary>
+            Reset global instance (for testing)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.#ctor(System.Object,System.Object)">
+            <summary>
+            Initialize dispatcher with executor and event bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.Dispatch(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Execute single command with event publishing
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.DispatchBatch(System.Collections.Generic.IEnumerable{PerAspera.GameAPI.Commands.Core.IGameCommand})">
+            <summary>
+            Execute multiple commands in sequence
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.DispatchBatchUntilFailure(System.Collections.Generic.IEnumerable{PerAspera.GameAPI.Commands.Core.IGameCommand})">
+            <summary>
+            Execute commands until first failure
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.SubscribeToExecutedEvents(System.Action{PerAspera.GameAPI.Commands.Events.CommandExecutedEvent})">
+            <summary>
+            Subscribe to command execution events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.SubscribeToFailedEvents(System.Action{PerAspera.GameAPI.Commands.Events.CommandFailedEvent})">
+            <summary>
+            Subscribe to command failure events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.UnsubscribeFromExecutedEvents(System.Action{PerAspera.GameAPI.Commands.Events.CommandExecutedEvent})">
+            <summary>
+            Unsubscribe from command execution events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.UnsubscribeFromFailedEvents(System.Action{PerAspera.GameAPI.Commands.Events.CommandFailedEvent})">
+            <summary>
+            Unsubscribe from command failure events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandDispatcher.GetStatistics">
+            <summary>
+            Get command execution statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.CommandExecutor">
+            <summary>
+            Core executor for game commands - bridges SDK to native CommandBus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.#ctor(System.Object,System.Object)">
+            <summary>
+            Initialize executor with access to native CommandBus and Keeper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.Execute(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Execute a single command synchronously
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ExecuteAsync(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Execute a single command asynchronously
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ExecuteBatch(System.Collections.Generic.IEnumerable{PerAspera.GameAPI.Commands.Core.IGameCommand})">
+            <summary>
+            Execute multiple commands in sequence
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ExecuteBatchParallelAsync(System.Collections.Generic.IEnumerable{PerAspera.GameAPI.Commands.Core.IGameCommand},System.Int32)">
+            <summary>
+            Execute commands in parallel (use with caution - may cause race conditions)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ExecuteNativeCommand(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Execute native command through CommandBus.Dispatch() → Keeper.Register()
+            This is the core bridge to the Per Aspera command system
+            Phase 1.1: Now integrated with GameTypeInitializer
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ConvertToNativeCommand(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Convert SDK command to native Per Aspera command instance
+            Phase 1.2: MVP implementation for basic command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.TryExtractImportResourceParameters(PerAspera.GameAPI.Commands.Core.IGameCommand,System.String@,System.Single@)">
+            <summary>
+            Try to extract ImportResource parameters from SDK command
+            Phase 1.2: MVP parameter extraction for testing
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandExecutor.ExtractCommandParameters(PerAspera.GameAPI.Commands.Core.IGameCommand)">
+            <summary>
+            Extract parameters from SDK command for native command creation
+            Phase 1.2: Basic parameter extraction
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.CommandResult">
+            <summary>
+            Result of command execution with success/failure status and metadata
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Success">
+            <summary>
+            Whether the command executed successfully
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Error">
+            <summary>
+            Error message if command failed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Message">
+            <summary>
+            Result message (success or error description)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Value">
+            <summary>
+            Return value from command execution
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Command">
+            <summary>
+            Command that was executed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.ExecutedAt">
+            <summary>
+            When the command execution completed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.ExecutionTimeMs">
+            <summary>
+            Execution time in milliseconds
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.CommandResult.Metadata">
+            <summary>
+            Additional metadata from command execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandResult.#ctor(PerAspera.GameAPI.Commands.Core.IGameCommand,System.Int64,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create successful command result
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandResult.#ctor(PerAspera.GameAPI.Commands.Core.IGameCommand,System.String,System.Int64,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create failed command result
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandResult.CreateSuccess(PerAspera.GameAPI.Commands.Core.IGameCommand,System.Int64,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create successful result from existing command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.CommandResult.CreateFailure(PerAspera.GameAPI.Commands.Core.IGameCommand,System.String,System.Int64,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create failed result from existing command
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.BatchCommandResult">
+            <summary>
+            Result of multiple command execution with aggregate status
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.Results">
+            <summary>
+            Individual command results
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.SuccessCount">
+            <summary>
+            Number of successfully executed commands
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.FailureCount">
+            <summary>
+            Number of failed commands
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.TotalCount">
+            <summary>
+            Total number of commands executed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.AllSucceeded">
+            <summary>
+            Whether all commands succeeded
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.AnySucceeded">
+            <summary>
+            Whether any commands succeeded
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.TotalExecutionTimeMs">
+            <summary>
+            Total execution time for all commands
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.Failures">
+            <summary>
+            Get all failed results
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.BatchCommandResult.Successes">
+            <summary>
+            Get all successful results
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.ErrorCommand">
+            <summary>
+            Represents an error command when no specific command can be constructed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.ErrorCommand.#ctor(System.String,System.Object)">
+            <summary>
+            Create an error command with the specified error type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.GameCommandBase">
+            <summary>
+            Abstract base class for all game commands with common functionality
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.GameCommandBase.CommandType">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.GameCommandBase.Timestamp">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.GameCommandBase.Faction">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.GameCommandBase.Parameters">
+            <summary>
+            Parameters for this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.#ctor">
+            <summary>
+            Initialize base command with current timestamp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.#ctor(System.String)">
+            <summary>
+            Initialize base command with command type and current timestamp
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.IsValid">
+            <inheritdoc/>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.GetDescription">
+            <inheritdoc/>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.AddParameter(System.String,System.Object)">
+            <summary>
+            Add parameter to this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.GetParameter``1(System.String,``0)">
+            <summary>
+            Get parameter value with type conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.HasParameter(System.String)">
+            <summary>
+            Check if parameter exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.GameCommandBase.ValidateRequiredParameters(System.String[])">
+            <summary>
+            Validate required parameters are present
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Core.IGameCommand">
+            <summary>
+            Base interface for all game commands (native and custom)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.IGameCommand.CommandType">
+            <summary>
+            Type of the command (used for routing and handling)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.IGameCommand.Timestamp">
+            <summary>
+            When the command was created
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Core.IGameCommand.Faction">
+            <summary>
+            Faction that will execute this command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.IGameCommand.IsValid">
+            <summary>
+            Validate command parameters before execution
+            </summary>
+            <returns>True if command is valid and ready for execution</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Core.IGameCommand.GetDescription">
+            <summary>
+            Get human-readable description of command for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Events.CommandStatistics">
+            <summary>
+            Statistics about command execution
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Events.CommandEventBus">
+            <summary>
+            Event bus for command system events
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Commands.Events.CommandEventBus.CommandExecuted">
+            <summary>
+            Event fired when a command is executed successfully
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Commands.Events.CommandEventBus.CommandFailed">
+            <summary>
+            Event fired when a command execution fails
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Events.CommandEventBus.PublishCommandExecuted(PerAspera.GameAPI.Commands.Events.CommandExecutedEvent)">
+            <summary>
+            Publish command executed event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Events.CommandEventBus.PublishCommandFailed(PerAspera.GameAPI.Commands.Events.CommandFailedEvent)">
+            <summary>
+            Publish command failed event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Events.CommandEventBus.GetStatistics">
+            <summary>
+            Get command execution statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Events.CommandEventBus.ResetStatistics">
+            <summary>
+            Reset statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Events.CommandExecutedEvent">
+            <summary>
+            Event published when a command is executed successfully
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandExecutedEvent.Command">
+            <summary>
+            Command that was executed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandExecutedEvent.Result">
+            <summary>
+            Result of the execution
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandExecutedEvent.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Events.CommandFailedEvent">
+            <summary>
+            Event published when a command execution fails
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandFailedEvent.Command">
+            <summary>
+            Command that failed
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandFailedEvent.Error">
+            <summary>
+            Error message
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandFailedEvent.ExecutionTimeMs">
+            <summary>
+            Execution time before failure
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Events.CommandFailedEvent.Timestamp">
+            <summary>
+            When the event occurred
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions">
+            <summary>
+            Extension methods for CommandBuilder to provide fluent API for common parameters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions.Resource(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.String)">
+            <summary>
+            Set resource for ImportResource commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions.Amount(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Single)">
+            <summary>
+            Set amount for ImportResource and similar commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions.Quantity(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Int32)">
+            <summary>
+            Set quantity for commands that need integer quantities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions.Building(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Object)">
+            <summary>
+            Set building for UnlockBuilding commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Extensions.CommandBuilderExtensions.Technology(PerAspera.GameAPI.Commands.Builders.CommandBuilder,System.Object)">
+            <summary>
+            Set technology for ResearchTechnology commands
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Helpers.ImportResource">
+            <summary>
+            Helper class for creating ImportResource commands with fluent API
+            MVP implementation for testing Commands Native Bridge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ImportResource.Create">
+            <summary>
+            Start building an ImportResource command
+            </summary>
+            <returns>CommandBuilder configured for ImportResource</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ImportResource.Create(System.String,System.Single)">
+            <summary>
+            Create ImportResource command for specific resource and amount
+            </summary>
+            <param name="resourceName">Resource name (e.g., "water", "carbon")</param>
+            <param name="amount">Amount to import</param>
+            <returns>Configured CommandBuilder</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ICommand">
+            <summary>
+            Base interface for all commands in the PerAspera command system
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ICommand.CommandName">
+            <summary>
+            The name/identifier of the command
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ICommand.Execute">
+            <summary>
+            Execute the command
+            </summary>
+            <returns>Result of command execution, or null if no result</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ICommand.CanExecute">
+            <summary>
+            Check if the command can be executed in the current state
+            </summary>
+            <returns>True if command can be executed, false otherwise</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.AddBuildingCommand">
+            <summary>
+            Add building command for spawning a new building at a specific location
+            Creates a new building instance on the planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.AddBuildingCommand.IsValid">
+            <summary>
+            Validates if the add building command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.AddBuildingCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create AddBuildingCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.LockBuildingCommand">
+            <summary>
+            Lock building command for removing a building type from a faction's available buildings
+            Prevents the faction from constructing the specified building type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.LockBuildingCommand.IsValid">
+            <summary>
+            Validates if the lock building command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.LockBuildingCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create LockBuildingCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.RemoveBuildingCommand">
+            <summary>
+            Remove building command for destroying existing buildings
+            Removes specified building instances from the planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.RemoveBuildingCommand.IsValid">
+            <summary>
+            Validates if the remove building command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.RemoveBuildingCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create RemoveBuildingCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.UnlockBuildingCommand">
+            <summary>
+            Unlock building command for making a building type available to a faction
+            Adds the building to the faction's available building list
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.UnlockBuildingCommand.IsValid">
+            <summary>
+            Validates if the unlock building command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.UnlockBuildingCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create UnlockBuildingCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand">
+            <summary>
+            Command to trigger game over condition
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.Reason">
+            <summary>
+            Reason for game over
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.IsVictory">
+            <summary>
+            Victory or defeat
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.#ctor">
+            <summary>
+            Initialize a new GameOverCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.IsValid">
+            <summary>
+            Validates if the game over command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.GameOverCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create GameOverCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand">
+            <summary>
+            Command to sabotage buildings or systems
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.Target">
+            <summary>
+            Target to sabotage
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.SabotageType">
+            <summary>
+            Type of sabotage
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.#ctor">
+            <summary>
+            Initialize a new SabotageCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.IsValid">
+            <summary>
+            Validates if the sabotage command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SabotageCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SabotageCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand">
+            <summary>
+            Command to set override values for game systems
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.SystemName">
+            <summary>
+            System to override
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.OverrideValue">
+            <summary>
+            Override value
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.#ctor">
+            <summary>
+            Initialize a new SetOverrideCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.IsValid">
+            <summary>
+            Validates if the set override command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SetOverrideCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SetOverrideCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand">
+            <summary>
+            Command to show messages to players
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.Message">
+            <summary>
+            Message text to display
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.Title">
+            <summary>
+            Message title
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.Duration">
+            <summary>
+            Duration to show the message
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.#ctor">
+            <summary>
+            Initialize a new ShowMessageCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.IsValid">
+            <summary>
+            Validates if the show message command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowMessageCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create ShowMessageCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand">
+            <summary>
+            Command to show tutorial messages
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.TutorialId">
+            <summary>
+            Tutorial message ID
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.Step">
+            <summary>
+            Tutorial step number
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.SkipIfShown">
+            <summary>
+            Skip if already shown
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.#ctor">
+            <summary>
+            Initialize a new ShowTutorialMessageCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.IsValid">
+            <summary>
+            Validates if the show tutorial message command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.ShowTutorialMessageCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create ShowTutorialMessageCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand">
+            <summary>
+            Command to spawn resource veins on the planet
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.ResourceType">
+            <summary>
+            Resource type to spawn
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.PositionX">
+            <summary>
+            X position coordinate
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.PositionY">
+            <summary>
+            Y position coordinate
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.Amount">
+            <summary>
+            Amount of resource in the vein
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.#ctor">
+            <summary>
+            Initialize a new SpawnResourceVeinCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.IsValid">
+            <summary>
+            Validates if the spawn resource vein command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands.SpawnResourceVeinCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SpawnResourceVeinCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.DisableKeeperModeCommand">
+            <summary>
+            Disable keeper mode command for deactivating AI keeper assistance
+            Disables the AI keeper mode for the specified faction, removing automated assistance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.DisableKeeperModeCommand.Faction">
+            <summary>
+            The faction to disable keeper mode for
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.DisableKeeperModeCommand.#ctor(System.Object)">
+            <summary>
+            Create a new DisableKeeperMode command
+            </summary>
+            <param name="faction">Faction to disable keeper mode for</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.EnableKeeperModeCommand">
+            <summary>
+            Enable keeper mode command for activating AI keeper assistance
+            Enables the AI keeper mode for the specified faction, providing automated assistance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.EnableKeeperModeCommand.Faction">
+            <summary>
+            The faction to enable keeper mode for
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.EnableKeeperModeCommand.#ctor(System.Object)">
+            <summary>
+            Create a new EnableKeeperMode command
+            </summary>
+            <param name="faction">Faction to enable keeper mode for</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.SkipDialogueCommand">
+            <summary>
+            Skip dialogue command for bypassing conversations
+            Skips the current dialogue sequence for a faction
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.SkipDialogueCommand.Faction">
+            <summary>
+            The faction skipping the dialogue
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.SkipDialogueCommand.Dialogue">
+            <summary>
+            The dialogue to skip
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.SkipDialogueCommand.#ctor(System.Object,System.Object)">
+            <summary>
+            Create a new SkipDialogue command
+            </summary>
+            <param name="faction">Faction skipping the dialogue</param>
+            <param name="dialogue">Dialogue to skip</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.StartDialogueCommand">
+            <summary>
+            Start dialogue command for initiating conversations between characters
+            Begins a dialogue sequence between a faction and a specific person
+            </summary>
+            <example>
+            <code>
+            // Start dialogue between player faction and scientist
+            var result = new StartDialogueCommand(playerFaction, scientist, DialogueType.Research).Execute();
+            
+            // Using convenience method
+            var result = Commands.StartDialogue(playerFaction, scientist, DialogueType.Research);
+            
+            // Chain dialogues in a faction builder
+            Commands.ForFaction(playerFaction)
+                .StartDialogue(scientist, DialogueType.Introduction)
+                .StartDialogue(engineer, DialogueType.ProjectUpdate)
+                .Execute();
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.StartDialogueCommand.Faction">
+            <summary>
+            The faction participating in the dialogue
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.StartDialogueCommand.Person">
+            <summary>
+            The person/character to dialogue with
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.StartDialogueCommand.Dialogue">
+            <summary>
+            The dialogue to start
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.InteractionCommands.StartDialogueCommand.#ctor(System.Object,System.Object,System.Object)">
+            <summary>
+            Create a new StartDialogue command
+            </summary>
+            <param name="faction">Faction participating in dialogue</param>
+            <param name="person">Person to dialogue with</param>
+            <param name="dialogue">Dialogue to start</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory">
+            <summary>
+            Factory for creating native command instances from command type and parameters
+            Provides type-safe instantiation and parameter validation for all native commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.CreateCommand(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create a native command instance from command type and parameters
+            </summary>
+            <param name="commandType">The native command type</param>
+            <param name="parameters">Command parameters</param>
+            <returns>Strongly-typed command instance</returns>
+            <exception cref="T:System.ArgumentException">If command type is not supported or parameters are invalid</exception>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.GetSupportedCommandTypes">
+            <summary>
+            Get all currently supported command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.IsCommandTypeSupported(System.String)">
+            <summary>
+            Check if a command type is supported by this factory
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.GetRequiredParameters(System.String)">
+            <summary>
+            Get the required parameters for a specific command type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.ValidateParameters(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.String[]@)">
+            <summary>
+            Validate that all required parameters are present for a command type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.NativeCommandFactory.GetCommandDocumentation(System.String)">
+            <summary>
+            Get command documentation and usage examples for a specific command type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.CommandDocumentation">
+            <summary>
+            Documentation information for a command type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand">
+            <summary>
+            Command to export resources from faction inventory
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.ResourceType">
+            <summary>
+            Resource type to export
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.Amount">
+            <summary>
+            Amount to export
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.Destination">
+            <summary>
+            Destination location
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.#ctor">
+            <summary>
+            Initialize a new ExportResourceCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.IsValid">
+            <summary>
+            Validates if the export resource command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ExportResourceCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create ExportResourceCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand">
+            <summary>
+            Command to import resources to faction inventory
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.ResourceType">
+            <summary>
+            Resource type to import
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.Amount">
+            <summary>
+            Amount to import
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.Source">
+            <summary>
+            Source location
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.#ctor">
+            <summary>
+            Initialize a new ImportResourceCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.IsValid">
+            <summary>
+            Validates if the import resource command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.ImportResourceCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create ImportResourceCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand">
+            <summary>
+            Command to set specific resource amounts for factions
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.Faction">
+            <summary>
+            The faction executing the command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.CommandType">
+            <summary>
+            The command type identifier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.ResourceType">
+            <summary>
+            Resource type to set
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.Amount">
+            <summary>
+            New amount to set
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.AddToExisting">
+            <summary>
+            Whether to add to existing amount or replace
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.#ctor">
+            <summary>
+            Initialize a new SetResourceAmountCommand
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.IsValid">
+            <summary>
+            Validates if the set resource amount command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands.SetResourceAmountCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SetResourceAmountCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.AddPointsCommand">
+            <summary>
+            Command to add or modify faction points/score
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.AddPointsCommand.IsValid">
+            <summary>
+            Validates if the add points command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.AddPointsCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create AddPointsCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.DestroyUnitCommand">
+            <summary>
+            Command to destroy specific units
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.DestroyUnitCommand.IsValid">
+            <summary>
+            Validates if the destroy unit command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.DestroyUnitCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create DestroyUnitCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.MoveUnitCommand">
+            <summary>
+            Command to move units to specific locations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.MoveUnitCommand.IsValid">
+            <summary>
+            Validates if the move unit command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.MoveUnitCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create MoveUnitCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetAIAggressionCommand">
+            <summary>
+            Command to set AI aggression levels
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetAIAggressionCommand.IsValid">
+            <summary>
+            Validates if the AI aggression command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetAIAggressionCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SetAIAggressionCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetClimateCommand">
+            <summary>
+            Command to set climate values on the planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetClimateCommand.IsValid">
+            <summary>
+            Validates if the climate command parameters are valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetClimateCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SetClimateCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetFactionRelationCommand">
+            <summary>
+            Command to set diplomatic relations between factions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetFactionRelationCommand.IsValid">
+            <summary>
+            Validates if the faction relation command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SetFactionRelationCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SetFactionRelationCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SpawnUnitCommand">
+            <summary>
+            Command to spawn units on the planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SpawnUnitCommand.IsValid">
+            <summary>
+            Validates if the spawn unit command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.SpawnUnitCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create SpawnUnitCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.TriggerEventCommand">
+            <summary>
+            Command to trigger predefined game events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.TriggerEventCommand.IsValid">
+            <summary>
+            Validates if the event trigger command is valid
+            </summary>
+            <returns>True if valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.TriggerEventCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Create TriggerEventCommand from parameters dictionary
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.ResearchTechnologyCommand">
+            <summary>
+            Research technology command for unlocking technologies in the tech tree
+            Advances the faction's technological progress by researching specific technologies
+            </summary>
+            <example>
+            <code>
+            // Research advanced engineering for player faction
+            var result = new ResearchTechnologyCommand(playerFaction, TechnologyType.AdvancedEngineering).Execute();
+            
+            // Using convenience method
+            var result = Commands.ResearchTechnology(playerFaction, TechnologyType.AdvancedEngineering);
+            
+            // Chain multiple technology research
+            Commands.ForFaction(playerFaction)
+                .ResearchTechnology(TechnologyType.BasicEngineering)
+                .ResearchTechnology(TechnologyType.AdvancedEngineering)
+                .ResearchTechnology(TechnologyType.ExpertEngineering)
+                .Execute();
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResearchTechnologyCommand.Faction">
+            <summary>
+            The faction that will research the technology
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.ResearchTechnologyCommand.Technology">
+            <summary>
+            The technology to research
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.ResearchTechnologyCommand.#ctor(System.Object,System.Object)">
+            <summary>
+            Create a new ResearchTechnology command
+            </summary>
+            <param name="faction">Faction to research technology for</param>
+            <param name="technology">Technology to research</param>
+            <exception cref="T:System.ArgumentNullException">If faction or technology is null</exception>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.UnlockKnowledgeCommand">
+            <summary>
+            Unlock knowledge command for making knowledge available to a faction
+            Grants access to specific knowledge items in the knowledge tree
+            </summary>
+            <example>
+            <code>
+            // Unlock basic chemistry knowledge for player faction
+            var result = new UnlockKnowledgeCommand(playerFaction, KnowledgeType.BasicChemistry).Execute();
+            
+            // Using convenience method
+            var result = Commands.UnlockKnowledge(playerFaction, KnowledgeType.BasicChemistry);
+            
+            // Unlock multiple knowledge items in sequence
+            Commands.ForFaction(playerFaction)
+                .UnlockKnowledge(KnowledgeType.BasicPhysics)
+                .UnlockKnowledge(KnowledgeType.BasicChemistry)
+                .UnlockKnowledge(KnowledgeType.BasicBiology)
+                .Execute();
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.UnlockKnowledgeCommand.Faction">
+            <summary>
+            The faction that will gain the knowledge
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.UnlockKnowledgeCommand.Knowledge">
+            <summary>
+            The knowledge to unlock
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.UnlockKnowledgeCommand.#ctor(System.Object,System.Object)">
+            <summary>
+            Create a new UnlockKnowledge command
+            </summary>
+            <param name="faction">Faction to unlock knowledge for</param>
+            <param name="knowledge">Knowledge to unlock</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.LockKnowledgeCommand">
+            <summary>
+            Lock knowledge command for removing knowledge from a faction's available knowledge
+            Removes access to specific knowledge items (useful for scenarios or balance)
+            </summary>
+            <example>
+            <code>
+            // Lock advanced physics knowledge from AI faction
+            var result = new LockKnowledgeCommand(aiFaction, KnowledgeType.AdvancedPhysics).Execute();
+            
+            // Lock multiple knowledge items for a faction
+            Commands.ForFaction(restrictedFaction)
+                .LockKnowledge(KnowledgeType.NuclearPhysics)
+                .LockKnowledge(KnowledgeType.QuantumMechanics)
+                .Execute();
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.LockKnowledgeCommand.Faction">
+            <summary>
+            The faction that will lose the knowledge
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.LockKnowledgeCommand.Knowledge">
+            <summary>
+            The knowledge to lock
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.LockKnowledgeCommand.#ctor(System.Object,System.Object)">
+            <summary>
+            Create a new LockKnowledge command
+            </summary>
+            <param name="faction">Faction to lock knowledge for</param>
+            <param name="knowledge">Knowledge to lock</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Commands.NativeCommands.LockKnowledgeCommand.FromParameters(System.Collections.Generic.Dictionary{System.String,System.Object})" -->
+        <member name="T:PerAspera.GameAPI.Commands.Native.CommandBusAccessor">
+            <summary>
+            Main accessor for native CommandBus system via IL2CPP interop
+            Provides high-level API for command execution through native Per Aspera systems
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.Instance">
+            <summary>
+            Singleton instance for global access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.Initialize(System.Object,System.Object)">
+            <summary>
+            Initialize global accessor with native CommandBus and Keeper
+            </summary>
+            <param name="nativeCommandBus">Native CommandBus instance from game</param>
+            <param name="nativeKeeper">Native Keeper instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.TryAutoInitialize">
+            <summary>
+            Auto-initialize using GameTypeInitializer (Phase 1.1 integration)
+            Attempts to find CommandBus and Keeper from BaseGame automatically
+            </summary>
+            <returns>True if initialization succeeded, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.Reset">
+            <summary>
+            Reset global instance (for testing)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.#ctor(System.Object,System.Object)">
+            <summary>
+            Initialize accessor with wrappers
+            </summary>
+            <param name="nativeCommandBus">Native CommandBus instance</param>
+            <param name="nativeKeeper">Native Keeper instance (can be null)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.ExecuteCommand(PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper)">
+            <summary>
+            Execute command via native CommandBus.Dispatch()
+            </summary>
+            <param name="command">Command to execute</param>
+            <returns>True if command executed successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.CreateAndExecuteCommand(System.String,System.Object[])">
+            <summary>
+            Create and execute command in one call
+            </summary>
+            <param name="commandTypeName">Type name of command to create</param>
+            <param name="parameters">Command parameters</param>
+            <returns>True if command was created and executed successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.RegisterWithKeeper(System.Object)">
+            <summary>
+            Register object with Keeper
+            </summary>
+            <param name="handleableObject">Object to register</param>
+            <returns>Registration result or null if failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.UnregisterFromKeeper(System.Object)">
+            <summary>
+            Unregister object from Keeper
+            </summary>
+            <param name="handleableObject">Object to unregister</param>
+            <returns>True if unregistered successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.IsAvailable">
+            <summary>
+            Check if CommandBus and Keeper are available
+            </summary>
+            <returns>True if both systems are available, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetSupportedCommandTypes">
+            <summary>
+            Get supported command types from CommandBus
+            </summary>
+            <returns>Array of supported command type names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetAvailableCommandTypes">
+            <summary>
+            Get available command types from factory
+            </summary>
+            <returns>Array of available command type names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetCommandBusWrapper">
+            <summary>
+            Access CommandBus wrapper for advanced scenarios
+            </summary>
+            <returns>CommandBus wrapper instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetKeeperWrapper">
+            <summary>
+            Access Keeper wrapper for advanced scenarios (may be null)
+            </summary>
+            <returns>Keeper wrapper instance or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetFactory">
+            <summary>
+            Access native command factory
+            </summary>
+            <returns>Native command factory instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.ExecuteRawCommand(System.Object)">
+            <summary>
+            Execute raw command object (advanced usage)
+            </summary>
+            <param name="nativeCommand">Native command object to execute</param>
+            <returns>True if command executed successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.GetSystemInfo">
+            <summary>
+            Get system information for debugging
+            </summary>
+            <returns>Formatted system information string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.CommandBusAccessor.ValidateInitialization">
+            <summary>
+            Validate that initialization completed successfully
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper">
+            <summary>
+            IL2CPP wrapper for native CommandBase classes with type safety
+            Provides bridge to CommandBase hierarchy (CmdImportResource, CmdUnlockBuilding, etc.)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize wrapper with native Command instance
+            </summary>
+            <param name="nativeCommand">Native command instance to wrap</param>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.NativeCommand">
+            <summary>
+            Native Command instance (for direct IL2CPP access)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.CommandType">
+            <summary>
+            Type of the native command
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.CommandName">
+            <summary>
+            Command name (derived from type)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.IsValid">
+            <summary>
+            Call native IsValid() method if available
+            </summary>
+            <returns>True if command is valid, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetDescription">
+            <summary>
+            Get human-readable string representation via ToTabbedString()
+            </summary>
+            <returns>Human-readable description of the command</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetFaction">
+            <summary>
+            Get Faction property if available
+            </summary>
+            <returns>Faction object or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.SetFaction(System.Object)">
+            <summary>
+            Set Faction property if available
+            </summary>
+            <param name="faction">Faction object to set</param>
+            <returns>True if faction was set successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetProperty(System.String)">
+            <summary>
+            Get property value by name via reflection
+            </summary>
+            <param name="propertyName">Name of the property to get</param>
+            <returns>Property value or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.SetProperty(System.String,System.Object)">
+            <summary>
+            Set property value by name via reflection
+            </summary>
+            <param name="propertyName">Name of the property to set</param>
+            <param name="value">Value to set</param>
+            <returns>True if property was set successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.InvokeMethod(System.String,System.Object[])">
+            <summary>
+            Invoke method on native command via reflection
+            </summary>
+            <param name="methodName">Name of the method to invoke</param>
+            <param name="parameters">Method parameters</param>
+            <returns>Method return value or null if method not found or failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.IsCommandType(System.String)">
+            <summary>
+            Check if command is a specific type (e.g., "CmdImportResource")
+            </summary>
+            <param name="commandTypeName">Type name to check against</param>
+            <returns>True if command matches the specified type name</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.ValidateCommandType">
+            <summary>
+            Validate that the wrapped object is a command type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetIsValidMethod">
+            <summary>
+            Get IsValid method via reflection
+            </summary>
+            <returns>IsValid MethodInfo or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetToTabbedStringMethod">
+            <summary>
+            Get ToTabbedString method via reflection
+            </summary>
+            <returns>ToTabbedString MethodInfo or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.ToString">
+            <summary>
+            Returns string representation of the command
+            </summary>
+            <returns>String representation</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper">
+            <summary>
+            IL2CPP wrapper for native CommandBus access with type safety
+            Provides bridge to CommandBus.Dispatch() system
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.#ctor(System.Object)" -->
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.DispatchCommand``1(``0)">
+            <summary>
+            Dispatch command via native CommandBus.Dispatch(command)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.DispatchCommandByType(System.String,System.Object)">
+            <summary>
+            Dispatch command by type name (for dynamic scenarios)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.IsAvailable">
+            <summary>
+            Check if CommandBus is available and functional
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.GetSupportedCommandTypes">
+            <summary>
+            Get information about available command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper.CreateFromGame">
+            <summary>
+            Create CommandBusWrapper using GameTypeInitializer for automatic CommandBus discovery
+            </summary>
+            <returns>CommandBusWrapper instance or null if CommandBus not found</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper">
+            <summary>
+            IL2CPP wrapper for native Keeper access with Handle management
+            Provides bridge to Keeper.Register() and Keeper.Unregister() system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize wrapper with native Keeper instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.RegisterHandleable(System.Object)">
+            <summary>
+            Register an IHandleable object via native Keeper.Register()
+            Returns Handle for the registered object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.UnregisterHandleable(System.Object)">
+            <summary>
+            Unregister an IHandleable object via native Keeper.Unregister()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.IsAvailable">
+            <summary>
+            Check if Keeper is available and functional
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.GetNativeKeeper">
+            <summary>
+            Get native Keeper instance for advanced scenarios
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.InvokeKeeperMethod(System.String,System.Object[])">
+            <summary>
+            Access Keeper via reflection for custom operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.KeeperWrapper.GetKeeperProperty(System.String)">
+            <summary>
+            Get property value from Keeper via reflection
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.NativeCommandFactory">
+            <summary>
+            Factory for creating native Per Aspera command instances with type safety
+            Refactored into modular services for better maintainability and testability
+            Uses dependency injection pattern with specialized services for each responsibility
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.Instance">
+            <summary>
+            Thread-safe singleton instance with double-checked locking pattern
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.IsInitialized">
+            <summary>
+            Check if factory has been initialized and has command types available
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.#ctor">
+            <summary>
+            Private constructor implementing singleton pattern
+            Initializes all service dependencies in correct order
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.InitializeServices">
+            <summary>
+            Initialize all services in correct dependency order
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.CreateCommand(System.String,System.Object[])">
+            <summary>
+            Create native command instance by type name with enhanced error handling
+            Uses the modular service architecture for optimal performance
+            </summary>
+            <param name="commandTypeName">Command type name (e.g., "CmdImportResource" or "ImportResource")</param>
+            <param name="parameters">Constructor parameters</param>
+            <returns>Wrapped native command instance or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.CreateCommand``1(System.Object[])">
+            <summary>
+            Create typed native command instance with compile-time type safety
+            </summary>
+            <typeparam name="T">Native command type</typeparam>
+            <param name="parameters">Constructor parameters</param>
+            <returns>Wrapped native command instance or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.CreateImportResourceCommand(System.String,System.Single)">
+            <summary>
+            Create ImportResource command with MVP parameters (specialized factory method)
+            Enhanced version with parameter validation and type checking
+            </summary>
+            <param name="resourceName">Resource name (e.g., "water", "carbon")</param>
+            <param name="amount">Amount to import (must be > 0)</param>
+            <returns>Configured CommandWrapper or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.IsCommandTypeAvailable(System.String)">
+            <summary>
+            Check if command type is available in the factory
+            Uses the type discovery service for accurate lookup
+            </summary>
+            <param name="commandTypeName">Command type name</param>
+            <returns>True if command type is available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetAvailableCommandTypes">
+            <summary>
+            Get all available command type names from the discovery service
+            </summary>
+            <returns>Array of command type names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetNativeType(System.String)">
+            <summary>
+            Get native type for command type name using the discovery service
+            </summary>
+            <param name="commandTypeName">Command type name</param>
+            <returns>Native Type or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetDiagnosticInfo">
+            <summary>
+            Get comprehensive diagnostic information about the factory state
+            Uses the dedicated diagnostics service for detailed reporting
+            </summary>
+            <returns>Detailed diagnostic information</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.PerformHealthCheck">
+            <summary>
+            Perform comprehensive system health check
+            Returns detailed health status for monitoring and debugging
+            </summary>
+            <returns>System health result with component details</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetRecentErrors(System.TimeSpan)">
+            <summary>
+            Get recent error events for monitoring and debugging
+            </summary>
+            <param name="timeWindow">Time window to search within</param>
+            <returns>List of recent error entries</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetTypeDiscoveryService">
+            <summary>
+            Get access to the type discovery service for advanced operations
+            </summary>
+            <returns>Type discovery service instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetReflectionCacheService">
+            <summary>
+            Get access to the reflection cache service for performance monitoring
+            </summary>
+            <returns>Reflection cache service instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetInstanceFactory">
+            <summary>
+            Get access to the instance factory for advanced creation patterns
+            </summary>
+            <returns>Command instance factory</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.GetDiagnosticsService">
+            <summary>
+            Get access to the diagnostics service for monitoring and logging
+            </summary>
+            <returns>Diagnostics service instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.Reset">
+            <summary>
+            Reset factory state (for testing purposes only)
+            Clears all cached data and reinitializes services
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.NativeCommandFactory.Reinitialize">
+            <summary>
+            Reinitialize services without recreating the singleton
+            Useful for recovering from errors or updating configurations
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory">
+            <summary>
+            Specialized factory for creating IL2CPP-compatible command instances
+            Handles complex instantiation patterns, parameter validation, and wrapper creation
+            Provides fallback mechanisms and specialized creation methods for common command patterns
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.CreateNativeInstance(System.Type,System.Object[])">
+            <summary>
+            Create native command instance with enhanced error handling and validation
+            Uses cached reflection data for optimal performance
+            </summary>
+            <param name="commandType">Type of command to create</param>
+            <param name="parameters">Constructor parameters</param>
+            <returns>Native command instance or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.ValidateConstructorParameters(System.Type,System.Object[])">
+            <summary>
+            Validate constructor parameters for compatibility with command type
+            </summary>
+            <param name="commandType">Command type to validate against</param>
+            <param name="parameters">Parameters to validate</param>
+            <returns>True if parameters are valid</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.CreateInstanceFallback(System.Type,System.Object[])">
+            <summary>
+            Fallback creation method using Activator.CreateInstance
+            Used when cached reflection fails
+            </summary>
+            <param name="commandType">Type to create</param>
+            <param name="parameters">Constructor parameters</param>
+            <returns>Created instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.ValidateCreatedInstance(System.Object,System.Type)">
+            <summary>
+            Validate that created instance is properly initialized and functional
+            </summary>
+            <param name="instance">Created instance to validate</param>
+            <param name="expectedType">Expected type of the instance</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.CreateImportResourceCommand(System.String,System.Single)">
+            <summary>
+            Create ImportResource command with specialized parameter handling
+            Enhanced version with parameter validation and type checking for MVP support
+            </summary>
+            <param name="resourceName">Resource name (e.g., "water", "carbon")</param>
+            <param name="amount">Amount to import (must be > 0)</param>
+            <returns>Configured CommandWrapper or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.TryCreateImportResourceCommand(System.String,System.String,System.Single)">
+            <summary>
+            Try to create ImportResource command with specific type name
+            </summary>
+            <param name="typeName">Command type name to try</param>
+            <param name="resourceName">Resource name</param>
+            <param name="amount">Import amount</param>
+            <returns>Created command wrapper or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.CreateFallbackCommand(System.String,System.Object[])">
+            <summary>
+            Create a fallback command when specific command creation fails
+            Provides a generic command object that can be used for logging and debugging
+            </summary>
+            <param name="commandTypeName">Original command type name that failed</param>
+            <param name="parameters">Original parameters</param>
+            <returns>Fallback command wrapper or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.ValidateCommand(PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper)">
+            <summary>
+            Validate that a command instance is properly configured and can be executed
+            </summary>
+            <param name="commandWrapper">Command wrapper to validate</param>
+            <returns>True if command is valid for execution</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.CommandInstanceFactory.GetInstanceCreationDiagnostics">
+            <summary>
+            Get diagnostic information about instance creation performance and statistics
+            </summary>
+            <returns>Formatted diagnostic information</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics">
+            <summary>
+            Comprehensive diagnostics service for native command system
+            Provides error handling, performance monitoring, and debugging tools
+            Includes system health checks and detailed reporting capabilities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.RecordEvent(PerAspera.GameAPI.Commands.Native.Services.DiagnosticLevel,System.String,System.String,System.Object)">
+            <summary>
+            Record a diagnostic event for monitoring and analysis
+            </summary>
+            <param name="level">Severity level</param>
+            <param name="category">Event category</param>
+            <param name="message">Diagnostic message</param>
+            <param name="details">Additional details</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.PerformHealthCheck">
+            <summary>
+            Perform comprehensive system health check
+            Validates all components and reports any issues
+            </summary>
+            <returns>Health check result with detailed status</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.CheckTypeDiscoveryHealth">
+            <summary>
+            Check health of type discovery service
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.CheckReflectionCacheHealth">
+            <summary>
+            Check health of reflection cache service
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.CheckInstanceFactoryHealth">
+            <summary>
+            Check health of instance factory
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.CheckSystemIntegrationHealth">
+            <summary>
+            Check overall system integration health
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.GetRecentErrors(System.TimeSpan)">
+            <summary>
+            Get recent error entries within specified time window
+            </summary>
+            <param name="timeWindow">Time window to search within</param>
+            <returns>List of recent error entries</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.GenerateDiagnosticReport">
+            <summary>
+            Generate comprehensive diagnostic report
+            </summary>
+            <returns>Formatted diagnostic report</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.NativeCommandDiagnostics.Reset">
+            <summary>
+            Reset diagnostic history and counters
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.DiagnosticEntry">
+            <summary>
+            Diagnostic event entry
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.DiagnosticLevel">
+            <summary>
+            Diagnostic severity levels
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.SystemHealthResult">
+            <summary>
+            System health check result
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.ComponentHealth">
+            <summary>
+            Individual component health status
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.HealthStatus">
+            <summary>
+            Health status enumeration
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService">
+            <summary>
+            Service for caching reflection data to improve performance
+            Provides fast access to constructors, methods, properties, and attributes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.#ctor">
+            <summary>
+            Initialize a new ReflectionCacheService instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.CacheConstructors(System.Collections.Concurrent.ConcurrentDictionary{System.String,System.Type})">
+            <summary>
+            Cache constructors for all provided command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.CacheConstructorsForType(System.Type)">
+            <summary>
+            Cache all constructors for a specific type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.GetCachedConstructor(System.Type,System.Int32)">
+            <summary>
+            Get cached constructor for a type with specific parameter count
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.CacheMethodsForType(System.Type)">
+            <summary>
+            Cache all methods for a type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.GetCachedMethods(System.Type)">
+            <summary>
+            Get cached methods for a type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.GetCachedProperty(System.Type,System.String)">
+            <summary>
+            Get a specific property from cache
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.GetCachedAttributes(System.Type)">
+            <summary>
+            Get cached attributes for a type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.CreateInstanceFast(System.Type,System.Object[])">
+            <summary>
+            Create instance using cached reflection data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.ClearCaches">
+            <summary>
+            Clear all caches
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.ReflectionCacheService.GetCacheStatistics">
+            <summary>
+            Get cache statistics for diagnostics
+            </summary>
+            <returns>String with cache statistics information</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService">
+            <summary>
+            Service for discovering and registering available command types across assemblies
+            Provides type resolution and caching for the command system
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.IsInitialized">
+            <summary>
+            Gets whether the service is initialized
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.#ctor">
+            <summary>
+            Initialize a new TypeDiscoveryService instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.Initialize">
+            <summary>
+            Initialize the service by discovering all available command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.ScanAssembliesForCommandTypes">
+            <summary>
+            Scan all loaded assemblies for GameCommandBase implementations
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.ScanAssemblyForCommands(System.Reflection.Assembly,System.Collections.Concurrent.ConcurrentDictionary{System.String,System.Type})">
+            <summary>
+            Scan individual assembly for command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.ProcessCommandType(System.Collections.Concurrent.ConcurrentDictionary{System.String,System.Type},System.Type)">
+            <summary>
+            Process and register a discovered command type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.GetDiscoveredTypes">
+            <summary>
+            Get all discovered command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.TryGetCommandType(System.String,System.Type@)">
+            <summary>
+            Try to get a command type by name
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.GetAvailableCommandTypes">
+            <summary>
+            Get all available command type names
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.InitializeCommandTypes">
+            <summary>
+            Initialize command types (alias for Initialize)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.FindCommandType(System.String)">
+            <summary>
+            Find a command type by name with flexible matching
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.IsCommandTypeRegistered(System.String)">
+            <summary>
+            Check if a command type is registered
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.GetRegisteredTypeCount">
+            <summary>
+            Get count of registered command types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.Clear">
+            <summary>
+            Clear all registered types (for testing/reset scenarios)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Native.Services.TypeDiscoveryService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about type discovery
+            </summary>
+            <returns>String with diagnostic information</returns>
+        </member>
+    </members>
+</doc>
