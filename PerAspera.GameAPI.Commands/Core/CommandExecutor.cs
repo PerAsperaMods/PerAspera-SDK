@@ -146,7 +146,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 }
 
                 // Execute via CommandBusAccessor
-                CommandBusAccessor.ExecuteCommand(nativeCommand);
+                Native.CommandBusAccessor.Instance.ExecuteCommand(nativeCommand);
                 return true;
             }
             catch (Exception ex)
