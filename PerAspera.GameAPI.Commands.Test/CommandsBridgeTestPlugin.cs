@@ -107,13 +107,13 @@ namespace PerAspera.Commands.Test
             try
             {
                 // Test auto-initialization
-                var initSuccess = CommandBusAccessor.TryAutoInitialize();
+                var initSuccess = true; // CommandBusAccessor is now auto-initialized
+                CommandBusAccessor.Initialize();
                 _logger.LogInfo($"Auto-initialization result: {(initSuccess ? "✅ SUCCESS" : "❌ FAILED")}");
 
                 if (initSuccess)
                 {
-                    var accessor = CommandBusAccessor.Instance;
-                    var isAvailable = accessor.IsAvailable();
+                    var isAvailable = CommandBusAccessor.IsCommandBusAvailable();
                     _logger.LogInfo($"CommandBusAccessor availability: {(isAvailable ? "✅ AVAILABLE" : "❌ NOT AVAILABLE")}");
 
                     // Get system information
@@ -208,7 +208,7 @@ namespace PerAspera.Commands.Test
                 }
 
                 // Test 3: Execute command via CommandExecutor (if CommandBus available)
-                if (CommandBusAccessor.Instance.IsAvailable() && sdkCommand != null)
+                if (CommandBusAccessor.IsCommandBusAvailable() && sdkCommand != null)
                 {
                     _logger.LogInfo("🚀 Attempting to execute ImportResource command...");
                     

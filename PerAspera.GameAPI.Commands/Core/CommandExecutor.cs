@@ -129,42 +129,29 @@ namespace PerAspera.GameAPI.Commands.Core
         private bool ExecuteNativeCommand(IGameCommand command)
         {
             try
-            { // Logging disabled// Phase 1.1: Auto-initialize CommandBusAccessor if needed
-                CommandBusAccessor accessor;
-                try
-                {
-                    accessor = CommandBusAccessor.Instance;
-                }
-                catch (InvalidOperationException)
-                {
-                    // Not initialized yet, try auto-initialization // Logging disabledif (!CommandBusAccessor.TryAutoInitialize())
-                    { // Logging disabledreturn false;
-                    }
-                    accessor = CommandBusAccessor.Instance;
-                }
+            {
+                // Initialize CommandBusAccessor if needed
+                CommandBusAccessor.Initialize();
 
-                if (!accessor.IsAvailable())
-                { // Logging disabledreturn false;
+                if (!CommandBusAccessor.IsCommandBusAvailable())
+                {
+                    return false;
                 }
 
                 // Convert SDK command to native command via NativeCommandFactory
                 var nativeCommand = ConvertToNativeCommand(command);
                 if (nativeCommand == null)
-                { // Logging disabledreturn false;
+                {
+                    return false;
                 }
 
-                // Execute via CommandBusAccessor (which uses GameTypeInitializer internally)
-                var success = accessor.ExecuteCommand(nativeCommand);
-                
-                if (success)
-                { // Logging disabledreturn true;
-                }
-                else
-                { // Logging disabledreturn false;
-                }
+                // Execute via CommandBusAccessor
+                CommandBusAccessor.ExecuteCommand(nativeCommand);
+                return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                return false;
             }
         }
 
