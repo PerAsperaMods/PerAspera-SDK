@@ -45,23 +45,31 @@ namespace PerAspera.GameAPI.Native.Events
                 return 0;
             }
 
-            // Enhanced climate methods with better detection
+            // ✅ CORRECTED: Hook vraies méthodes Planet pour surcharges Climate
             var climateHooks = new Dictionary<string, string>
             {
-                { "SetAverageTemperature", "Temperature" },
-                { "SetTemperature", "Temperature" },
-                { "SetCO2Pressure", "CO2Pressure" },
-                { "SetO2Pressure", "O2Pressure" },
-                { "SetOxygenPressure", "O2Pressure" },
-                { "SetN2Pressure", "N2Pressure" },
-                { "SetNitrogenPressure", "N2Pressure" },
-                { "SetGHGPressure", "GHGPressure" },
-                { "SetGreenhouseGasPressure", "GHGPressure" },
-                { "SetWaterStock", "WaterStock" },
-                { "SetWater", "WaterStock" },
-                { "SetTotalPressure", "TotalPressure" },
-                { "SetPressure", "TotalPressure" },
-                { "SetArgonPressure", "ArgonPressure" }
+                // Getters (pour lecture climate)
+                { "GetAverageTemperature", "Temperature" },
+                { "GetTotalPressure", "TotalPressure" },
+                { "GetCO2Pressure", "CO2Pressure" },
+                { "GetO2Pressure", "O2Pressure" },
+                { "GetN2Pressure", "N2Pressure" },
+                { "GetGHGPressure", "GHGPressure" },
+                { "GetWaterStock", "WaterStock" },
+                // Modifiers (pour surcharges climate)
+                { "IncreaseCO2", "CO2Pressure" },
+                { "DecreaseCO2", "CO2Pressure" },
+                { "IncreaseO2", "O2Pressure" },
+                { "DecreaseO2", "O2Pressure" },
+                { "IncreaseN2", "N2Pressure" },
+                { "DecreaseN2", "N2Pressure" },
+                { "IncreaseGHG", "GHGPressure" },
+                { "DecreaseGHG", "GHGPressure" },
+                { "IncreaseWater", "WaterStock" },
+                { "DecreaseWater", "WaterStock" },
+                // Conversion methods (pour events climate)
+                { "ConvertCO2IntoO2", "Conversion" },
+                { "ConvertO2IntoCO2", "Conversion" }
             };
 
             int hookedCount = 0;

@@ -15,7 +15,7 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="PerAspera.GameLibs" Version="1.5.0-r.*" />
+		<PackageReference Include="PerAspera.GameLibs" Version=" 1.5.1-r.0" />
 	</ItemGroup>
 
 	<!-- Project References -->

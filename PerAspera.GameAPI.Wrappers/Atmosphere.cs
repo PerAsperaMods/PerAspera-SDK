@@ -139,24 +139,71 @@ namespace PerAspera.GameAPI.Wrappers
         {
             _nativePlanet = nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet));
             
-            // Initialize gas composition
-            var gases = new Dictionary<string, AtmosphericGas>
-            {
-                ["CO2"] = new AtmosphericGas(_nativePlanet, "Carbon Dioxide", "CO2", "get_CO2Pressure", "set_CO2Pressure"),
-                ["O2"] = new AtmosphericGas(_nativePlanet, "Oxygen", "O2", "get_O2Pressure", "set_O2Pressure"),
-                ["N2"] = new AtmosphericGas(_nativePlanet, "Nitrogen", "N2", "get_N2Pressure", "set_N2Pressure"),
-                ["H2O"] = new AtmosphericGas(_nativePlanet, "Water Vapor", "H2O", "get_waterVaporPressure", "set_waterVaporPressure")
-            };
+            // 🔄 DYNAMIC: Initialize gas composition from ResourceType system
+            var gases = new Dictionary<string, AtmosphericGas>();
+            
+            // Core atmospheric gases (always present)
+            InitializeCoreGases(gases);
+            
+            // 🎯 MODABLE: Discover additional atmospheric ResourceType from mods
+            DiscoverModdedAtmosphericResources(gases);
             
             _composition = new AtmosphericComposition(gases, () => TotalPressure);
             
-            // Initialize terraforming effects
-            _effects = new Dictionary<string, TerraformingEffect>
+            // Initialize terraforming effects (also potentially modable)
+            _effects = InitializeTerraformingEffects();
+        }
+        
+        /// <summary>
+        /// Initialize core atmospheric gases that are always present
+        /// </summary>
+        private void InitializeCoreGases(Dictionary<string, AtmosphericGas> gases)
+        {
+            // Base game atmospheric ResourceType
+            gases["CO2"] = new AtmosphericGas(_nativePlanet, "Carbon Dioxide", "CO2", "GetCO2Pressure", null);
+            gases["O2"] = new AtmosphericGas(_nativePlanet, "Oxygen", "O2", "GetO2Pressure", null);
+            gases["N2"] = new AtmosphericGas(_nativePlanet, "Nitrogen", "N2", "GetN2Pressure", null);
+            gases["GHG"] = new AtmosphericGas(_nativePlanet, "Greenhouse Gas", "GHG", "GetGHGPressure", null);
+        }
+        
+        /// <summary>
+        /// 🎯 MODABLE: Discover atmospheric resources from ResourceType system
+        /// TODO: Implementation complete when ResourceType integration finished
+        /// </summary>
+        private void DiscoverModdedAtmosphericResources(Dictionary<string, AtmosphericGas> gases)
+        {
+            // TODO: Query ResourceType system for atmospheric gases
+            // ResourceManager.GetResourceTypes().Where(r => r.Category == "atmospheric")
+            
+            // PLACEHOLDER: Framework for dynamic gas discovery
+            try
             {
-                ["PolarNuke"] = new TerraformingEffect(_nativePlanet, "Polar Nuclear", "Temperature effect from polar ice cap nukes", "get_polarNukeEffect"),
-                ["PolarDust"] = new TerraformingEffect(_nativePlanet, "Polar Dust", "Temperature effect from polar dust reduction", "get_polarDustEffect"),
-                ["Comet"] = new TerraformingEffect(_nativePlanet, "Comet Impact", "Temperature effect from comet impacts", "get_cometEffect"),
-                ["Deimos"] = new TerraformingEffect(_nativePlanet, "Deimos Crash", "Temperature effect from Deimos moon crash", "get_deimosEffect")
+                // Future: Dynamic discovery of mod-added atmospheric ResourceType
+                // foreach (var resourceType in GetAtmosphericResourceTypes())
+                // {
+                //     gases[resourceType.Id] = CreateDynamicGas(resourceType);
+                // }
+                
+                // For now: Static but extensible structure
+            }
+            catch (Exception)
+            {
+                // Fail silently - core gases still work
+            }
+        }
+        
+        /// <summary>
+        /// Initialize terraforming effects (potentially modable)
+        /// </summary>
+        private Dictionary<string, TerraformingEffect> InitializeTerraformingEffects()
+        {
+            return new Dictionary<string, TerraformingEffect>
+            {
+                ["PolarNuke"] = new TerraformingEffect(_nativePlanet, "Polar Nuclear", "Temperature effect from polar ice cap nukes", "get_polarTemperatureNukeEffect"),
+                ["PolarDust"] = new TerraformingEffect(_nativePlanet, "Polar Dust", "Temperature effect from polar dust reduction", "get_polarTemperatureDustEffect"),
+                ["Comet"] = new TerraformingEffect(_nativePlanet, "Comet Impact", "Temperature effect from comet impacts", "get_temperatureCometEffect"),
+                ["Deimos"] = new TerraformingEffect(_nativePlanet, "Deimos Crash", "Temperature effect from Deimos moon crash", "get_temperatureDeimosEffect")
+                // TODO: Support for mod-added terraforming effects
             };
         }
         
@@ -172,21 +219,17 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Total atmospheric pressure (sum of all partial pressures, kPa)
-        /// Property: totalPressure (READ-ONLY - calculated by game)
+        /// Property: GetTotalPressure (READ-ONLY - calculated by game)
         /// </summary>
-        public float TotalPressure => _nativePlanet.InvokeMethod<float>("get_totalPressure");
+        public float TotalPressure => _nativePlanet.InvokeMethod<float>("GetTotalPressure");
         
         // ==================== TEMPERATURE ====================
         
         /// <summary>
-        /// Current surface temperature (Kelvin)
-        /// Property: temperature
+        /// Current average surface temperature (Kelvin)
+        /// Property: GetAverageTemperature (READ-ONLY - calculated by game)
         /// </summary>
-        public float Temperature
-        {
-            get => _nativePlanet.InvokeMethod<float>("get_temperature");
-            set => _nativePlanet.InvokeMethod("set_temperature", value);
-        }
+        public float Temperature => _nativePlanet.InvokeMethod<float>("GetAverageTemperature");
         
         /// <summary>
         /// Minimum temperature recorded (Kelvin)
@@ -227,13 +270,9 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Available water stock (kilotons)
-        /// Property: waterStock
+        /// Property: GetWaterStock (READ-ONLY - use IncreaseWater/DecreaseWater pour modifications)
         /// </summary>
-        public float WaterStock
-        {
-            get => _nativePlanet.InvokeMethod<float>("get_waterStock");
-            set => _nativePlanet.InvokeMethod("set_waterStock", value);
-        }
+        public float WaterStock => _nativePlanet.InvokeMethod<float>("GetWaterStock");
         
         /// <summary>
         /// Permafrost deposits (kilotons)
@@ -293,6 +332,91 @@ namespace PerAspera.GameAPI.Wrappers
                 
                 return score;
             }
+        }
+        
+        // ==================== MODABLE RESOURCE MANAGEMENT ====================
+        
+        /// <summary>
+        /// 🎯 MODABLE: Modify atmospheric gas by ResourceType ID
+        /// Supports both core gases (CO2, O2) and mod-added gases
+        /// </summary>
+        /// <param name="gasId">Gas identifier (CO2, O2, N2, or mod ResourceType ID)</param>
+        /// <param name="amount">Amount to add (positive) or remove (negative)</param>
+        /// <returns>Actual amount changed</returns>
+        public float ModifyGas(string gasId, float amount)
+        {
+            try
+            {
+                // Route to appropriate Planet method based on gas type
+                switch (gasId.ToUpper())
+                {
+                    case "CO2":
+                        return amount > 0 
+                            ? _nativePlanet.InvokeMethod<float>("IncreaseCO2", Math.Abs(amount))
+                            : _nativePlanet.InvokeMethod<float>("DecreaseCO2", Math.Abs(amount));
+                    
+                    case "O2":
+                        return amount > 0
+                            ? _nativePlanet.InvokeMethod<float>("IncreaseO2", Math.Abs(amount))
+                            : _nativePlanet.InvokeMethod<float>("DecreaseO2", Math.Abs(amount));
+                    
+                    case "N2":
+                        if (amount > 0)
+                            _nativePlanet.InvokeMethod("IncreaseN2", Math.Abs(amount));
+                        else
+                            _nativePlanet.InvokeMethod("DecreaseN2", Math.Abs(amount));
+                        return Math.Abs(amount); // N2 methods return void
+                    
+                    case "GHG":
+                        if (amount > 0)
+                            _nativePlanet.InvokeMethod("IncreaseGHG", Math.Abs(amount));
+                        else
+                            _nativePlanet.InvokeMethod("DecreaseGHG", Math.Abs(amount));
+                        return Math.Abs(amount); // GHG methods return void
+                    
+                    default:
+                        // TODO: Handle mod-added atmospheric ResourceType
+                        throw new NotSupportedException($"Atmospheric gas '{gasId}' modification not yet implemented");
+                }
+            }
+            catch (Exception)
+            {
+                return 0f; // Failed to modify
+            }
+        }
+        
+        /// <summary>
+        /// 🎯 MODABLE: Convert one gas to another (for atmospheric chemistry mods)
+        /// </summary>
+        /// <param name="fromGas">Source gas to convert</param>
+        /// <param name="toGas">Target gas to produce</param>
+        /// <param name="amount">Amount to convert</param>
+        /// <returns>Actual amount converted</returns>
+        public float ConvertGas(string fromGas, string toGas, float amount)
+        {
+            // Core conversions (hardcoded in Planet)
+            if (fromGas == "CO2" && toGas == "O2")
+                return _nativePlanet.InvokeMethod<float>("ConvertCO2IntoO2", amount);
+            
+            if (fromGas == "O2" && toGas == "CO2")
+                return _nativePlanet.InvokeMethod<float>("ConvertO2IntoCO2", amount);
+            
+            // TODO: Support mod-added gas conversions
+            throw new NotSupportedException($"Conversion {fromGas} -> {toGas} not yet implemented");
+        }
+        
+        /// <summary>
+        /// 🎯 MODABLE: Register new atmospheric ResourceType (for mods)
+        /// TODO: Implementation when ResourceType system integrated
+        /// </summary>
+        /// <param name="resourceId">ResourceType identifier</param>
+        /// <param name="gasName">Human-readable name</param>
+        /// <param name="symbol">Chemical symbol</param>
+        public void RegisterModdedGas(string resourceId, string gasName, string symbol)
+        {
+            // TODO: Dynamic registration of mod-added atmospheric gases
+            // This will allow mods to add custom atmospheric components
+            throw new NotImplementedException("Modded gas registration not yet implemented - planned for v2.0");
         }
         
         public override string ToString()

@@ -1,5 +1,6 @@
 using Il2CppInterop.Runtime.Injection;
 using System;
+using BepInEx.Unity.IL2CPP;
 using UnityEngine;
 
 namespace PerAspera.GameAPI.Helpers
@@ -8,7 +9,7 @@ namespace PerAspera.GameAPI.Helpers
     /// Helper pour Unity GUI avec IL2CPP
     /// Simplifie la création d'interfaces utilisateur dans Per Aspera
     /// </summary>
-    public static class UnityGuiHelper
+    public static class UnityGuiHelper 
     {
         /// <summary>
         /// Enregistre un type MonoBehaviour pour IL2CPP
@@ -71,7 +72,7 @@ namespace PerAspera.GameAPI.Helpers
             var arrow = isExpanded ? "▼" : "▶";
             var label = string.IsNullOrEmpty(icon) ? $"{arrow} {categoryName}" : $"{arrow} {icon} {categoryName}";
             
-            return GUILayout.Button(label, GUI.skin.button);
+            return GUILayout.Button(label);
         }
 
         /// <summary>
@@ -235,7 +236,7 @@ namespace PerAspera.GameAPI.Helpers
             }
 
             // Dessiner la fenêtre
-            GUILayout.BeginArea(windowRect, title, GUI.skin.window);
+            GUILayout.BeginArea(windowRect, new GUIContent(title), GUI.skin.window);
             try
             {
                 content?.Invoke();
