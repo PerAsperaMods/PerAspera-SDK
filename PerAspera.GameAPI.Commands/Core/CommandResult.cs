@@ -20,6 +20,16 @@ namespace PerAspera.GameAPI.Commands.Core
         public string Error { get; }
         
         /// <summary>
+        /// Result message (success or error description)
+        /// </summary>
+        public string Message => Success ? "Success" : Error ?? "Unknown error";
+        
+        /// <summary>
+        /// Return value from command execution
+        /// </summary>
+        public object Value { get; set; }
+        
+        /// <summary>
         /// Command that was executed
         /// </summary>
         public IGameCommand Command { get; }

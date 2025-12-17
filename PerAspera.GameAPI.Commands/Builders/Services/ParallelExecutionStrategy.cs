@@ -202,15 +202,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
 
         private BatchCommandResult ProcessParallelResults(List<CommandResult> results)
         {
-            var overallSuccess = results.TrueForAll(r => r.Success);
-
-            if (_stopOnFailure && !overallSuccess)
-            {
-                var firstFailure = results.FirstOrDefault(r => !r.Success);
-                return new BatchCommandResult(results, false, $"Parallel execution failed: {firstFailure?.Error}");
-            }
-
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+            return new BatchCommandResult(results);
         }
     }
 }

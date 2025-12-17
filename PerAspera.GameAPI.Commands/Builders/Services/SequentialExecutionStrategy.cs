@@ -136,7 +136,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             }
             catch (Exception ex)
             {
-                return new CommandResult(false, ex.Message, ex);
+                return CommandResult(errorCommand, ex.Message, 0);
             }
         }
 
@@ -147,8 +147,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
 
         private static BatchCommandResult CreateFinalResult(List<CommandResult> results)
         {
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+            return new BatchCommandResult(results);
         }
     }
 }

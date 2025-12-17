@@ -14,7 +14,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
     {
         private readonly object _nativeCommandBus;
         private readonly System.Type _commandBusType;
-        
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
+
         /// <summary>
         /// Initialize wrapper with native CommandBus instance
         /// Uses GameTypeInitializer for enhanced type discovery
@@ -30,12 +31,12 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             // Validate that the provided instance matches the expected type
             if (!_commandBusType.IsInstanceOfType(nativeCommandBus))
             {
-                LoggingSystem.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
+                _logger.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
                 _commandBusType = nativeCommandBus.GetType(); // Fallback to runtime type
             }
             
             ValidateCommandBusType();
-            LoggingSystem.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
+            _logger.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
         }
         
         /// <summary>
@@ -49,19 +50,19 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var dispatchMethod = GetDispatchMethod(typeof(T));
                 if (dispatchMethod == null)
                 {
-                    LoggingSystem.Error($"Dispatch method not found for type {typeof(T).Name}");
+                    _logger.LogError($"Dispatch method not found for type {typeof(T).Name}");
                     return false;
                 }
                 
                 // Invoke Dispatch<T>(command)
                 var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
                 
-                LoggingSystem.Debug($"Command dispatched: {typeof(T).Name}");
+                _logger.LogDebug($"Command dispatched: {typeof(T).Name}");
                 return true;
             }
             catch (Exception ex)
             {
-                LoggingSystem.Error($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
+                _logger.Error($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
                 return false;
             }
         }
@@ -146,6 +147,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
 
             if (!hasDispatchMethod)
             { // Logging disabled}
+                
             }
         }
         

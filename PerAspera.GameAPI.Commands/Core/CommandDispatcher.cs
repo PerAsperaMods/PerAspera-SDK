@@ -1,9 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.GameAPI.Commands.Events;
 using PerAspera.GameAPI.Events.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
@@ -15,7 +16,8 @@ namespace PerAspera.GameAPI.Commands.Core
         private readonly CommandExecutor _executor;
         private readonly CommandEventBus _eventBus;
         private static CommandDispatcher _instance;
-        
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
+
         /// <summary>
         /// Global instance for static API access
         /// </summary>
@@ -64,7 +66,7 @@ namespace PerAspera.GameAPI.Commands.Core
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
                 
-            LoggingSystem.Debug($"Dispatching command: {command.GetDescription()}");
+            _logger.Debug($"Dispatching command: {command.GetDescription()}");
             
             try
             {
@@ -84,7 +86,8 @@ namespace PerAspera.GameAPI.Commands.Core
                 return result;
             }
             catch (Exception ex)
-            { // Logging disabledvar failureResult = CommandResult.CreateFailure(command, ex.Message, 0);
+            { // Logging disabled
+                var failureResult = new CommandResult(command, ex.Message, 0);
                 _eventBus.PublishCommandFailed(new CommandFailedEvent(command, ex.Message, 0));
                 return failureResult;
             }
@@ -112,7 +115,7 @@ namespace PerAspera.GameAPI.Commands.Core
         public BatchCommandResult DispatchBatchUntilFailure(IEnumerable<IGameCommand> commands)
         {
             var commandList = commands.ToList();
-            LoggingSystem.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
+            _logger.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
             
             var results = new List<CommandResult>();
             
@@ -127,7 +130,7 @@ namespace PerAspera.GameAPI.Commands.Core
             }
             
             var batchResult = new BatchCommandResult(results);
-            LoggingSystem.Info($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
+            _logger.Info($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
             
             return batchResult;
         }

@@ -18,10 +18,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
         {
             if (results == null) throw new ArgumentNullException(nameof(results));
 
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            var errorMessage = overrideErrorMessage ?? (overallSuccess ? null : "Some commands failed");
-
-            return new BatchCommandResult(results.ToList(), overallSuccess, errorMessage);
+            return new BatchCommandResult(results);
         }
 
         /// <summary>
@@ -30,9 +27,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
         public static BatchCommandResult CreateTimeoutResult(IReadOnlyList<CommandResult> partialResults, string timeoutMessage = null)
         {
             return new BatchCommandResult(
-                partialResults?.ToList() ?? new List<CommandResult>(),
-                false,
-                timeoutMessage ?? "Batch execution timed out"
+                partialResults?.ToList() ?? new List<CommandResult>()
             );
         }
 
@@ -44,8 +39,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             int failedCommandIndex,
             string commandError)
         {
-            var errorMessage = $"Command {failedCommandIndex + 1} failed: {commandError}";
-            return new BatchCommandResult(results.ToList(), false, errorMessage);
+            return new BatchCommandResult(results.ToList());
         }
 
         /// <summary>

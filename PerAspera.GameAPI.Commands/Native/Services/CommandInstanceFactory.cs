@@ -13,6 +13,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
     public sealed class CommandInstanceFactory
     {
         private readonly ReflectionCacheService _reflectionCache;
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
 
         public CommandInstanceFactory(ReflectionCacheService reflectionCache)
         {
@@ -77,7 +78,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 var hasMatchingConstructor = constructors.Any(c => c.GetParameters().Length == parameterCount);
 
                 if (!hasMatchingConstructor)
-                { // Logging disabledLoggingSystem.Debug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
+                { // Logging disabled
+                  _logger.Debug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
                 }
 
                 return hasMatchingConstructor;
@@ -124,13 +126,13 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 // Check type compatibility
                 if (!expectedType.IsInstanceOfType(instance))
                 {
-                    LoggingSystem.Warning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
+                    _logger.Warning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
                 }
 
                 // Check for common IL2CPP issues
                 if (instance.ToString() == null)
                 {
-                    LoggingSystem.Warning($"Created instance has null ToString() - possible IL2CPP interop issue");
+                    _logger.Warning($"Created instance has null ToString() - possible IL2CPP interop issue");
                 }
             }
             catch (Exception ex)
@@ -207,7 +209,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                         // In a real implementation, we would get the type from TypeDiscoveryService
                         // For this refactoring, we'll create a placeholder structure
                         
-                        LoggingSystem.Debug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
+                        _logger.Debug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
                         
                         // This is where the actual type lookup and instantiation would happen
                         // var commandType = _typeDiscovery.TryGetCommandType(typeName);

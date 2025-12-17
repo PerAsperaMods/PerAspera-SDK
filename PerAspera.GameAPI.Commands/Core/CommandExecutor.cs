@@ -17,7 +17,8 @@ namespace PerAspera.GameAPI.Commands.Core
     {
         private readonly object _commandBus;
         private readonly object _keeper;
-        
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
+
         /// <summary>
         /// Initialize executor with access to native CommandBus and Keeper
         /// </summary>
@@ -43,7 +44,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 if (!command.IsValid())
                 {
                     stopwatch.Stop();
-                    return CommandResult.CreateFailure(command, "Command validation failed", stopwatch.ElapsedMilliseconds);
+                    return new CommandResult(command, "Command validation failed", stopwatch.ElapsedMilliseconds);
                 }
                 
                 // Execute command via native CommandBus
@@ -53,19 +54,19 @@ namespace PerAspera.GameAPI.Commands.Core
                 
                 if (success)
                 {
-                    LoggingSystem.Info($"Command executed successfully: {command.GetDescription()}");
+                    _logger.LogInfo($"Command executed successfully: {command.GetDescription()}");
                     return CommandResult.CreateSuccess(command, stopwatch.ElapsedMilliseconds);
                 }
                 else
                 {
-                    LoggingSystem.Warning($"Command execution failed: {command.GetDescription()}");
+                    _logger.LogWarning($"Command execution failed: {command.GetDescription()}");
                     return CommandResult.CreateFailure(command, "Native execution failed", stopwatch.ElapsedMilliseconds);
                 }
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                LoggingSystem.Error($"Exception executing command {command.GetDescription()}: {ex.Message}");
+                _logger.Error($"Exception executing command {command.GetDescription()}: {ex.Message}");
                 return CommandResult.CreateFailure(command, ex.Message, stopwatch.ElapsedMilliseconds);
             }
         }
@@ -91,7 +92,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
                 
                 // Log batch progress
-                LoggingSystem.Info($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
+                _logger.Info($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
             }
             
             return new BatchCommandResult(results);
@@ -182,10 +183,12 @@ namespace PerAspera.GameAPI.Commands.Core
                 {
                     // Try to extract resource and amount from command
                     if (TryExtractImportResourceParameters(command, out string resourceName, out float amount))
-                    { // Logging disabledreturn factory.CreateImportResourceCommand(resourceName, amount);
+                    { // Logging disable
+                      return factory.CreateImportResourceCommand(resourceName, amount);
                     }
                     else
                     { // Logging disabled}
+                       throw new InvalidOperationException("Failed to extract parameters for ImportResource command");
                     }
                 }
                 
@@ -201,6 +204,7 @@ namespace PerAspera.GameAPI.Commands.Core
             }
             catch (Exception ex)
             { // Logging disabledreturn null;
+                throw new Exception($"Error converting command {command.CommandType} to native: {ex.Message}", ex);
             }
         }
 

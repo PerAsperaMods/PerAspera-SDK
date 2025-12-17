@@ -151,7 +151,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         public BatchCommandResult Execute()
         {
             if (_commands.Count == 0)
-                return new BatchCommandResult(new List<CommandResult>(), true, null);
+                return new BatchCommandResult(new List<CommandResult>());
                 
             if (_executeInParallel)
             {
@@ -171,7 +171,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         public async Task<BatchCommandResult> ExecuteAsync()
         {
             if (_commands.Count == 0)
-                return new BatchCommandResult(new List<CommandResult>(), true, null);
+                return new BatchCommandResult(new List<CommandResult>());
                 
             if (_executeInParallel)
             {

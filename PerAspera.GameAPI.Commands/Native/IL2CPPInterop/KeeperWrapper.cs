@@ -16,6 +16,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         private readonly System.Type _keeperType;
         private readonly MethodInfo _registerMethod;
         private readonly MethodInfo _unregisterMethod;
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
 
         /// <summary>
         /// Initialize wrapper with native Keeper instance
@@ -50,7 +51,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Call Keeper.Register(IHandleable) -> returns Handle
                 var handle = _registerMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                LoggingSystem.Debug($"Registered handleable object: {handleableObject.GetType().Name}");
+                _logger.Debug($"Registered handleable object: {handleableObject.GetType().Name}");
                 return handle;
             }
             catch (Exception ex)
@@ -76,7 +77,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Call Keeper.Unregister(IHandleable)
                 _unregisterMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                LoggingSystem.Debug($"Unregistered handleable object: {handleableObject.GetType().Name}");
+                _logger.Debug($"Unregistered handleable object: {handleableObject.GetType().Name}");
                 return true;
             }
             catch (Exception ex)

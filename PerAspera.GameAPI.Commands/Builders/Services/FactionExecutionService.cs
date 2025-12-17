@@ -1,7 +1,9 @@
+﻿using Il2CppSystem.Runtime.Remoting.Messaging;
+using PerAspera.GameAPI.Commands.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PerAspera.GameAPI.Commands.Core;
+using UnityEngine.Profiling.Memory.Experimental;
 
 namespace PerAspera.GameAPI.Commands.Builders.Services
 {
@@ -17,37 +19,39 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
         public static BatchCommandResult ExecuteCommands(IReadOnlyList<CommandBuilder> commands, bool stopOnFailure)
         {
             if (commands == null) throw new ArgumentNullException(nameof(commands));
-            
+
             var results = new List<CommandResult>();
-            
+
             foreach (var command in commands)
             {
                 try
                 {
                     var result = command.Execute();
                     results.Add(result);
-                    
+
                     if (!result.Success && stopOnFailure)
                     {
-                        return new BatchCommandResult(results, false, $"Command failed: {result.Error}");
+                        // ✅ CORRECTION: Utilise seulement les results
+                        return new BatchCommandResult(results);
                     }
                 }
                 catch (Exception ex)
                 {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
+                    var errorResult = CommandResult.CreateFailure(command.BuildCommand(), ex.Message, 0);
                     results.Add(errorResult);
-                    
+
                     if (stopOnFailure)
                     {
-                        return new BatchCommandResult(results, false, $"Command execution failed: {ex.Message}");
+                        // ✅ CORRECTION: Utilise seulement les results
+                        return new BatchCommandResult(results);
                     }
                 }
             }
-            
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+
+            // ✅ CORRECTION: À la fin aussi
+            return new  (results);
         }
-        
+
         /// <summary>
         /// Execute commands sequentially asynchronously with stop-on-failure logic
         /// </summary>
@@ -66,23 +70,23 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                     
                     if (!result.Success && stopOnFailure)
                     {
-                        return new BatchCommandResult(results, false, $"Command failed: {result.Error}");
+                        return new BatchCommandResult(results);
                     }
                 }
                 catch (Exception ex)
                 {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
+                    var errorResult = CommandResult.CreateFailure(command.BuildCommand(), ex.Message, 0);
                     results.Add(errorResult);
                     
                     if (stopOnFailure)
                     {
-                        return new BatchCommandResult(results, false, $"Command execution failed: {ex.Message}");
+                        return new BatchCommandResult(results);
                     }
                 }
             }
             
             var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+            return new BatchCommandResult(results);
         }
         
         /// <summary>

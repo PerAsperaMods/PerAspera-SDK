@@ -18,7 +18,8 @@ namespace PerAspera.GameAPI.Commands.Builders
         private readonly List<Func<IGameCommand, bool>> _validators;
         private TimeSpan? _timeout;
         private bool _validateBeforeExecution = true;
-        
+        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
+
         /// <summary>
         /// Initialize builder with command type
         /// </summary>
@@ -61,7 +62,8 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("Parameter name cannot be null or empty", nameof(name));
                 
-            _parameters[name] = value; // Logging disabledreturn this;
+            _parameters[name] = value;
+            return this;
         }
         
         /// <summary>
@@ -76,6 +78,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             {
                 _parameters[kvp.Key] = kvp.Value;
             } // Logging disabledreturn this;
+            return this;
         }
         
         /// <summary>
@@ -86,7 +89,8 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (validator == null)
                 throw new ArgumentNullException(nameof(validator));
                 
-            _validators.Add(validator); // Logging disabledreturn this;
+            _validators.Add(validator); // Logging disabled
+                                        return this;
         }
         
         /// <summary>
@@ -97,7 +101,8 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (timeout <= TimeSpan.Zero)
                 throw new ArgumentException("Timeout must be positive", nameof(timeout));
                 
-            _timeout = timeout; // Logging disabledreturn this;
+            _timeout = timeout; // Logging disabled
+                                return this;
         }
         
         /// <summary>
@@ -105,7 +110,8 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public CommandBuilder SkipValidation()
         {
-            _validateBeforeExecution = false; // Logging disabledreturn this;
+            _validateBeforeExecution = false; // Logging disabled
+                                              return this;
         }
         
         /// <summary>
@@ -128,7 +134,8 @@ namespace PerAspera.GameAPI.Commands.Builders
                 {
                     throw new InvalidOperationException($"Custom validation failed for {_commandType}");
                 }
-            } // Logging disabledreturn this;
+            } // Logging disabled
+              return this;
         }
         
         /// <summary>
@@ -150,12 +157,13 @@ namespace PerAspera.GameAPI.Commands.Builders
                 var dispatcher = CommandDispatcher.Instance;
                 var result = dispatcher.Dispatch(command);
                 
-                LoggingSystem.Info($"CommandBuilder: {_commandType} execution {(result.Success ? "succeeded" : "failed")}");
+                _logger.LogInfo($"CommandBuilder: {_commandType} execution {(result.Success ? "succeeded" : "failed")}");
                 return result;
             }
             catch (Exception ex)
-            { // Logging disabledvar errorCommand = BuildCommand();
-                return CommandResult.CreateFailure(errorCommand, ex.Message, 0);
+            {
+                var errorCommand = BuildCommand();
+                return new CommandResult(errorCommand, ex.Message, 0);
             }
         }
         
@@ -189,8 +197,10 @@ namespace PerAspera.GameAPI.Commands.Builders
         public CommandBuilder ClearParameters()
         {
             _parameters.Clear(); // Logging disabledreturn this;
+            return this;
+
         }
-        
+
         /// <summary>
         /// Remove specific parameter
         /// </summary>
@@ -198,10 +208,11 @@ namespace PerAspera.GameAPI.Commands.Builders
         {
             if (_parameters.Remove(name))
             { // Logging disabled}
-                return this;
             }
+            return this;
+
         }
-        
+
         /// <summary>
         /// Check if parameter exists
         /// </summary>

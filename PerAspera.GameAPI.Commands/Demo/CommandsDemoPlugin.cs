@@ -15,6 +15,7 @@ namespace PerAspera.GameAPI.Commands.Demo
     /// </summary>
     [BepInPlugin("PerAspera.GameAPI.Commands.Demo", "Commands SDK Demo", "1.0.0")]
     [BepInDependency("PerAspera.GameAPI.Commands", BepInDependency.DependencyFlags.HardDependency)]
+
     public class CommandsDemoPlugin : BasePlugin
     {
         internal new static ManualLogSource Logger { get; private set; }
@@ -33,7 +34,7 @@ namespace PerAspera.GameAPI.Commands.Demo
         /// </summary>
         private void Awake()
         {
-            Logger = base.Logger;
+            Logger = Log;
             Logger.LogInfo("Commands SDK Demo Plugin loading...");
             
             try
@@ -297,26 +298,28 @@ namespace PerAspera.GameAPI.Commands.Demo
         
         private void ShowCommandStatistics()
         {
+            ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ClassName");
+
             try
             {
                 var stats = Commands.GetStatistics();
                 
-                Plugin.Logger.LogInfo("=== Commands SDK Statistics ===");
-                Plugin.Logger.LogInfo($"Total commands executed: {stats.TotalExecuted}");
-                Plugin.Logger.LogInfo($"Successful commands: {stats.TotalSuccessful}");
-                Plugin.Logger.LogInfo($"Failed commands: {stats.TotalFailed}");
-                Plugin.Logger.LogInfo($"Success rate: {stats.SuccessRate:P2}");
-                Plugin.Logger.LogInfo($"Average execution time: {stats.AverageDuration:F2}ms");
+                _logger.LogInfo("=== Commands SDK Statistics ===");
+                _logger.LogInfo($"Total commands executed: {stats.TotalExecuted}");
+                _logger.LogInfo($"Successful commands: {stats.TotalSuccessful}");
+                _logger.LogInfo($"Failed commands: {stats.TotalFailed}");
+                _logger.LogInfo($"Success rate: {stats.SuccessRate:P2}");
+                _logger.LogInfo($"Average execution time: {stats.AverageDuration:F2}ms");
                 
                 if (stats.TotalExecuted > 0)
                 {
-                    Plugin.Logger.LogInfo($"Fastest command: {stats.FastestCommand?.CommandType} ({stats.FastestDuration:F2}ms)");
-                    Plugin.Logger.LogInfo($"Slowest command: {stats.SlowestCommand?.CommandType} ({stats.SlowestDuration:F2}ms)");
+                    _logger.LogInfo($"Fastest command: {stats.FastestCommand?.CommandType} ({stats.FastestDuration:F2}ms)");
+                    _logger.LogInfo($"Slowest command: {stats.SlowestCommand?.CommandType} ({stats.SlowestDuration:F2}ms)");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to get statistics: {ex.Message}");
+                _logger.LogError($"Failed to get statistics: {ex.Message}");
             }
         }
     }
