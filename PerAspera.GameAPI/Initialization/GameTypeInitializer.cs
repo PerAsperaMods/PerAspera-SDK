@@ -393,6 +393,125 @@ namespace PerAspera.GameAPI
                 Initialize();
             }
         }
+
+        // Additional type accessors for event patching services
+        
+        /// <summary>
+        /// Get TimeManager type (fallback to Universe if not found)
+        /// </summary>
+        public static System.Type? GetTimeManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find TimeManager type first
+            var timeManagerType = FindType("TimeManager");
+            if (timeManagerType != null)
+                return timeManagerType;
+            
+            // Fallback to Universe type which often handles time
+            return GetUniverseType();
+        }
+
+        /// <summary>
+        /// Get ResourceManager type (fallback to Faction if not found)
+        /// </summary>
+        public static System.Type? GetResourceManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find ResourceManager type first
+            var resourceManagerType = FindType("ResourceManager");
+            if (resourceManagerType != null)
+                return resourceManagerType;
+            
+            // Fallback to Faction type which often handles resources
+            return GetFactionType();
+        }
+
+        /// <summary>
+        /// Get SaveManager type (fallback to BaseGame if not found)
+        /// </summary>
+        public static System.Type? GetSaveManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find SaveManager type first
+            var saveManagerType = FindType("SaveManager");
+            if (saveManagerType != null)
+                return saveManagerType;
+            
+            // Fallback to BaseGame type which often handles saves
+            return GetBaseGameType();
+        }
+
+        /// <summary>
+        /// Get SceneManager type (fallback to BaseGame if not found)
+        /// </summary>
+        public static System.Type? GetSceneManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find SceneManager type first
+            var sceneManagerType = FindType("SceneManager");
+            if (sceneManagerType != null)
+                return sceneManagerType;
+            
+            // Fallback to BaseGame type which often handles scenes
+            return GetBaseGameType();
+        }
+
+        /// <summary>
+        /// Get UIManager type (fallback to BaseGame if not found)
+        /// </summary>
+        public static System.Type? GetUIManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find UIManager type first
+            var uiManagerType = FindType("UIManager");
+            if (uiManagerType != null)
+                return uiManagerType;
+            
+            // Fallback to BaseGame type which often handles UI
+            return GetBaseGameType();
+        }
+
+        /// <summary>
+        /// Get BuildingManager type (fallback to Planet if not found)
+        /// </summary>
+        public static System.Type? GetBuildingManagerType()
+        {
+            EnsureInitialized();
+            
+            // Try to find BuildingManager type first
+            var buildingManagerType = FindType("BuildingManager");
+            if (buildingManagerType != null)
+                return buildingManagerType;
+            
+            // Fallback to Planet type which often handles buildings
+            return GetPlanetType();
+        }
+
+        /// <summary>
+        /// Get Construction type (fallback to Building if not found)
+        /// </summary>
+        public static System.Type? GetConstructionType()
+        {
+            EnsureInitialized();
+            
+            // Try to find Construction type first
+            var constructionType = FindType("Construction");
+            if (constructionType != null)
+                return constructionType;
+            
+            // Try alternative names
+            var buildingConstructionType = FindType("BuildingConstruction");
+            if (buildingConstructionType != null)
+                return buildingConstructionType;
+            
+            // Fallback to Building type
+            return GetBuildingType();
+        }
     }
 
     /// <summary>

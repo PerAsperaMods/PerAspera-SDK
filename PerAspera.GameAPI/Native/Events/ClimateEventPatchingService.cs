@@ -15,13 +15,25 @@ namespace PerAspera.GameAPI.Native.Events
     {
         private System.Type _planetType;
 
+        /// <summary>
+        /// Initialize climate event patching service
+        /// </summary>
+        /// <param name="harmony">Harmony instance for IL2CPP patching</param>
         public ClimateEventPatchingService(Harmony harmony) 
             : base("Climate", harmony)
         {
         }
 
+        /// <summary>
+        /// Get the event type identifier for this service
+        /// </summary>
+        /// <returns>Event type string</returns>
         public override string GetEventType() => "Climate";
 
+        /// <summary>
+        /// Initialize all climate-related event hooks
+        /// </summary>
+        /// <returns>Number of successfully hooked methods</returns>
         public override int InitializeEventHooks()
         {
             _log.Debug("🌡️ Setting up enhanced climate event hooks...");
@@ -122,7 +134,7 @@ namespace PerAspera.GameAPI.Native.Events
                 __state["ClimateType"] = climateType;
                 __state["MethodName"] = methodName;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }
@@ -166,7 +178,7 @@ namespace PerAspera.GameAPI.Native.Events
                     ModEventBus.Publish("ClimateChanged", eventData);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }

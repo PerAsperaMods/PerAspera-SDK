@@ -18,13 +18,25 @@ namespace PerAspera.GameAPI.Native.Events
         private System.Type _constructionType;
         private System.Type _planetType;
 
+        /// <summary>
+        /// Initialize building event patching service
+        /// </summary>
+        /// <param name="harmony">Harmony instance for IL2CPP patching</param>
         public BuildingEventPatchingService(Harmony harmony) 
             : base("Building", harmony)
         {
         }
 
+        /// <summary>
+        /// Get the event type identifier for this service
+        /// </summary>
+        /// <returns>Event type string</returns>
         public override string GetEventType() => "Building";
 
+        /// <summary>
+        /// Initialize all building-related event hooks
+        /// </summary>
+        /// <returns>Number of successfully hooked methods</returns>
         public override int InitializeEventHooks()
         {
             _log.Debug("🏗️ Setting up enhanced building event hooks...");

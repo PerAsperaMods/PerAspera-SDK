@@ -13,11 +13,31 @@ namespace PerAspera.GameAPI.Native.Events
     /// </summary>
     public abstract class BaseEventPatchingService
     {
+        /// <summary>
+        /// Logger instance for event patching operations
+        /// </summary>
         protected readonly LogAspera _log;
+        
+        /// <summary>
+        /// Dictionary tracking patched methods and their event types
+        /// </summary>
         protected readonly Dictionary<string, string> _patchedMethods;
+        
+        /// <summary>
+        /// Context information for patch operations
+        /// </summary>
         protected readonly Dictionary<string, object> _patchContext;
+        
+        /// <summary>
+        /// Harmony instance for IL2CPP patching
+        /// </summary>
         protected readonly Harmony _harmony;
 
+        /// <summary>
+        /// Initialize base event patching service with logging and Harmony instance
+        /// </summary>
+        /// <param name="serviceName">Name of the service for logging purposes</param>
+        /// <param name="harmony">Harmony instance for patching</param>
         protected BaseEventPatchingService(string serviceName, Harmony harmony)
         {
             _log = new LogAspera($"GameAPI.Events.{serviceName}");

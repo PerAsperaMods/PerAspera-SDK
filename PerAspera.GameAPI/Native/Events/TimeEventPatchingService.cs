@@ -16,13 +16,25 @@ namespace PerAspera.GameAPI.Native.Events
         private System.Type _baseGameType;
         private System.Type _timeManagerType;
 
+        /// <summary>
+        /// Initialize time event patching service
+        /// </summary>
+        /// <param name="harmony">Harmony instance for IL2CPP patching</param>
         public TimeEventPatchingService(Harmony harmony) 
             : base("Time", harmony)
         {
         }
 
+        /// <summary>
+        /// Get the event type identifier for this service
+        /// </summary>
+        /// <returns>Event type string</returns>
         public override string GetEventType() => "Time";
 
+        /// <summary>
+        /// Initialize all time-related event hooks
+        /// </summary>
+        /// <returns>Number of successfully hooked methods</returns>
         public override int InitializeEventHooks()
         {
             _log.Debug("⏰ Setting up enhanced time event hooks...");
@@ -135,7 +147,7 @@ namespace PerAspera.GameAPI.Native.Events
                 __state["Instance"] = __instance;
                 __state["Timestamp"] = DateTime.UtcNow;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }
@@ -184,7 +196,7 @@ namespace PerAspera.GameAPI.Native.Events
                 // Special handling for critical time events
                 PublishSpecialTimeEvents(timeType, eventData);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }
