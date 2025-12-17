@@ -437,6 +437,11 @@
             <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
             <param name="amount">Amount to add (can be negative to remove)</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Universe">
             <summary>
             Wrapper for the native Universe class

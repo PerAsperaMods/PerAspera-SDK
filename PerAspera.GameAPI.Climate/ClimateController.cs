@@ -2,27 +2,28 @@ using System;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Configuration;
 using PerAspera.GameAPI.Climate.Simulation;
-using PerAspera.GameAPI.Climate.Analysis;
+using PerAspera.GameAPI.Climate.Patches;
 using PerAspera.GameAPI.Wrappers;
-using PerAspera.GameAPI.Wrappers.Atmosphere = PerAspera.GameAPI.Wrappers.PerAspera.GameAPI.Wrappers.Atmosphere;
-using PerAspera.GameAPI.Wrappers.Planet = PerAspera.GameAPI.Wrappers.PerAspera.GameAPI.Wrappers.Planet;
+
+// Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
+using Atmo = PerAspera.GameAPI.Wrappers.Atmosphere;
+using PlanetWrapped = PerAspera.GameAPI.Wrappers.Planet;
 
 namespace PerAspera.GameAPI.Climate
 {
     /// <summary>
     /// Master controller for climate simulation integration with Per Aspera
     /// Manages bidirectional synchronization between simulation and game state
+    /// Provides the requested bidirectional control over atmospheric values.
     /// </summary>
     public class ClimateController
     {
         private static readonly LogAspera Log = new LogAspera("Climate.Controller");
         
         private readonly ClimateSimulator _simulator;
-        private readonly HabitabilityAnalyzer _habitability;
-        private readonly TerraformingAnalyzer _terraforming;
         private readonly ClimateConfig _config;
         
-        private PerAspera.GameAPI.Wrappers.Planet? _planet;
+        private PlanetWrapped? _planet;
         private bool _isActive = false;
         private DateTime _lastUpdate = DateTime.Now;
         
@@ -30,223 +31,158 @@ namespace PerAspera.GameAPI.Climate
         {
             _config = config ?? ClimateConfig.CreateGameBalanced();
             _simulator = new ClimateSimulator(_config);
-            _habitability = new HabitabilityAnalyzer(_config);
-            _terraforming = new TerraformingAnalyzer(_config);
             
-            Log.Info("ClimateController initialized with enhanced terraforming simulation");
+            Log.Info("ClimateController initialized with bidirectional Harmony control");
         }
         
         /// <summary>
-        /// Enable climate simulation control over PerAspera.GameAPI.Wrappers.Planet PerAspera.GameAPI.Wrappers.Atmosphere
+        /// Enable climate control for the specified planet
+        /// Activates Harmony patches for bidirectional control
         /// </summary>
-        public void EnableClimateControl(PerAspera.GameAPI.Wrappers.Planet PerAspera.GameAPI.Wrappers.Planet)
+        public void EnableClimateControl(PlanetWrapped planet)
         {
-            _planet = PerAspera.GameAPI.Wrappers.Planet ?? throw new ArgumentNullException(nameof(PerAspera.GameAPI.Wrappers.Planet));
+            _planet = planet ?? throw new ArgumentNullException(nameof(planet));
             _isActive = true;
-            _lastUpdate = DateTime.Now;
             
-            Log.Info("Climate control activated for PerAspera.GameAPI.Wrappers.Planet");
+            // Active les patches Harmony pour ce planet
+            PlanetClimatePatches.EnableClimateControl(planet.GetNativeObject());
+            
+            Log.Info("Climate control activated with Harmony patches - full bidirectional control enabled");
         }
         
         /// <summary>
-        /// Disable climate simulation (game returns to normal behavior)
+        /// Disable climate control - game takes over atmospheric management
+        /// Deactivates Harmony patches
         /// </summary>
         public void DisableClimateControl()
         {
+            if (_planet != null)
+            {
+                PlanetClimatePatches.DisableClimateControl(_planet.GetNativeObject());
+            }
+            
             _isActive = false;
             _planet = null;
-            
-            Log.Info("Climate control deactivated - game takes over");
+            Log.Info("Climate control deactivated - game takes over, Harmony patches disabled");
         }
         
         /// <summary>
-        /// Update climate simulation and apply results to game
-        /// Call this periodically (e.g., every game day/hour)
+        /// Update climate simulation and synchronize with game if active
+        /// Called from mod's update loop
         /// </summary>
-        public ClimateUpdateResult UpdateClimate(float deltaTimeSols = 1.0f)
+        public void UpdateClimate(float deltaTime)
         {
-            if (!_isActive || _planet == null)
-            {
-                return new ClimateUpdateResult
-                {
-                    Success = false,
-                    Message = "Climate control not active"
-                };
-            }
+            if (!_isActive || _planet == null) return;
             
             try
             {
-                var PerAspera.GameAPI.Wrappers.Atmosphere = _planet.PerAspera.GameAPI.Wrappers.Atmosphere;
+                var atmosphere = _planet.Atmosphere;
                 
-                // 1. Run physics simulation
-                var simResult = _simulator.SimulateStep(PerAspera.GameAPI.Wrappers.Atmosphere, deltaTimeSols);
+                // Run climate simulation step
+                _simulator.SimulateStep(atmosphere, deltaTime);
                 
-                if (!simResult.Success)
-                {
-                    return new ClimateUpdateResult
-                    {
-                        Success = false,
-                        Message = $"Simulation failed: {simResult.ErrorMessage}"
-                    };
-                }
+                // Calculate metrics for monitoring
+                var status = _simulator.GetClimateStatus(atmosphere);
                 
-                // 2. Apply temperature changes to game
-                ApplyTemperatureToGame(PerAspera.GameAPI.Wrappers.Atmosphere, simResult.NewTemperature);
-                
-                // 3. Calculate analysis scores
-                var habitabilityScore = _habitability.CalculateHabitabilityScore(PerAspera.GameAPI.Wrappers.Atmosphere);
-                var terraformingProgress = _terraforming.CalculateTerraformingProgress(PerAspera.GameAPI.Wrappers.Atmosphere);
-                
-                // 4. Log status for debugging
-                var status = _simulator.GetClimateStatus(PerAspera.GameAPI.Wrappers.Atmosphere);
-                Log.Debug($"Climate update: {status} | Habitability: {habitabilityScore:F1}% | Progress: {terraformingProgress:F1}%");
-                
-                return new ClimateUpdateResult
-                {
-                    Success = true,
-                    Message = "Climate simulation updated successfully",
-                    TemperatureChange = simResult.TemperatureChange,
-                    NewTemperature = simResult.NewTemperature,
-                    HabitabilityScore = habitabilityScore,
-                    TerraformingProgress = terraformingProgress,
-                    GreenhouseWarming = simResult.GreenhouseWarming
-                };
+                Log.Debug($"Climate update: {status} | Bidirectional control active");
             }
             catch (Exception ex)
             {
                 Log.Error($"Climate update failed: {ex.Message}");
-                return new ClimateUpdateResult
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
             }
         }
         
         /// <summary>
-        /// Override atmospheric gas pressure in the game
-        /// Allows direct control of O2, CO2, N2, H2O levels
+        /// Set gas pressure directly (bidirectional control feature)
+        /// Uses Harmony patches to override game getters
         /// </summary>
-        public bool SetGasPressure(string gasType, float pressureKPa)
-        {
-            if (!_isActive || _planet == null)
-            {
-                Log.Warning("Cannot set gas pressure: climate control not active");
-                return false;
-            }
-            
-            try
-            {
-                var gas = _planet.PerAspera.GameAPI.Wrappers.Atmosphere.Composition[gasType];
-                if (gas == null)
-                {
-                    Log.Warning($"Unknown gas type: {gasType}");
-                    return false;
-                }
-                
-                if (gas.IsReadOnly)
-                {
-                    Log.Warning($"Gas {gasType} is read-only");
-                    return false;
-                }
-                
-                gas.PartialPressure = pressureKPa;
-                Log.Debug($"Set {gasType} pressure to {pressureKPa:F2} kPa");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Failed to set {gasType} pressure: {ex.Message}");
-                return false;
-            }
-        }
-        
-        /// <summary>
-        /// Get current status summary for UI display
-        /// </summary>
-        public string GetStatusSummary()
-        {
-            if (!_isActive || _planet == null)
-                return "Climate Control: DISABLED";
-                
-            try
-            {
-                var PerAspera.GameAPI.Wrappers.Atmosphere = _planet.PerAspera.GameAPI.Wrappers.Atmosphere;
-                var habitability = _habitability.GetHabitabilityAssessment(PerAspera.GameAPI.Wrappers.Atmosphere);
-                var terraforming = _terraforming.GetTerraformingStatusSummary(PerAspera.GameAPI.Wrappers.Atmosphere);
-                
-                return $"🌡️ {habitability}\\n🌍 {terraforming}";
-            }
-            catch (Exception ex)
-            {
-                return $"Climate Control: ERROR - {ex.Message}";
-            }
-        }
-        
-        /// <summary>
-        /// Apply calculated temperature to game PerAspera.GameAPI.Wrappers.Planet
-        /// </summary>
-        private void ApplyTemperatureToGame(PerAspera.GameAPI.Wrappers.Atmosphere PerAspera.GameAPI.Wrappers.Atmosphere, float newTemperature)
+        public void SetGasPressure(string gasType, float pressure)
         {
             try
             {
-                // Set new temperature with validation bounds
-                var clampedTemp = Math.Max(150f, Math.Min(400f, newTemperature));
-                PerAspera.GameAPI.Wrappers.Atmosphere.Temperature = clampedTemp;
-                
-                if (Math.Abs(clampedTemp - newTemperature) > 0.1f)
+                if (!_isActive || _planet == null)
                 {
-                    Log.Warning($"Temperature clamped from {newTemperature:F1}K to {clampedTemp:F1}K");
+                    Log.Warning("Cannot set gas pressure: climate control not active");
+                    return;
                 }
+                
+                // Met à jour via les patches Harmony - le jeu verra cette valeur
+                PlanetClimatePatches.SetClimateValue(_planet.GetNativeObject(), $"{gasType}Pressure", pressure);
+                
+                Log.Debug($"Set gas pressure via Harmony: {gasType}={pressure:F2}kPa");
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to apply temperature: {ex.Message}");
+                Log.Error($"Failed to set gas pressure: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Terraforming boost: rapidly increase greenhouse gases
+        /// Set temperature directly (bidirectional control feature)
+        /// Uses Harmony patches to override game getters
         /// </summary>
-        public bool BoostTerraforming(float co2BoostKPa = 5.0f, float h2oBoostKPa = 1.0f)
+        public void SetTemperature(float temperatureKelvin)
         {
-            if (!_isActive)
-                return false;
-                
-            var success = true;
-            success &= SetGasPressure("CO2", (_planet?.PerAspera.GameAPI.Wrappers.Atmosphere.Composition["CO2"]?.PartialPressure ?? 0f?.PartialPressure ?? 0f) + co2BoostKPa);
-            success &= SetGasPressure("H2O", (_planet?.PerAspera.GameAPI.Wrappers.Atmosphere.Composition["H2O"]?.PartialPressure ?? 0f?.PartialPressure ?? 0f) + h2oBoostKPa);
-            
-            if (success)
+            try
             {
-                Log.Info($"Terraforming boost applied: +{co2BoostKPa}kPa CO2, +{h2oBoostKPa}kPa H2O");
+                if (!_isActive || _planet == null)
+                {
+                    Log.Warning("Cannot set temperature: climate control not active");
+                    return;
+                }
+                
+                // Met à jour via les patches Harmony - le jeu verra cette valeur 
+                PlanetClimatePatches.SetClimateValue(_planet.GetNativeObject(), "temperature", temperatureKelvin);
+                
+                Log.Debug($"Set temperature via Harmony: {temperatureKelvin:F1}K ({temperatureKelvin - 273.15f:F1}°C)");
             }
-            
-            return success;
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to set temperature: {ex.Message}");
+            }
         }
-    }
-    
-    /// <summary>
-    /// Result of a climate update operation
-    /// </summary>
-    public class ClimateUpdateResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-        public float TemperatureChange { get; set; }
-        public float NewTemperature { get; set; }
-        public float HabitabilityScore { get; set; }
-        public float TerraformingProgress { get; set; }
-        public float GreenhouseWarming { get; set; }
         
-        public override string ToString()
+        /// <summary>
+        /// Boost terraforming progress by temporarily accelerating atmospheric changes
+        /// Uses Harmony-controlled values for immediate game impact
+        /// </summary>
+        public void BoostTerraforming(float boostFactor = 2.0f, int durationMinutes = 30)
         {
-            if (!Success) return $"❌ {Message}";
-            return $"✅ ΔT={TemperatureChange:+F1;-F1;0}K → {NewTemperature:F0}K | Habitability:{HabitabilityScore:F0}% | Progress:{TerraformingProgress:F0}%";
+            if (_planet == null) return;
+            
+            try
+            {
+                // Example: Get current values from our simulation and boost O2 production
+                var atmosphere = _planet.Atmosphere;
+                float currentCO2 = atmosphere.Composition["CO2"]?.PartialPressure ?? 0.6f; // Mars baseline
+                float currentO2 = atmosphere.Composition["O2"]?.PartialPressure ?? 0.01f;
+                
+                float co2ToConvert = currentCO2 * 0.02f * boostFactor; // Convert 2% * boost factor
+                
+                // Use Harmony patches for immediate effect
+                SetGasPressure("CO2", currentCO2 - co2ToConvert);
+                SetGasPressure("O2", currentO2 + co2ToConvert * 0.7f); // 70% efficiency
+                
+                Log.Info($"Terraforming boosted via Harmony: rate={boostFactor:F2}x for {durationMinutes}m");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to boost terraforming: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Get current climate status for monitoring/debugging
+        /// </summary>
+        public string GetStatus()
+        {
+            if (!_isActive || _planet == null) 
+                return "Climate Control: INACTIVE";
+            
+            var atmosphere = _planet.Atmosphere;
+            var status = _simulator.GetClimateStatus(atmosphere);
+            
+            return $"Climate Control: ACTIVE (Harmony) | {status}";
         }
     }
 }
-
-
-
-

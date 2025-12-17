@@ -9,31 +9,62 @@ namespace PerAspera.GameAPI.Commands.Constants
     {
         // Resource Commands
         public const string ImportResource = "ImportResource";
+        public const string ExportResource = "ExportResource";
+        public const string SetResourceAmount = "SetResourceAmount";
         public const string SpawnResourceVein = "SpawnResourceVein";
         public const string ExhaustResourceVein = "ExhaustResourceVein";
         
         // Building Commands  
         public const string UnlockBuilding = "UnlockBuilding";
+        public const string LockBuilding = "LockBuilding";
+        public const string AddBuilding = "AddBuilding";
+        public const string RemoveBuilding = "RemoveBuilding";
         public const string AdditionalBuilding = "AdditionalBuilding";
         public const string BuildingRebuild = "BuildingRebuild";
         public const string FactionCreateBuilding = "FactionCreateBuilding";
         
-        // Technology Commands
+        // Technology & Knowledge Commands
         public const string ResearchTechnology = "ResearchTechnology";
         public const string UnlockKnowledge = "UnlockKnowledge";
+        public const string LockKnowledge = "LockKnowledge";
         public const string UnlockTech = "UnlockTech";
         
-        // Dialogue Commands
+        // Interaction Commands
         public const string StartDialogue = "StartDialogue";
+        public const string SkipDialogue = "SkipDialogue";
+        public const string EnableKeeperMode = "EnableKeeperMode";
+        public const string DisableKeeperMode = "DisableKeeperMode";
         public const string NotifyDialogue = "NotifyDialogue";
         public const string ShowDialogue = "ShowDialogue";
         
-        // Universe Commands
+        // Environment & Utility Commands
         public const string Sabotage = "Sabotage";
-        public const string GameOver = "GameOver";
-        public const string KillSwitchMode = "KillSwitchMode";
         public const string SetOverride = "SetOverride";
+        public const string ShowMessage = "ShowMessage";
+        public const string ShowTutorialMessage = "ShowTutorialMessage";
         public const string SPLoadPrefab = "SPLoadPrefab";
+        
+        // Game Control Commands
+        public const string GameOver = "GameOver";
+        public const string WinGame = "WinGame";
+        public const string LoseGame = "LoseGame";
+        public const string PauseGame = "PauseGame";
+        public const string ResumeGame = "ResumeGame";
+        public const string SaveGame = "SaveGame";
+        public const string LoadGame = "LoadGame";
+        public const string RestartGame = "RestartGame";
+        public const string SetGameSpeed = "SetGameSpeed";
+        public const string KillSwitchMode = "KillSwitchMode";
+        
+        // Specialized Commands
+        public const string SetClimate = "SetClimate";
+        public const string TriggerEvent = "TriggerEvent";
+        public const string SpawnUnit = "SpawnUnit";
+        public const string DestroyUnit = "DestroyUnit";
+        public const string MoveUnit = "MoveUnit";
+        public const string SetFactionRelation = "SetFactionRelation";
+        public const string AddPoints = "AddPoints";
+        public const string SetAIAggression = "SetAIAggression";
         
         // Special Commands
         public const string CustomCommand = "CustomCommand";
