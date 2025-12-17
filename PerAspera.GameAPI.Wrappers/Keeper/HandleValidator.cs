@@ -446,13 +446,35 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public struct HandleValidationResult
     {
+        /// <summary>
+        /// Whether the handle validation was successful
+        /// </summary>
         public bool IsValid { get; set; }
+        /// <summary>
+        /// Error code if validation failed, None if successful
+        /// </summary>
         public ValidationError ErrorCode { get; set; }
+        /// <summary>
+        /// Human-readable error message if validation failed
+        /// </summary>
         public string? ErrorMessage { get; set; }
+        /// <summary>
+        /// Type of the entity associated with the handle
+        /// </summary>
         public System.Type? EntityType { get; set; }
+        /// <summary>
+        /// The handle object being validated
+        /// </summary>
         public object? Handle { get; set; }
+        /// <summary>
+        /// The entity retrieved from the handle, if validation succeeded
+        /// </summary>
         public object? Entity { get; set; }
         
+        /// <summary>
+        /// Returns a string representation of the validation result
+        /// </summary>
+        /// <returns>Formatted string with validation status and details</returns>
         public override string ToString()
         {
             if (IsValid)
@@ -467,12 +489,19 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public enum ValidationError
     {
+        /// <summary>No error - validation successful</summary>
         None = 0,
+        /// <summary>Handle is null or invalid</summary>
         NullHandle,
+        /// <summary>KeeperMap instance is not available</summary>
         KeeperMapUnavailable,
+        /// <summary>Handle does not exist in KeeperMap</summary>
         HandleNotFound,
+        /// <summary>Failed to retrieve entity from valid handle</summary>
         EntityRetrievalFailed,
+        /// <summary>Retrieved entity type does not match expected type</summary>
         TypeMismatch,
+        /// <summary>Exception occurred during validation process</summary>
         ValidationException
     }
     
@@ -481,11 +510,27 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public struct HandleRecoveryResult
     {
+        /// <summary>
+        /// Whether the handle recovery attempt was successful
+        /// </summary>
         public bool Success { get; set; }
+        /// <summary>
+        /// The recovered handle if recovery was successful
+        /// </summary>
         public object? RecoveredHandle { get; set; }
+        /// <summary>
+        /// Description of the recovery method used
+        /// </summary>
         public string? RecoveryMethod { get; set; }
+        /// <summary>
+        /// Error message if recovery failed
+        /// </summary>
         public string? ErrorMessage { get; set; }
         
+        /// <summary>
+        /// Returns a string representation of the recovery result
+        /// </summary>
+        /// <returns>Formatted string with recovery status and details</returns>
         public override string ToString()
         {
             return Success ? $"Recovered via: {RecoveryMethod}" : $"Recovery failed: {ErrorMessage}";
@@ -498,9 +543,13 @@ namespace PerAspera.GameAPI.Wrappers
     [Flags]
     public enum HandleRecoveryStrategy
     {
+        /// <summary>No recovery strategy - accept failure</summary>
         None = 0,
+        /// <summary>Attempt to revalidate the same handle</summary>
         Revalidate = 1,
+        /// <summary>Attempt to find similar valid handle</summary>
         FindSimilar = 2,
+        /// <summary>Default recovery strategy - revalidate and find similar</summary>
         Default = Revalidate | FindSimilar
     }
     
@@ -509,13 +558,35 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public struct HandleValidatorDiagnostics
     {
+        /// <summary>
+        /// Number of valid handles in cache
+        /// </summary>
         public int ValidCacheSize { get; set; }
+        /// <summary>
+        /// Number of invalid handles in cache
+        /// </summary>
         public int InvalidCacheSize { get; set; }
+        /// <summary>
+        /// Cache hit rate percentage (0.0 to 100.0)
+        /// </summary>
         public double CacheHitRate { get; set; }
+        /// <summary>
+        /// Timestamp of last cache cleanup operation
+        /// </summary>
         public DateTime LastCleanup { get; set; }
+        /// <summary>
+        /// Whether KeeperMap instance is currently available
+        /// </summary>
         public bool KeeperMapAvailable { get; set; }
+        /// <summary>
+        /// Current error message, if any
+        /// </summary>
         public string? ErrorMessage { get; set; }
         
+        /// <summary>
+        /// Returns a string representation of the validator diagnostics
+        /// </summary>
+        /// <returns>Formatted string with cache statistics and system status</returns>
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(ErrorMessage))

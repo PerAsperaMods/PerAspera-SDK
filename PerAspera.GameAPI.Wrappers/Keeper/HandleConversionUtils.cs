@@ -20,7 +20,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Resolve Handle to strongly-typed entity with validation
-        /// Safe alternative to direct KeeperMap.Find<T> with error handling
+        /// Safe alternative to direct KeeperMap.Find{T} with error handling
         /// Performance: O(1) with validation overhead
         /// </summary>
         /// <typeparam name="T">Expected entity type</typeparam>
@@ -437,14 +437,39 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public struct ConversionDiagnostics
     {
+        /// <summary>
+        /// Whether KeeperMap instance is currently available for conversion operations
+        /// </summary>
         public bool KeeperMapAvailable { get; set; }
+        /// <summary>
+        /// Number of handles tested in last diagnostic run
+        /// </summary>
         public int TestHandleCount { get; set; }
+        /// <summary>
+        /// Success rate of handle validation operations (0.0 to 100.0)
+        /// </summary>
         public double ValidationSuccessRate { get; set; }
+        /// <summary>
+        /// Success rate of handle to entity conversion operations (0.0 to 100.0)
+        /// </summary>
         public double ConversionSuccessRate { get; set; }
+        /// <summary>
+        /// Success rate of round-trip conversions (handle → entity → handle) (0.0 to 100.0)
+        /// </summary>
         public double RoundTripSuccessRate { get; set; }
+        /// <summary>
+        /// Overall system health indicator
+        /// </summary>
         public bool IsHealthy { get; set; }
+        /// <summary>
+        /// Current system error message, if any
+        /// </summary>
         public string? ErrorMessage { get; set; }
         
+        /// <summary>
+        /// Returns a string representation of the conversion system diagnostics
+        /// </summary>
+        /// <returns>Formatted string with conversion statistics and health status</returns>
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(ErrorMessage))

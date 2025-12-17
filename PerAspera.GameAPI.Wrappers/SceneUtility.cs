@@ -126,8 +126,6 @@ namespace PerAspera.GameAPI.Wrappers
                 return false;
             }
         }
-            return !string.IsNullOrEmpty(GetScenePathByBuildIndex(buildIndex));
-        }
         
         /// <summary>
         /// Get scene name from scene path

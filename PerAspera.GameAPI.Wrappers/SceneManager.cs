@@ -233,27 +233,7 @@ namespace PerAspera.GameAPI.Wrappers
                 return null;
             }
         }
-        
-        /// <summary>
-        /// Move GameObject to different scene
-        /// Static Method: SceneManager.MoveGameObjectToScene(GameObject, Scene)
-        /// </summary>
-        public static void MoveGameObjectToScene(GameObject go, Scene scene)
-        {
-            try
-            {
-                if (go == null)
-                {
-                    Log.Warning("Cannot move null GameObject");
-                    return;
-                }
-                
-                if (scene == null)
-                {
-                    Log.Warning("Cannot move GameObject to null scene");
-                    return;
-                }
-                
+
         /// <summary>
         /// Move GameObject to scene
         /// Unity 2020.3 compatibility: Alternative approach using Transform

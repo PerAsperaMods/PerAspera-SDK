@@ -64,19 +64,24 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Current scene loading state
-        /// Property: loadingState { get; }
+        /// Unity 2020.3 compatibility: Scene struct doesn't have loadingState property
         /// </summary>
-        public object? LoadingState 
+        public string LoadingState 
         { 
             get 
             {
                 try 
                 {
-                    return _nativeScene != null ? _nativeScene.GetPropertyValue<object>("loadingState") : null;
+                    // Unity 2020.3 alternative: derive state from isLoaded
+                    if (_nativeScene.IsValid())
+                    {
+                        return _nativeScene.isLoaded ? "Loaded" : "Loading";
+                    }
+                    return "Invalid";
                 } 
                 catch 
                 {
-                    return null;
+                    return "Unknown";
                 }
             }
         }
