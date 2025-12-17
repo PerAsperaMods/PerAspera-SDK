@@ -72,7 +72,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 try 
                 {
-                    return _nativeScene?.GetPropertyValue("loadingState");
+                    return _nativeScene != null ? _nativeScene.GetPropertyValue<object>("loadingState") : null;
                 } 
                 catch 
                 {
@@ -88,10 +88,25 @@ namespace PerAspera.GameAPI.Wrappers
         public int RootCount => _nativeScene.rootCount;
         
         /// <summary>
-        /// Scene GUID (unique identifier)
-        /// Property: guid { get; }
+        /// Scene GUID (unique identifier) - Unity 2020.3 compatibility
+        /// Property: Alternative to guid property
         /// </summary>
-        public string Guid => _nativeScene.guid ?? "";
+        public string Guid 
+        {
+            get
+            {
+                try
+                {
+                    // Unity 2020.3 doesn't have guid property, use path as fallback
+                    var pathProperty = _nativeScene.GetPropertyValue<object>("path");
+                    return pathProperty?.ToString() ?? _nativeScene.GetHashCode().ToString();
+                }
+                catch
+                {
+                    return _nativeScene.GetHashCode().ToString();
+                }
+            }
+        }
         
         // ==================== VALIDATION ====================
         

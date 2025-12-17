@@ -93,7 +93,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Resolve multiple Handles to entities efficiently
         /// Optimized for bulk operations with shared KeeperMap access
-        /// Returns: Dictionary<Handle, Entity> with successful resolutions only
+        /// Returns: Dictionary with Handle as key, Entity as value for successful resolutions only
         /// </summary>
         /// <typeparam name="T">Expected entity type for all Handles</typeparam>
         /// <param name="handles">Collection of Handles to resolve</param>

@@ -182,7 +182,15 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>Valid entities (skips invalid Handles)</returns>
         public static IEnumerable<T> FindMany<T>(IEnumerable<object> handles) where T : class
         {
-            if (handles == null) yield break;
+            if (handles == null) 
+                return Enumerable.Empty<T>();
+            
+            return EnumerateManyEntities<T>(handles);
+        }
+        
+        private static IEnumerable<T> EnumerateManyEntities<T>(IEnumerable<object> handles) where T : class
+        {
+            var results = new List<T>();
             
             try
             {
@@ -190,7 +198,7 @@ namespace PerAspera.GameAPI.Wrappers
                 if (keeperMap == null)
                 {
                     LogDebug("KeeperMap not available for FindMany");
-                    yield break;
+                    return results;
                 }
                 
                 foreach (var handle in handles)
@@ -200,7 +208,7 @@ namespace PerAspera.GameAPI.Wrappers
                         var entity = keeperMap.InvokeMethod<T>("Find", handle);
                         if (entity != null)
                         {
-                            yield return entity;
+                            results.Add(entity);
                         }
                     }
                 }
@@ -208,8 +216,9 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 LogWarning($"FindMany<{typeof(T).Name}> failed: {ex.Message}");
-                yield break;
             }
+            
+            return results;
         }
         
         // ==================== SPECIALIZED ACCESS ====================
@@ -223,7 +232,15 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>All buildings matching type name</returns>
         public static IEnumerable<object> FindBuildingsByType(string buildingTypeName)
         {
-            if (string.IsNullOrEmpty(buildingTypeName)) yield break;
+            if (string.IsNullOrEmpty(buildingTypeName)) 
+                return Enumerable.Empty<object>();
+            
+            return EnumerateBuildingsByType(buildingTypeName);
+        }
+        
+        private static IEnumerable<object> EnumerateBuildingsByType(string buildingTypeName)
+        {
+            var results = new List<object>();
             
             try
             {
@@ -234,13 +251,13 @@ namespace PerAspera.GameAPI.Wrappers
                 foreach (var building in allBuildings)
                 {
                     // Check buildingType.name property
-                    var buildingType = building.GetPropertyValue("buildingType");
+                    var buildingType = building.GetPropertyValue<object>("buildingType");
                     if (buildingType != null)
                     {
-                        var name = buildingType.GetPropertyValue("name") as string;
+                        var name = buildingType.GetPropertyValue<object>("name") as string;
                         if (string.Equals(name, buildingTypeName, StringComparison.OrdinalIgnoreCase))
                         {
-                            yield return building;
+                            results.Add(building);
                         }
                     }
                 }
@@ -248,8 +265,9 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 LogWarning($"FindBuildingsByType({buildingTypeName}) failed: {ex.Message}");
-                yield break;
             }
+            
+            return results;
         }
         
         /// <summary>
@@ -262,7 +280,15 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>Buildings within specified area</returns>
         public static IEnumerable<object> FindBuildingsNear(Vector3 center, float radius)
         {
-            if (radius <= 0) yield break;
+            if (radius <= 0) 
+                return Enumerable.Empty<object>();
+            
+            return EnumerateBuildingsNear(center, radius);
+        }
+        
+        private static IEnumerable<object> EnumerateBuildingsNear(Vector3 center, float radius)
+        {
+            var results = new List<object>();
             
             try
             {
@@ -278,7 +304,7 @@ namespace PerAspera.GameAPI.Wrappers
                         var distance = Vector3.SqrMagnitude(position.Value - center);
                         if (distance <= radiusSquared)
                         {
-                            yield return building;
+                            results.Add(building);
                         }
                     }
                 }
@@ -286,8 +312,9 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 LogWarning($"FindBuildingsNear failed: {ex.Message}");
-                yield break;
             }
+            
+            return results;
         }
         
         // ==================== INTERNAL HELPERS ====================
@@ -317,7 +344,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 // Get KeeperMap from Keeper
-                var keeperMap = keeper.GetFieldValue("map");
+                var keeperMap = keeper.GetFieldValue<object>("map");
                 if (keeperMap == null)
                 {
                     LogDebug("keeper.map field returned null");
@@ -344,8 +371,8 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 // Check for building-specific properties
-                var buildingType = entity.GetPropertyValue("buildingType");
-                var position = entity.GetPropertyValue("position");
+                var buildingType = entity.GetPropertyValue<object>("buildingType");
+                var position = entity.GetPropertyValue<object>("position");
                 return buildingType != null && position != null;
             }
             catch
@@ -362,7 +389,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var position = building.GetPropertyValue("position");
+                var position = building.GetPropertyValue<object>("position");
                 if (position is Vector3 vec3)
                 {
                     return vec3;
@@ -406,8 +433,8 @@ namespace PerAspera.GameAPI.Wrappers
                     };
                 }
                 
-                var objectsDict = keeperMap.GetFieldValue("_objects");
-                var count = objectsDict?.GetPropertyValue("Count") as int? ?? 0;
+                var objectsDict = keeperMap.GetFieldValue<object>("_objects");
+                var count = objectsDict?.GetPropertyValue<object>("Count") as int? ?? 0;
                 
                 return new HandleSystemMetrics
                 {
@@ -434,10 +461,25 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public struct HandleSystemMetrics
     {
+        /// <summary>
+        /// Gets or sets whether the Handle system is available and functioning
+        /// </summary>
         public bool IsAvailable { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the total number of entities tracked in the Handle system
+        /// </summary>
         public int TotalEntities { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the error message if Handle system access failed
+        /// </summary>
         public string? ErrorMessage { get; set; }
         
+        /// <summary>
+        /// Returns a string representation of the Handle system metrics
+        /// </summary>
+        /// <returns>Formatted metrics string</returns>
         public override string ToString()
         {
             if (!IsAvailable)

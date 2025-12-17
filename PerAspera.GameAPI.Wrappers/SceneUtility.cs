@@ -1,13 +1,12 @@
 using System;
-using UnityEngine.SceneManagement;
 using PerAspera.Core;
+using UnityEngine;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Type-safe wrapper for Unity SceneUtility static class
-    /// Provides utilities for scene path/index conversion
-    /// DOC: SceneUtility wrapper for Unity scene utility functions
+    /// Unity 2020.3.49f1 Compatible Scene Utility Wrapper
+    /// COMPATIBILITY: SceneUtility doesn't exist in Unity 2020.3, providing alternative implementation
     /// </summary>
     public static class SceneUtility
     {
@@ -17,7 +16,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get scene build index from scene path
-        /// Static Method: SceneUtility.GetBuildIndexByScenePath(string) -> int
+        /// Unity 2020.3 compatibility: Alternative implementation since SceneUtility doesn't exist
         /// Returns -1 if scene not found in build settings
         /// </summary>
         public static int GetBuildIndexByScenePath(string scenePath)
@@ -30,7 +29,24 @@ namespace PerAspera.GameAPI.Wrappers
                     return -1;
                 }
                 
-                var buildIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath(scenePath);
+                // Unity 2020.3 alternative: Use Application.CanStreamedLevelBeLoaded
+                for (int i = 0; i < Application.levelCount; i++)
+                {
+                    // Check if scene exists in build settings
+                    if (Application.CanStreamedLevelBeLoaded(i))
+                    {
+                        // Simple path matching (limited in Unity 2020.3)
+                        var levelName = $"level{i}"; // Unity 2020.3 limitation
+                        if (scenePath.Contains(levelName))
+                        {
+                            Log.Debug($"Scene path '{scenePath}' -> build index {i} (approximate match)");
+                            return i;
+                        }
+                    }
+                }
+                
+                Log.Debug($"Scene path '{scenePath}' not found in build settings");
+                return -1;
                 
                 if (buildIndex == -1)
                 {

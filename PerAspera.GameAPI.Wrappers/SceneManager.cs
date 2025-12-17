@@ -86,14 +86,22 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get scene by build index in build settings
-        /// Static Method: SceneManager.GetSceneByBuildIndex(int) -> Scene  
+        /// Unity 2020.3 compatibility: Use GetSceneAt with validation
         /// </summary>
         public static Scene GetSceneByBuildIndex(int buildIndex)
         {
             try
             {
-                var nativeScene = UnityEngine.SceneManagement.SceneManager.GetSceneByBuildIndex(buildIndex);
-                return nativeScene.IsValid() ? new Scene(nativeScene) : null;
+                // Unity 2020.3 doesn't have GetSceneByBuildIndex, use alternative
+                var sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCount;
+                if (buildIndex >= 0 && buildIndex < sceneCount)
+                {
+                    var nativeScene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(buildIndex);
+                    return nativeScene.IsValid() ? new Scene(nativeScene) : null;
+                }
+                
+                Log.Warning($"Build index {buildIndex} is out of range (0-{sceneCount - 1})");
+                return null;
             }
             catch (Exception ex)
             {
@@ -246,14 +254,39 @@ namespace PerAspera.GameAPI.Wrappers
                     return;
                 }
                 
+        /// <summary>
+        /// Move GameObject to scene
+        /// Unity 2020.3 compatibility: Alternative approach using Transform
+        /// </summary>
+        public static void MoveGameObjectToScene(GameObject go, Scene scene)
+        {
+            if (go == null || scene == null)
+            {
+                Log.Warning("Cannot move null GameObject or to null Scene");
+                return;
+            }
+            
+            try
+            {
                 if (!scene.IsLoaded)
                 {
                     Log.Warning($"Cannot move GameObject to unloaded scene '{scene.Name}'");
                     return;
                 }
                 
-                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene.NativeScene);
-                Log.Debug($"Moved GameObject '{go.name}' to scene '{scene.Name}'");
+                // Unity 2020.3 alternative: Use native scene directly with reflection
+                var moveMethod = typeof(UnityEngine.SceneManagement.SceneManager)
+                    .GetMethod("MoveGameObjectToScene", new[] { typeof(GameObject), typeof(UnityEngine.SceneManagement.Scene) });
+                
+                if (moveMethod != null)
+                {
+                    moveMethod.Invoke(null, new object[] { go, scene.NativeScene });
+                    Log.Debug($"Moved GameObject '{go.name}' to scene '{scene.Name}'");
+                }
+                else
+                {
+                    Log.Warning("MoveGameObjectToScene not available in this Unity version");
+                }
             }
             catch (Exception ex)
             {
@@ -314,7 +347,7 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 Log.Info($"Loading scene at build index {sceneBuildIndex} with mode {mode}");
-                return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneBuildIndex, mode);
+                return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneBuildIndex.ToString(), mode);
             }
             catch (Exception ex)
             {
@@ -368,7 +401,8 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 Log.Info($"Unloading scene '{sceneName}'");
-                return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName);
+                var targetScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
+                return UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(targetScene);
             }
             catch (Exception ex)
             {

@@ -189,16 +189,24 @@ namespace PerAspera.GameAPI.Wrappers
         public IEnumerable<object> EnumerateHandles()
         {
             var objectsDict = GetObjectsDict();
-            if (objectsDict == null) yield break;
+            if (objectsDict == null) 
+                return Enumerable.Empty<object>();
+            
+            return EnumerateHandlesInternal(objectsDict);
+        }
+        
+        private IEnumerable<object> EnumerateHandlesInternal(object objectsDict)
+        {
+            var results = new List<object>();
             
             try
             {
                 // Get Dictionary.Keys collection
                 var keys = objectsDict.InvokeMethod<object>("get_Keys");
-                if (keys == null) yield break;
+                if (keys == null) return results;
                 
                 var enumerator = keys.InvokeMethod<object>("GetEnumerator");
-                if (enumerator == null) yield break;
+                if (enumerator == null) return results;
                 
                 // Enumerate all Handles
                 while (enumerator.InvokeMethod<bool>("MoveNext"))
@@ -206,15 +214,16 @@ namespace PerAspera.GameAPI.Wrappers
                     var current = enumerator.GetPropertyValue<object>("Current");
                     if (current != null)
                     {
-                        yield return current;
+                        results.Add(current);
                     }
                 }
             }
             catch (Exception ex)
             {
                 UnityEngine.Debug.LogWarning($"{LogPrefix} EnumerateHandles failed: {ex.Message}");
-                yield break;
             }
+            
+            return results;
         }
         
         /// <summary>
@@ -225,32 +234,41 @@ namespace PerAspera.GameAPI.Wrappers
         public IEnumerable<object> EnumerateEntities()
         {
             var objectsDict = GetObjectsDict();
-            if (objectsDict == null) yield break;
+            if (objectsDict == null) 
+                return Enumerable.Empty<object>();
+            
+            return EnumerateEntitiesInternal(objectsDict);
+        }
+        
+        private IEnumerable<object> EnumerateEntitiesInternal(object objectsDict)
+        {
+            var results = new List<object>();
             
             try
             {
                 // Get Dictionary.Values collection
                 var values = objectsDict.InvokeMethod<object>("get_Values");
-                if (values == null) yield break;
+                if (values == null) return results;
                 
                 var enumerator = values.InvokeMethod<object>("GetEnumerator");
-                if (enumerator == null) yield break;
+                if (enumerator == null) return results;
                 
                 // Enumerate all entities
                 while (enumerator.InvokeMethod<bool>("MoveNext"))
                 {
-                    var current = enumerator.GetPropertyValue("Current");
+                    var current = enumerator.GetPropertyValue<object>("Current");
                     if (current != null)
                     {
-                        yield return current;
+                        results.Add(current);
                     }
                 }
             }
             catch (Exception ex)
             {
                 UnityEngine.Debug.LogWarning($"{LogPrefix} EnumerateEntities failed: {ex.Message}");
-                yield break;
             }
+            
+            return results;
         }
         
         /// <summary>
@@ -261,7 +279,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="typePredicate">Function to test entity type</param>
         public IEnumerable<object> EnumerateEntitiesByType(Func<object, bool> typePredicate)
         {
-            if (typePredicate == null) yield break;
+            if (typePredicate == null) 
+                return Enumerable.Empty<object>();
+            
+            var results = new List<object>();
             
             foreach (var entity in EnumerateEntities())
             {
@@ -269,7 +290,7 @@ namespace PerAspera.GameAPI.Wrappers
                 {
                     if (typePredicate(entity))
                     {
-                        yield return entity;
+                        results.Add(entity);
                     }
                 }
                 catch (Exception ex)
@@ -278,6 +299,8 @@ namespace PerAspera.GameAPI.Wrappers
                     // Continue enumeration despite individual failures
                 }
             }
+            
+            return results;
         }
         
         // ==================== DIAGNOSTICS ====================
