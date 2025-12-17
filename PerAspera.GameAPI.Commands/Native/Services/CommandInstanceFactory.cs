@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
@@ -134,7 +134,9 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 }
             }
             catch (Exception ex)
-            { // Logging disabled}
+            {
+                _logger.Error($"Error validating created instance: {ex.Message}");
+            } // ✅ CORRECTION: Accolade fermante manquante
         }
 
         /// <summary>
@@ -216,7 +218,9 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                         // but actual implementation needs integration with TypeDiscoveryService
                     }
                     catch (Exception ex)
-                    { // Logging disabled}
+                    {
+                        // Logging disabled
+                     }
                 }
 
                 return null;

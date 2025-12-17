@@ -46,8 +46,8 @@ namespace PerAspera.ModSDK
                 // Initialize subsystems // Logging disabledEventSystem.Initialize();
                 Systems.OverrideSystem.Initialize();
                 
-                _log.Info($"PerAspera ModSDK v{VersionInfo.SDK_VERSION} initialized for mod '{modName}' v{modVersion}");
-                _log.Info($"API Version: {VersionInfo.API_VERSION}");
+                _log.Info($"PerAspera ModSDK v{MyPluginInfo.PLUGIN_VERSION} initialized for mod '{modName}' v{modVersion}");
+                _log.Info($"API Version: {MyPluginInfo.PLUGIN_VERSION}");
                 _log.Info($"Override System: {Systems.OverrideSystem.GetStatistics()}");
             }
             catch (Exception ex)

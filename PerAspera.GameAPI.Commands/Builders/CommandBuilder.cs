@@ -196,7 +196,8 @@ namespace PerAspera.GameAPI.Commands.Builders
         {
             if (_parameters.Remove(name))
             { // Logging disabled}
-            return this;
+                return this;
+            }
         }
         
         /// <summary>

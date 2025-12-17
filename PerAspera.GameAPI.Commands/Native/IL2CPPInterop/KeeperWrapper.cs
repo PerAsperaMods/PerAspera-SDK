@@ -16,7 +16,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         private readonly System.Type _keeperType;
         private readonly MethodInfo _registerMethod;
         private readonly MethodInfo _unregisterMethod;
-        
+
         /// <summary>
         /// Initialize wrapper with native Keeper instance
         /// </summary>
@@ -24,13 +24,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             _nativeKeeper = nativeKeeper ?? throw new ArgumentNullException(nameof(nativeKeeper));
             _keeperType = nativeKeeper.GetType();
-            
+
             // Cache important methods for performance
             _registerMethod = GetRegisterMethod();
             _unregisterMethod = GetUnregisterMethod();
-            
+
             ValidateKeeperType(); // Logging disabled}
-        
+        }
         /// <summary>
         /// Register an IHandleable object via native Keeper.Register()
         /// Returns Handle for the registered object
@@ -155,12 +155,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 
             var hasUnregisterMethod = _keeperType.GetMethods()
                 .Any(m => m.Name == "Unregister" && m.GetParameters().Length == 1);
-                
+
             if (!hasRegisterMethod)
             { // Logging disabled}
-            
-            if (!hasUnregisterMethod)
-            { // Logging disabled}
+            }
+                if (!hasUnregisterMethod)
+                { // Logging disabled}
+                }
         }
         
         private MethodInfo GetRegisterMethod()

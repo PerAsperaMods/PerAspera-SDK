@@ -1,3 +1,4 @@
+using PerAspera.GameAPI.Commands.Core;
 using PerAspera.GameAPI.Events;
 
 namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands

@@ -28,7 +28,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 return _instance;
             }
         }
-        
+
         /// <summary>
         /// Initialize global dispatcher instance
         /// </summary>
@@ -36,9 +36,9 @@ namespace PerAspera.GameAPI.Commands.Core
         {
             if (_instance != null)
                 throw new InvalidOperationException("CommandDispatcher already initialized.");
-                
+
             _instance = new CommandDispatcher(commandBus, keeper); // Logging disabled}
-        
+        }
         /// <summary>
         /// Reset global instance (for testing)
         /// </summary>

@@ -52,13 +52,18 @@ namespace PerAspera.GameAPI.Commands.Events
             {
                 // Update statistics
                 UpdateStatistics(eventData.Command.CommandType, eventData.Result.ExecutionTimeMs, true);
-                
+
                 // Fire event
-                CommandExecuted?.Invoke(eventData); // Logging disabled}
+                CommandExecuted?.Invoke(eventData);
+            }
             catch (Exception ex)
-            { // Logging disabled}
+            {
+                // Error handling
+            }
+            }
+
         }
-        
+
         /// <summary>
         /// Publish command failed event
         /// </summary>
@@ -68,11 +73,13 @@ namespace PerAspera.GameAPI.Commands.Events
             {
                 // Update statistics
                 UpdateStatistics(eventData.Command.CommandType, eventData.ExecutionTimeMs, false);
-                
+
                 // Fire event
                 CommandFailed?.Invoke(eventData); // Logging disabled}
+            }
             catch (Exception ex)
             { // Logging disabled}
+            }
         }
         
         /// <summary>
@@ -90,7 +97,7 @@ namespace PerAspera.GameAPI.Commands.Events
                 CommandTypeExecutionTimes = new Dictionary<string, long>(_statistics.CommandTypeExecutionTimes)
             };
         }
-        
+
         /// <summary>
         /// Reset statistics
         /// </summary>
@@ -102,7 +109,7 @@ namespace PerAspera.GameAPI.Commands.Events
             _statistics.TotalExecutionTimeMs = 0;
             _statistics.CommandTypeCounts.Clear();
             _statistics.CommandTypeExecutionTimes.Clear(); // Logging disabled}
-        
+        }
         private void UpdateStatistics(string commandType, long executionTimeMs, bool success)
         {
             _statistics.TotalCommandsExecuted++;

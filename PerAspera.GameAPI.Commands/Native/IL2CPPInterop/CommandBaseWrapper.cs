@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
-using BepInEx.Logging;
 using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
@@ -13,13 +12,15 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
     public class CommandBaseWrapper
     {
         private readonly object _nativeCommand;
-        private readonly System.Type _commandType;
-        private readonly MethodInfo _isValidMethod;
-        private readonly MethodInfo _toTabbedStringMethod;
+        private readonly System.Type _commandType; // ✅ CORRECTION: Utiliser System.Type pour éviter l'ambiguïté
+        private readonly MethodInfo? _isValidMethod;
+        private readonly MethodInfo? _toTabbedStringMethod;
+        private static readonly LogAspera _logger = new LogAspera("GameAPI.Commands.Wrapper"); // ✅ AJOUT
 
         /// <summary>
         /// Initialize wrapper with native Command instance
         /// </summary>
+        /// <param name="nativeCommand">Native command instance to wrap</param>
         public CommandBaseWrapper(object nativeCommand)
         {
             _nativeCommand = nativeCommand ?? throw new ArgumentNullException(nameof(nativeCommand));
@@ -29,8 +30,9 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             _isValidMethod = GetIsValidMethod();
             _toTabbedStringMethod = GetToTabbedStringMethod();
 
-            ValidateCommandType(); // Logging disabled}
-        }
+            ValidateCommandType();
+        } // ✅ CORRECTION: Accolade fermante manquante
+
         /// <summary>
         /// Native Command instance (for direct IL2CPP access)
         /// </summary>
@@ -39,7 +41,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         /// <summary>
         /// Type of the native command
         /// </summary>
-        public Type CommandType => _commandType;
+        public System.Type CommandType => _commandType; // ✅ CORRECTION: System.Type pour éviter l'ambiguïté
         
         /// <summary>
         /// Command name (derived from type)
@@ -49,25 +51,31 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         /// <summary>
         /// Call native IsValid() method if available
         /// </summary>
+        /// <returns>True if command is valid, false otherwise</returns>
         public bool IsValid()
         {
             try
             {
                 if (_isValidMethod == null)
-                { // Logging disabledreturn true; // Assume valid if method not available
+                {
+                    _logger.Debug("IsValid method not available, assuming valid");
+                    return true; // Assume valid if method not available
                 }
                 
-                var result = _isValidMethod.Invoke(_nativeCommand, new object[0]);
+                var result = _isValidMethod.Invoke(_nativeCommand, Array.Empty<object>());
                 return result is bool valid ? valid : true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                _logger.Error($"Error calling IsValid: {ex.Message}");
+                return false;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get human-readable string representation via ToTabbedString()
         /// </summary>
+        /// <returns>Human-readable description of the command</returns>
         public string GetDescription()
         {
             try
@@ -77,18 +85,21 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     return $"{CommandName}()";
                 }
                 
-                var result = _toTabbedStringMethod.Invoke(_nativeCommand, new object[0]);
+                var result = _toTabbedStringMethod.Invoke(_nativeCommand, Array.Empty<object>());
                 return result?.ToString() ?? $"{CommandName}()";
             }
             catch (Exception ex)
-            { // Logging disabledreturn $"{CommandName}(error)";
+            {
+                _logger.Error($"Error getting description: {ex.Message}");
+                return $"{CommandName}(error)";
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get Faction property if available
         /// </summary>
-        public object GetFaction()
+        /// <returns>Faction object or null if not available</returns>
+        public object? GetFaction()
         {
             try
             {
@@ -101,34 +112,44 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return factionProperty.GetValue(_nativeCommand);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                _logger.Error($"Error getting faction: {ex.Message}");
+                return null;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Set Faction property if available
         /// </summary>
-        public bool SetFaction(object faction)
+        /// <param name="faction">Faction object to set</param>
+        /// <returns>True if faction was set successfully, false otherwise</returns>
+        public bool SetFaction(object? faction)
         {
             try
             {
                 var factionProperty = _commandType.GetProperty("Faction", BindingFlags.Public | BindingFlags.Instance);
                 if (factionProperty == null || !factionProperty.CanWrite)
-                { // Logging disabledreturn false;
+                {
+                    _logger.Warning("Faction property not available or not writable");
+                    return false;
                 }
                 
                 factionProperty.SetValue(_nativeCommand, faction);
                 return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                _logger.Error($"Error setting faction: {ex.Message}");
+                return false;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Get property value by name via reflection
         /// </summary>
-        public object GetProperty(string propertyName)
+        /// <param name="propertyName">Name of the property to get</param>
+        /// <returns>Property value or null if not found</returns>
+        public object? GetProperty(string propertyName)
         {
             try
             {
@@ -141,57 +162,78 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return property.GetValue(_nativeCommand);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                _logger.Error($"Error getting property {propertyName}: {ex.Message}");
+                return null;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Set property value by name via reflection
         /// </summary>
-        public bool SetProperty(string propertyName, object value)
+        /// <param name="propertyName">Name of the property to set</param>
+        /// <param name="value">Value to set</param>
+        /// <returns>True if property was set successfully, false otherwise</returns>
+        public bool SetProperty(string propertyName, object? value)
         {
             try
             {
                 var property = _commandType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite)
-                { // Logging disabledreturn false;
+                {
+                    _logger.Warning($"Property {propertyName} not available or not writable");
+                    return false;
                 }
                 
                 property.SetValue(_nativeCommand, value);
                 return true;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                _logger.Error($"Error setting property {propertyName}: {ex.Message}");
+                return false;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Invoke method on native command via reflection
         /// </summary>
-        public object InvokeMethod(string methodName, params object[] parameters)
+        /// <param name="methodName">Name of the method to invoke</param>
+        /// <param name="parameters">Method parameters</param>
+        /// <returns>Method return value or null if method not found or failed</returns>
+        public object? InvokeMethod(string methodName, params object[] parameters)
         {
             try
             {
                 var method = _commandType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
-                { // Logging disabledreturn null;
+                {
+                    _logger.Warning($"Method {methodName} not found");
+                    return null;
                 }
                 
                 return method.Invoke(_nativeCommand, parameters);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                _logger.Error($"Error invoking method {methodName}: {ex.Message}");
+                return null;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
         /// <summary>
         /// Check if command is a specific type (e.g., "CmdImportResource")
         /// </summary>
+        /// <param name="commandTypeName">Type name to check against</param>
+        /// <returns>True if command matches the specified type name</returns>
         public bool IsCommandType(string commandTypeName)
         {
             return _commandType.Name.Equals(commandTypeName, StringComparison.OrdinalIgnoreCase);
         }
         
+        /// <summary>
+        /// Validate that the wrapped object is a command type
+        /// </summary>
         private void ValidateCommandType()
         {
             // Check if this looks like a command type
@@ -200,32 +242,52 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                            _commandType.BaseType?.Name == "CommandBase";
                            
             if (!isCommand)
-            { // Logging disabled}
-        }
+            {
+                _logger.Warning($"Type {_commandType.Name} does not appear to be a command type");
+            }
+        } // ✅ CORRECTION: Accolade fermante manquante
         
-        private MethodInfo GetIsValidMethod()
+        /// <summary>
+        /// Get IsValid method via reflection
+        /// </summary>
+        /// <returns>IsValid MethodInfo or null if not found</returns>
+        private MethodInfo? GetIsValidMethod()
         {
             try
             {
-                return _commandType.GetMethod("isValid", BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null) ??
-                       _commandType.GetMethod("IsValid", BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
+                // ✅ CORRECTION: Utiliser System.Type[] et méthodes simplifiées
+                return _commandType.GetMethod("isValid", BindingFlags.Public | BindingFlags.Instance) ??
+                       _commandType.GetMethod("IsValid", BindingFlags.Public | BindingFlags.Instance);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                _logger.Error($"Error getting IsValid method: {ex.Message}");
+                return null;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
-        private MethodInfo GetToTabbedStringMethod()
+        /// <summary>
+        /// Get ToTabbedString method via reflection
+        /// </summary>
+        /// <returns>ToTabbedString MethodInfo or null if not found</returns>
+        private MethodInfo? GetToTabbedStringMethod()
         {
             try
             {
-                return _commandType.GetMethod("ToTabbedString", BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
+                // ✅ CORRECTION: Méthode simplifiée
+                return _commandType.GetMethod("ToTabbedString", BindingFlags.Public | BindingFlags.Instance);
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            {
+                _logger.Error($"Error getting ToTabbedString method: {ex.Message}");
+                return null;
             }
-        }
+        } // ✅ CORRECTION: Toutes les branches retournent une valeur
         
+        /// <summary>
+        /// Returns string representation of the command
+        /// </summary>
+        /// <returns>String representation</returns>
         public override string ToString()
         {
             return GetDescription();

@@ -30,11 +30,11 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             _typeDiscovery = typeDiscovery ?? throw new ArgumentNullException(nameof(typeDiscovery));
             _reflectionCache = reflectionCache ?? throw new ArgumentNullException(nameof(reflectionCache));
             _instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
-            
+
             _diagnosticHistory = new List<DiagnosticEntry>();
             _errorCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             _startTime = DateTime.UtcNow; // Logging disabled}
-
+        }
         /// <summary>
         /// Record a diagnostic event for monitoring and analysis
         /// </summary>

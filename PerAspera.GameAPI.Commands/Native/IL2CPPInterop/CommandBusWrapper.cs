@@ -149,7 +149,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
         }
         
-        private MethodInfo GetDispatchMethod(Type commandType)
+        private MethodInfo GetDispatchMethod(System.Type commandType)
         {
             try
             {
@@ -171,7 +171,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             }
         }
         
-        private Type FindCommandType(string typeName)
+        private System.Type FindCommandType(string typeName)
         {
             try
             {

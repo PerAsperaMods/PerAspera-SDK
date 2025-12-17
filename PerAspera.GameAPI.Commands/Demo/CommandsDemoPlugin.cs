@@ -5,6 +5,7 @@ using UnityEngine;
 using PerAspera.GameAPI.Commands;
 using PerAspera.GameAPI.Commands.Constants;
 using PerAspera.GameAPI.Commands.Builders;
+using BepInEx.Unity.IL2CPP;
 
 namespace PerAspera.GameAPI.Commands.Demo
 {
@@ -14,7 +15,7 @@ namespace PerAspera.GameAPI.Commands.Demo
     /// </summary>
     [BepInPlugin("PerAspera.GameAPI.Commands.Demo", "Commands SDK Demo", "1.0.0")]
     [BepInDependency("PerAspera.GameAPI.Commands", BepInDependency.DependencyFlags.HardDependency)]
-    public class CommandsDemoPlugin : BaseUnityPlugin
+    public class CommandsDemoPlugin : BasePlugin
     {
         internal new static ManualLogSource Logger { get; private set; }
         

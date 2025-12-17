@@ -353,6 +353,41 @@
             Ensure initialization
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetTimeManagerType">
+            <summary>
+            Get TimeManager type (fallback to Universe if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetResourceManagerType">
+            <summary>
+            Get ResourceManager type (fallback to Faction if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetSaveManagerType">
+            <summary>
+            Get SaveManager type (fallback to BaseGame if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetSceneManagerType">
+            <summary>
+            Get SceneManager type (fallback to BaseGame if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUIManagerType">
+            <summary>
+            Get UIManager type (fallback to BaseGame if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBuildingManagerType">
+            <summary>
+            Get BuildingManager type (fallback to Planet if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetConstructionType">
+            <summary>
+            Get Construction type (fallback to Building if not found)
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.TypeDiscoveryStats">
             <summary>
             Type discovery statistics
@@ -475,6 +510,736 @@
         <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.RecommendedAction">
             <summary>Recommended next action for terraforming</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.BaseEventPatchingService">
+            <summary>
+            Base class for all event patching services
+            Provides common functionality and patterns for Harmony IL2CPP patching
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Native.Events.BaseEventPatchingService._log">
+            <summary>
+            Logger instance for event patching operations
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Native.Events.BaseEventPatchingService._patchedMethods">
+            <summary>
+            Dictionary tracking patched methods and their event types
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Native.Events.BaseEventPatchingService._patchContext">
+            <summary>
+            Context information for patch operations
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Native.Events.BaseEventPatchingService._harmony">
+            <summary>
+            Harmony instance for IL2CPP patching
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.#ctor(System.String,HarmonyLib.Harmony)">
+            <summary>
+            Initialize base event patching service with logging and Harmony instance
+            </summary>
+            <param name="serviceName">Name of the service for logging purposes</param>
+            <param name="harmony">Harmony instance for patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize event hooks for this service
+            </summary>
+            <returns>Number of successfully patched methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.GetEventType">
+            <summary>
+            Get event type name for this service
+            </summary>
+            <returns>Event type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.GetPatchedMethods">
+            <summary>
+            Get statistics about patched methods for this service
+            </summary>
+            <returns>Dictionary of method name to event type mappings</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.CreateSafeMethodPatch(System.Type,System.String,System.String,System.Reflection.MethodInfo,System.Reflection.MethodInfo)">
+            <summary>
+            Create safe method patch with error handling and validation
+            </summary>
+            <param name="targetType">Type containing the method to patch</param>
+            <param name="methodName">Name of the method to patch</param>
+            <param name="eventType">Type of event for tracking</param>
+            <param name="prefix">Optional prefix method</param>
+            <param name="postfix">Optional postfix method</param>
+            <returns>True if patch was successfully applied</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.ExtractValueFromArgs(System.Object[])">
+            <summary>
+            Extract value from method arguments based on parameter patterns
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>Extracted value or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.PublishEvent(System.String,System.Object)">
+            <summary>
+            Publish event through the ModEventBus
+            </summary>
+            <param name="eventName">Name of the event</param>
+            <param name="eventData">Event data object</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.StoreContext(System.String,System.Object)">
+            <summary>
+            Store context data for method patches
+            </summary>
+            <param name="key">Context key</param>
+            <param name="value">Context value</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.GetContext(System.String)">
+            <summary>
+            Retrieve context data from method patches
+            </summary>
+            <param name="key">Context key</param>
+            <returns>Context value or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.ClearContext">
+            <summary>
+            Clear context data (useful for cleanup)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.CreateEventData(System.Object,System.Object,System.Object,System.String)">
+            <summary>
+            Generate event data object for common event patterns
+            </summary>
+            <param name="instance">Object instance where change occurred</param>
+            <param name="oldValue">Previous value</param>
+            <param name="newValue">New value</param>
+            <param name="methodName">Method that triggered the change</param>
+            <returns>Formatted event data object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.ValidateMethodForPatching(System.Type,System.String)">
+            <summary>
+            Validate that a type has the expected method for patching
+            </summary>
+            <param name="type">Type to validate</param>
+            <param name="methodName">Method name to check</param>
+            <returns>True if method exists and is patchable</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BaseEventPatchingService.GetFriendlyTypeName(System.Type)">
+            <summary>
+            Get friendly type name for logging
+            </summary>
+            <param name="type">Type to get name for</param>
+            <returns>Friendly type name</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService">
+            <summary>
+            Building event patching service for Per Aspera
+            Handles all building-related events including construction, destruction, upgrades, and operational state changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>
+            Initialize building event patching service
+            </summary>
+            <param name="harmony">Harmony instance for IL2CPP patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.GetEventType">
+            <summary>
+            Get the event type identifier for this service
+            </summary>
+            <returns>Event type string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize all building-related event hooks
+            </summary>
+            <returns>Number of successfully hooked methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.AddBuildingInstanceHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add Building instance-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.AddBuildingManagerHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add BuildingManager-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.AddConstructionHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add Construction-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.AddPlanetBuildingHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add Planet building-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.CreateBuildingMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create a building-specific method hook with prefix and postfix handling
+            </summary>
+            <param name="targetType">Type containing the method</param>
+            <param name="methodName">Method name to hook</param>
+            <param name="eventType">Type of building event</param>
+            <returns>True if hook was successfully created</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.BuildingPrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for building methods
+            Captures the old building state before method execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.BuildingPostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for building methods
+            Publishes building change events with before/after states
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.GetCurrentBuildingState(System.Object,System.String)">
+            <summary>
+            Get current building state with comprehensive information
+            </summary>
+            <param name="instance">Building instance</param>
+            <param name="methodName">Method being called</param>
+            <returns>Current building state object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractBasicBuildingInfo(System.Object)">
+            <summary>
+            Extract basic building information
+            </summary>
+            <param name="instance">Building instance</param>
+            <returns>Basic building info or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractProductionInfo(System.Object)">
+            <summary>
+            Extract production information
+            </summary>
+            <param name="instance">Building instance</param>
+            <returns>Production info or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractConstructionInfo(System.Object)">
+            <summary>
+            Extract construction information
+            </summary>
+            <param name="instance">Building instance</param>
+            <returns>Construction info or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractOperationalInfo(System.Object)">
+            <summary>
+            Extract operational information
+            </summary>
+            <param name="instance">Building instance</param>
+            <returns>Operational info or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.GetPropertyValue(System.Object,System.String)">
+            <summary>
+            Helper method to get property value safely
+            </summary>
+            <param name="instance">Object instance</param>
+            <param name="propertyName">Property name</param>
+            <returns>Property value or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractBuildingTypeFromMethodName(System.String)">
+            <summary>
+            Extract building type from method name
+            </summary>
+            <param name="methodName">Method name</param>
+            <returns>Building type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractBuildingInformation(System.Object[],System.String)">
+            <summary>
+            Extract building-specific information from method arguments
+            </summary>
+            <param name="args">Method arguments</param>
+            <param name="methodName">Method name for context</param>
+            <returns>Building information object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.ExtractMethodArguments(System.Object[])">
+            <summary>
+            Extract meaningful arguments from method call
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>Processed arguments object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.PublishSpecialBuildingEvents(System.String,System.Object)">
+            <summary>
+            Publish special building events for critical building state changes
+            </summary>
+            <param name="buildingType">Type of building event</param>
+            <param name="eventData">Event data</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.BuildingEventPatchingService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about building event hooks
+            </summary>
+            <returns>Diagnostic information string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService">
+            <summary>
+            Climate event patching service for Per Aspera
+            Handles all climate-related events including temperature, pressure, and atmospheric composition changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>
+            Initialize climate event patching service
+            </summary>
+            <param name="harmony">Harmony instance for IL2CPP patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GetEventType">
+            <summary>
+            Get the event type identifier for this service
+            </summary>
+            <returns>Event type string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize all climate-related event hooks
+            </summary>
+            <returns>Number of successfully hooked methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.CreateClimateMethodHook(System.String,System.String)">
+            <summary>
+            Create a climate-specific method hook with prefix and postfix handling
+            </summary>
+            <param name="methodName">Method name to hook</param>
+            <param name="climateType">Type of climate parameter</param>
+            <returns>True if hook was successfully created</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ClimatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for climate methods
+            Captures the old value before method execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ClimatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for climate methods
+            Publishes climate change events with before/after values
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GetCurrentClimateValue(System.Object,System.String)">
+            <summary>
+            Get current climate value with enhanced detection
+            </summary>
+            <param name="instance">Planet instance</param>
+            <param name="climateType">Type of climate parameter</param>
+            <returns>Current climate value or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GeneratePropertyNames(System.String)">
+            <summary>
+            Generate possible property names for a climate type
+            </summary>
+            <param name="climateType">Climate type identifier</param>
+            <returns>Array of possible property names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ExtractClimateTypeFromMethodName(System.String)">
+            <summary>
+            Extract climate type from method name
+            </summary>
+            <param name="methodName">Method name</param>
+            <returns>Climate type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ExtractNewValue(System.Object[])">
+            <summary>
+            Extract new value from method arguments
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>New value or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ValuesEqual(System.Object,System.Object)">
+            <summary>
+            Compare values for equality handling floating point precision
+            </summary>
+            <param name="oldValue">Old value</param>
+            <param name="newValue">New value</param>
+            <returns>True if values are considered equal</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about climate event hooks
+            </summary>
+            <returns>Diagnostic information string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService">
+            <summary>
+            Game state event patching service for Per Aspera
+            Handles all game state events including save/load, scene transitions, game mode changes, and UI state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>
+            Initialize game state event patching service
+            </summary>
+            <param name="harmony">Harmony instance for IL2CPP patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GetEventType">
+            <summary>
+            Get the event type identifier for this service
+            </summary>
+            <returns>Event type string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize all game state-related event hooks
+            </summary>
+            <returns>Number of successfully hooked methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.AddBaseGameHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add BaseGame-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.AddSaveManagerHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add SaveManager-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.AddSceneManagerHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add SceneManager-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.AddUIManagerHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add UIManager-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.CreateGameStateMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create a game state-specific method hook with prefix and postfix handling
+            </summary>
+            <param name="targetType">Type containing the method</param>
+            <param name="methodName">Method name to hook</param>
+            <param name="eventType">Type of game state event</param>
+            <returns>True if hook was successfully created</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GameStatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for game state methods
+            Captures the old game state before method execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GameStatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for game state methods
+            Publishes game state change events with before/after states
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GetCurrentGameState(System.Object,System.String)">
+            <summary>
+            Get current game state with comprehensive information
+            </summary>
+            <param name="instance">Game instance</param>
+            <param name="methodName">Method being called</param>
+            <returns>Current game state object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractBasicGameState(System.Object)">
+            <summary>
+            Extract basic game state information
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Basic game state or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractSaveState(System.Object)">
+            <summary>
+            Extract save-related state information
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Save state or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractUIState(System.Object)">
+            <summary>
+            Extract UI state information
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>UI state or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractSceneState(System.Object)">
+            <summary>
+            Extract scene state information
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Scene state or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GetPropertyValue(System.Object,System.String)">
+            <summary>
+            Helper method to get property value safely
+            </summary>
+            <param name="instance">Object instance</param>
+            <param name="propertyName">Property name</param>
+            <returns>Property value or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractStateTypeFromMethodName(System.String)">
+            <summary>
+            Extract state type from method name
+            </summary>
+            <param name="methodName">Method name</param>
+            <returns>State type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.ExtractMethodArguments(System.Object[])">
+            <summary>
+            Extract meaningful arguments from method call
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>Processed arguments object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.PublishSpecialGameStateEvents(System.String,System.Object)">
+            <summary>
+            Publish special game state events for critical game state changes
+            </summary>
+            <param name="stateType">Type of game state event</param>
+            <param name="eventData">Event data</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.GameStateEventPatchingService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about game state event hooks
+            </summary>
+            <returns>Diagnostic information string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService">
+            <summary>
+            Resource event patching service for Per Aspera
+            Handles all resource-related events including production, consumption, transfer, and storage changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>
+            Initialize resource event patching service
+            </summary>
+            <param name="harmony">Harmony instance for IL2CPP patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.GetEventType">
+            <summary>
+            Get the event type identifier for this service
+            </summary>
+            <returns>Event type string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize all resource-related event hooks
+            </summary>
+            <returns>Number of successfully hooked methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.AddResourceManagerHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add ResourceManager-specific hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.AddBuildingResourceHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add Building-specific resource hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.AddPlanetResourceHooks(System.Collections.Generic.Dictionary{System.String,System.ValueTuple{System.Type,System.String}})">
+            <summary>
+            Add Planet-specific resource hooks
+            </summary>
+            <param name="hooks">Hook dictionary to populate</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.CreateResourceMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create a resource-specific method hook with prefix and postfix handling
+            </summary>
+            <param name="targetType">Type containing the method</param>
+            <param name="methodName">Method name to hook</param>
+            <param name="eventType">Type of resource event</param>
+            <returns>True if hook was successfully created</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ResourcePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for resource methods
+            Captures the old resource state before method execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ResourcePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for resource methods
+            Publishes resource change events with before/after states
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.GetCurrentResourceState(System.Object,System.String)">
+            <summary>
+            Get current resource state with comprehensive information
+            </summary>
+            <param name="instance">Game instance</param>
+            <param name="methodName">Method being called</param>
+            <returns>Current resource state object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractEnergyInformation(System.Object)">
+            <summary>
+            Extract energy information from instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Energy information or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractGeneralResourceInformation(System.Object)">
+            <summary>
+            Extract general resource information from instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Resource information or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractStorageInformation(System.Object)">
+            <summary>
+            Extract storage information from instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Storage information or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.GetPropertyValue(System.Object,System.String)">
+            <summary>
+            Helper method to get property value safely
+            </summary>
+            <param name="instance">Object instance</param>
+            <param name="propertyName">Property name</param>
+            <returns>Property value or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractResourceTypeFromMethodName(System.String)">
+            <summary>
+            Extract resource type from method name
+            </summary>
+            <param name="methodName">Method name</param>
+            <returns>Resource type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractResourceInformation(System.Object[],System.String)">
+            <summary>
+            Extract resource-specific information from method arguments
+            </summary>
+            <param name="args">Method arguments</param>
+            <param name="methodName">Method name for context</param>
+            <returns>Resource information object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.ExtractMethodArguments(System.Object[])">
+            <summary>
+            Extract meaningful arguments from method call
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>Processed arguments object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.PublishSpecialResourceEvents(System.String,System.Object)">
+            <summary>
+            Publish special resource events for critical game state changes
+            </summary>
+            <param name="resourceType">Type of resource event</param>
+            <param name="eventData">Event data</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.ResourceEventPatchingService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about resource event hooks
+            </summary>
+            <returns>Diagnostic information string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.TimeEventPatchingService">
+            <summary>
+            Time event patching service for Per Aspera
+            Handles all time-related events including day progression, time speed, and temporal state changes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>
+            Initialize time event patching service
+            </summary>
+            <param name="harmony">Harmony instance for IL2CPP patching</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.GetEventType">
+            <summary>
+            Get the event type identifier for this service
+            </summary>
+            <returns>Event type string</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.InitializeEventHooks">
+            <summary>
+            Initialize all time-related event hooks
+            </summary>
+            <returns>Number of successfully hooked methods</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.CreateTimeMethodHook(System.Type,System.String,System.String)">
+            <summary>
+            Create a time-specific method hook with prefix and postfix handling
+            </summary>
+            <param name="targetType">Type containing the method</param>
+            <param name="methodName">Method name to hook</param>
+            <param name="eventType">Type of time event</param>
+            <returns>True if hook was successfully created</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.TimePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
+            <summary>
+            Enhanced Harmony prefix for time methods
+            Captures the old time state before method execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.TimePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Enhanced Harmony postfix for time methods
+            Publishes time change events with before/after states
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.GetCurrentTimeState(System.Object)">
+            <summary>
+            Get current time state with comprehensive information
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Current time state object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.ExtractDayInformation(System.Object)">
+            <summary>
+            Extract day information from game instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Day information or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.ExtractSpeedInformation(System.Object)">
+            <summary>
+            Extract speed information from game instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Speed information or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.ExtractPauseState(System.Object)">
+            <summary>
+            Extract pause state from game instance
+            </summary>
+            <param name="instance">Game instance</param>
+            <returns>Pause state or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.ExtractTimeTypeFromMethodName(System.String)">
+            <summary>
+            Extract time type from method name
+            </summary>
+            <param name="methodName">Method name</param>
+            <returns>Time type identifier</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.ExtractMethodArguments(System.Object[])">
+            <summary>
+            Extract meaningful arguments from method call
+            </summary>
+            <param name="args">Method arguments</param>
+            <returns>Processed arguments object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.PublishSpecialTimeEvents(System.String,System.Object)">
+            <summary>
+            Publish special time events for critical game state changes
+            </summary>
+            <param name="timeType">Type of time event</param>
+            <param name="eventData">Event data</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.TimeEventPatchingService.GetDiagnosticInfo">
+            <summary>
+            Get diagnostic information about time event hooks
+            </summary>
+            <returns>Diagnostic information string</returns>
+        </member>
         <member name="T:PerAspera.GameAPI.Native.ModEventBus">
             <summary>
             ModEventBus - Proxy for event publishing from native event patches
@@ -486,102 +1251,6 @@
             <summary>
             Publish an event - called by NativeEventPatcher patches
             ModSDK will hook this to forward to its EventSystem
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Native.NativeEventPatcher">
-            <summary>
-            Enhanced native event patching system for the GameAPI
-            Provides comprehensive hooks for native game events using Harmony IL2CPP patches
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Initialize">
-            <summary>
-            Initialize the native event patching system
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupClimateEventHooks">
-            <summary>
-            Setup enhanced climate-related event hooks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.CreateClimateMethodHook(System.Type,System.String,System.String)">
-            <summary>
-            Create an enhanced hook for a climate method
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Reflection.MethodBase)">
-            <summary>
-            Enhanced Harmony prefix for climate methods
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedClimatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
-            <summary>
-            Enhanced Harmony postfix for climate methods
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentClimateValue(System.Object,System.String)">
-            <summary>
-            Get current climate value with enhanced detection
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.ExtractNewValue(System.Object[])">
-            <summary>
-            Extract new value from method arguments
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupTimeEventHooks">
-            <summary>
-            Setup enhanced time/day progression hooks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedDayAdvancedPostfix(System.Object)">
-            <summary>
-            Enhanced day advancement postfix
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupResourceEventHooks">
-            <summary>
-            Setup enhanced resource event hooks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object}@,System.Object[],System.Reflection.MethodBase)">
-            <summary>
-            Enhanced resource prefix
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.EnhancedResourcePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object})">
-            <summary>
-            Enhanced resource postfix
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupGameStateEventHooks">
-            <summary>
-            Setup game state event hooks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.SetupBuildingEventHooks">
-            <summary>
-            Setup building event hooks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GameStateChangedPostfix(System.Object,System.Object[],System.Reflection.MethodBase)">
-            <summary>
-            Game state changed postfix
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetCurrentMartianSol">
-            <summary>
-            Get current Martian sol safely with fallbacks
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.Shutdown">
-            <summary>
-            Enhanced shutdown with proper cleanup
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.NativeEventPatcher.GetStats">
-            <summary>
-            Enhanced statistics
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Patches.EnergyPatches">

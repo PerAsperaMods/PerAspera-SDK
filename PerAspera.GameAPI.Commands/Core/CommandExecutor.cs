@@ -185,16 +185,18 @@ namespace PerAspera.GameAPI.Commands.Core
                     }
                     else
                     { // Logging disabled}
+                    }
                 }
                 
                 // Fallback: Generic parameter extraction
                 var parameters = ExtractCommandParameters(command);
                 var nativeCommand = factory.CreateCommand(command.CommandType, parameters);
-                
-                if (nativeCommand == null)
-                { // Logging disabled}
 
-                return nativeCommand;
+                    if (nativeCommand == null)
+                    { // Logging disabled}
+
+                        return nativeCommand;
+                    }
             }
             catch (Exception ex)
             { // Logging disabledreturn null;
@@ -233,14 +235,19 @@ namespace PerAspera.GameAPI.Commands.Core
                 var hasValidParams = !string.IsNullOrEmpty(resourceName) && amount > 0;
                 
                 if (hasValidParams)
-                { // Logging disabled}
+                {
+                    // Success case
+                }
                 else
-                { // Logging disabled}
+                {
+                    // Failure case
+                }
 
                 return hasValidParams;
             }
             catch (Exception ex)
-            { // Logging disabledreturn false;
+            {
+                return false;
             }
         }
 

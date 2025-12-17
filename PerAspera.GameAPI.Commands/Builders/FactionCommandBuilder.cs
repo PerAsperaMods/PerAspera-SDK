@@ -124,13 +124,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder ResearchTechnology(object technology)
         {
-            var command = new CommandBuilder(NativeCommandTypes.ResearchTechnology)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Technology, technology);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionTechnologyCommands.ResearchTechnology(_faction, technology, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -140,13 +134,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder UnlockKnowledge(object knowledge)
         {
-            var command = new CommandBuilder(NativeCommandTypes.UnlockKnowledge)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Knowledge, knowledge);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionTechnologyCommands.UnlockKnowledge(_faction, knowledge, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -156,13 +144,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder LockKnowledge(object knowledge)
         {
-            var command = new CommandBuilder(NativeCommandTypes.LockKnowledge)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Knowledge, knowledge);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionTechnologyCommands.LockKnowledge(_faction, knowledge, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -174,14 +156,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder StartDialogue(object person, object dialogue)
         {
-            var command = new CommandBuilder(NativeCommandTypes.StartDialogue)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Person, person)
-                .WithParameter(ParameterNames.Dialogue, dialogue);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.StartDialogue(_faction, person, dialogue, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -191,13 +166,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder SkipDialogue(object dialogue)
         {
-            var command = new CommandBuilder(NativeCommandTypes.SkipDialogue)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Dialogue, dialogue);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.SkipDialogue(_faction, dialogue, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -207,12 +176,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder EnableKeeperMode()
         {
-            var command = new CommandBuilder(NativeCommandTypes.EnableKeeperMode)
-                .WithFaction(_faction);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.EnableKeeperMode(_faction, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -222,12 +186,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder DisableKeeperMode()
         {
-            var command = new CommandBuilder(NativeCommandTypes.DisableKeeperMode)
-                .WithFaction(_faction);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.DisableKeeperMode(_faction, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -239,16 +198,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder SpawnResourceVein(object resource, float x, float y, float z)
         {
-            var command = new CommandBuilder(NativeCommandTypes.SpawnResourceVein)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Resource, resource)
-                .WithParameter(ParameterNames.X, x)
-                .WithParameter(ParameterNames.Y, y)
-                .WithParameter(ParameterNames.Z, z);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionResourceCommands.SpawnResourceVein(_faction, resource, x, y, z, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -258,12 +208,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder Sabotage()
         {
-            var command = new CommandBuilder(NativeCommandTypes.Sabotage)
-                .WithFaction(_faction);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.Sabotage(_faction, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -275,13 +220,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder ShowMessage(string message)
         {
-            var command = new CommandBuilder(NativeCommandTypes.ShowMessage)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Message, message);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.ShowMessage(_faction, message, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -291,13 +230,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder ShowTutorialMessage(string message)
         {
-            var command = new CommandBuilder(NativeCommandTypes.ShowTutorialMessage)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Message, message);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionInteractionCommands.ShowTutorialMessage(_faction, message, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -309,23 +242,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder CustomCommand(string commandType, Action<ParameterBuilder> parameterConfig = null)
         {
-            var command = new CommandBuilder(commandType)
-                .WithFaction(_faction);
-                
-            if (parameterConfig != null)
-            {
-                var paramBuilder = new ParameterBuilder();
-                parameterConfig(paramBuilder);
-                
-                foreach (var param in paramBuilder.Build())
-                {
-                    command.WithParameter(param.Key, param.Value);
-                }
-            }
-            
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionExecutionService.CreateCustomCommand(_faction, commandType, _globalTimeout, parameterConfig);
             _commands.Add(command);
             return this;
         }
@@ -337,35 +254,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandResult Execute()
         {
-            var results = new List<CommandResult>();
-            var errors = new List<string>();
-            
-            foreach (var command in _commands)
-            {
-                try
-                {
-                    var result = command.Execute();
-                    results.Add(result);
-                    
-                    if (!result.Success && _stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command failed: {result.Error}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
-                    results.Add(errorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command execution failed: {ex.Message}");
-                    }
-                }
-            }
-            
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+            return FactionExecutionService.ExecuteCommands(_commands, _stopOnFailure);
         }
         
         /// <summary>
@@ -373,40 +262,13 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public async Task<BatchCommandResult> ExecuteAsync()
         {
-            var results = new List<CommandResult>();
-            
-            foreach (var command in _commands)
-            {
-                try
-                {
-                    var result = await command.ExecuteAsync();
-                    results.Add(result);
-                    
-                    if (!result.Success && _stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command failed: {result.Error}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
-                    results.Add(errorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command execution failed: {ex.Message}");
-                    }
-                }
-            }
-            
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
+            return await FactionExecutionService.ExecuteCommandsAsync(_commands, _stopOnFailure);
         }
         
         /// <summary>
         /// Get count of commands to be executed
         /// </summary>
-        public int Count => _commands.Count;
+        public int Count => FactionExecutionService.GetCommandCount(_commands);
         
         /// <summary>
         /// Get the faction this builder is configured for
@@ -433,13 +295,8 @@ namespace PerAspera.GameAPI.Commands.Builders
                 _stopOnFailure = this._stopOnFailure
             };
             
-            // Clone all commands
-            foreach (var command in _commands)
-            {
-                // Note: CommandBuilder would need a Clone method for this to work properly
-                // For now, we'll create new commands with same parameters
-                clone._commands.Add(command);
-            }
+            var clonedCommands = FactionExecutionService.CloneCommandList(_commands);
+            clone._commands.AddRange(clonedCommands);
             
             return clone;
         }
