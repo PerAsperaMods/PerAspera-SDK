@@ -143,9 +143,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             // Validate that we have a proper CommandBus type
             var hasDispatchMethod = _commandBusType.GetMethods()
                 .Any(m => m.Name == "Dispatch" && m.IsGenericMethod);
-                
+
             if (!hasDispatchMethod)
             { // Logging disabled}
+            }
         }
         
         private MethodInfo GetDispatchMethod(Type commandType)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PerAspera.GameAPI.Commands.Constants;
 using PerAspera.GameAPI.Commands.Core;
+using PerAspera.GameAPI.Commands.Builders.Services;
 
 namespace PerAspera.GameAPI.Commands.Builders
 {
@@ -19,7 +20,8 @@ namespace PerAspera.GameAPI.Commands.Builders
         
         internal FactionCommandBuilder(object faction)
         {
-            _faction = faction ?? throw new ArgumentNullException(nameof(faction));
+            FactionExecutionService.ValidateFaction(faction);
+            _faction = faction;
             _commands = new List<CommandBuilder>();
         }
         
@@ -48,14 +50,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder ImportResource(object resource, int quantity)
         {
-            var command = new CommandBuilder(NativeCommandTypes.ImportResource)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Resource, resource)
-                .WithParameter(ParameterNames.Quantity, quantity);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionResourceCommands.ImportResource(_faction, resource, quantity, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -65,14 +60,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder ExportResource(object resource, int quantity)
         {
-            var command = new CommandBuilder(NativeCommandTypes.ExportResource)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Resource, resource)
-                .WithParameter(ParameterNames.Quantity, quantity);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionResourceCommands.ExportResource(_faction, resource, quantity, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -82,14 +70,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder SetResourceAmount(object resource, float amount)
         {
-            var command = new CommandBuilder(NativeCommandTypes.SetResourceAmount)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Resource, resource)
-                .WithParameter(ParameterNames.Amount, amount);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionResourceCommands.SetResourceAmount(_faction, resource, amount, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -101,13 +82,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder UnlockBuilding(object building)
         {
-            var command = new CommandBuilder(NativeCommandTypes.UnlockBuilding)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Building, building);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionBuildingCommands.UnlockBuilding(_faction, building, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -117,13 +92,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder LockBuilding(object building)
         {
-            var command = new CommandBuilder(NativeCommandTypes.LockBuilding)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Building, building);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionBuildingCommands.LockBuilding(_faction, building, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -133,16 +102,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder AddBuilding(object building, float x, float y, float z)
         {
-            var command = new CommandBuilder(NativeCommandTypes.AddBuilding)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Building, building)
-                .WithParameter(ParameterNames.X, x)
-                .WithParameter(ParameterNames.Y, y)
-                .WithParameter(ParameterNames.Z, z);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionBuildingCommands.AddBuilding(_faction, building, x, y, z, _globalTimeout);
             _commands.Add(command);
             return this;
         }
@@ -152,13 +112,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public FactionCommandBuilder RemoveBuilding(object building)
         {
-            var command = new CommandBuilder(NativeCommandTypes.RemoveBuilding)
-                .WithFaction(_faction)
-                .WithParameter(ParameterNames.Building, building);
-                
-            if (_globalTimeout.HasValue)
-                command.WithTimeout(_globalTimeout.Value);
-                
+            var command = FactionBuildingCommands.RemoveBuilding(_faction, building, _globalTimeout);
             _commands.Add(command);
             return this;
         }

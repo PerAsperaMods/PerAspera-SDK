@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PerAspera.GameAPI.Commands.Core;
+using PerAspera.GameAPI.Commands.Builders.Services;
 
 namespace PerAspera.GameAPI.Commands.Builders
 {
@@ -30,11 +31,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder AddCommand(CommandBuilder command)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-                
-            _commands.Add(command);
-            _conditions.Add(() => true); // Default: always execute
+            BatchCommandUtilities.AddCommand(_commands, _conditions, command);
             return this;
         }
         
@@ -43,13 +40,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder AddCommand(CommandBuilder command, Func<bool> condition)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-            if (condition == null)
-                throw new ArgumentNullException(nameof(condition));
-                
-            _commands.Add(command);
-            _conditions.Add(condition);
+            BatchCommandUtilities.AddCommand(_commands, _conditions, command, condition);
             return this;
         }
         
@@ -58,14 +49,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder AddCommands(params CommandBuilder[] commands)
         {
-            if (commands == null)
-                throw new ArgumentNullException(nameof(commands));
-                
-            foreach (var command in commands)
-            {
-                AddCommand(command);
-            }
-            
+            BatchCommandUtilities.AddCommands(_commands, _conditions, commands);
             return this;
         }
         
@@ -74,14 +58,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder AddCommands(IEnumerable<(CommandBuilder command, Func<bool> condition)> commandsWithConditions)
         {
-            if (commandsWithConditions == null)
-                throw new ArgumentNullException(nameof(commandsWithConditions));
-                
-            foreach (var (command, condition) in commandsWithConditions)
-            {
-                AddCommand(command, condition);
-            }
-            
+            BatchCommandUtilities.AddCommandsWithConditions(_commands, _conditions, commandsWithConditions);
             return this;
         }
         
@@ -137,14 +114,15 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (blockBuilder == null)
                 throw new ArgumentNullException(nameof(blockBuilder));
                 
-            var subBuilder = new BatchCommandBuilder();
-            blockBuilder(subBuilder);
-            
-            foreach (var command in subBuilder._commands.Zip(subBuilder._conditions, (cmd, cond) => new { Command = cmd, Condition = cond }))
+            BatchCommandUtilities.AddConditionalBlock(_commands, _conditions, condition, (commands, conditions) =>
             {
-                // Combine the block condition with individual command conditions
-                AddCommand(command.Command, () => condition() && command.Condition());
-            }
+                var subBuilder = new BatchCommandBuilder();
+                blockBuilder(subBuilder);
+                
+                // Transfer commands from sub-builder
+                commands.AddRange(subBuilder._commands);
+                conditions.AddRange(subBuilder._conditions);
+            });
             
             return this;
         }
@@ -176,9 +154,15 @@ namespace PerAspera.GameAPI.Commands.Builders
                 return new BatchCommandResult(new List<CommandResult>(), true, null);
                 
             if (_executeInParallel)
-                return ExecuteInParallelInternal();
+            {
+                var parallelStrategy = new ParallelExecutionStrategy(_stopOnFailure, _globalTimeout, _maxParallelism);
+                return parallelStrategy.Execute(_commands, _conditions);
+            }
             else
-                return ExecuteSequentialInternal();
+            {
+                var sequentialStrategy = new SequentialExecutionStrategy(_stopOnFailure, _globalTimeout);
+                return sequentialStrategy.Execute(_commands, _conditions);
+            }
         }
         
         /// <summary>
@@ -190,264 +174,24 @@ namespace PerAspera.GameAPI.Commands.Builders
                 return new BatchCommandResult(new List<CommandResult>(), true, null);
                 
             if (_executeInParallel)
-                return await ExecuteInParallelInternalAsync();
-            else
-                return await ExecuteSequentialInternalAsync();
-        }
-        
-        private BatchCommandResult ExecuteSequentialInternal()
-        {
-            var results = new List<CommandResult>();
-            var startTime = DateTime.UtcNow;
-            
-            for (int i = 0; i < _commands.Count; i++)
             {
-                // Check global timeout
-                if (_globalTimeout.HasValue && DateTime.UtcNow - startTime > _globalTimeout.Value)
-                {
-                    return new BatchCommandResult(results, false, "Batch execution timed out");
-                }
-                
-                // Check condition
-                try
-                {
-                    if (!_conditions[i]())
-                    {
-                        // Condition not met, skip this command
-                        results.Add(new CommandResult(true, "Skipped due to condition", null));
-                        continue;
-                    }
-                }
-                catch (Exception conditionEx)
-                {
-                    var conditionErrorResult = new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
-                    results.Add(conditionErrorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Condition evaluation failed: {conditionEx.Message}");
-                    }
-                    continue;
-                }
-                
-                // Execute command
-                try
-                {
-                    var result = _commands[i].Execute();
-                    results.Add(result);
-                    
-                    if (!result.Success && _stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command {i + 1} failed: {result.Error}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
-                    results.Add(errorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command {i + 1} execution failed: {ex.Message}");
-                    }
-                }
-            }
-            
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
-        }
-        
-        private async Task<BatchCommandResult> ExecuteSequentialInternalAsync()
-        {
-            var results = new List<CommandResult>();
-            var startTime = DateTime.UtcNow;
-            
-            for (int i = 0; i < _commands.Count; i++)
-            {
-                // Check global timeout
-                if (_globalTimeout.HasValue && DateTime.UtcNow - startTime > _globalTimeout.Value)
-                {
-                    return new BatchCommandResult(results, false, "Batch execution timed out");
-                }
-                
-                // Check condition
-                try
-                {
-                    if (!_conditions[i]())
-                    {
-                        results.Add(new CommandResult(true, "Skipped due to condition", null));
-                        continue;
-                    }
-                }
-                catch (Exception conditionEx)
-                {
-                    var conditionErrorResult = new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
-                    results.Add(conditionErrorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Condition evaluation failed: {conditionEx.Message}");
-                    }
-                    continue;
-                }
-                
-                // Execute command
-                try
-                {
-                    var result = await _commands[i].ExecuteAsync();
-                    results.Add(result);
-                    
-                    if (!result.Success && _stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command {i + 1} failed: {result.Error}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var errorResult = new CommandResult(false, ex.Message, ex);
-                    results.Add(errorResult);
-                    
-                    if (_stopOnFailure)
-                    {
-                        return new BatchCommandResult(results, false, $"Command {i + 1} execution failed: {ex.Message}");
-                    }
-                }
-            }
-            
-            var overallSuccess = results.TrueForAll(r => r.Success);
-            return new BatchCommandResult(results, overallSuccess, overallSuccess ? null : "Some commands failed");
-        }
-        
-        private BatchCommandResult ExecuteInParallelInternal()
-        {
-            var results = new CommandResult[_commands.Count];
-            var parallelOptions = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = _maxParallelism ?? Environment.ProcessorCount
-            };
-            
-            if (_globalTimeout.HasValue)
-            {
-                parallelOptions.CancellationToken = new System.Threading.CancellationTokenSource(_globalTimeout.Value).Token;
-            }
-            
-            try
-            {
-                Parallel.For(0, _commands.Count, parallelOptions, i =>
-                {
-                    // Check condition
-                    try
-                    {
-                        if (!_conditions[i]())
-                        {
-                            results[i] = new CommandResult(true, "Skipped due to condition", null);
-                            return;
-                        }
-                    }
-                    catch (Exception conditionEx)
-                    {
-                        results[i] = new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx);
-                        return;
-                    }
-                    
-                    // Execute command
-                    try
-                    {
-                        results[i] = _commands[i].Execute();
-                    }
-                    catch (Exception ex)
-                    {
-                        results[i] = new CommandResult(false, ex.Message, ex);
-                    }
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                return new BatchCommandResult(results.Where(r => r != null).ToList(), false, "Batch execution timed out");
-            }
-            
-            var resultList = results.ToList();
-            var overallSuccess = resultList.TrueForAll(r => r.Success);
-            
-            if (_stopOnFailure && !overallSuccess)
-            {
-                var firstFailure = resultList.FirstOrDefault(r => !r.Success);
-                return new BatchCommandResult(resultList, false, $"Parallel execution failed: {firstFailure?.Error}");
-            }
-            
-            return new BatchCommandResult(resultList, overallSuccess, overallSuccess ? null : "Some commands failed");
-        }
-        
-        private async Task<BatchCommandResult> ExecuteInParallelInternalAsync()
-        {
-            var tasks = new List<Task<(int index, CommandResult result)>>();
-            
-            for (int i = 0; i < _commands.Count; i++)
-            {
-                var index = i; // Capture loop variable
-                
-                var task = Task.Run(async () =>
-                {
-                    // Check condition
-                    try
-                    {
-                        if (!_conditions[index]())
-                        {
-                            return (index, new CommandResult(true, "Skipped due to condition", null));
-                        }
-                    }
-                    catch (Exception conditionEx)
-                    {
-                        return (index, new CommandResult(false, $"Condition evaluation failed: {conditionEx.Message}", conditionEx));
-                    }
-                    
-                    // Execute command
-                    try
-                    {
-                        var result = await _commands[index].ExecuteAsync();
-                        return (index, result);
-                    }
-                    catch (Exception ex)
-                    {
-                        return (index, new CommandResult(false, ex.Message, ex));
-                    }
-                });
-                
-                tasks.Add(task);
-            }
-            
-            CommandResult[] results;
-            
-            if (_globalTimeout.HasValue)
-            {
-                var completedTasks = await Task.WhenAll(tasks).WaitAsync(_globalTimeout.Value);
-                results = new CommandResult[_commands.Count];
-                foreach (var (index, result) in completedTasks)
-                {
-                    results[index] = result;
-                }
+                var parallelStrategy = new ParallelExecutionStrategy(_stopOnFailure, _globalTimeout, _maxParallelism);
+                return await parallelStrategy.ExecuteAsync(_commands, _conditions);
             }
             else
             {
-                var completedTasks = await Task.WhenAll(tasks);
-                results = new CommandResult[_commands.Count];
-                foreach (var (index, result) in completedTasks)
-                {
-                    results[index] = result;
-                }
+                var sequentialStrategy = new SequentialExecutionStrategy(_stopOnFailure, _globalTimeout);
+                return await sequentialStrategy.ExecuteAsync(_commands, _conditions);
             }
-            
-            var resultList = results.ToList();
-            var overallSuccess = resultList.TrueForAll(r => r.Success);
-            
-            if (_stopOnFailure && !overallSuccess)
-            {
-                var firstFailure = resultList.FirstOrDefault(r => !r.Success);
-                return new BatchCommandResult(resultList, false, $"Parallel execution failed: {firstFailure?.Error}");
-            }
-            
-            return new BatchCommandResult(resultList, overallSuccess, overallSuccess ? null : "Some commands failed");
         }
+        
+        // Removed: Sequential execution logic moved to SequentialExecutionStrategy
+        
+        // Removed: Async sequential execution logic moved to SequentialExecutionStrategy
+        
+        // Removed: Parallel execution logic moved to ParallelExecutionStrategy
+        
+        // Removed: Async parallel execution logic moved to ParallelExecutionStrategy
         
         /// <summary>
         /// Get count of commands in the batch
@@ -459,8 +203,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder Clear()
         {
-            _commands.Clear();
-            _conditions.Clear();
+            BatchCommandUtilities.Clear(_commands, _conditions);
             return this;
         }
         
@@ -469,11 +212,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder RemoveAt(int index)
         {
-            if (index < 0 || index >= _commands.Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-                
-            _commands.RemoveAt(index);
-            _conditions.RemoveAt(index);
+            BatchCommandUtilities.RemoveAt(_commands, _conditions, index);
             return this;
         }
         
@@ -482,13 +221,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder InsertAt(int index, CommandBuilder command, Func<bool> condition = null)
         {
-            if (index < 0 || index > _commands.Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-                
-            _commands.Insert(index, command);
-            _conditions.Insert(index, condition ?? (() => true));
+            BatchCommandUtilities.InsertAt(_commands, _conditions, index, command, condition);
             return this;
         }
         
@@ -497,7 +230,9 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public BatchCommandBuilder Clone()
         {
-            var clone = new BatchCommandBuilder()
+            var (clonedCommands, clonedConditions) = BatchCommandUtilities.CloneCommandLists(_commands, _conditions);
+            
+            var clone = new BatchCommandBuilder
             {
                 _stopOnFailure = this._stopOnFailure,
                 _executeInParallel = this._executeInParallel,
@@ -505,10 +240,8 @@ namespace PerAspera.GameAPI.Commands.Builders
                 _maxParallelism = this._maxParallelism
             };
             
-            for (int i = 0; i < _commands.Count; i++)
-            {
-                clone.AddCommand(_commands[i], _conditions[i]);
-            }
+            clone._commands.AddRange(clonedCommands);
+            clone._conditions.AddRange(clonedConditions);
             
             return clone;
         }

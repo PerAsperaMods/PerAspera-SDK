@@ -369,8 +369,10 @@ namespace PerAspera.GameAPI.Commands.Native
                         _instance._reflectionCache?.ClearCaches();
                         _instance._diagnostics?.RecordEvent(DiagnosticLevel.Info, "Reset", "Factory state reset");
                     }
-                    catch (Exception ex)
-                    { // Logging disabled}
+                    catch (Exception)
+                    {
+                        // Error ignored during reset
+                    }
                     finally
                     {
                         _instance = null;

@@ -2,274 +2,173 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using BepInEx.Logging;
+using PerAspera.GameAPI.Commands.Core;
 
 namespace PerAspera.GameAPI.Commands.Native.Services
 {
     /// <summary>
-    /// High-performance reflection caching service optimized for IL2CPP command creation
-    /// Provides thread-safe caching of constructors, methods, and reflection metadata
-    /// Follows BepInX 6 best practices for minimal allocation and optimal performance
+    /// Service for caching reflection data to improve performance
+    /// Provides fast access to constructors, methods, properties, and attributes
     /// </summary>
-    public sealed class ReflectionCacheService
+    public class ReflectionCacheService
     {
         private readonly ConcurrentDictionary<string, ConstructorInfo> _constructorCache;
         private readonly ConcurrentDictionary<System.Type, MethodInfo[]> _methodCache;
-        private readonly ConcurrentDictionary<string, PropertyInfo> _propertyCache;
-        private readonly ConcurrentDictionary<System.Type, object[]> _attributeCache;
+        private readonly ConcurrentDictionary<System.Type, PropertyInfo[]> _propertyCache;
+        private readonly ConcurrentDictionary<System.Type, Attribute[]> _attributeCache;
 
+        /// <summary>
+        /// Initialize a new ReflectionCacheService instance
+        /// </summary>
         public ReflectionCacheService()
         {
-            _constructorCache = new ConcurrentDictionary<string, ConstructorInfo>(StringComparer.Ordinal);
+            _constructorCache = new ConcurrentDictionary<string, ConstructorInfo>();
             _methodCache = new ConcurrentDictionary<System.Type, MethodInfo[]>();
-            _propertyCache = new ConcurrentDictionary<string, PropertyInfo>(StringComparer.Ordinal);
-            _attributeCache = new ConcurrentDictionary<System.Type, object[]>();
+            _propertyCache = new ConcurrentDictionary<System.Type, PropertyInfo[]>();
+            _attributeCache = new ConcurrentDictionary<System.Type, Attribute[]>();
         }
 
         /// <summary>
-        /// Build constructor cache for performance optimization
-        /// Pre-caches commonly used constructors for faster instantiation
+        /// Cache constructors for all provided command types
         /// </summary>
-        /// <param name="commandTypes">Dictionary of discovered command types</param>
         public void CacheConstructors(ConcurrentDictionary<string, System.Type> commandTypes)
-        { // Logging disabledforeach (var kvp in commandTypes)
+        {
+            foreach (var kvp in commandTypes)
             {
                 var type = kvp.Value;
                 try
                 {
                     CacheConstructorsForType(type);
                 }
-                catch (Exception ex)
-                { // Logging disabled}
+                catch (Exception)
+                {
+                    // Constructor caching failed - continue
+                }
             }
+        }
 
         /// <summary>
-        /// Cache all constructors for a specific type with different parameter patterns
+        /// Cache all constructors for a specific type
         /// </summary>
-        /// <param name="type">Type to cache constructors for</param>
         private void CacheConstructorsForType(System.Type type)
         {
             var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             
             foreach (var constructor in constructors)
             {
-                var key = GenerateConstructorKey(type, constructor);
-                _constructorCache.TryAdd(key, constructor); // Logging disabled}
-        }
-
-        /// <summary>
-        /// Generate a unique key for constructor caching based on type and parameter signature
-        /// </summary>
-        /// <param name="type">Type containing the constructor</param>
-        /// <param name="constructor">Constructor to generate key for</param>
-        /// <returns>Unique cache key</returns>
-        private static string GenerateConstructorKey(System.Type type, ConstructorInfo constructor)
-        {
-            var paramTypes = constructor.GetParameters().Select(p => p.ParameterType.Name);
-            var paramSignature = string.Join(",", paramTypes);
-            return $"{type.FullName}({paramSignature})";
-        }
-
-        /// <summary>
-        /// Get optimal constructor for a type with given parameter types
-        /// Uses cached constructors for maximum performance
-        /// </summary>
-        /// <param name="type">Type to create constructor for</param>
-        /// <param name="parameterTypes">Parameter types for constructor matching</param>
-        /// <returns>Best matching constructor or null if not found</returns>
-        public ConstructorInfo GetOptimalConstructor(System.Type type, System.Type[] parameterTypes)
-        {
-            // Try exact match from cache first
-            var paramSignature = string.Join(",", parameterTypes.Select(t => t.Name));
-            var exactKey = $"{type.FullName}({paramSignature})";
-            
-            if (_constructorCache.TryGetValue(exactKey, out var exactMatch))
-            {
-                return exactMatch;
+                var parameters = constructor.GetParameters();
+                var key = $"{type.FullName}_{parameters.Length}";
+                
+                _constructorCache.TryAdd(key, constructor);
             }
-
-            // Fallback: Find best matching constructor
-            var constructors = GetCachedConstructors(type);
-            
-            // Find exact parameter match
-            var exactConstructor = constructors.FirstOrDefault(c => 
-                ParameterTypesMatch(c.GetParameters(), parameterTypes));
-            
-            if (exactConstructor != null)
-            {
-                // Cache this combination for future use
-                _constructorCache.TryAdd(exactKey, exactConstructor);
-                return exactConstructor;
-            }
-
-            // Find compatible constructor (with parameter type compatibility)
-            var compatibleConstructor = constructors
-                .Where(c => c.GetParameters().Length == parameterTypes.Length)
-                .FirstOrDefault(c => ParameterTypesCompatible(c.GetParameters(), parameterTypes));
-
-            if (compatibleConstructor != null)
-            {
-                _constructorCache.TryAdd(exactKey, compatibleConstructor);
-            }
-
-            return compatibleConstructor;
         }
 
         /// <summary>
-        /// Get cached constructors for a type
+        /// Get cached constructor for a type with specific parameter count
         /// </summary>
-        /// <param name="type">Type to get constructors for</param>
-        /// <returns>Array of constructors for the type</returns>
-        private ConstructorInfo[] GetCachedConstructors(System.Type type)
+        public ConstructorInfo GetCachedConstructor(System.Type type, int parameterCount)
         {
-            return _constructorCache.Values
-                .Where(c => c.DeclaringType == type)
-                .ToArray();
-        }
-
-        /// <summary>
-        /// Check if parameter types match exactly
-        /// </summary>
-        /// <param name="constructorParams">Constructor parameters</param>
-        /// <param name="providedTypes">Provided parameter types</param>
-        /// <returns>True if types match exactly</returns>
-        private static bool ParameterTypesMatch(ParameterInfo[] constructorParams, System.Type[] providedTypes)
-        {
-            if (constructorParams.Length != providedTypes.Length)
-                return false;
-
-            for (int i = 0; i < constructorParams.Length; i++)
-            {
-                if (constructorParams[i].ParameterType != providedTypes[i])
-                    return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Check if parameter types are compatible (includes inheritance and conversion)
-        /// </summary>
-        /// <param name="constructorParams">Constructor parameters</param>
-        /// <param name="providedTypes">Provided parameter types</param>
-        /// <returns>True if types are compatible</returns>
-        private static bool ParameterTypesCompatible(ParameterInfo[] constructorParams, System.Type[] providedTypes)
-        {
-            if (constructorParams.Length != providedTypes.Length)
-                return false;
-
-            for (int i = 0; i < constructorParams.Length; i++)
-            {
-                var paramType = constructorParams[i].ParameterType;
-                var providedType = providedTypes[i];
-
-                // Exact match
-                if (paramType == providedType)
-                    continue;
-
-                // Assignable (inheritance/interface)
-                if (paramType.IsAssignableFrom(providedType))
-                    continue;
-
-                // IL2CPP object compatibility
-                if (paramType == typeof(object))
-                    continue;
-
-                // Not compatible
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Cache methods for a type for reflection optimization
-        /// </summary>
-        /// <param name="type">Type to cache methods for</param>
-        public void CacheMethodsForType(System.Type type)
-        {
-            if (_methodCache.ContainsKey(type))
-                return;
-
+            var key = $"{type.FullName}_{parameterCount}";
+            if (_constructorCache.TryGetValue(key, out var constructor))
+                return constructor;
+                
+            // Cache miss - try to find and cache
             try
             {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-                    .Where(m => !m.IsGenericMethod && !m.IsAbstract)
-                    .ToArray();
+                var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+                var found = constructors.FirstOrDefault(c => c.GetParameters().Length == parameterCount);
+                
+                if (found != null)
+                {
+                    _constructorCache.TryAdd(key, found);
+                }
+                
+                return found;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
 
-                _methodCache.TryAdd(type, methods); // Logging disabled}
-            catch (Exception ex)
-            { // Logging disabled_methodCache.TryAdd(type, Array.Empty<MethodInfo>());
+        /// <summary>
+        /// Cache all methods for a type
+        /// </summary>
+        public void CacheMethodsForType(System.Type type)
+        {
+            try
+            {
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+                _methodCache.TryAdd(type, methods);
+            }
+            catch (Exception)
+            {
+                // Method caching failed
             }
         }
 
         /// <summary>
         /// Get cached methods for a type
         /// </summary>
-        /// <param name="type">Type to get methods for</param>
-        /// <returns>Cached methods array</returns>
         public MethodInfo[] GetCachedMethods(System.Type type)
         {
             if (_methodCache.TryGetValue(type, out var methods))
-            {
                 return methods;
+            
+            // Cache miss - try to cache and return
+            try
+            {
+                CacheMethodsForType(type);
+                if (_methodCache.TryGetValue(type, out var newMethods))
+                    return newMethods;
             }
-
-            // Cache methods if not already cached
-            CacheMethodsForType(type);
-            return _methodCache.GetValueOrDefault(type, Array.Empty<MethodInfo>());
+            catch (Exception)
+            {
+                // Method access failed
+            }
+            
+            return Array.Empty<MethodInfo>();
         }
 
         /// <summary>
-        /// Cache property for fast property access
+        /// Get a specific property from cache
         /// </summary>
-        /// <param name="type">Type containing the property</param>
-        /// <param name="propertyName">Name of the property</param>
-        /// <returns>Cached PropertyInfo or null if not found</returns>
         public PropertyInfo GetCachedProperty(System.Type type, string propertyName)
         {
-            var key = $"{type.FullName}.{propertyName}";
-            
-            if (_propertyCache.TryGetValue(key, out var property))
-            {
-                return property;
-            }
-
             try
             {
-                property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (property != null)
+                if (!_propertyCache.TryGetValue(type, out var properties))
                 {
-                    _propertyCache.TryAdd(key, property);
+                    properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    _propertyCache.TryAdd(type, properties);
                 }
-                return property;
+
+                return properties.FirstOrDefault(p => p.Name == propertyName);
             }
-            catch (Exception ex)
-            { // Logging disabledreturn null;
+            catch (Exception)
+            {
+                // Property access failed
+                return null;
             }
         }
 
         /// <summary>
         /// Get cached attributes for a type
         /// </summary>
-        /// <param name="type">Type to get attributes for</param>
-        /// <returns>Cached attributes array</returns>
-        public object[] GetCachedAttributes(System.Type type)
+        public Attribute[] GetCachedAttributes(System.Type type)
         {
             if (_attributeCache.TryGetValue(type, out var attributes))
-            {
                 return attributes;
-            }
 
             try
             {
-                attributes = type.GetCustomAttributes(false);
+                attributes = type.GetCustomAttributes().ToArray();
                 _attributeCache.TryAdd(type, attributes);
                 return attributes;
             }
-            catch (Exception ex)
-            { // Logging disabledvar emptyAttributes = Array.Empty<object>();
+            catch (Exception)
+            {
+                var emptyAttributes = Array.Empty<Attribute>();
                 _attributeCache.TryAdd(type, emptyAttributes);
                 return emptyAttributes;
             }
@@ -277,57 +176,36 @@ namespace PerAspera.GameAPI.Commands.Native.Services
 
         /// <summary>
         /// Create instance using cached reflection data
-        /// Optimized path for maximum performance with IL2CPP
         /// </summary>
-        /// <param name="type">Type to create instance of</param>
-        /// <param name="parameters">Constructor parameters</param>
-        /// <returns>Created instance or null on failure</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object CreateInstanceFast(System.Type type, object[] parameters)
         {
             try
             {
-                var paramTypes = parameters?.Select(p => p?.GetType() ?? typeof(object)).ToArray() ?? Array.Empty<System.Type>();
-                var constructor = GetOptimalConstructor(type, paramTypes);
-                
-                if (constructor == null)
+                var constructor = GetCachedConstructor(type, parameters?.Length ?? 0);
+                if (constructor != null)
                 {
-                    // Fallback to Activator for simple cases
-                    return Activator.CreateInstance(type, parameters);
+                    return constructor.Invoke(parameters);
                 }
-
-                return constructor.Invoke(parameters);
+                
+                // Fallback to Activator
+                return Activator.CreateInstance(type, parameters);
             }
-            catch (Exception ex)
-            { // Logging disabledreturn null;
+            catch (Exception)
+            {
+                // Fast instance creation failed
+                return null;
             }
         }
 
         /// <summary>
-        /// Get diagnostic information about cache performance
-        /// </summary>
-        /// <returns>Formatted cache statistics</returns>
-        public string GetCacheStatistics()
-        {
-            var stats = new System.Text.StringBuilder();
-            stats.AppendLine("=== ReflectionCacheService Statistics ===");
-            stats.AppendLine($"Cached Constructors: {_constructorCache.Count}");
-            stats.AppendLine($"Cached Method Groups: {_methodCache.Count}");
-            stats.AppendLine($"Total Cached Methods: {_methodCache.Values.Sum(m => m.Length)}");
-            stats.AppendLine($"Cached Properties: {_propertyCache.Count}");
-            stats.AppendLine($"Cached Attribute Groups: {_attributeCache.Count}");
-
-            return stats.ToString();
-        }
-
-        /// <summary>
-        /// Clear all caches (for memory management or testing)
+        /// Clear all caches
         /// </summary>
         public void ClearCaches()
         {
             _constructorCache.Clear();
             _methodCache.Clear();
             _propertyCache.Clear();
-            _attributeCache.Clear(); // Logging disabled}
+            _attributeCache.Clear();
+        }
     }
 }

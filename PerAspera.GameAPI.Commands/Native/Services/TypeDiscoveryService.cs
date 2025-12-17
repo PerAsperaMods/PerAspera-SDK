@@ -1,61 +1,69 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BepInEx.Logging;
-using PerAspera.Core;
-using PerAspera.GameAPI.Commands.Constants;
+using PerAspera.GameAPI.Commands.Core;
 
 namespace PerAspera.GameAPI.Commands.Native.Services
 {
     /// <summary>
-    /// Service responsible for discovering command types from assemblies using IL2CPP-compatible reflection
-    /// Provides thread-safe scanning and caching of command types with GameTypeInitializer integration
+    /// Service for discovering and registering available command types across assemblies
+    /// Provides type resolution and caching for the command system
     /// </summary>
-    public sealed class TypeDiscoveryService
+    public class TypeDiscoveryService
     {
-        private readonly ConcurrentDictionary<string, System.Type> _commandTypes;
-        private volatile bool _isInitialized = false;
-
+        private ConcurrentDictionary<string, System.Type> _commandTypes;
+        private volatile bool _isInitialized;
+        
+        /// <summary>
+        /// Gets whether the service is initialized
+        /// </summary>
+        public bool IsInitialized => _isInitialized;
+        
+        /// <summary>
+        /// Initialize a new TypeDiscoveryService instance
+        /// </summary>
         public TypeDiscoveryService()
         {
-            _commandTypes = new ConcurrentDictionary<string, System.Type>(StringComparer.OrdinalIgnoreCase);
+            _commandTypes = new ConcurrentDictionary<string, System.Type>();
         }
-
+        
         /// <summary>
-        /// Initialize command type discovery using GameTypeInitializer integration
-        /// Follows BepInX 6 patterns for IL2CPP type discovery
+        /// Initialize the service by discovering all available command types
         /// </summary>
-        public void InitializeCommandTypes()
+        public void Initialize()
         {
-            try
-            { // Logging disabled// Initialize GameTypeInitializer for enhanced type access
-                GameTypeInitializer.Initialize();
+            if (_isInitialized)
+                return;
                 
+            try
+            {
                 // Scan assemblies for command types
-                ScanAssembliesForCommandTypes(); // Logging disabled_isInitialized = true;
+                ScanAssembliesForCommandTypes();
+                _isInitialized = true;
             }
-            catch (Exception ex)
-            { // Logging disabled_isInitialized = false;
+            catch (Exception)
+            {
+                _isInitialized = false;
                 throw;
             }
         }
-
+        
         /// <summary>
-        /// Scan all available assemblies for command types using enhanced IL2CPP patterns
-        /// Prioritizes game assemblies and uses efficient reflection caching
+        /// Scan all loaded assemblies for GameCommandBase implementations
         /// </summary>
         private void ScanAssembliesForCommandTypes()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
-                .ToArray(); // Logging disabled// Priority scan: Focus on Assembly-CSharp (Per Aspera game assembly)
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var commandTypes = new ConcurrentDictionary<string, System.Type>();
+            
+            // Priority scanning for key assemblies
             var gameAssembly = assemblies.FirstOrDefault(a => a.GetName().Name == "Assembly-CSharp");
             if (gameAssembly != null)
-            { // Logging disabledScanAssemblyForCommands(gameAssembly, isPriorityAssembly: true);
+            {
+                ScanAssemblyForCommands(gameAssembly, commandTypes);
             }
-
+            
             // Scan other relevant assemblies
             var relevantAssemblies = assemblies.Where(a => 
                 a != gameAssembly && 
@@ -68,200 +76,166 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             {
                 try
                 {
-                    LoggingSystem.Debug($"Scanning assembly: {assembly.GetName().Name}");
-                    ScanAssemblyForCommands(assembly, isPriorityAssembly: false);
+                    ScanAssemblyForCommands(assembly, commandTypes);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    LoggingSystem.Warning($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
+                    // Assembly scan failed - continue with next assembly
                 }
             }
+            
+            _commandTypes = commandTypes;
         }
 
         /// <summary>
-        /// Scan individual assembly for command types with pattern matching and validation
+        /// Scan individual assembly for command types
         /// </summary>
-        /// <param name="assembly">Assembly to scan</param>
-        /// <param name="isPriorityAssembly">Whether this is a priority assembly for enhanced logging</param>
-        private void ScanAssemblyForCommands(Assembly assembly, bool isPriorityAssembly)
+        private void ScanAssemblyForCommands(Assembly assembly, ConcurrentDictionary<string, System.Type> commandTypes)
         {
             try
             {
                 var types = assembly.GetTypes()
-                    .Where(IsCommandType)
+                    .Where(t => t.IsClass && !t.IsAbstract && typeof(GameCommandBase).IsAssignableFrom(t))
                     .ToArray();
-
-                if (isPriorityAssembly)
-                {
-                    LoggingSystem.Info($"Found {types.Length} command types in {assembly.GetName().Name}");
-                }
-
+                
                 foreach (var type in types)
                 {
-                    RegisterCommandType(type);
+                    ProcessCommandType(commandTypes, type);
                 }
             }
-            catch (ReflectionTypeLoadException ex)
+            catch (ReflectionTypeLoadException ex) when (ex.Types != null)
             {
-                LoggingSystem.Warning($"Partial type loading from assembly {assembly.GetName().Name}: {ex.LoaderExceptions.Length} exceptions");
-                
-                // Process types that loaded successfully
-                var loadedTypes = ex.Types.Where(t => t != null && IsCommandType(t));
+                // Handle partial loading
+                var loadedTypes = ex.Types.Where(t => t != null).ToArray();
                 foreach (var type in loadedTypes)
                 {
-                    RegisterCommandType(type);
+                    if (type.IsClass && !type.IsAbstract && typeof(GameCommandBase).IsAssignableFrom(type))
+                    {
+                        ProcessCommandType(commandTypes, type);
+                    }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LoggingSystem.Error($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
+                // Assembly processing failed - continue
             }
         }
-
+        
         /// <summary>
-        /// Check if a type is a command type based on naming patterns and inheritance
-        /// Enhanced pattern matching for Per Aspera command detection
+        /// Process and register a discovered command type
         /// </summary>
-        /// <param name="type">Type to evaluate</param>
-        /// <returns>True if the type appears to be a command type</returns>
-        private static bool IsCommandType(System.Type type)
+        private void ProcessCommandType(ConcurrentDictionary<string, System.Type> commandTypes, System.Type type)
         {
-            if (type == null || type.IsAbstract || type.IsInterface)
-                return false;
-
-            var typeName = type.Name;
-
-            // Common Per Aspera command patterns
-            if (typeName.StartsWith("Cmd") && !typeName.EndsWith("Base"))
-                return true;
-
-            if (typeName.EndsWith("Command") && !typeName.EndsWith("BaseCommand"))
-                return true;
-
-            // Check for command-related interfaces or base classes
-            var interfaces = type.GetInterfaces().Select(i => i.Name);
-            if (interfaces.Any(i => i.Contains("Command") || i.Contains("ICommand")))
-                return true;
-
-            // Check inheritance hierarchy for command base classes
-            var baseType = type.BaseType;
-            while (baseType != null && baseType != typeof(object))
+            try
             {
-                if (baseType.Name.Contains("Command") && !baseType.Name.Contains("Base"))
-                    return true;
-                baseType = baseType.BaseType;
+                var typeName = type.Name;
+                
+                // Remove "Command" suffix for cleaner lookups
+                if (typeName.EndsWith("Command"))
+                {
+                    typeName = typeName.Substring(0, typeName.Length - 7);
+                }
+                
+                // Register with multiple patterns for flexibility
+                commandTypes.TryAdd(typeName, type);
+                commandTypes.TryAdd(type.Name, type);
+                commandTypes.TryAdd(type.FullName, type);
             }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Register a command type with multiple naming variations for flexible lookup
-        /// </summary>
-        /// <param name="type">Command type to register</param>
-        private void RegisterCommandType(System.Type type)
-        {
-            var typeName = type.Name;
-
-            // Register with full type name
-            _commandTypes.TryAdd(typeName, type);
-
-            // Register with "Cmd" prefix removed if present
-            if (typeName.StartsWith("Cmd"))
+            catch (Exception)
             {
-                var shortName = typeName.Substring(3);
-                _commandTypes.TryAdd(shortName, type);
+                // Type registration failed - continue
             }
-
-            // Register with "Command" suffix removed if present
-            if (typeName.EndsWith("Command"))
+        }
+        
+        /// <summary>
+        /// Get all discovered command types
+        /// </summary>
+        public System.Type[] GetDiscoveredTypes()
+        {
+            if (_commandTypes == null)
             {
-                var shortName = typeName.Substring(0, typeName.Length - 7);
-                _commandTypes.TryAdd(shortName, type);
+                return Array.Empty<System.Type>();
             }
-
-        /// <summary>
-        /// Normalize command type name for consistent lookup
-        /// </summary>
-        /// <param name="typeName">Raw command type name</param>
-        /// <returns>Normalized type name for lookup</returns>
-        public string NormalizeCommandTypeName(string typeName)
-        {
-            if (string.IsNullOrWhiteSpace(typeName))
-                return string.Empty;
-
-            // Remove common prefixes/suffixes for flexible matching
-            var normalized = typeName.Trim();
-
-            // Try exact match first
-            if (_commandTypes.ContainsKey(normalized))
-                return normalized;
-
-            // Try with "Cmd" prefix
-            var withCmdPrefix = "Cmd" + normalized;
-            if (_commandTypes.ContainsKey(withCmdPrefix))
-                return withCmdPrefix;
-
-            // Try with "Command" suffix  
-            var withCommandSuffix = normalized + "Command";
-            if (_commandTypes.ContainsKey(withCommandSuffix))
-                return withCommandSuffix;
-
-            // Return original if no matches found
-            return normalized;
+            
+            return _commandTypes.Values.Distinct().ToArray();
         }
-
-        /// <summary>
-        /// Get available command types discovered during initialization
-        /// </summary>
-        /// <returns>Array of command type names</returns>
-        public string[] GetAvailableCommandTypes()
-        {
-            if (!_isInitialized)
-            { // Logging disabledreturn Array.Empty<string>();
-            }
-
-            return _commandTypes.Keys.ToArray();
-        }
-
+        
         /// <summary>
         /// Try to get a command type by name
         /// </summary>
-        /// <param name="typeName">Command type name</param>
-        /// <param name="commandType">Output command type if found</param>
-        /// <returns>True if command type was found</returns>
         public bool TryGetCommandType(string typeName, out System.Type commandType)
         {
-            var normalizedName = NormalizeCommandTypeName(typeName);
-            return _commandTypes.TryGetValue(normalizedName, out commandType);
+            commandType = FindCommandType(typeName);
+            return commandType != null;
         }
-
+        
         /// <summary>
-        /// Get diagnostic information about discovered types
+        /// Get all available command type names
         /// </summary>
-        /// <returns>Formatted diagnostic string</returns>
-        public string GetDiagnosticInfo()
+        public string[] GetAvailableCommandTypes()
         {
-            var info = new System.Text.StringBuilder();
-            info.AppendLine("=== TypeDiscoveryService Diagnostics ===");
-            info.AppendLine($"Initialized: {_isInitialized}");
-            info.AppendLine($"Command Types Discovered: {_commandTypes.Count}");
-            
-            if (_commandTypes.Count > 0)
-            {
-                info.AppendLine("\nDiscovered Types:");
-                foreach (var kvp in _commandTypes.OrderBy(x => x.Key))
-                {
-                    info.AppendLine($"  {kvp.Key} -> {kvp.Value.FullName}");
-                }
-            }
-
-            return info.ToString();
+            if (_commandTypes == null)
+                return Array.Empty<string>();
+                
+            return _commandTypes.Keys.ToArray();
         }
-
+        
         /// <summary>
-        /// Check if the service has been properly initialized
+        /// Initialize command types (alias for Initialize)
         /// </summary>
-        public bool IsInitialized => _isInitialized && _commandTypes.Count > 0;
+        public void InitializeCommandTypes()
+        {
+            Initialize();
+        }
+        
+        /// <summary>
+        /// Find a command type by name with flexible matching
+        /// </summary>
+        public System.Type FindCommandType(string typeName)
+        {
+            if (string.IsNullOrEmpty(typeName) || _commandTypes == null)
+                return null;
+                
+            // Direct lookup
+            if (_commandTypes.TryGetValue(typeName, out var type))
+                return type;
+                
+            // Try with "Command" suffix
+            var commandTypeName = typeName.EndsWith("Command") ? typeName : typeName + "Command";
+            if (_commandTypes.TryGetValue(commandTypeName, out type))
+                return type;
+                
+            // Case-insensitive lookup
+            var match = _commandTypes.FirstOrDefault(kvp => 
+                string.Equals(kvp.Key, typeName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(kvp.Key, commandTypeName, StringComparison.OrdinalIgnoreCase));
+                
+            return match.Value;
+        }
+        
+        /// <summary>
+        /// Check if a command type is registered
+        /// </summary>
+        public bool IsCommandTypeRegistered(string typeName)
+        {
+            return FindCommandType(typeName) != null;
+        }
+        
+        /// <summary>
+        /// Get count of registered command types
+        /// </summary>
+        public int GetRegisteredTypeCount()
+        {
+            return _commandTypes?.Count ?? 0;
+        }
+        
+        /// <summary>
+        /// Clear all registered types (for testing/reset scenarios)
+        /// </summary>
+        public void Clear()
+        {
+            _commandTypes?.Clear();
+            _isInitialized = false;
+        }
     }
 }

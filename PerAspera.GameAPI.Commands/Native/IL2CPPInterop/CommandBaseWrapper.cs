@@ -16,7 +16,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         private readonly System.Type _commandType;
         private readonly MethodInfo _isValidMethod;
         private readonly MethodInfo _toTabbedStringMethod;
-        
+
         /// <summary>
         /// Initialize wrapper with native Command instance
         /// </summary>
@@ -24,13 +24,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             _nativeCommand = nativeCommand ?? throw new ArgumentNullException(nameof(nativeCommand));
             _commandType = nativeCommand.GetType();
-            
+
             // Cache important methods for performance
             _isValidMethod = GetIsValidMethod();
             _toTabbedStringMethod = GetToTabbedStringMethod();
-            
+
             ValidateCommandType(); // Logging disabled}
-        
+        }
         /// <summary>
         /// Native Command instance (for direct IL2CPP access)
         /// </summary>

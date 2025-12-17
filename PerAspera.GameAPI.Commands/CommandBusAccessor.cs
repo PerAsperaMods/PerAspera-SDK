@@ -14,7 +14,7 @@ namespace PerAspera.GameAPI.Commands
     {
         private static readonly LogAspera _log = new LogAspera("CommandBusAccessor");
         private static object? _commandBusInstance = null;
-        private static Type? _commandBusType = null;
+        private static System.Type? _commandBusType = null;
         private static bool _isInitialized = false;
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace PerAspera.GameAPI.Commands
         /// Get command bus type
         /// </summary>
         /// <returns>Command bus type, or null if not available</returns>
-        public static Type? GetCommandBusType()
+        public static System.Type? GetCommandBusType()
         {
             EnsureInitialized();
             return _commandBusType;
