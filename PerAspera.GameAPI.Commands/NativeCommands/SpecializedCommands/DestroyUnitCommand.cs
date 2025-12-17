@@ -45,7 +45,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             
             if (parameters.TryGetValue("UnitId", out var unitId))
             {
-                command.UnitId = unitId;
+                command.UnitId = unitId?.ToString();
             }
             
             return command;

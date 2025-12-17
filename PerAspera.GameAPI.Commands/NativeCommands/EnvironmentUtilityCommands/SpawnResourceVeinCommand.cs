@@ -71,14 +71,14 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
                 command.PositionX = posXValue;
             }
             
-            if (parameters.TryGetValue("PositionZ", out var posZ) && float.TryParse(posZ?.ToString(), out var posZValue))
+            if (parameters.TryGetValue("PositionY", out var posY) && float.TryParse(posY?.ToString(), out var posYValue))
             {
-                command.PositionZ = posZValue;
+                command.PositionY = posYValue;
             }
             
-            if (parameters.TryGetValue("ResourceAmount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
+            if (parameters.TryGetValue("Amount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
             {
-                command.ResourceAmount = amountValue;
+                command.Amount = amountValue;
             }
             
             return command;

@@ -49,9 +49,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             var command = new SabotageCommand();
             
-            if (parameters.TryGetValue("TargetId", out var targetId))
+            if (parameters.TryGetValue("Target", out var target))
             {
-                command.TargetId = targetId?.ToString();
+                command.Target = target?.ToString();
             }
             
             if (parameters.TryGetValue("SabotageType", out var sabotageType))

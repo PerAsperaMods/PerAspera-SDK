@@ -49,7 +49,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             
             if (parameters.TryGetValue("TargetFaction", out var targetFaction))
             {
-                command.TargetFaction = targetFaction;
+                command.TargetFaction = targetFaction?.ToString();
             }
             
             if (parameters.TryGetValue("RelationValue", out var value) && float.TryParse(value?.ToString(), out var relationValue))

@@ -74,10 +74,18 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             // Log to BepInX based on severity
             switch (level)
             {
-                case DiagnosticLevel.Error: // Logging disabledbreak;
-                case DiagnosticLevel.Warning: // Logging disabledbreak;
-                case DiagnosticLevel.Info: // Logging disabledbreak;
-                case DiagnosticLevel.Debug: // Logging disabledbreak;
+                case DiagnosticLevel.Error: 
+                    // Logging disabled
+                    break;
+                case DiagnosticLevel.Warning: 
+                    // Logging disabled
+                    break;
+                case DiagnosticLevel.Info: 
+                    // Logging disabled
+                    break;
+                case DiagnosticLevel.Debug: 
+                    // Logging disabled
+                    break;
             }
         }
 

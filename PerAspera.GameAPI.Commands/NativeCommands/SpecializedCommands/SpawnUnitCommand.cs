@@ -52,7 +52,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             
             if (parameters.TryGetValue("UnitType", out var unitType))
             {
-                command.UnitType = unitType;
+                command.UnitType = unitType?.ToString();
             }
             
             return command;

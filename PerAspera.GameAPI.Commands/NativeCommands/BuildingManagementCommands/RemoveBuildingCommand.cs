@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             
             if (parameters.TryGetValue("BuildingId", out var buildingId))
             {
-                command.BuildingId = buildingId;
+                command.BuildingId = buildingId?.ToString();
             }
             
             return command;
