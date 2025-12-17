@@ -13,7 +13,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
     public class KeeperWrapper
     {
         private readonly object _nativeKeeper;
-        private readonly Type _keeperType;
+        private readonly System.Type _keeperType;
         private readonly MethodInfo _registerMethod;
         private readonly MethodInfo _unregisterMethod;
         

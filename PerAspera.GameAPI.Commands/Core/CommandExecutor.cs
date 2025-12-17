@@ -120,7 +120,7 @@ namespace PerAspera.GameAPI.Commands.Core
         }
         
         /// <summary>
-        /// Execute native command through CommandBus.Dispatch<T>() → Keeper.Register()
+        /// Execute native command through CommandBus.Dispatch() → Keeper.Register()
         /// This is the core bridge to the Per Aspera command system
         /// Phase 1.1: Now integrated with GameTypeInitializer
         /// </summary>

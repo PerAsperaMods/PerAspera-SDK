@@ -29,7 +29,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction that will have access to the resource vein
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
         
         /// <summary>
         /// The type of resource vein to spawn
@@ -80,81 +80,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Z] = z;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
-            if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
-                return false;
-            }
-            
-            if (Resource == null)
-            {
-                errorMessage = "Resource cannot be null";
-                return false;
-            }
-            
-            if (!float.IsFinite(X))
-            {
-                errorMessage = $"X coordinate must be finite, got {X}";
-                return false;
-            }
-            
-            if (!float.IsFinite(Y))
-            {
-                errorMessage = $"Y coordinate must be finite, got {Y}";
-                return false;
-            }
-            
-            if (!float.IsFinite(Z))
-            {
-                errorMessage = $"Z coordinate must be finite, got {Z}";
-                return false;
-            }
+            if (Faction == null) return false;
+            if (Resource == null) return false;
+            if (!float.IsFinite(X)) return false;
+            if (!float.IsFinite(Y)) return false;
+            if (!float.IsFinite(Z)) return false;
             
             return true;
-        }
-        
-        public override string GetDescription()
-        {
-            return $"Spawn {Resource} vein for faction {Faction} at ({X:F1}, {Y:F1}, {Z:F1})";
-        }
-        
-        public static SpawnResourceVeinCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
-        {
-            if (!parameters.TryGetValue(ParameterNames.Faction, out var faction))
-                throw new ArgumentException($"Missing required parameter: {ParameterNames.Faction}");
-                
-            if (!parameters.TryGetValue(ParameterNames.Resource, out var resource))
-                throw new ArgumentException($"Missing required parameter: {ParameterNames.Resource}");
-                
-            if (!parameters.TryGetValue(ParameterNames.X, out var xObj) ||
-                !TryConvertToFloat(xObj, out var x))
-                throw new ArgumentException($"Missing or invalid parameter: {ParameterNames.X}");
-                
-            if (!parameters.TryGetValue(ParameterNames.Y, out var yObj) ||
-                !TryConvertToFloat(yObj, out var y))
-                throw new ArgumentException($"Missing or invalid parameter: {ParameterNames.Y}");
-                
-            if (!parameters.TryGetValue(ParameterNames.Z, out var zObj) ||
-                !TryConvertToFloat(zObj, out var z))
-                throw new ArgumentException($"Missing or invalid parameter: {ParameterNames.Z}");
-            
-            return new SpawnResourceVeinCommand(faction, resource, x, y, z);
-        }
-        
-        private static bool TryConvertToFloat(object value, out float result)
-        {
-            result = 0f;
-            return value switch
-            {
-                float f when float.IsFinite(f) => (result = f) >= 0 || true,
-                double d when double.IsFinite(d) => (result = (float)d) >= 0 || float.IsFinite(result),
-                int i => (result = i) >= 0 || true,
-                _ => float.TryParse(value?.ToString(), out result) && float.IsFinite(result)
-            };
         }
     }
     

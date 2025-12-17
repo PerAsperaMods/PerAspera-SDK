@@ -13,7 +13,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
     public class CommandBaseWrapper
     {
         private readonly object _nativeCommand;
-        private readonly Type _commandType;
+        private readonly System.Type _commandType;
         private readonly MethodInfo _isValidMethod;
         private readonly MethodInfo _toTabbedStringMethod;
         

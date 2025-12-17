@@ -174,7 +174,7 @@ namespace PerAspera.GameAPI.Commands.Native
         }
         
         /// <summary>
-        /// Execute command via native CommandBus.Dispatch<T>()
+        /// Execute command via native CommandBus.Dispatch()
         /// </summary>
         public bool ExecuteCommand(CommandBaseWrapper command)
         {

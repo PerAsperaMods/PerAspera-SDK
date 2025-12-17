@@ -10,7 +10,7 @@ namespace PerAspera.GameAPI.Commands.Core
     public abstract class GameCommandBase : IGameCommand
     {
         /// <inheritdoc/>
-        public abstract string CommandType { get; }
+        public virtual string CommandType => _commandType ?? GetType().Name;
         
         /// <inheritdoc/>
         public DateTime Timestamp { get; }
@@ -31,6 +31,16 @@ namespace PerAspera.GameAPI.Commands.Core
             Timestamp = DateTime.UtcNow;
             Parameters = new Dictionary<string, object>();
         }
+        
+        /// <summary>
+        /// Initialize base command with command type and current timestamp
+        /// </summary>
+        protected GameCommandBase(string commandType) : this()
+        {
+            _commandType = commandType;
+        }
+        
+        private readonly string _commandType;
         
         /// <inheritdoc/>
         public abstract bool IsValid();

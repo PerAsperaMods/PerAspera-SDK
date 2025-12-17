@@ -8,16 +8,17 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
 {
     /// <summary>
     /// IL2CPP wrapper for native CommandBus access with type safety
-    /// Provides bridge to CommandBus.Dispatch<T>() system
+    /// Provides bridge to CommandBus.Dispatch() system
     /// </summary>
     public class CommandBusWrapper
     {
         private readonly object _nativeCommandBus;
-        private readonly Type _commandBusType;
+        private readonly System.Type _commandBusType;
         
         /// <summary>
         /// Initialize wrapper with native CommandBus instance
         /// Uses GameTypeInitializer for enhanced type discovery
+        /// </summary>
         /// </summary>
         public CommandBusWrapper(object nativeCommandBus)
         {
@@ -38,7 +39,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         }
         
         /// <summary>
-        /// Dispatch command via native CommandBus.Dispatch<T>(command)
+        /// Dispatch command via native CommandBus.Dispatch(command)
         /// </summary>
         public bool DispatchCommand<T>(T command) where T : class
         {
