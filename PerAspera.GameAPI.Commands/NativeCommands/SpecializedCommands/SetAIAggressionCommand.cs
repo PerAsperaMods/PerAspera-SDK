@@ -42,20 +42,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create SetAIAggressionCommand from parameters array
+        /// Create SetAIAggressionCommand from parameters dictionary
         /// </summary>
-        public static SetAIAggressionCommand FromParameters(object[] parameters)
+        public static SetAIAggressionCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new SetAIAggressionCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("AggressionLevel", out var level) && float.TryParse(level?.ToString(), out var levelValue))
             {
-                command.Faction = parameters[0];
-                
-                if (float.TryParse(parameters[1]?.ToString(), out var level))
-                {
-                    command.AggressionLevel = level;
-                }
+                command.AggressionLevel = levelValue;
             }
             
             return command;

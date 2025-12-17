@@ -36,16 +36,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             return true;
         }
         /// <summary>
-        /// Create LockBuildingCommand from parameters array
+        /// Create LockBuildingCommand from parameters dictionary
         /// </summary>
-        public static LockBuildingCommand FromParameters(object[] parameters)
+        public static LockBuildingCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new LockBuildingCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("Building", out var building))
             {
-                command.Faction = parameters[0];
-                command.Building = parameters[1];
+                command.Building = building;
             }
             
             return command;

@@ -1,3 +1,4 @@
+using System;
 using PerAspera.GameAPI.Commands.Core;
 
 namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
@@ -49,17 +50,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
         }
 
         /// <summary>
-        /// Create SetResourceAmountCommand from parameters array
+        /// Create SetResourceAmountCommand from parameters dictionary
         /// </summary>
-        public static SetResourceAmountCommand FromParameters(object[] parameters)
+        public static SetResourceAmountCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new SetResourceAmountCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("ResourceType", out var resourceType))
             {
-                command.Faction = parameters[0];
-                command.ResourceType = parameters[1];
-                command.Amount = Convert.ToInt32(parameters[2]);
+                command.ResourceType = resourceType;
+            }
+            
+            if (parameters.TryGetValue("Amount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
+            {
+                command.Amount = amountValue;
             }
             
             return command;

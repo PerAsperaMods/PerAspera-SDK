@@ -86,19 +86,6 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             
             return new ResearchTechnologyCommand(faction, technology);
         }
-
-        /// <summary>
-        /// Create ResearchTechnologyCommand from parameters array
-        /// </summary>
-        public static ResearchTechnologyCommand FromParameters(object[] parameters)
-        {
-            if (parameters?.Length >= 2)
-            {
-                return new ResearchTechnologyCommand(parameters[0], parameters[1]);
-            }
-            
-            throw new ArgumentException("ResearchTechnologyCommand requires at least 2 parameters: faction and technology");
-        }
     }
     
     /// <summary>
@@ -181,19 +168,6 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             
             return new UnlockKnowledgeCommand(faction, knowledge);
         }
-
-        /// <summary>
-        /// Create UnlockKnowledgeCommand from parameters array
-        /// </summary>
-        public static UnlockKnowledgeCommand FromParameters(object[] parameters)
-        {
-            if (parameters?.Length >= 2)
-            {
-                return new UnlockKnowledgeCommand(parameters[0], parameters[1]);
-            }
-            
-            throw new ArgumentException("UnlockKnowledgeCommand requires at least 2 parameters: faction and knowledge");
-        }
     }
     
     /// <summary>
@@ -258,17 +232,6 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         }
 
         /// <summary>
-        /// Create LockKnowledgeCommand from parameters array
-        /// </summary>
-        public static LockKnowledgeCommand FromParameters(object[] parameters)
-        {
-            if (parameters?.Length >= 2)
-            {
-                return new LockKnowledgeCommand(parameters[0], parameters[1]);
-            }
-            
-            throw new ArgumentException("LockKnowledgeCommand requires at least 2 parameters: faction and knowledge");
-        }
         
         public static LockKnowledgeCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {

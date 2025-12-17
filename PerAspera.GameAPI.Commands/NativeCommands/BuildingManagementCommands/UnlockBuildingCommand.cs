@@ -36,17 +36,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
         }
 
         /// <summary>
-        /// Create UnlockBuildingCommand from parameters array
+        /// Create UnlockBuildingCommand from parameters dictionary
         /// </summary>
-        public static UnlockBuildingCommand FromParameters(object[] parameters)
+        public static UnlockBuildingCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new UnlockBuildingCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("Building", out var building))
             {
-                // First parameter: Faction
-                // Second parameter: Building type
-                command.Building = parameters[1];
+                command.Building = building;
             }
             
             return command;

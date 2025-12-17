@@ -44,22 +44,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create MoveUnitCommand from parameters array
+        /// Create MoveUnitCommand from parameters dictionary
         /// </summary>
-        public static MoveUnitCommand FromParameters(object[] parameters)
+        public static MoveUnitCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new MoveUnitCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("UnitId", out var unitId))
             {
-                command.Faction = parameters[0];
-                command.UnitId = parameters[1];
-                command.TargetPosition = parameters[2];
-                
-                if (parameters.Length > 3 && float.TryParse(parameters[3]?.ToString(), out var speed))
-                {
-                    command.Speed = speed;
-                }
+                command.UnitId = unitId;
+            }
+            
+            if (parameters.TryGetValue("Speed", out var speed) && float.TryParse(speed?.ToString(), out var speedValue))
+            {
+                command.Speed = speedValue;
             }
             
             return command;

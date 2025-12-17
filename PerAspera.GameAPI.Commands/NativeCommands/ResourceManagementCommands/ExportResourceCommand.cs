@@ -1,3 +1,4 @@
+using System;
 using PerAspera.GameAPI.Commands.Core;
 
 namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
@@ -51,19 +52,23 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
         /// <summary>
         /// Create ExportResourceCommand from parameters dictionary
         /// </summary>
-        public static ExportResourceCommand FromParameters(object[] parameters)
+        public static ExportResourceCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new ExportResourceCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("ResourceType", out var resourceType))
             {
-                command.Faction = parameters[0];
-                command.ResourceType = parameters[1];
-                command.Amount = Convert.ToInt32(parameters[2]);
-                if (parameters.Length > 3)
-                {
-                    command.Destination = parameters[3]?.ToString();
-                }
+                command.ResourceType = resourceType;
+            }
+            
+            if (parameters.TryGetValue("Amount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
+            {
+                command.Amount = amountValue;
+            }
+            
+            if (parameters.TryGetValue("Destination", out var destination))
+            {
+                command.Destination = destination?.ToString();
             }
             
             return command;

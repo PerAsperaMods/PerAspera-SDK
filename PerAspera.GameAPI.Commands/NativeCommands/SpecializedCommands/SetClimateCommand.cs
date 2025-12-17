@@ -41,27 +41,11 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create SetClimateCommand from parameters array
+        /// Create SetClimateCommand from parameters dictionary
         /// </summary>
-        public static SetClimateCommand FromParameters(object[] parameters)
+        public static SetClimateCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new SetClimateCommand();
-            
-            if (parameters?.Length >= 3)
-            {
-                command.Faction = parameters[0];
-                command.ClimateType = parameters[1]?.ToString();
-                
-                if (float.TryParse(parameters[2]?.ToString(), out var value))
-                {
-                    command.Value = value;
-                }
-                
-                if (parameters.Length > 3 && float.TryParse(parameters[3]?.ToString(), out var duration))
-                {
-                    command.Duration = duration;
-                }
-            }
             
             return command;
         }

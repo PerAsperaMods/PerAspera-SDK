@@ -53,5 +53,35 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             return Faction != null && ResourceType != null && Amount > 0;
         }
+        
+        /// <summary>
+        /// Create SpawnResourceVeinCommand from parameters dictionary
+        /// </summary>
+        public static SpawnResourceVeinCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
+        {
+            var command = new SpawnResourceVeinCommand();
+            
+            if (parameters.TryGetValue("ResourceType", out var resourceType))
+            {
+                command.ResourceType = resourceType;
+            }
+            
+            if (parameters.TryGetValue("PositionX", out var posX) && float.TryParse(posX?.ToString(), out var posXValue))
+            {
+                command.PositionX = posXValue;
+            }
+            
+            if (parameters.TryGetValue("PositionZ", out var posZ) && float.TryParse(posZ?.ToString(), out var posZValue))
+            {
+                command.PositionZ = posZValue;
+            }
+            
+            if (parameters.TryGetValue("ResourceAmount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
+            {
+                command.ResourceAmount = amountValue;
+            }
+            
+            return command;
+        }
     }
 }

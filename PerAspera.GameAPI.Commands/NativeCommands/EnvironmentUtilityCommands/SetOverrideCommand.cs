@@ -42,5 +42,24 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             return Faction != null && !string.IsNullOrEmpty(SystemName);
         }
+        /// <summary>
+        /// Create SetOverrideCommand from parameters dictionary
+        /// </summary>
+        public static SetOverrideCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
+        {
+            var command = new SetOverrideCommand();
+            
+            if (parameters.TryGetValue("OverrideType", out var overrideType))
+            {
+                command.OverrideType = overrideType?.ToString();
+            }
+            
+            if (parameters.TryGetValue("Value", out var value))
+            {
+                command.Value = value;
+            }
+            
+            return command;
+        }
     }
 }

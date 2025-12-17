@@ -52,19 +52,28 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands
         /// <summary>
         /// Create ImportResourceCommand from parameters dictionary
         /// </summary>
-        public static ImportResourceCommand FromParameters(object[] parameters)
+        public static ImportResourceCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new ImportResourceCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("Faction", out var faction))
             {
-                command.Faction = parameters[0];
-                command.ResourceType = parameters[1];
-                command.Amount = Convert.ToInt32(parameters[2]);
-                if (parameters.Length > 3)
-                {
-                    command.Source = parameters[3]?.ToString();
-                }
+                // Faction property is readonly, handled in constructor
+            }
+            
+            if (parameters.TryGetValue("ResourceType", out var resourceType))
+            {
+                command.ResourceType = resourceType;
+            }
+            
+            if (parameters.TryGetValue("Amount", out var amount) && int.TryParse(amount?.ToString(), out var amountValue))
+            {
+                command.Amount = amountValue;
+            }
+            
+            if (parameters.TryGetValue("Source", out var source))
+            {
+                command.Source = source?.ToString();
             }
             
             return command;

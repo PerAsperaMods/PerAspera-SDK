@@ -37,16 +37,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create DestroyUnitCommand from parameters array
+        /// Create DestroyUnitCommand from parameters dictionary
         /// </summary>
-        public static DestroyUnitCommand FromParameters(object[] parameters)
+        public static DestroyUnitCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new DestroyUnitCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("UnitId", out var unitId))
             {
-                command.Faction = parameters[0];
-                command.UnitId = parameters[1];
+                command.UnitId = unitId;
             }
             
             return command;

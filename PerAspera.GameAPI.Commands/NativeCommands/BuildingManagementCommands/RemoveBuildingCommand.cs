@@ -50,16 +50,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             return true;
         }
         /// <summary>
-        /// Create RemoveBuildingCommand from parameters array
+        /// Create RemoveBuildingCommand from parameters dictionary
         /// </summary>
-        public static RemoveBuildingCommand FromParameters(object[] parameters)
+        public static RemoveBuildingCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new RemoveBuildingCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("BuildingId", out var buildingId))
             {
-                command.Faction = parameters[0];
-                command.BuildingId = parameters[1];
+                command.BuildingId = buildingId;
             }
             
             return command;

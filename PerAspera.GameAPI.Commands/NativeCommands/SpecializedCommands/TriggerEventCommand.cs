@@ -41,27 +41,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
         }
 
         /// <summary>
-        /// Create TriggerEventCommand from parameters array
+        /// Create TriggerEventCommand from parameters dictionary
         /// </summary>
-        public static TriggerEventCommand FromParameters(object[] parameters)
+        public static TriggerEventCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new TriggerEventCommand();
             
-            if (parameters?.Length >= 1)
+            if (parameters.TryGetValue("EventId", out var eventId))
             {
-                command.EventId = parameters[0]?.ToString();
-                
-                if (parameters.Length >= 2 && float.TryParse(parameters[1]?.ToString(), out var delay))
-                {
-                    command.DelaySeconds = delay;
-                }
-                
-                if (parameters.Length > 2)
-                {
-                    var eventParams = new object[parameters.Length - 2];
-                    System.Array.Copy(parameters, 2, eventParams, 0, eventParams.Length);
-                    command.Parameters = eventParams;
-                }
+                command.EventId = eventId?.ToString();
+            }
+            
+            if (parameters.TryGetValue("DelaySeconds", out var delay) && float.TryParse(delay?.ToString(), out var delayValue))
+            {
+                command.DelaySeconds = delayValue;
             }
             
             return command;

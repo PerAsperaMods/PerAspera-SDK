@@ -42,5 +42,24 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             return Faction != null && !string.IsNullOrEmpty(Target) && !string.IsNullOrEmpty(SabotageType);
         }
+        /// <summary>
+        /// Create SabotageCommand from parameters dictionary
+        /// </summary>
+        public static SabotageCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
+        {
+            var command = new SabotageCommand();
+            
+            if (parameters.TryGetValue("TargetId", out var targetId))
+            {
+                command.TargetId = targetId?.ToString();
+            }
+            
+            if (parameters.TryGetValue("SabotageType", out var sabotageType))
+            {
+                command.SabotageType = sabotageType?.ToString();
+            }
+            
+            return command;
+        }
     }
 }

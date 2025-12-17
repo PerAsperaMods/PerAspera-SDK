@@ -49,26 +49,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
             return Faction != null && !string.IsNullOrEmpty(Message) && Duration > 0;
         }
         /// <summary>
-        /// Create ShowMessageCommand from parameters array
+        /// Create ShowMessageCommand from parameters dictionary
         /// </summary>
-        public static ShowMessageCommand FromParameters(object[] parameters)
+        public static ShowMessageCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new ShowMessageCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("Message", out var message))
             {
-                command.Faction = parameters[0];
-                command.Message = parameters[1]?.ToString();
-                
-                if (parameters.Length > 2 && float.TryParse(parameters[2]?.ToString(), out var duration))
-                {
-                    command.Duration = duration;
-                }
-                
-                if (parameters.Length > 3)
-                {
-                    command.MessageType = parameters[3]?.ToString();
-                }
+                command.Message = message?.ToString();
+            }
+            
+            if (parameters.TryGetValue("Duration", out var duration) && float.TryParse(duration?.ToString(), out var durationValue))
+            {
+                command.Duration = durationValue;
             }
             
             return command;

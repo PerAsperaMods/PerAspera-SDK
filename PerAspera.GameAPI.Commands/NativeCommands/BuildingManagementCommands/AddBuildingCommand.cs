@@ -49,17 +49,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
             return true;
         }
         /// <summary>
-        /// Create AddBuildingCommand from parameters array
+        /// Create AddBuildingCommand from parameters dictionary
         /// </summary>
-        public static AddBuildingCommand FromParameters(object[] parameters)
+        public static AddBuildingCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new AddBuildingCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("BuildingType", out var buildingType))
             {
-                command.Faction = parameters[0];
-                command.BuildingType = parameters[1];
-                command.Position = parameters[2];
+                command.BuildingType = buildingType;
             }
             
             return command;

@@ -42,5 +42,24 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             return Faction != null && !string.IsNullOrEmpty(Reason);
         }
+        /// <summary>
+        /// Create GameOverCommand from parameters dictionary
+        /// </summary>
+        public static GameOverCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
+        {
+            var command = new GameOverCommand();
+            
+            if (parameters.TryGetValue("IsWin", out var isWin) && bool.TryParse(isWin?.ToString(), out var isWinValue))
+            {
+                command.IsWin = isWinValue;
+            }
+            
+            if (parameters.TryGetValue("Reason", out var reason))
+            {
+                command.Reason = reason?.ToString();
+            }
+            
+            return command;
+        }
     }
 }

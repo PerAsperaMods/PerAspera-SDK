@@ -49,21 +49,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
             return Faction != null && !string.IsNullOrEmpty(TutorialId) && Step >= 0;
         }
         /// <summary>
-        /// Create ShowTutorialMessageCommand from parameters array
+        /// Create ShowTutorialMessageCommand from parameters dictionary
         /// </summary>
-        public static ShowTutorialMessageCommand FromParameters(object[] parameters)
+        public static ShowTutorialMessageCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new ShowTutorialMessageCommand();
             
-            if (parameters?.Length >= 2)
+            if (parameters.TryGetValue("TutorialId", out var tutorialId))
             {
-                command.Faction = parameters[0];
-                command.TutorialId = parameters[1]?.ToString();
-                
-                if (parameters.Length > 2 && bool.TryParse(parameters[2]?.ToString(), out var force))
-                {
-                    command.ForceShow = force;
-                }
+                command.TutorialId = tutorialId?.ToString();
             }
             
             return command;

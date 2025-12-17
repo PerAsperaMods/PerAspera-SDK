@@ -44,22 +44,15 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create SpawnUnitCommand from parameters array
+        /// Create SpawnUnitCommand from parameters dictionary
         /// </summary>
-        public static SpawnUnitCommand FromParameters(object[] parameters)
+        public static SpawnUnitCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new SpawnUnitCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("UnitType", out var unitType))
             {
-                command.Faction = parameters[0];
-                command.UnitType = parameters[1];
-                command.Position = parameters[2];
-                
-                if (parameters.Length > 3)
-                {
-                    command.Rotation = parameters[3];
-                }
+                command.UnitType = unitType;
             }
             
             return command;

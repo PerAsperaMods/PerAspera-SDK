@@ -41,21 +41,20 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
             return true;
         }
         /// <summary>
-        /// Create SetFactionRelationCommand from parameters array
+        /// Create SetFactionRelationCommand from parameters dictionary
         /// </summary>
-        public static SetFactionRelationCommand FromParameters(object[] parameters)
+        public static SetFactionRelationCommand FromParameters(System.Collections.Generic.Dictionary<string, object> parameters)
         {
             var command = new SetFactionRelationCommand();
             
-            if (parameters?.Length >= 3)
+            if (parameters.TryGetValue("TargetFaction", out var targetFaction))
             {
-                command.Faction = parameters[0];
-                command.TargetFaction = parameters[1];
-                
-                if (float.TryParse(parameters[2]?.ToString(), out var value))
-                {
-                    command.RelationValue = value;
-                }
+                command.TargetFaction = targetFaction;
+            }
+            
+            if (parameters.TryGetValue("RelationValue", out var value) && float.TryParse(value?.ToString(), out var relationValue))
+            {
+                command.RelationValue = relationValue;
             }
             
             return command;
