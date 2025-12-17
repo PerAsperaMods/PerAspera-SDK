@@ -50,9 +50,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             string conditionError)
         {
             return new BatchCommandResult(
-                results.ToList(),
-                false,
-                $"Condition evaluation failed: {conditionError}"
+                results.ToList()
             );
         }
 
@@ -131,9 +129,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             if (firstFailure != null)
             {
                 return new BatchCommandResult(
-                    results.ToList(),
-                    false,
-                    $"{executionType} failed: {firstFailure.Error}"
+                    results.ToList()
                 );
             }
 

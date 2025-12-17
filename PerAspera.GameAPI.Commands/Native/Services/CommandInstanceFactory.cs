@@ -79,7 +79,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
 
                 if (!hasMatchingConstructor)
                 { // Logging disabled
-                  _logger.Debug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
+                  _logger.LogDebug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
                 }
 
                 return hasMatchingConstructor;
@@ -126,18 +126,18 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 // Check type compatibility
                 if (!expectedType.IsInstanceOfType(instance))
                 {
-                    _logger.Warning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
+                    _logger.LogWarning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
                 }
 
                 // Check for common IL2CPP issues
                 if (instance.ToString() == null)
                 {
-                    _logger.Warning($"Created instance has null ToString() - possible IL2CPP interop issue");
+                    _logger.LogWarning($"Created instance has null ToString() - possible IL2CPP interop issue");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error validating created instance: {ex.Message}");
+                _logger.LogError($"Error validating created instance: {ex.Message}");
             } // ✅ CORRECTION: Accolade fermante manquante
         }
 
@@ -151,11 +151,13 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public CommandBaseWrapper CreateImportResourceCommand(string resourceName, float amount)
         {
             if (string.IsNullOrWhiteSpace(resourceName))
-            { // Logging disabledreturn null;
+            { // Logging disable
+              return null;
             }
 
             if (amount <= 0)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+              return null;
             }
 
             try
@@ -171,12 +173,15 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 {
                     var command = TryCreateImportResourceCommand(typeName, resourceName, amount);
                     if (command != null)
-                    { // Logging disabledreturn command;
+                    { // Logging disabled
+                      return command;
                     }
-                } // Logging disabledreturn null;
+                } // Logging disabled
+                   return null;
             }
             catch (Exception ex)
-            { // Logging disabledreturn null;
+            { // Logging disabled
+               return null;
             }
         }
 
@@ -209,7 +214,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                         // In a real implementation, we would get the type from TypeDiscoveryService
                         // For this refactoring, we'll create a placeholder structure
                         
-                        _logger.Debug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
+                        _logger.LogDebug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
                         
                         // This is where the actual type lookup and instantiation would happen
                         // var commandType = _typeDiscovery.TryGetCommandType(typeName);

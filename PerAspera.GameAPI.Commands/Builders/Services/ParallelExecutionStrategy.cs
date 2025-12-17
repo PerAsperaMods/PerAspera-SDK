@@ -45,9 +45,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
             catch (OperationCanceledException)
             {
                 return new BatchCommandResult(
-                    results.Where(r => r != null).ToList(), 
-                    false, 
-                    "Batch execution timed out"
+                    results.Where(r => r != null).ToList()
                 );
             }
 

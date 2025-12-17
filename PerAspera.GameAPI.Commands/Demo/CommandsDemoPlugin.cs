@@ -167,7 +167,7 @@ namespace PerAspera.GameAPI.Commands.Demo
                     .ShowTutorialMessage("This is a demo of the Commands API")
                     .Execute();
                 
-                Logger.LogInfo($"Faction commands result: {factionResult.Success}");
+                Logger.LogInfo($"Faction commands result: {factionResult.AllSucceeded}");
                 Logger.LogInfo($"Executed {factionResult.Results.Count} commands");
             }
             catch (Exception ex)
@@ -195,7 +195,7 @@ namespace PerAspera.GameAPI.Commands.Demo
                     .StopOnFailure(false)
                     .Execute();
                 
-                Logger.LogInfo($"Batch execution result: {batchResult.Success}");
+                Logger.LogInfo($"Batch execution result: {batchResult.AllSucceeded}");
                 Logger.LogInfo($"Executed {batchResult.Results.Count}/3 commands");
             }
             catch (Exception ex)
