@@ -66,7 +66,20 @@ namespace PerAspera.GameAPI.Wrappers
         /// Current scene loading state
         /// Property: loadingState { get; }
         /// </summary>
-        public UnityEngine.SceneManagement.Scene.LoadingState LoadingState => _nativeScene.loadingState;
+        public object? LoadingState 
+        { 
+            get 
+            {
+                try 
+                {
+                    return _nativeScene?.GetPropertyValue("loadingState");
+                } 
+                catch 
+                {
+                    return null;
+                }
+            }
+        }
         
         /// <summary>
         /// Number of root GameObjects in scene

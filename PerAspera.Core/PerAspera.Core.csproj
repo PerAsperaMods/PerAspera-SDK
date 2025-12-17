@@ -9,6 +9,8 @@
 		<Description>Per Aspera Core - Low-level utilities and IL2CPP extensions for mod development</Description>
 		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Enable all Unity references for SDK -->
+		<IncludeAllUnityReferences>true</IncludeAllUnityReferences>
 	</PropertyGroup>
 
 	<!-- BepInEx packages only - removed game assemblies for standalone compilation -->

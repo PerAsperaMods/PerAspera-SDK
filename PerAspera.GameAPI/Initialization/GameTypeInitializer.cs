@@ -42,10 +42,13 @@ namespace PerAspera.GameAPI
             {
                 _log.Info("🔍 Initializing game type discovery...");
 
+                // PERFORMANCE OPTIMIZATION: Warm up type discovery cache
+                PerAspera.GameAPI.Caching.TypeDiscoveryCache.WarmupCache();
+
                 // Wait for game assemblies to be loaded
                 WaitForGameAssemblies();
 
-                // Try to discover core types
+                // Try to discover core types (now much faster with cache)
                 DiscoverGameTypes();
 
                 // Try to get singleton instances
@@ -54,7 +57,9 @@ namespace PerAspera.GameAPI
                 _isInitialized = true;
                 
                 var stats = GetDiscoveryStats();
+                var cacheStats = PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics();
                 _log.Info($"✅ Type discovery initialized: {stats}");
+                _log.Info($"📊 Cache statistics: {cacheStats}");
             }
             catch (Exception ex)
             {
@@ -251,6 +256,8 @@ namespace PerAspera.GameAPI
         /// </summary>
         public static TypeDiscoveryStats GetDiscoveryStats()
         {
+            var cacheStats = PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics();
+            
             return new TypeDiscoveryStats
             {
                 HasBaseGame = GetBaseGameType() != null,
@@ -262,7 +269,10 @@ namespace PerAspera.GameAPI
                 HasCommandBus = GetCommandBusType() != null,
                 TotalTypesFound = CountFoundTypes(),
                 IsInitialized = _isInitialized,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                CacheEntriesCount = cacheStats.CacheEntriesCount,
+                CacheHitRate = cacheStats.MemoryCacheCount > 0 ? 
+                    (double)cacheStats.MemoryCacheCount / cacheStats.CacheEntriesCount * 100 : 0
             };
         }
 
@@ -529,10 +539,16 @@ namespace PerAspera.GameAPI
         public int TotalTypesFound { get; set; }
         public bool IsInitialized { get; set; }
         public DateTime Timestamp { get; set; }
+        
+        // PERFORMANCE METRICS
+        public int CacheEntriesCount { get; set; }
+        public double CacheHitRate { get; set; }
 
         public override string ToString()
         {
-            return $"TypeDiscovery: {TotalTypesFound}/7 types found (BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet})";
+            return $"TypeDiscovery: {TotalTypesFound}/7 types found " +
+                   $"(BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet}) " +
+                   $"Cache: {CacheEntriesCount} entries, {CacheHitRate:F1}% hit rate";
         }
     }
 }

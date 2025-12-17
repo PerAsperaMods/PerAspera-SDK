@@ -4,6 +4,35 @@
         <name>PerAspera.GameAPI</name>
     </assembly>
     <members>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Caching.TypeDiscoveryCache" -->
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.FindType(System.String)">
+            <summary>
+            Fast type discovery with automatic caching
+            Performance: Cache hit ~5ms vs Cold discovery ~1-3s
+            </summary>
+            <param name="typeName">Type name to find</param>
+            <returns>Type if found, null otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics">
+            <summary>
+            Get cache statistics for performance monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.ClearCache">
+            <summary>
+            Clear all caches (for testing/debugging)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.WarmupCache">
+            <summary>
+            Preload common types to cache for faster startup
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.ParseCacheDataJson(System.String)">
+            <summary>
+            Parse CacheData from JSON - IL2CPP compatible alternative to JsonUtility
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Helpers.CargoQuantityHelper">
             <summary>
             Helper for working with native CargoQuantity instances
@@ -192,9 +221,10 @@
             <param name="isExpanded">État actuel (pliée/dépliée)</param>
             <returns>Nouvel état après clic</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawBoxedSection(System.Action,UnityEngine.GUIStyle)">
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiHelper.DrawBoxedSection(System.Action,System.Object)">
             <summary>
             Dessine une section avec bordure
+            TEMPORAIREMENT DÉSACTIVÉ - GUI APIs strippées dans Per Aspera
             </summary>
             <param name="content">Action pour dessiner le contenu</param>
             <param name="style">Style optionnel (par défaut GUI.skin.box)</param>
@@ -231,6 +261,26 @@
             <param name="isDragging">État de drag actuel</param>
             <param name="dragOffset">Offset du drag</param>
             <returns>Nouveau rectangle et états de drag</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Helpers.UnityGuiTester">
+            <summary>
+            Wrapper de test pour Unity GUI - teste quelles méthodes sont vraiment disponibles
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiTester.TestUnityGuiCapabilities">
+            <summary>
+            Teste les capacités Unity GUI disponibles dans Per Aspera
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiTester.GetCapabilitiesReport">
+            <summary>
+            Retourne un rapport sur les capacités GUI disponibles
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Helpers.UnityGuiTester.SafeGuiOperation(System.Action,System.String)">
+            <summary>
+            Safe wrapper pour GUI operations - ne fait rien si GUI n'est pas disponible
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.GameTypeInitializer">
             <summary>

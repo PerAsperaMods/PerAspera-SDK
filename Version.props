@@ -74,6 +74,83 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!-- Unity DLL References -->
+  <PropertyGroup>
+    <UnityDLLPath>F:\SteamLibrary\steamapps\common\Per Aspera\BepInX\interop</UnityDLLPath>
+    <UnityRuntimePath>F:\SteamLibrary\steamapps\common\Per Aspera\BepInX\unity-libs</UnityRuntimePath>
+  </PropertyGroup>
+  
+  <!-- Unity References for SDK projects -->
+  <ItemGroup Label="Unity References">
+    <!-- Core Unity - forced to local version -->
+    <Reference Include="UnityEngine.CoreModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.CoreModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine" Condition="Exists('$(UnityDLLPath)\UnityEngine.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    
+    <!-- IMGUI Module (GUI, GUILayout) - PRIORITY LOCAL -->
+    <Reference Include="UnityEngine.IMGUIModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.IMGUIModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+      <ExcludeAssets>all</ExcludeAssets>
+    </Reference>
+    
+    <!-- Input Modules -->
+    <Reference Include="UnityEngine.InputModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.InputModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.InputModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.InputLegacyModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    
+    <!-- JSON Serialization -->
+    <Reference Include="UnityEngine.JSONSerializeModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.JSONSerializeModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    
+    <!-- Physics -->
+    <Reference Include="UnityEngine.PhysicsModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.PhysicsModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.Physics2DModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.Physics2DModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    
+    <!-- UI and Text -->
+    <Reference Include="UnityEngine.UIElementsModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.UIElementsModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.UIElementsModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.UIModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" Condition="Exists('$(UnityDLLPath)\UnityEngine.TextRenderingModule.dll')">
+      <HintPath>$(UnityDLLPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+
 
 </Project>
 

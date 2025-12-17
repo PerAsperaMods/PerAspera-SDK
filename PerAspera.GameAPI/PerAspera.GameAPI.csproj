@@ -9,6 +9,8 @@
 		<Description>Per Aspera Game API - IL2CPP game class wrappers, mirrors and event system</Description>
 		<PackageTags>per-aspera;gameapi;wrappers;mirrors;events</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Enable all Unity references for SDK -->
+		<IncludeAllUnityReferences>true</IncludeAllUnityReferences>
 	</PropertyGroup>
 
 	<!-- BepInEx packages -->
@@ -25,6 +27,7 @@
 		</Reference>
 	</ItemDefinitionGroup>
 
+	<!-- Unity DLL Support - Already imported above -->
 	<!-- Dependencies -->
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />

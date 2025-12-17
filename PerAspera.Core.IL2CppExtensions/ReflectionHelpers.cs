@@ -13,6 +13,7 @@ namespace PerAspera.Core.IL2CPP
     {
         /// <summary>
         /// Finds a type by name across all loaded assemblies
+        /// OPTIMIZED: Uses TypeDiscoveryCache via reflection to avoid circular dependency
         /// </summary>
         /// <param name="typeName">Full or simple type name</param>
         /// <returns>Type if found, null otherwise</returns>
@@ -21,16 +22,61 @@ namespace PerAspera.Core.IL2CPP
             if (string.IsNullOrEmpty(typeName))
                 return null;
 
+            // Try to use TypeDiscoveryCache if available (via reflection to avoid dependency)
+            try
+            {
+                return TryUseCachedDiscovery(typeName) ?? FindTypeSlowFallback(typeName);
+            }
+            catch
+            {
+                // Fallback to original slow method if cache fails
+                return FindTypeSlowFallback(typeName);
+            }
+        }
+
+        /// <summary>
+        /// Try to use TypeDiscoveryCache via reflection to avoid circular dependency
+        /// </summary>
+        private static System.Type? TryUseCachedDiscovery(string typeName)
+        {
+            try
+            {
+                // Find TypeDiscoveryCache type dynamically
+                var cacheType = FindTypeSlowFallback("TypeDiscoveryCache") ??
+                               FindTypeSlowFallback("PerAspera.GameAPI.Caching.TypeDiscoveryCache");
+                
+                if (cacheType != null)
+                {
+                    var findMethod = cacheType.GetMethod("FindType", 
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    
+                    if (findMethod != null)
+                    {
+                        return findMethod.Invoke(null, new object[] { typeName }) as System.Type;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore errors - fallback to slow discovery
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Original slow type discovery method (fallback only)
+        /// </summary>
+        private static System.Type? FindTypeSlowFallback(string typeName)
+        {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
                 {
-                    // Direct type lookup
                     var type = assembly.GetType(typeName);
                     if (type != null) 
                         return type;
                     
-                    // Search in exported types
                     type = assembly.GetTypes()
                         .FirstOrDefault(t => t.Name == typeName || t.FullName == typeName);
                     if (type != null) 
@@ -38,11 +84,9 @@ namespace PerAspera.Core.IL2CPP
                 }
                 catch
                 {
-                    // Ignore assemblies that cannot be examined
                     continue;
                 }
             }
-            
             return null;
         }
 

@@ -2,6 +2,8 @@ using Il2CppInterop.Runtime.Injection;
 using System;
 using BepInEx.Unity.IL2CPP;
 using UnityEngine;
+// TODO: Remove circular dependency - move this to Wrappers when HandleHelper is implemented
+// using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Helpers
 {
@@ -77,21 +79,22 @@ namespace PerAspera.GameAPI.Helpers
 
         /// <summary>
         /// Dessine une section avec bordure
+        /// TEMPORAIREMENT DÉSACTIVÉ - GUI APIs strippées dans Per Aspera
         /// </summary>
         /// <param name="content">Action pour dessiner le contenu</param>
         /// <param name="style">Style optionnel (par défaut GUI.skin.box)</param>
-        public static void DrawBoxedSection(System.Action content, GUIStyle? style = null)
+        public static void DrawBoxedSection(System.Action content, object? style = null)
         {
-            var boxStyle = style ?? GUI.skin.box;
-            GUILayout.BeginVertical(boxStyle);
-            try
-            {
+            // TODO: GUI APIs strippées dans IL2CPP - implementation différée
+            content?.Invoke();
+            /*
+            UnityGuiTester.SafeGuiOperation(() => {
+                // var boxStyle = style ?? GUI.skin.box;
+                GUILayout.BeginVertical();
                 content?.Invoke();
-            }
-            finally
-            {
                 GUILayout.EndVertical();
-            }
+            }, "DrawBoxedSection");
+            */
         }
 
         /// <summary>
@@ -145,45 +148,8 @@ namespace PerAspera.GameAPI.Helpers
             System.Action<float>? onValueChanged = null,
             System.Action? onResetClicked = null)
         {
-            GUILayout.BeginHorizontal();
-            try
-            {
-                // Checkbox
-                var newEnabled = GUILayout.Toggle(isEnabled, "", GUILayout.Width(20));
-                if (newEnabled != isEnabled)
-                {
-                    onEnabledChanged?.Invoke(newEnabled);
-                }
-
-                // Label
-                GUILayout.Label(displayName, GUILayout.Width(120));
-
-                // Slider (désactivé si not enabled)
-                var oldEnabled = GUI.enabled;
-                GUI.enabled = newEnabled;
-                
-                var newValue = GUILayout.HorizontalSlider(currentValue, minValue, maxValue, GUILayout.ExpandWidth(true));
-                if (Math.Abs(newValue - currentValue) > 0.01f)
-                {
-                    onValueChanged?.Invoke(newValue);
-                }
-
-                GUI.enabled = oldEnabled;
-
-                // Valeur affichée
-                var valueText = string.IsNullOrEmpty(unit) ? $"{newValue:F1}" : $"{newValue:F1}{unit}";
-                GUILayout.Label(valueText, GUILayout.Width(60));
-
-                // Bouton reset
-                if (GUILayout.Button("R", GUILayout.Width(25)))
-                {
-                    onResetClicked?.Invoke();
-                }
-            }
-            finally
-            {
-                GUILayout.EndHorizontal();
-            }
+            // TODO: GUI APIs strippées dans IL2CPP - implementation différée
+            // Placeholder implementation - sera implémenté via PerAspera.SDK.UI
         }
 
         /// <summary>

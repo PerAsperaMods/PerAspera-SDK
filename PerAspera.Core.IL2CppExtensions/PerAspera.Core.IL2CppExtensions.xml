@@ -76,9 +76,20 @@
         <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.FindType(System.String)">
             <summary>
             Finds a type by name across all loaded assemblies
+            OPTIMIZED: Uses TypeDiscoveryCache via reflection to avoid circular dependency
             </summary>
             <param name="typeName">Full or simple type name</param>
             <returns>Type if found, null otherwise</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.TryUseCachedDiscovery(System.String)">
+            <summary>
+            Try to use TypeDiscoveryCache via reflection to avoid circular dependency
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.FindTypeSlowFallback(System.String)">
+            <summary>
+            Original slow type discovery method (fallback only)
+            </summary>
         </member>
         <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.FindTypes(System.Func{System.Type,System.Boolean})">
             <summary>
