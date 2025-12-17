@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers
@@ -36,7 +37,7 @@ namespace PerAspera.GameAPI.Wrappers
                 var keeper = baseGame.GetKeeper();
                 if (keeper == null) return null;
                 
-                var keeperMap = keeper.GetFieldValue("map");
+                var keeperMap = keeper.GetFieldValue<object>("map");
                 if (keeperMap == null) return null;
                 
                 return new KeeperMapWrapper(keeperMap);
@@ -90,7 +91,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogDebug($"{LogPrefix} Contains failed: {ex.Message}");
+                UnityEngine.Debug.Log($"{LogPrefix} Contains failed: {ex.Message}");
                 return false;
             }
         }
@@ -129,7 +130,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (NativeObject == null) return null;
                 
-                return NativeObject.GetFieldValue("_objects");
+                return NativeObject.GetFieldValue<object>("_objects");
             }
             catch (Exception ex)
             {
@@ -148,7 +149,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (NativeObject == null) return null;
                 
-                return NativeObject.GetFieldValue("_keeper");
+                return NativeObject.GetFieldValue<object>("_objects");
             }
             catch (Exception ex)
             {
@@ -168,7 +169,7 @@ namespace PerAspera.GameAPI.Wrappers
                 var objectsDict = GetObjectsDict();
                 if (objectsDict == null) return 0;
                 
-                var count = objectsDict.GetPropertyValue("Count");
+                var count = objectsDict.GetPropertyValue<object>("Count");
                 return count is int intCount ? intCount : 0;
             }
             catch (Exception ex)
@@ -202,7 +203,7 @@ namespace PerAspera.GameAPI.Wrappers
                 // Enumerate all Handles
                 while (enumerator.InvokeMethod<bool>("MoveNext"))
                 {
-                    var current = enumerator.GetPropertyValue("Current");
+                    var current = enumerator.GetPropertyValue<object>("Current");
                     if (current != null)
                     {
                         yield return current;
@@ -273,7 +274,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 catch (Exception ex)
                 {
-                    UnityEngine.Debug.LogDebug($"{LogPrefix} Type predicate failed for entity: {ex.Message}");
+                    UnityEngine.Debug.Log($"{LogPrefix} Type predicate failed for entity: {ex.Message}");
                     // Continue enumeration despite individual failures
                 }
             }

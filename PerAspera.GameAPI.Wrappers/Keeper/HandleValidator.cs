@@ -339,7 +339,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogDebug($"{LogPrefix} Cache update failed: {ex.Message}");
+                UnityEngine.Debug.Log($"{LogPrefix} Cache update failed: {ex.Message}");
             }
         }
         

@@ -156,18 +156,21 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (handle == null) continue;
                 
+                T? entity = null;
                 try
                 {
-                    var entity = keeperMap.Find<T>(handle);
-                    if (entity != null)
-                    {
-                        yield return entity;
-                    }
+                    entity = keeperMap.Find<T>(handle);
                 }
                 catch (Exception ex)
                 {
-                    UnityEngine.Debug.LogDebug($"{LogPrefix} Handle→Entity conversion failed: {ex.Message}");
+                    UnityEngine.Debug.Log($"{LogPrefix} Handle→Entity conversion failed: {ex.Message}");
                     // Continue with next Handle
+                    continue;
+                }
+                
+                if (entity != null)
+                {
+                    yield return entity;
                 }
             }
         }
@@ -194,7 +197,7 @@ namespace PerAspera.GameAPI.Wrappers
                 {
                     try
                     {
-                        var handle = entity.GetPropertyValue(propertyName);
+                        var handle = entity.GetPropertyValue<object>(propertyName);
                         if (handle != null)
                         {
                             return handle;
@@ -294,7 +297,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 try
                 {
-                    var buildingPosition = building.GetPropertyValue("position");
+                    var buildingPosition = building.GetPropertyValue<object>("position");
                     if (buildingPosition is Vector3 pos)
                     {
                         var distance = Vector3.Distance(pos, expectedPosition.Value);

@@ -126,44 +126,49 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>All entities of type T currently in game</returns>
         public static IEnumerable<T> FindAll<T>() where T : class
         {
+            var keeperMap = GetKeeperMapInternal();
+            if (keeperMap == null)
+            {
+                LogDebug("KeeperMap not available for FindAll");
+                return Enumerable.Empty<T>();
+            }
+            
             try
             {
-                var keeperMap = GetKeeperMapInternal();
-                if (keeperMap == null)
-                {
-                    LogDebug("KeeperMap not available for FindAll");
-                    yield break;
-                }
-                
                 // Access _objects Dictionary for bulk enumeration
-                var objectsDict = keeperMap.GetFieldValue("_objects");
+                var objectsDict = keeperMap.GetFieldValue<object>("_objects");
                 if (objectsDict == null)
                 {
                     LogDebug("_objects Dictionary not accessible");
-                    yield break;
+                    return Enumerable.Empty<T>();
                 }
                 
                 // Use IL2CPP Dictionary enumeration
                 var values = objectsDict.InvokeMethod<object>("get_Values");
-                if (values == null) yield break;
+                if (values == null) return Enumerable.Empty<T>();
                 
-                var enumerator = values.InvokeMethod<object>("GetEnumerator");
-                if (enumerator == null) yield break;
-                
-                // Enumerate and filter by type
-                while (enumerator.InvokeMethod<bool>("MoveNext"))
-                {
-                    var current = enumerator.GetPropertyValue("Current");
-                    if (current is T typedEntity)
-                    {
-                        yield return typedEntity;
-                    }
-                }
+                return EnumerateValues<T>(values);
             }
             catch (Exception ex)
             {
                 LogWarning($"FindAll<{typeof(T).Name}> failed: {ex.Message}");
-                yield break;
+                return Enumerable.Empty<T>();
+            }
+        }
+        
+        private static IEnumerable<T> EnumerateValues<T>(object values) where T : class
+        {
+            var enumerator = values.InvokeMethod<object>("GetEnumerator");
+            if (enumerator == null) yield break;
+            
+            // Enumerate and filter by type
+            while (enumerator.InvokeMethod<bool>("MoveNext"))
+            {
+                var current = enumerator.GetPropertyValue<object>("Current");
+                if (current is T typedEntity)
+                {
+                    yield return typedEntity;
+                }
             }
         }
         
