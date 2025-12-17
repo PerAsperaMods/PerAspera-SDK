@@ -39,5 +39,32 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
 
             return true;
         }
+
+        /// <summary>
+        /// Create TriggerEventCommand from parameters array
+        /// </summary>
+        public static TriggerEventCommand FromParameters(object[] parameters)
+        {
+            var command = new TriggerEventCommand();
+            
+            if (parameters?.Length >= 1)
+            {
+                command.EventId = parameters[0]?.ToString();
+                
+                if (parameters.Length >= 2 && float.TryParse(parameters[1]?.ToString(), out var delay))
+                {
+                    command.DelaySeconds = delay;
+                }
+                
+                if (parameters.Length > 2)
+                {
+                    var eventParams = new object[parameters.Length - 2];
+                    System.Array.Copy(parameters, 2, eventParams, 0, eventParams.Length);
+                    command.Parameters = eventParams;
+                }
+            }
+            
+            return command;
+        }
     }
 }

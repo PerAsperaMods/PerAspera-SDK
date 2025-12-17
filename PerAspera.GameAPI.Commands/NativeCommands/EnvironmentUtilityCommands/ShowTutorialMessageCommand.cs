@@ -48,5 +48,25 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             return Faction != null && !string.IsNullOrEmpty(TutorialId) && Step >= 0;
         }
+        /// <summary>
+        /// Create ShowTutorialMessageCommand from parameters array
+        /// </summary>
+        public static ShowTutorialMessageCommand FromParameters(object[] parameters)
+        {
+            var command = new ShowTutorialMessageCommand();
+            
+            if (parameters?.Length >= 2)
+            {
+                command.Faction = parameters[0];
+                command.TutorialId = parameters[1]?.ToString();
+                
+                if (parameters.Length > 2 && bool.TryParse(parameters[2]?.ToString(), out var force))
+                {
+                    command.ForceShow = force;
+                }
+            }
+            
+            return command;
+        }
     }
 }

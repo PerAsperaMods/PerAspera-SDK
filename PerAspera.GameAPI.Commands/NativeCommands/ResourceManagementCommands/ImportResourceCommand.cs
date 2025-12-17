@@ -1,3 +1,4 @@
+using System;
 using PerAspera.GameAPI.Commands.Core;
 
 namespace PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands

@@ -40,5 +40,23 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
 
             return true;
         }
+        /// <summary>
+        /// Create AddPointsCommand from parameters array
+        /// </summary>
+        public static AddPointsCommand FromParameters(object[] parameters)
+        {
+            var command = new AddPointsCommand();
+            
+            if (parameters?.Length >= 2)
+            {
+                command.Faction = parameters[0];
+                if (int.TryParse(parameters[1]?.ToString(), out var points))
+                {
+                    command.Points = points;
+                }
+            }
+            
+            return command;
+        }
     }
 }
