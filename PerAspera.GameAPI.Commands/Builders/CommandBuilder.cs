@@ -37,9 +37,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (faction == null)
                 throw new ArgumentNullException(nameof(faction));
                 
-            _parameters[ParameterNames.Faction] = faction;
-            LogAspera.Debug($"CommandBuilder: Set faction for {_commandType}");
-            return this;
+            _parameters[ParameterNames.Faction] = faction; // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -50,9 +48,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("Parameter name cannot be null or empty", nameof(name));
                 
-            _parameters[name] = value;
-            LogAspera.Debug($"CommandBuilder: Added parameter {name} = {value} for {_commandType}");
-            return this;
+            _parameters[name] = value; // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -63,9 +59,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("Parameter name cannot be null or empty", nameof(name));
                 
-            _parameters[name] = value;
-            LogAspera.Debug($"CommandBuilder: Added parameter {name} = {value} for {_commandType}");
-            return this;
+            _parameters[name] = value; // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -79,10 +73,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             foreach (var kvp in parameters)
             {
                 _parameters[kvp.Key] = kvp.Value;
-            }
-            
-            LogAspera.Debug($"CommandBuilder: Added {parameters.Count} parameters for {_commandType}");
-            return this;
+            } // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -93,9 +84,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (validator == null)
                 throw new ArgumentNullException(nameof(validator));
                 
-            _validators.Add(validator);
-            LogAspera.Debug($"CommandBuilder: Added custom validator for {_commandType}");
-            return this;
+            _validators.Add(validator); // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -106,9 +95,7 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (timeout <= TimeSpan.Zero)
                 throw new ArgumentException("Timeout must be positive", nameof(timeout));
                 
-            _timeout = timeout;
-            LogAspera.Debug($"CommandBuilder: Set timeout {timeout.TotalMilliseconds}ms for {_commandType}");
-            return this;
+            _timeout = timeout; // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -116,9 +103,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public CommandBuilder SkipValidation()
         {
-            _validateBeforeExecution = false;
-            LogAspera.Warning($"CommandBuilder: Validation disabled for {_commandType}");
-            return this;
+            _validateBeforeExecution = false; // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -141,10 +126,7 @@ namespace PerAspera.GameAPI.Commands.Builders
                 {
                     throw new InvalidOperationException($"Custom validation failed for {_commandType}");
                 }
-            }
-            
-            LogAspera.Debug($"CommandBuilder: Parameters validated successfully for {_commandType}");
-            return this;
+            } // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -153,10 +135,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         public CommandResult Execute()
         {
             try
-            {
-                LogAspera.Info($"CommandBuilder: Executing {_commandType} with {_parameters.Count} parameters");
-                
-                // Build command
+            { // Logging disabled// Build command
                 var command = BuildCommand();
                 
                 // Validate if enabled
@@ -169,13 +148,11 @@ namespace PerAspera.GameAPI.Commands.Builders
                 var dispatcher = CommandDispatcher.Instance;
                 var result = dispatcher.Dispatch(command);
                 
-                LogAspera.Info($"CommandBuilder: {_commandType} execution {(result.Success ? "succeeded" : "failed")}");
+                LoggingSystem.Info($"CommandBuilder: {_commandType} execution {(result.Success ? "succeeded" : "failed")}");
                 return result;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"CommandBuilder: Failed to execute {_commandType}: {ex.Message}");
-                var errorCommand = BuildCommand();
+            { // Logging disabledvar errorCommand = BuildCommand();
                 return CommandResult.CreateFailure(errorCommand, ex.Message, 0);
             }
         }
@@ -209,9 +186,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         /// </summary>
         public CommandBuilder ClearParameters()
         {
-            _parameters.Clear();
-            LogAspera.Debug($"CommandBuilder: Cleared parameters for {_commandType}");
-            return this;
+            _parameters.Clear(); // Logging disabledreturn this;
         }
         
         /// <summary>
@@ -220,9 +195,7 @@ namespace PerAspera.GameAPI.Commands.Builders
         public CommandBuilder RemoveParameter(string name)
         {
             if (_parameters.Remove(name))
-            {
-                LogAspera.Debug($"CommandBuilder: Removed parameter {name} from {_commandType}");
-            }
+            { // Logging disabled}
             return this;
         }
         

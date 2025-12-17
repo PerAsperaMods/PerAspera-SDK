@@ -33,10 +33,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         /// </summary>
         /// <param name="commandTypes">Dictionary of discovered command types</param>
         public void CacheConstructors(ConcurrentDictionary<string, System.Type> commandTypes)
-        {
-            LogAspera.Debug("Building constructor cache for command types...");
-            
-            foreach (var kvp in commandTypes)
+        { // Logging disabledforeach (var kvp in commandTypes)
             {
                 var type = kvp.Value;
                 try
@@ -44,13 +41,8 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                     CacheConstructorsForType(type);
                 }
                 catch (Exception ex)
-                {
-                    LogAspera.Warning($"Failed to cache constructors for {type.Name}: {ex.Message}");
-                }
+                { // Logging disabled}
             }
-            
-            LogAspera.Info($"Constructor cache built: {_constructorCache.Count} constructors cached");
-        }
 
         /// <summary>
         /// Cache all constructors for a specific type with different parameter patterns
@@ -63,10 +55,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             foreach (var constructor in constructors)
             {
                 var key = GenerateConstructorKey(type, constructor);
-                _constructorCache.TryAdd(key, constructor);
-                
-                LogAspera.Debug($"Cached constructor: {key}");
-            }
+                _constructorCache.TryAdd(key, constructor); // Logging disabled}
         }
 
         /// <summary>
@@ -209,13 +198,9 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                     .Where(m => !m.IsGenericMethod && !m.IsAbstract)
                     .ToArray();
 
-                _methodCache.TryAdd(type, methods);
-                LogAspera.Debug($"Cached {methods.Length} methods for type {type.Name}");
-            }
+                _methodCache.TryAdd(type, methods); // Logging disabled}
             catch (Exception ex)
-            {
-                LogAspera.Warning($"Failed to cache methods for {type.Name}: {ex.Message}");
-                _methodCache.TryAdd(type, Array.Empty<MethodInfo>());
+            { // Logging disabled_methodCache.TryAdd(type, Array.Empty<MethodInfo>());
             }
         }
 
@@ -261,9 +246,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return property;
             }
             catch (Exception ex)
-            {
-                LogAspera.Warning($"Failed to get property {propertyName} from {type.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -286,9 +269,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return attributes;
             }
             catch (Exception ex)
-            {
-                LogAspera.Warning($"Failed to get attributes for {type.Name}: {ex.Message}");
-                var emptyAttributes = Array.Empty<object>();
+            { // Logging disabledvar emptyAttributes = Array.Empty<object>();
                 _attributeCache.TryAdd(type, emptyAttributes);
                 return emptyAttributes;
             }
@@ -318,9 +299,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return constructor.Invoke(parameters);
             }
             catch (Exception ex)
-            {
-                LogAspera.Debug($"Fast instance creation failed for {type.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -349,8 +328,6 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             _constructorCache.Clear();
             _methodCache.Clear();
             _propertyCache.Clear();
-            _attributeCache.Clear();
-            LogAspera.Info("Reflection caches cleared");
-        }
+            _attributeCache.Clear(); // Logging disabled}
     }
 }

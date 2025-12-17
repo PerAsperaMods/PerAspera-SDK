@@ -117,7 +117,7 @@ namespace PerAspera.GameAPI.Native.Events
                 _log.Debug($"✓ Hooked {patchKey} for {eventType} events");
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _log.Warning($"Failed to hook {methodName}: {ex.Message}");
                 return false;
@@ -453,3 +453,4 @@ namespace PerAspera.GameAPI.Native.Events
         }
     }
 }
+

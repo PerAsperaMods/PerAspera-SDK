@@ -37,9 +37,7 @@ namespace PerAspera.GameAPI.Commands.Core
             if (_instance != null)
                 throw new InvalidOperationException("CommandDispatcher already initialized.");
                 
-            _instance = new CommandDispatcher(commandBus, keeper);
-            LogAspera.Info("CommandDispatcher initialized successfully");
-        }
+            _instance = new CommandDispatcher(commandBus, keeper); // Logging disabled}
         
         /// <summary>
         /// Reset global instance (for testing)
@@ -66,7 +64,7 @@ namespace PerAspera.GameAPI.Commands.Core
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
                 
-            LogAspera.Debug($"Dispatching command: {command.GetDescription()}");
+            LoggingSystem.Debug($"Dispatching command: {command.GetDescription()}");
             
             try
             {
@@ -86,9 +84,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 return result;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Exception in command dispatch: {ex.Message}");
-                var failureResult = CommandResult.CreateFailure(command, ex.Message, 0);
+            { // Logging disabledvar failureResult = CommandResult.CreateFailure(command, ex.Message, 0);
                 _eventBus.PublishCommandFailed(new CommandFailedEvent(command, ex.Message, 0));
                 return failureResult;
             }
@@ -99,10 +95,7 @@ namespace PerAspera.GameAPI.Commands.Core
         /// </summary>
         public BatchCommandResult DispatchBatch(IEnumerable<IGameCommand> commands)
         {
-            var commandList = commands.ToList();
-            LogAspera.Info($"Dispatching batch of {commandList.Count} commands");
-            
-            var results = new List<CommandResult>();
+            var commandList = commands.ToList(); // Logging disabledvar results = new List<CommandResult>();
             
             foreach (var command in commandList)
             {
@@ -110,10 +103,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
             }
             
-            var batchResult = new BatchCommandResult(results);
-            LogAspera.Info($"Batch complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
-            
-            return batchResult;
+            var batchResult = new BatchCommandResult(results); // Logging disabledreturn batchResult;
         }
         
         /// <summary>
@@ -122,7 +112,7 @@ namespace PerAspera.GameAPI.Commands.Core
         public BatchCommandResult DispatchBatchUntilFailure(IEnumerable<IGameCommand> commands)
         {
             var commandList = commands.ToList();
-            LogAspera.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
+            LoggingSystem.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
             
             var results = new List<CommandResult>();
             
@@ -132,14 +122,12 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
                 
                 if (!result.Success)
-                {
-                    LogAspera.Warning($"Batch stopped on failure: {result.Error}");
-                    break;
+                { // Logging disabledbreak;
                 }
             }
             
             var batchResult = new BatchCommandResult(results);
-            LogAspera.Info($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
+            LoggingSystem.Info($"Batch (stop on failure) complete: {batchResult.SuccessCount}/{batchResult.TotalCount} succeeded");
             
             return batchResult;
         }

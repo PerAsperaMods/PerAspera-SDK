@@ -29,9 +29,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             _registerMethod = GetRegisterMethod();
             _unregisterMethod = GetUnregisterMethod();
             
-            ValidateKeeperType();
-            LogAspera.Info($"KeeperWrapper initialized for type: {_keeperType.FullName}");
-        }
+            ValidateKeeperType(); // Logging disabled}
         
         /// <summary>
         /// Register an IHandleable object via native Keeper.Register()
@@ -42,27 +40,21 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             try
             {
                 if (handleableObject == null)
-                {
-                    LogAspera.Warning("Cannot register null handleable object");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 if (_registerMethod == null)
-                {
-                    LogAspera.Error("Keeper.Register method not available");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 // Call Keeper.Register(IHandleable) -> returns Handle
                 var handle = _registerMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                LogAspera.Debug($"Registered handleable object: {handleableObject.GetType().Name}");
+                LoggingSystem.Debug($"Registered handleable object: {handleableObject.GetType().Name}");
                 return handle;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to register handleable object: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -74,27 +66,21 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             try
             {
                 if (handleableObject == null)
-                {
-                    LogAspera.Warning("Cannot unregister null handleable object");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 if (_unregisterMethod == null)
-                {
-                    LogAspera.Error("Keeper.Unregister method not available");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Call Keeper.Unregister(IHandleable)
                 _unregisterMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
                 
-                LogAspera.Debug($"Unregistered handleable object: {handleableObject.GetType().Name}");
+                LoggingSystem.Debug($"Unregistered handleable object: {handleableObject.GetType().Name}");
                 return true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to unregister handleable object: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -133,17 +119,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var method = _keeperType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
-                {
-                    LogAspera.Warning($"Keeper method not found: {methodName}");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 return method.Invoke(_nativeKeeper, parameters);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to invoke Keeper method {methodName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -156,17 +138,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var property = _keeperType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null)
-                {
-                    LogAspera.Warning($"Keeper property not found: {propertyName}");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 return property.GetValue(_nativeKeeper);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get Keeper property {propertyName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -179,14 +157,10 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 .Any(m => m.Name == "Unregister" && m.GetParameters().Length == 1);
                 
             if (!hasRegisterMethod)
-            {
-                LogAspera.Warning($"Keeper type {_keeperType.Name} may not have expected Register method");
-            }
+            { // Logging disabled}
             
             if (!hasUnregisterMethod)
-            {
-                LogAspera.Warning($"Keeper type {_keeperType.Name} may not have expected Unregister method");
-            }
+            { // Logging disabled}
         }
         
         private MethodInfo GetRegisterMethod()
@@ -199,18 +173,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                {
-                    LogAspera.Error("No Register methods found on Keeper");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 // Return first Register method found
                 return methods[0];
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get Register method: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -224,18 +194,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                {
-                    LogAspera.Error("No Unregister methods found on Keeper");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 // Return first Unregister method found
                 return methods[0];
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get Unregister method: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
     }

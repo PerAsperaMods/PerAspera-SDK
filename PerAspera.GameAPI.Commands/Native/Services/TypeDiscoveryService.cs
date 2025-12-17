@@ -30,22 +30,14 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public void InitializeCommandTypes()
         {
             try
-            {
-                LogAspera.Info("Initializing command type discovery...");
-                
-                // Initialize GameTypeInitializer for enhanced type access
+            { // Logging disabled// Initialize GameTypeInitializer for enhanced type access
                 GameTypeInitializer.Initialize();
                 
                 // Scan assemblies for command types
-                ScanAssembliesForCommandTypes();
-                
-                LogAspera.Info($"Command type discovery complete: {_commandTypes.Count} types found");
-                _isInitialized = true;
+                ScanAssembliesForCommandTypes(); // Logging disabled_isInitialized = true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Error during command type initialization: {ex.Message}");
-                _isInitialized = false;
+            { // Logging disabled_isInitialized = false;
                 throw;
             }
         }
@@ -58,16 +50,10 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
-                .ToArray();
-
-            LogAspera.Debug($"Scanning {assemblies.Length} assemblies for command types");
-
-            // Priority scan: Focus on Assembly-CSharp (Per Aspera game assembly)
+                .ToArray(); // Logging disabled// Priority scan: Focus on Assembly-CSharp (Per Aspera game assembly)
             var gameAssembly = assemblies.FirstOrDefault(a => a.GetName().Name == "Assembly-CSharp");
             if (gameAssembly != null)
-            {
-                LogAspera.Debug("Scanning priority assembly: Assembly-CSharp");
-                ScanAssemblyForCommands(gameAssembly, isPriorityAssembly: true);
+            { // Logging disabledScanAssemblyForCommands(gameAssembly, isPriorityAssembly: true);
             }
 
             // Scan other relevant assemblies
@@ -82,12 +68,12 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             {
                 try
                 {
-                    LogAspera.Debug($"Scanning assembly: {assembly.GetName().Name}");
+                    LoggingSystem.Debug($"Scanning assembly: {assembly.GetName().Name}");
                     ScanAssemblyForCommands(assembly, isPriorityAssembly: false);
                 }
                 catch (Exception ex)
                 {
-                    LogAspera.Warning($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
+                    LoggingSystem.Warning($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
                 }
             }
         }
@@ -107,7 +93,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
 
                 if (isPriorityAssembly)
                 {
-                    LogAspera.Info($"Found {types.Length} command types in {assembly.GetName().Name}");
+                    LoggingSystem.Info($"Found {types.Length} command types in {assembly.GetName().Name}");
                 }
 
                 foreach (var type in types)
@@ -117,7 +103,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             }
             catch (ReflectionTypeLoadException ex)
             {
-                LogAspera.Warning($"Partial type loading from assembly {assembly.GetName().Name}: {ex.LoaderExceptions.Length} exceptions");
+                LoggingSystem.Warning($"Partial type loading from assembly {assembly.GetName().Name}: {ex.LoaderExceptions.Length} exceptions");
                 
                 // Process types that loaded successfully
                 var loadedTypes = ex.Types.Where(t => t != null && IsCommandType(t));
@@ -128,7 +114,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
+                LoggingSystem.Error($"Failed to scan assembly {assembly.GetName().Name}: {ex.Message}");
             }
         }
 
@@ -194,9 +180,6 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 _commandTypes.TryAdd(shortName, type);
             }
 
-            LogAspera.Debug($"Registered command type: {typeName} -> {type.FullName}");
-        }
-
         /// <summary>
         /// Normalize command type name for consistent lookup
         /// </summary>
@@ -235,9 +218,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public string[] GetAvailableCommandTypes()
         {
             if (!_isInitialized)
-            {
-                LogAspera.Warning("TypeDiscoveryService not initialized - returning empty array");
-                return Array.Empty<string>();
+            { // Logging disabledreturn Array.Empty<string>();
             }
 
             return _commandTypes.Keys.ToArray();

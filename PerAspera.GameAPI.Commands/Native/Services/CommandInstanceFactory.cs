@@ -29,43 +29,30 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public object CreateNativeInstance(System.Type commandType, object[] parameters)
         {
             if (commandType == null)
-            {
-                LogAspera.Warning("Cannot create instance with null command type");
-                return null;
+            { // Logging disabledreturn null;
             }
 
             try
-            {
-                LogAspera.Debug($"Creating instance of {commandType.Name} with {parameters?.Length ?? 0} parameters");
-
-                // Validate parameters first
+            { // Logging disabled// Validate parameters first
                 if (!ValidateConstructorParameters(commandType, parameters))
-                {
-                    LogAspera.Warning($"Invalid parameters for {commandType.Name} constructor");
-                    return null;
+                { // Logging disabledreturn null;
                 }
 
                 // Use cached reflection for fast instantiation
                 var instance = _reflectionCache.CreateInstanceFast(commandType, parameters);
                 
                 if (instance == null)
-                {
-                    LogAspera.Warning($"Fast instantiation failed for {commandType.Name}, trying fallback");
-                    instance = CreateInstanceFallback(commandType, parameters);
+                { // Logging disabledinstance = CreateInstanceFallback(commandType, parameters);
                 }
 
                 if (instance != null)
-                {
-                    LogAspera.Debug($"Successfully created instance of {commandType.Name}");
-                    ValidateCreatedInstance(instance, commandType);
+                { // Logging disabledValidateCreatedInstance(instance, commandType);
                 }
 
                 return instance;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to create instance of {commandType.Name}: {ex.Message}");
-                return CreateInstanceFallback(commandType, parameters);
+            { // Logging disabledreturn CreateInstanceFallback(commandType, parameters);
             }
         }
 
@@ -82,9 +69,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 var constructors = commandType.GetConstructors();
                 
                 if (constructors.Length == 0)
-                {
-                    LogAspera.Warning($"No public constructors found for {commandType.Name}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Check if any constructor matches the parameters
@@ -92,17 +77,13 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 var hasMatchingConstructor = constructors.Any(c => c.GetParameters().Length == parameterCount);
 
                 if (!hasMatchingConstructor)
-                {
-                    LogAspera.Debug($"No constructor found with {parameterCount} parameters for {commandType.Name}");
-                    LogAspera.Debug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
+                { // Logging disabledLoggingSystem.Debug($"Available constructors: {string.Join(", ", constructors.Select(c => c.GetParameters().Length))}");
                 }
 
                 return hasMatchingConstructor;
             }
             catch (Exception ex)
-            {
-                LogAspera.Warning($"Failed to validate constructor parameters for {commandType.Name}: {ex.Message}");
-                return true; // Allow fallback creation to attempt
+            { // Logging disabledreturn true; // Allow fallback creation to attempt
             }
         }
 
@@ -116,10 +97,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         private object CreateInstanceFallback(System.Type commandType, object[] parameters)
         {
             try
-            {
-                LogAspera.Debug($"Attempting fallback creation for {commandType.Name}");
-                
-                if (parameters == null || parameters.Length == 0)
+            { // Logging disabledif (parameters == null || parameters.Length == 0)
                 {
                     return Activator.CreateInstance(commandType);
                 }
@@ -127,9 +105,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 return Activator.CreateInstance(commandType, parameters);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Fallback creation failed for {commandType.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -148,19 +124,17 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 // Check type compatibility
                 if (!expectedType.IsInstanceOfType(instance))
                 {
-                    LogAspera.Warning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
+                    LoggingSystem.Warning($"Created instance type mismatch. Expected: {expectedType.Name}, Actual: {instance.GetType().Name}");
                 }
 
                 // Check for common IL2CPP issues
                 if (instance.ToString() == null)
                 {
-                    LogAspera.Warning($"Created instance has null ToString() - possible IL2CPP interop issue");
+                    LoggingSystem.Warning($"Created instance has null ToString() - possible IL2CPP interop issue");
                 }
             }
             catch (Exception ex)
-            {
-                LogAspera.Debug($"Instance validation completed with minor issues: {ex.Message}");
-            }
+            { // Logging disabled}
         }
 
         /// <summary>
@@ -173,22 +147,15 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public CommandBaseWrapper CreateImportResourceCommand(string resourceName, float amount)
         {
             if (string.IsNullOrWhiteSpace(resourceName))
-            {
-                LogAspera.Warning("Cannot create ImportResource command with null or empty resource name");
-                return null;
+            { // Logging disabledreturn null;
             }
 
             if (amount <= 0)
-            {
-                LogAspera.Warning($"Cannot create ImportResource command with invalid amount: {amount}");
-                return null;
+            { // Logging disabledreturn null;
             }
 
             try
-            {
-                LogAspera.Debug($"Creating ImportResource command for {resourceName} with amount {amount}");
-
-                // Try multiple command type patterns
+            { // Logging disabled// Try multiple command type patterns
                 string[] possibleTypeNames = {
                     "CmdImportResource",
                     "ImportResourceCommand", 
@@ -200,19 +167,12 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                 {
                     var command = TryCreateImportResourceCommand(typeName, resourceName, amount);
                     if (command != null)
-                    {
-                        LogAspera.Info($"Successfully created ImportResource command using type {typeName}");
-                        return command;
+                    { // Logging disabledreturn command;
                     }
-                }
-
-                LogAspera.Warning("Failed to create ImportResource command with any known type pattern");
-                return null;
+                } // Logging disabledreturn null;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to create ImportResource command: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -228,11 +188,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             try
             {
                 // This would typically require access to TypeDiscoveryService
-                // For now, we'll implement a basic pattern
-                
-                LogAspera.Debug($"Attempting to create {typeName} with resource: {resourceName}, amount: {amount}");
-
-                // Try different parameter patterns that are common for ImportResource commands
+                // For now, we'll implement a basic pattern // Logging disabled// Try different parameter patterns that are common for ImportResource commands
                 var parameterCombinations = new object[][]
                 {
                     new object[] { resourceName, amount },
@@ -249,7 +205,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                         // In a real implementation, we would get the type from TypeDiscoveryService
                         // For this refactoring, we'll create a placeholder structure
                         
-                        LogAspera.Debug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
+                        LoggingSystem.Debug($"Trying parameter pattern: [{string.Join(", ", parameters.Select(p => p?.ToString() ?? "null"))}]");
                         
                         // This is where the actual type lookup and instantiation would happen
                         // var commandType = _typeDiscovery.TryGetCommandType(typeName);
@@ -260,17 +216,13 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                         // but actual implementation needs integration with TypeDiscoveryService
                     }
                     catch (Exception ex)
-                    {
-                        LogAspera.Debug($"Parameter pattern failed: {ex.Message}");
-                    }
+                    { // Logging disabled}
                 }
 
                 return null;
             }
             catch (Exception ex)
-            {
-                LogAspera.Debug($"Failed to create {typeName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -284,10 +236,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public CommandBaseWrapper CreateFallbackCommand(string commandTypeName, object[] parameters)
         {
             try
-            {
-                LogAspera.Info($"Creating fallback command for {commandTypeName}");
-                
-                // Create a generic command object that can be used for basic operations
+            { // Logging disabled// Create a generic command object that can be used for basic operations
                 // This might involve creating a simple data structure or mock object
                 
                 var fallbackData = new
@@ -296,19 +245,13 @@ namespace PerAspera.GameAPI.Commands.Native.Services
                     Parameters = parameters,
                     CreatedAt = DateTime.UtcNow,
                     IsFallback = true
-                };
-
-                LogAspera.Debug($"Fallback command created for {commandTypeName}");
-                
-                // In real implementation, this would return a proper wrapper
+                }; // Logging disabled// In real implementation, this would return a proper wrapper
                 // return new CommandBaseWrapper(fallbackData);
                 
                 return null; // Placeholder for refactoring structure
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to create fallback command for {commandTypeName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -320,30 +263,21 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         public bool ValidateCommand(CommandBaseWrapper commandWrapper)
         {
             if (commandWrapper == null)
-            {
-                LogAspera.Warning("Cannot validate null command wrapper");
-                return false;
+            { // Logging disabledreturn false;
             }
 
             try
             {
                 // Basic validation checks
                 if (string.IsNullOrEmpty(commandWrapper.CommandName))
-                {
-                    LogAspera.Warning("Command wrapper has no command name");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Check for required properties or methods
-                // This would be expanded based on Per Aspera command requirements
-                
-                LogAspera.Debug($"Command validation passed for {commandWrapper.CommandName}");
-                return true;
+                // This would be expanded based on Per Aspera command requirements // Logging disabledreturn true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Warning($"Command validation failed: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
 

@@ -30,12 +30,12 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             // Validate that the provided instance matches the expected type
             if (!_commandBusType.IsInstanceOfType(nativeCommandBus))
             {
-                LogAspera.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
+                LoggingSystem.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
                 _commandBusType = nativeCommandBus.GetType(); // Fallback to runtime type
             }
             
             ValidateCommandBusType();
-            LogAspera.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
+            LoggingSystem.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
         }
         
         /// <summary>
@@ -49,19 +49,19 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 var dispatchMethod = GetDispatchMethod(typeof(T));
                 if (dispatchMethod == null)
                 {
-                    LogAspera.Error($"Dispatch method not found for type {typeof(T).Name}");
+                    LoggingSystem.Error($"Dispatch method not found for type {typeof(T).Name}");
                     return false;
                 }
                 
                 // Invoke Dispatch<T>(command)
                 var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
                 
-                LogAspera.Debug($"Command dispatched: {typeof(T).Name}");
+                LoggingSystem.Debug($"Command dispatched: {typeof(T).Name}");
                 return true;
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
+                LoggingSystem.Error($"Failed to dispatch command {typeof(T).Name}: {ex.Message}");
                 return false;
             }
         }
@@ -76,29 +76,20 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Find command type
                 var commandType = FindCommandType(commandTypeName);
                 if (commandType == null)
-                {
-                    LogAspera.Error($"Command type not found: {commandTypeName}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Get dispatch method for this type
                 var dispatchMethod = GetDispatchMethod(commandType);
                 if (dispatchMethod == null)
-                {
-                    LogAspera.Error($"Dispatch method not found for command type: {commandTypeName}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Invoke dispatch
-                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
-                
-                LogAspera.Debug($"Command dispatched by type: {commandTypeName}");
-                return true;
+                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command }); // Logging disabledreturn true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to dispatch command by type {commandTypeName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -143,9 +134,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 };
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get supported command types: {ex.Message}");
-                return new string[0];
+            { // Logging disabledreturn new string[0];
             }
         }
         
@@ -156,9 +145,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 .Any(m => m.Name == "Dispatch" && m.IsGenericMethod);
                 
             if (!hasDispatchMethod)
-            {
-                LogAspera.Warning($"CommandBus type {_commandBusType.Name} may not have expected Dispatch<T> method");
-            }
+            { // Logging disabled}
         }
         
         private MethodInfo GetDispatchMethod(Type commandType)
@@ -171,9 +158,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     .ToArray();
                     
                 if (methods.Length == 0)
-                {
-                    LogAspera.Error("No Dispatch methods found on CommandBus");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 // Get first generic Dispatch method and make it concrete for our command type
@@ -181,9 +166,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return genericMethod.MakeGenericMethod(commandType);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get dispatch method for {commandType.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -214,9 +197,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return null;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to find command type {typeName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         /// <summary>
@@ -233,18 +214,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 // Get BaseGame instance
                 var baseGameType = GameTypeInitializer.GetBaseGameType();
                 if (baseGameType == null)
-                {
-                    LogAspera.Error("BaseGame type not found via GameTypeInitializer");
-                    return null;
+                { // Logging disabledreturn null;
                 }
 
                 var baseGameInstance = baseGameType.GetProperty("Instance", 
                     BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
 
                 if (baseGameInstance == null)
-                {
-                    LogAspera.Error("BaseGame.Instance not found");
-                    return null;
+                { // Logging disabledreturn null;
                 }
 
                 // Try to find CommandBus on BaseGame instance
@@ -255,9 +232,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 {
                     var commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
                     if (commandBusInstance != null)
-                    {
-                        LogAspera.Info("CommandBus found via BaseGame.CommandBus property");
-                        return new CommandBusWrapper(commandBusInstance);
+                    { // Logging disabledreturn new CommandBusWrapper(commandBusInstance);
                     }
                 }
 
@@ -271,20 +246,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     {
                         var commandBusInstance = field.GetValue(baseGameInstance);
                         if (commandBusInstance != null)
-                        {
-                            LogAspera.Info($"CommandBus found via BaseGame field: {field.Name}");
-                            return new CommandBusWrapper(commandBusInstance);
+                        { // Logging disabledreturn new CommandBusWrapper(commandBusInstance);
                         }
                     }
-                }
-
-                LogAspera.Error("CommandBus instance not found on BaseGame");
-                return null;
+                } // Logging disabledreturn null;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to create CommandBusWrapper from game: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }    }
 }

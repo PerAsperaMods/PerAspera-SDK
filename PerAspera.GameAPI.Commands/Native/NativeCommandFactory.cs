@@ -73,15 +73,10 @@ namespace PerAspera.GameAPI.Commands.Native
                 _diagnostics = new NativeCommandDiagnostics(_typeDiscovery, _reflectionCache, _instanceFactory);
                 
                 // Initialize the discovery and caching systems
-                InitializeServices();
-                
-                LogAspera.Info($"NativeCommandFactory initialized with modular services");
-                _isInitialized = true;
+                InitializeServices(); // Logging disabled_isInitialized = true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to initialize NativeCommandFactory: {ex.Message}");
-                _isInitialized = false;
+            { // Logging disabled_isInitialized = false;
             }
         }
 
@@ -375,9 +370,7 @@ namespace PerAspera.GameAPI.Commands.Native
                         _instance._diagnostics?.RecordEvent(DiagnosticLevel.Info, "Reset", "Factory state reset");
                     }
                     catch (Exception ex)
-                    {
-                        LogAspera.Warning($"Error during factory reset: {ex.Message}");
-                    }
+                    { // Logging disabled}
                     finally
                     {
                         _instance = null;

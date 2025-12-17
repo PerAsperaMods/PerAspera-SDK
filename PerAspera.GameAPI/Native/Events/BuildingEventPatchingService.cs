@@ -266,7 +266,7 @@ namespace PerAspera.GameAPI.Native.Events
                 __state["Instance"] = __instance;
                 __state["Timestamp"] = DateTime.UtcNow;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }
@@ -319,7 +319,7 @@ namespace PerAspera.GameAPI.Native.Events
                 // Special handling for critical building events
                 PublishSpecialBuildingEvents(buildingType, eventData);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fail silently to avoid disrupting game flow
             }
@@ -740,3 +740,4 @@ namespace PerAspera.GameAPI.Native.Events
         }
     }
 }
+

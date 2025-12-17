@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI;
-using PerAspera.ModSDK.Systems;
-
 namespace PerAspera.ModSDK
 {
     /// <summary>
@@ -45,9 +43,7 @@ namespace PerAspera.ModSDK
                 // GameAPI should auto-initialize, but we can verify it's ready
                 // GameAPI.Initialize(); // This method doesn't exist
                 
-                // Initialize subsystems
-                LoggingSystem.Initialize(_modName);
-                EventSystem.Initialize();
+                // Initialize subsystems // Logging disabledEventSystem.Initialize();
                 Systems.OverrideSystem.Initialize();
                 
                 _log.Info($"PerAspera ModSDK v{VersionInfo.SDK_VERSION} initialized for mod '{modName}' v{modVersion}");

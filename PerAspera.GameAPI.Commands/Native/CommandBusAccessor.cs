@@ -40,9 +40,7 @@ namespace PerAspera.GameAPI.Commands.Native
             if (_instance != null)
                 throw new InvalidOperationException("CommandBusAccessor already initialized.");
                 
-            _instance = new CommandBusAccessor(nativeCommandBus, nativeKeeper);
-            LogAspera.Info("CommandBusAccessor initialized successfully");
-        }
+            _instance = new CommandBusAccessor(nativeCommandBus, nativeKeeper); // Logging disabled}
 
         /// <summary>
         /// Auto-initialize using GameTypeInitializer (Phase 1.1 integration)
@@ -51,33 +49,24 @@ namespace PerAspera.GameAPI.Commands.Native
         public static bool TryAutoInitialize()
         {
             if (_instance != null)
-            {
-                LogAspera.Debug("CommandBusAccessor already initialized");
-                return true;
+            { // Logging disabledreturn true;
             }
 
             try
-            {
-                LogAspera.Info("Attempting auto-initialization via GameTypeInitializer...");
-
-                // Initialize GameTypeInitializer first
+            { // Logging disabled// Initialize GameTypeInitializer first
                 GameTypeInitializer.Initialize();
 
                 // Get BaseGame instance
                 var baseGameType = GameTypeInitializer.GetBaseGameType();
                 if (baseGameType == null)
-                {
-                    LogAspera.Error("BaseGame type not found via GameTypeInitializer");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 var baseGameInstance = baseGameType.GetProperty("Instance", 
                     BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
 
                 if (baseGameInstance == null)
-                {
-                    LogAspera.Error("BaseGame.Instance not found");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Find CommandBus on BaseGame
@@ -103,9 +92,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 }
 
                 if (commandBusInstance == null)
-                {
-                    LogAspera.Error("CommandBus instance not found on BaseGame");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Find Keeper (similar approach)
@@ -132,13 +119,11 @@ namespace PerAspera.GameAPI.Commands.Native
 
                 // Initialize with found instances (keeper can be null for now)
                 _instance = new CommandBusAccessor(commandBusInstance, keeperInstance);
-                LogAspera.Info($"CommandBusAccessor auto-initialized successfully (CommandBus: {commandBusInstance != null}, Keeper: {keeperInstance != null})");
+                LoggingSystem.Info($"CommandBusAccessor auto-initialized successfully (CommandBus: {commandBusInstance != null}, Keeper: {keeperInstance != null})");
                 return true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Auto-initialization failed: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -164,9 +149,7 @@ namespace PerAspera.GameAPI.Commands.Native
             }
             else
             {
-                _keeperWrapper = null;
-                LogAspera.Warning("CommandBusAccessor initialized without Keeper - some functionality may be limited");
-            }
+                _keeperWrapper = null; // Logging disabled}
             
             _factory = NativeCommandFactory.Instance;
             
@@ -181,22 +164,16 @@ namespace PerAspera.GameAPI.Commands.Native
             try
             {
                 if (command == null)
-                {
-                    LogAspera.Warning("Cannot execute null command");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 if (!IsAvailable())
-                {
-                    LogAspera.Error("CommandBus or Keeper not available");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Validate command before execution
                 if (!command.IsValid())
-                {
-                    LogAspera.Warning($"Command validation failed: {command.CommandName}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Execute via CommandBus
@@ -206,19 +183,17 @@ namespace PerAspera.GameAPI.Commands.Native
                 
                 if (success)
                 {
-                    LogAspera.Debug($"Command executed successfully: {command.GetDescription()}");
+                    LoggingSystem.Debug($"Command executed successfully: {command.GetDescription()}");
                 }
                 else
                 {
-                    LogAspera.Warning($"Command execution failed: {command.GetDescription()}");
+                    LoggingSystem.Warning($"Command execution failed: {command.GetDescription()}");
                 }
                 
                 return success;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Exception executing command {command?.CommandName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -232,18 +207,14 @@ namespace PerAspera.GameAPI.Commands.Native
                 // Create command
                 var command = _factory.CreateCommand(commandTypeName, parameters);
                 if (command == null)
-                {
-                    LogAspera.Error($"Failed to create command: {commandTypeName}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 // Execute command
                 return ExecuteCommand(command);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to create and execute command {commandTypeName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -255,23 +226,17 @@ namespace PerAspera.GameAPI.Commands.Native
             try
             {
                 if (!IsAvailable())
-                {
-                    LogAspera.Error("Keeper not available for registration");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 if (_keeperWrapper == null)
-                {
-                    LogAspera.Error("KeeperWrapper is null - cannot register");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 return _keeperWrapper.RegisterHandleable(handleableObject);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to register with Keeper: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -283,23 +248,17 @@ namespace PerAspera.GameAPI.Commands.Native
             try
             {
                 if (!IsAvailable())
-                {
-                    LogAspera.Error("Keeper not available for unregistration");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 if (_keeperWrapper == null)
-                {
-                    LogAspera.Error("KeeperWrapper is null - cannot unregister");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 return _keeperWrapper.UnregisterHandleable(handleableObject);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to unregister from Keeper: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -322,9 +281,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 return _commandBusWrapper?.GetSupportedCommandTypes() ?? new string[0];
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get supported command types: {ex.Message}");
-                return new string[0];
+            { // Logging disabledreturn new string[0];
             }
         }
         
@@ -338,9 +295,7 @@ namespace PerAspera.GameAPI.Commands.Native
                 return _factory?.GetAvailableCommandTypes() ?? new string[0];
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get available command types: {ex.Message}");
-                return new string[0];
+            { // Logging disabledreturn new string[0];
             }
         }
         
@@ -376,18 +331,14 @@ namespace PerAspera.GameAPI.Commands.Native
             try
             {
                 if (nativeCommand == null)
-                {
-                    LogAspera.Warning("Cannot execute null raw command");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 var wrapper = new CommandBaseWrapper(nativeCommand);
                 return ExecuteCommand(wrapper);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to execute raw command: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -419,19 +370,11 @@ namespace PerAspera.GameAPI.Commands.Native
         private void ValidateInitialization()
         {
             if (!IsAvailable())
-            {
-                LogAspera.Warning("CommandBusAccessor initialized but some components are not available");
-            }
+            { // Logging disabled}
             
             var supportedCount = GetSupportedCommandTypes().Length;
-            var availableCount = GetAvailableCommandTypes().Length;
-            
-            LogAspera.Info($"CommandBusAccessor ready: {supportedCount} supported, {availableCount} available command types");
-            
-            if (availableCount == 0)
-            {
-                LogAspera.Warning("No command types found - command execution may not work");
-            }
+            var availableCount = GetAvailableCommandTypes().Length; // Logging disabledif (availableCount == 0)
+            { // Logging disabled}
         }
     }
 }

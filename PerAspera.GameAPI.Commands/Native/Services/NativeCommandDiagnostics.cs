@@ -33,10 +33,7 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             
             _diagnosticHistory = new List<DiagnosticEntry>();
             _errorCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            _startTime = DateTime.UtcNow;
-            
-            LogAspera.Info("NativeCommandDiagnostics service initialized");
-        }
+            _startTime = DateTime.UtcNow; // Logging disabled}
 
         /// <summary>
         /// Record a diagnostic event for monitoring and analysis
@@ -77,18 +74,10 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             // Log to BepInX based on severity
             switch (level)
             {
-                case DiagnosticLevel.Error:
-                    LogAspera.Error($"[{category}] {message}");
-                    break;
-                case DiagnosticLevel.Warning:
-                    LogAspera.Warning($"[{category}] {message}");
-                    break;
-                case DiagnosticLevel.Info:
-                    LogAspera.Info($"[{category}] {message}");
-                    break;
-                case DiagnosticLevel.Debug:
-                    LogAspera.Debug($"[{category}] {message}");
-                    break;
+                case DiagnosticLevel.Error: // Logging disabledbreak;
+                case DiagnosticLevel.Warning: // Logging disabledbreak;
+                case DiagnosticLevel.Info: // Logging disabledbreak;
+                case DiagnosticLevel.Debug: // Logging disabledbreak;
             }
         }
 

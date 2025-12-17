@@ -29,9 +29,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             _isValidMethod = GetIsValidMethod();
             _toTabbedStringMethod = GetToTabbedStringMethod();
             
-            ValidateCommandType();
-            LogAspera.Debug($"CommandBaseWrapper initialized for type: {_commandType.Name}");
-        }
+            ValidateCommandType(); // Logging disabled}
         
         /// <summary>
         /// Native Command instance (for direct IL2CPP access)
@@ -56,18 +54,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             try
             {
                 if (_isValidMethod == null)
-                {
-                    LogAspera.Warning($"IsValid method not available for {CommandName}");
-                    return true; // Assume valid if method not available
+                { // Logging disabledreturn true; // Assume valid if method not available
                 }
                 
                 var result = _isValidMethod.Invoke(_nativeCommand, new object[0]);
                 return result is bool valid ? valid : true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to call IsValid on {CommandName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -87,9 +81,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return result?.ToString() ?? $"{CommandName}()";
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get description for {CommandName}: {ex.Message}");
-                return $"{CommandName}(error)";
+            { // Logging disabledreturn $"{CommandName}(error)";
             }
         }
         
@@ -109,9 +101,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return factionProperty.GetValue(_nativeCommand);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get Faction from {CommandName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -124,18 +114,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var factionProperty = _commandType.GetProperty("Faction", BindingFlags.Public | BindingFlags.Instance);
                 if (factionProperty == null || !factionProperty.CanWrite)
-                {
-                    LogAspera.Warning($"Cannot set Faction on {CommandName} - property not writable");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 factionProperty.SetValue(_nativeCommand, faction);
                 return true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to set Faction on {CommandName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -155,9 +141,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return property.GetValue(_nativeCommand);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to get property {propertyName} from {CommandName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -170,18 +154,14 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var property = _commandType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite)
-                {
-                    LogAspera.Warning($"Cannot set property {propertyName} on {CommandName}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
                 
                 property.SetValue(_nativeCommand, value);
                 return true;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to set property {propertyName} on {CommandName}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
         
@@ -194,17 +174,13 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
             {
                 var method = _commandType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
                 if (method == null)
-                {
-                    LogAspera.Warning($"Method {methodName} not found on {CommandName}");
-                    return null;
+                { // Logging disabledreturn null;
                 }
                 
                 return method.Invoke(_nativeCommand, parameters);
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to invoke method {methodName} on {CommandName}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -224,9 +200,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                            _commandType.BaseType?.Name == "CommandBase";
                            
             if (!isCommand)
-            {
-                LogAspera.Warning($"Type {_commandType.Name} may not be a valid command type");
-            }
+            { // Logging disabled}
         }
         
         private MethodInfo GetIsValidMethod()
@@ -237,9 +211,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                        _commandType.GetMethod("IsValid", BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
             }
             catch (Exception ex)
-            {
-                LogAspera.Debug($"Could not find IsValid method on {_commandType.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         
@@ -250,9 +222,7 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return _commandType.GetMethod("ToTabbedString", BindingFlags.Public | BindingFlags.Instance, null, new Type[0], null);
             }
             catch (Exception ex)
-            {
-                LogAspera.Debug($"Could not find ToTabbedString method on {_commandType.Name}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
         

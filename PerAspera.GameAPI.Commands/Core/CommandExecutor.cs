@@ -52,19 +52,19 @@ namespace PerAspera.GameAPI.Commands.Core
                 
                 if (success)
                 {
-                    LogAspera.Info($"Command executed successfully: {command.GetDescription()}");
+                    LoggingSystem.Info($"Command executed successfully: {command.GetDescription()}");
                     return CommandResult.CreateSuccess(command, stopwatch.ElapsedMilliseconds);
                 }
                 else
                 {
-                    LogAspera.Warning($"Command execution failed: {command.GetDescription()}");
+                    LoggingSystem.Warning($"Command execution failed: {command.GetDescription()}");
                     return CommandResult.CreateFailure(command, "Native execution failed", stopwatch.ElapsedMilliseconds);
                 }
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                LogAspera.Error($"Exception executing command {command.GetDescription()}: {ex.Message}");
+                LoggingSystem.Error($"Exception executing command {command.GetDescription()}: {ex.Message}");
                 return CommandResult.CreateFailure(command, ex.Message, stopwatch.ElapsedMilliseconds);
             }
         }
@@ -90,7 +90,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 results.Add(result);
                 
                 // Log batch progress
-                LogAspera.Info($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
+                LoggingSystem.Info($"Batch command {results.Count}: {(result.Success ? "SUCCESS" : "FAILED")} - {command.GetDescription()}");
             }
             
             return new BatchCommandResult(results);
@@ -127,10 +127,7 @@ namespace PerAspera.GameAPI.Commands.Core
         private bool ExecuteNativeCommand(IGameCommand command)
         {
             try
-            {
-                LogAspera.Debug($"Executing native command: {command.CommandType}");
-
-                // Phase 1.1: Auto-initialize CommandBusAccessor if needed
+            { // Logging disabled// Phase 1.1: Auto-initialize CommandBusAccessor if needed
                 CommandBusAccessor accessor;
                 try
                 {
@@ -138,48 +135,34 @@ namespace PerAspera.GameAPI.Commands.Core
                 }
                 catch (InvalidOperationException)
                 {
-                    // Not initialized yet, try auto-initialization
-                    LogAspera.Info("CommandBusAccessor not initialized, attempting auto-initialization...");
-                    if (!CommandBusAccessor.TryAutoInitialize())
-                    {
-                        LogAspera.Error("CommandBusAccessor auto-initialization failed");
-                        return false;
+                    // Not initialized yet, try auto-initialization // Logging disabledif (!CommandBusAccessor.TryAutoInitialize())
+                    { // Logging disabledreturn false;
                     }
                     accessor = CommandBusAccessor.Instance;
                 }
 
                 if (!accessor.IsAvailable())
-                {
-                    LogAspera.Error("CommandBusAccessor still not available after initialization");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Convert SDK command to native command via NativeCommandFactory
                 var nativeCommand = ConvertToNativeCommand(command);
                 if (nativeCommand == null)
-                {
-                    LogAspera.Error($"Failed to convert SDK command to native: {command.CommandType}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
 
                 // Execute via CommandBusAccessor (which uses GameTypeInitializer internally)
                 var success = accessor.ExecuteCommand(nativeCommand);
                 
                 if (success)
-                {
-                    LogAspera.Debug($"Native command executed successfully: {command.CommandType}");
-                    return true;
+                { // Logging disabledreturn true;
                 }
                 else
-                {
-                    LogAspera.Warning($"Native command execution failed: {command.CommandType}");
-                    return false;
+                { // Logging disabledreturn false;
                 }
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Failed to execute native command {command.CommandType}: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
 
@@ -198,14 +181,10 @@ namespace PerAspera.GameAPI.Commands.Core
                 {
                     // Try to extract resource and amount from command
                     if (TryExtractImportResourceParameters(command, out string resourceName, out float amount))
-                    {
-                        LogAspera.Debug($"Converting SDK ImportResource to native: {resourceName} x {amount}");
-                        return factory.CreateImportResourceCommand(resourceName, amount);
+                    { // Logging disabledreturn factory.CreateImportResourceCommand(resourceName, amount);
                     }
                     else
-                    {
-                        LogAspera.Warning("Could not extract parameters from ImportResource command");
-                    }
+                    { // Logging disabled}
                 }
                 
                 // Fallback: Generic parameter extraction
@@ -213,16 +192,12 @@ namespace PerAspera.GameAPI.Commands.Core
                 var nativeCommand = factory.CreateCommand(command.CommandType, parameters);
                 
                 if (nativeCommand == null)
-                {
-                    LogAspera.Error($"NativeCommandFactory failed to create command: {command.CommandType}");
-                }
+                { // Logging disabled}
 
                 return nativeCommand;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Error converting command {command.CommandType}: {ex.Message}");
-                return null;
+            { // Logging disabledreturn null;
             }
         }
 
@@ -258,20 +233,14 @@ namespace PerAspera.GameAPI.Commands.Core
                 var hasValidParams = !string.IsNullOrEmpty(resourceName) && amount > 0;
                 
                 if (hasValidParams)
-                {
-                    LogAspera.Debug($"Extracted ImportResource parameters: {resourceName} x {amount}");
-                }
+                { // Logging disabled}
                 else
-                {
-                    LogAspera.Warning($"ImportResource parameter extraction failed: resource='{resourceName}', amount={amount}");
-                }
+                { // Logging disabled}
 
                 return hasValidParams;
             }
             catch (Exception ex)
-            {
-                LogAspera.Error($"Error extracting ImportResource parameters: {ex.Message}");
-                return false;
+            { // Logging disabledreturn false;
             }
         }
 
