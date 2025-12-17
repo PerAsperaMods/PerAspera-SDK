@@ -37,7 +37,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                 // Check global timeout
                 if (IsTimedOut(startTime))
                 {
-                    return new BatchCommandResult(results, false, "Batch execution timed out");
+                    return new BatchCommandResult(results);
                 }
 
                 // Execute command with condition check
@@ -47,7 +47,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                 // Handle failure based on strategy
                 if (!result.Success && _stopOnFailure)
                 {
-                    return new BatchCommandResult(results, false, $"Command {i + 1} failed: {result.Error}");
+                    return new BatchCommandResult(results);
                 }
             }
 
@@ -71,7 +71,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                 // Check global timeout
                 if (IsTimedOut(startTime))
                 {
-                    return new BatchCommandResult(results, false, "Batch execution timed out");
+                    return new BatchCommandResult(results);
                 }
 
                 // Execute command asynchronously with condition check
@@ -81,7 +81,7 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
                 // Handle failure based on strategy
                 if (!result.Success && _stopOnFailure)
                 {
-                    return new BatchCommandResult(results, false, $"Command {i + 1} failed: {result.Error}");
+                    return new BatchCommandResult(results);
                 }
             }
 
