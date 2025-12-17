@@ -7,18 +7,18 @@ using PerAspera.GameAPI.Events.Core;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Main orchestrator for command system - provides high-level API and manages execution
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandDispatcher
     {
         private readonly CommandExecutor _executor;
         private readonly CommandEventBus _eventBus;
         private static CommandDispatcher _instance;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Global instance for static API access
-        /// &lt;/summary&gt;
+        /// </summary>
         public static CommandDispatcher Instance
         {
             get
@@ -29,9 +29,9 @@ namespace PerAspera.GameAPI.Commands.Core
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Initialize global dispatcher instance
-        /// &lt;/summary&gt;
+        /// </summary>
         public static void Initialize(object commandBus, object keeper)
         {
             if (_instance != null)
@@ -41,26 +41,26 @@ namespace PerAspera.GameAPI.Commands.Core
             LogAspera.Info("CommandDispatcher initialized successfully");
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Reset global instance (for testing)
-        /// &lt;/summary&gt;
+        /// </summary>
         internal static void Reset()
         {
             _instance = null;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Initialize dispatcher with executor and event bus
-        /// &lt;/summary&gt;
+        /// </summary>
         private CommandDispatcher(object commandBus, object keeper)
         {
             _executor = new CommandExecutor(commandBus, keeper);
             _eventBus = new CommandEventBus();
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute single command with event publishing
-        /// &lt;/summary&gt;
+        /// </summary>
         public CommandResult Dispatch(IGameCommand command)
         {
             if (command == null)
@@ -94,15 +94,15 @@ namespace PerAspera.GameAPI.Commands.Core
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute multiple commands in sequence
-        /// &lt;/summary&gt;
-        public BatchCommandResult DispatchBatch(IEnumerable&lt;IGameCommand&gt; commands)
+        /// </summary>
+        public BatchCommandResult DispatchBatch(IEnumerable<IGameCommand> commands)
         {
             var commandList = commands.ToList();
             LogAspera.Info($"Dispatching batch of {commandList.Count} commands");
             
-            var results = new List&lt;CommandResult&gt;();
+            var results = new List<CommandResult>();
             
             foreach (var command in commandList)
             {
@@ -116,15 +116,15 @@ namespace PerAspera.GameAPI.Commands.Core
             return batchResult;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute commands until first failure
-        /// &lt;/summary&gt;
-        public BatchCommandResult DispatchBatchUntilFailure(IEnumerable&lt;IGameCommand&gt; commands)
+        /// </summary>
+        public BatchCommandResult DispatchBatchUntilFailure(IEnumerable<IGameCommand> commands)
         {
             var commandList = commands.ToList();
             LogAspera.Info($"Dispatching batch (stop on failure) of {commandList.Count} commands");
             
-            var results = new List&lt;CommandResult&gt;();
+            var results = new List<CommandResult>();
             
             foreach (var command in commandList)
             {
@@ -144,41 +144,41 @@ namespace PerAspera.GameAPI.Commands.Core
             return batchResult;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Subscribe to command execution events
-        /// &lt;/summary&gt;
-        public void SubscribeToExecutedEvents(Action&lt;CommandExecutedEvent&gt; handler)
+        /// </summary>
+        public void SubscribeToExecutedEvents(Action<CommandExecutedEvent> handler)
         {
             _eventBus.CommandExecuted += handler;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Subscribe to command failure events
-        /// &lt;/summary&gt;
-        public void SubscribeToFailedEvents(Action&lt;CommandFailedEvent&gt; handler)
+        /// </summary>
+        public void SubscribeToFailedEvents(Action<CommandFailedEvent> handler)
         {
             _eventBus.CommandFailed += handler;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Unsubscribe from command execution events
-        /// &lt;/summary&gt;
-        public void UnsubscribeFromExecutedEvents(Action&lt;CommandExecutedEvent&gt; handler)
+        /// </summary>
+        public void UnsubscribeFromExecutedEvents(Action<CommandExecutedEvent> handler)
         {
             _eventBus.CommandExecuted -= handler;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Unsubscribe from command failure events
-        /// &lt;/summary&gt;
-        public void UnsubscribeFromFailedEvents(Action&lt;CommandFailedEvent&gt; handler)
+        /// </summary>
+        public void UnsubscribeFromFailedEvents(Action<CommandFailedEvent> handler)
         {
             _eventBus.CommandFailed -= handler;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get command execution statistics
-        /// &lt;/summary&gt;
+        /// </summary>
         public CommandStatistics GetStatistics()
         {
             return _eventBus.GetStatistics();

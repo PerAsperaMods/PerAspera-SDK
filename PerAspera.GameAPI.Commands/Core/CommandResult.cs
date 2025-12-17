@@ -4,78 +4,78 @@ using System.Linq;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Result of command execution with success/failure status and metadata
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandResult
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Whether the command executed successfully
-        /// &lt;/summary&gt;
+        /// </summary>
         public bool Success { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Error message if command failed
-        /// &lt;/summary&gt;
+        /// </summary>
         public string Error { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Command that was executed
-        /// &lt;/summary&gt;
+        /// </summary>
         public IGameCommand Command { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// When the command execution completed
-        /// &lt;/summary&gt;
+        /// </summary>
         public DateTime ExecutedAt { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execution time in milliseconds
-        /// &lt;/summary&gt;
+        /// </summary>
         public long ExecutionTimeMs { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Additional metadata from command execution
-        /// &lt;/summary&gt;
-        public Dictionary&lt;string, object&gt; Metadata { get; }
+        /// </summary>
+        public Dictionary<string, object> Metadata { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Create successful command result
-        /// &lt;/summary&gt;
-        public CommandResult(IGameCommand command, long executionTimeMs, Dictionary&lt;string, object&gt; metadata = null)
+        /// </summary>
+        public CommandResult(IGameCommand command, long executionTimeMs, Dictionary<string, object> metadata = null)
         {
             Success = true;
             Command = command;
             ExecutedAt = DateTime.UtcNow;
             ExecutionTimeMs = executionTimeMs;
-            Metadata = metadata ?? new Dictionary&lt;string, object&gt;();
+            Metadata = metadata ?? new Dictionary<string, object>();
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Create failed command result
-        /// &lt;/summary&gt;
-        public CommandResult(IGameCommand command, string error, long executionTimeMs, Dictionary&lt;string, object&gt; metadata = null)
+        /// </summary>
+        public CommandResult(IGameCommand command, string error, long executionTimeMs, Dictionary<string, object> metadata = null)
         {
             Success = false;
             Error = error;
             Command = command;
             ExecutedAt = DateTime.UtcNow;
             ExecutionTimeMs = executionTimeMs;
-            Metadata = metadata ?? new Dictionary&lt;string, object&gt;();
+            Metadata = metadata ?? new Dictionary<string, object>();
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Create successful result from existing command
-        /// &lt;/summary&gt;
-        public static CommandResult CreateSuccess(IGameCommand command, long executionTimeMs, Dictionary&lt;string, object&gt; metadata = null)
+        /// </summary>
+        public static CommandResult CreateSuccess(IGameCommand command, long executionTimeMs, Dictionary<string, object> metadata = null)
         {
             return new CommandResult(command, executionTimeMs, metadata);
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Create failed result from existing command
-        /// &lt;/summary&gt;
-        public static CommandResult CreateFailure(IGameCommand command, string error, long executionTimeMs, Dictionary&lt;string, object&gt; metadata = null)
+        /// </summary>
+        public static CommandResult CreateFailure(IGameCommand command, string error, long executionTimeMs, Dictionary<string, object> metadata = null)
         {
             return new CommandResult(command, error, executionTimeMs, metadata);
         }
@@ -88,57 +88,57 @@ namespace PerAspera.GameAPI.Commands.Core
         }
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Result of multiple command execution with aggregate status
-    /// &lt;/summary&gt;
+    /// </summary>
     public class BatchCommandResult
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Individual command results
-        /// &lt;/summary&gt;
-        public IReadOnlyList&lt;CommandResult&gt; Results { get; }
+        /// </summary>
+        public IReadOnlyList<CommandResult> Results { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Number of successfully executed commands
-        /// &lt;/summary&gt;
-        public int SuccessCount =&gt; Results.Count(r =&gt; r.Success);
+        /// </summary>
+        public int SuccessCount => Results.Count(r => r.Success);
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Number of failed commands
-        /// &lt;/summary&gt;
-        public int FailureCount =&gt; Results.Count(r =&gt; !r.Success);
+        /// </summary>
+        public int FailureCount => Results.Count(r => !r.Success);
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Total number of commands executed
-        /// &lt;/summary&gt;
-        public int TotalCount =&gt; Results.Count;
+        /// </summary>
+        public int TotalCount => Results.Count;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Whether all commands succeeded
-        /// &lt;/summary&gt;
-        public bool AllSucceeded =&gt; FailureCount == 0;
+        /// </summary>
+        public bool AllSucceeded => FailureCount == 0;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Whether any commands succeeded
-        /// &lt;/summary&gt;
-        public bool AnySucceeded =&gt; SuccessCount &gt; 0;
+        /// </summary>
+        public bool AnySucceeded => SuccessCount > 0;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Total execution time for all commands
-        /// &lt;/summary&gt;
-        public long TotalExecutionTimeMs =&gt; Results.Sum(r =&gt; r.ExecutionTimeMs);
+        /// </summary>
+        public long TotalExecutionTimeMs => Results.Sum(r => r.ExecutionTimeMs);
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get all failed results
-        /// &lt;/summary&gt;
-        public IEnumerable&lt;CommandResult&gt; Failures =&gt; Results.Where(r =&gt; !r.Success);
+        /// </summary>
+        public IEnumerable<CommandResult> Failures => Results.Where(r => !r.Success);
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get all successful results
-        /// &lt;/summary&gt;
-        public IEnumerable&lt;CommandResult&gt; Successes =&gt; Results.Where(r =&gt; r.Success);
+        /// </summary>
+        public IEnumerable<CommandResult> Successes => Results.Where(r => r.Success);
         
-        public BatchCommandResult(IEnumerable&lt;CommandResult&gt; results)
+        public BatchCommandResult(IEnumerable<CommandResult> results)
         {
             Results = results.ToList().AsReadOnly();
         }

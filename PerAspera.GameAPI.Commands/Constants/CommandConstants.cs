@@ -2,9 +2,9 @@ using System;
 
 namespace PerAspera.GameAPI.Commands.Constants
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Types of native Per Aspera commands
-    /// &lt;/summary&gt;
+    /// </summary>
     public static class NativeCommandTypes
     {
         // Resource Commands
@@ -70,9 +70,9 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string CustomCommand = "CustomCommand";
         public const string BatchCommand = "BatchCommand";
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get all native command types
-        /// &lt;/summary&gt;
+        /// </summary>
         public static readonly string[] AllNativeTypes = {
             ImportResource, SpawnResourceVein, ExhaustResourceVein,
             UnlockBuilding, AdditionalBuilding, BuildingRebuild, FactionCreateBuilding,
@@ -82,18 +82,18 @@ namespace PerAspera.GameAPI.Commands.Constants
             CustomCommand, BatchCommand
         };
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Check if command type is a native Per Aspera command
-        /// &lt;/summary&gt;
+        /// </summary>
         public static bool IsNativeCommandType(string commandType)
         {
-            return Array.Exists(AllNativeTypes, t =&gt; t.Equals(commandType, StringComparison.OrdinalIgnoreCase));
+            return Array.Exists(AllNativeTypes, t => t.Equals(commandType, StringComparison.OrdinalIgnoreCase));
         }
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Parameter names used in commands
-    /// &lt;/summary&gt;
+    /// </summary>
     public static class ParameterNames
     {
         // Common parameters
@@ -132,9 +132,9 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string Validate = "validate";
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Error codes for command execution
-    /// &lt;/summary&gt;
+    /// </summary>
     public static class ErrorCodes
     {
         public const string ValidationFailed = "VALIDATION_FAILED";
@@ -151,34 +151,34 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string InternalError = "INTERNAL_ERROR";
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Constants for command system configuration
-    /// &lt;/summary&gt;
+    /// </summary>
     public static class CommandConstants
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Default timeout for command execution in milliseconds
-        /// &lt;/summary&gt;
+        /// </summary>
         public const int DefaultTimeoutMs = 5000;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Maximum number of commands in a batch
-        /// &lt;/summary&gt;
+        /// </summary>
         public const int MaxBatchSize = 100;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Maximum number of concurrent commands in parallel execution
-        /// &lt;/summary&gt;
+        /// </summary>
         public const int MaxConcurrentCommands = 8;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Default retry count for failed commands
-        /// &lt;/summary&gt;
+        /// </summary>
         public const int DefaultRetryCount = 3;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Version of the command system API
-        /// &lt;/summary&gt;
+        /// </summary>
         public const string ApiVersion = "1.0.0";
     }
 }

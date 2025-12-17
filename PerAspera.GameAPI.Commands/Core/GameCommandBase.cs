@@ -4,56 +4,56 @@ using System.Linq;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Abstract base class for all game commands with common functionality
-    /// &lt;/summary&gt;
+    /// </summary>
     public abstract class GameCommandBase : IGameCommand
     {
-        /// &lt;inheritdoc/&gt;
+        /// <inheritdoc/>
         public abstract string CommandType { get; }
         
-        /// &lt;inheritdoc/&gt;
+        /// <inheritdoc/>
         public DateTime Timestamp { get; }
         
-        /// &lt;inheritdoc/&gt;
+        /// <inheritdoc/>
         public abstract object Faction { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Parameters for this command
-        /// &lt;/summary&gt;
-        protected Dictionary&lt;string, object&gt; Parameters { get; }
+        /// </summary>
+        protected Dictionary<string, object> Parameters { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Initialize base command with current timestamp
-        /// &lt;/summary&gt;
+        /// </summary>
         protected GameCommandBase()
         {
             Timestamp = DateTime.UtcNow;
-            Parameters = new Dictionary&lt;string, object&gt;();
+            Parameters = new Dictionary<string, object>();
         }
         
-        /// &lt;inheritdoc/&gt;
+        /// <inheritdoc/>
         public abstract bool IsValid();
         
-        /// &lt;inheritdoc/&gt;
+        /// <inheritdoc/>
         public virtual string GetDescription()
         {
-            var parametersList = string.Join(", ", Parameters.Select(kvp =&gt; $"{kvp.Key}={kvp.Value}"));
+            var parametersList = string.Join(", ", Parameters.Select(kvp => $"{kvp.Key}={kvp.Value}"));
             return $"{CommandType}({parametersList})";
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Add parameter to this command
-        /// &lt;/summary&gt;
+        /// </summary>
         protected void AddParameter(string key, object value)
         {
             Parameters[key] = value;
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get parameter value with type conversion
-        /// &lt;/summary&gt;
-        protected T GetParameter&lt;T&gt;(string key, T defaultValue = default)
+        /// </summary>
+        protected T GetParameter<T>(string key, T defaultValue = default)
         {
             if (!Parameters.TryGetValue(key, out var value))
                 return defaultValue;
@@ -71,20 +71,20 @@ namespace PerAspera.GameAPI.Commands.Core
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Check if parameter exists
-        /// &lt;/summary&gt;
+        /// </summary>
         protected bool HasParameter(string key)
         {
             return Parameters.ContainsKey(key);
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Validate required parameters are present
-        /// &lt;/summary&gt;
+        /// </summary>
         protected bool ValidateRequiredParameters(params string[] requiredParameters)
         {
-            return requiredParameters.All(param =&gt; Parameters.ContainsKey(param) && Parameters[param] != null);
+            return requiredParameters.All(param => Parameters.ContainsKey(param) && Parameters[param] != null);
         }
         
         public override string ToString()

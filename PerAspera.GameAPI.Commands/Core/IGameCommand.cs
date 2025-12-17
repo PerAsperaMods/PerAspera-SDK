@@ -2,35 +2,35 @@ using System;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Base interface for all game commands (native and custom)
-    /// &lt;/summary&gt;
+    /// </summary>
     public interface IGameCommand
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Type of the command (used for routing and handling)
-        /// &lt;/summary&gt;
+        /// </summary>
         string CommandType { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// When the command was created
-        /// &lt;/summary&gt;
+        /// </summary>
         DateTime Timestamp { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Faction that will execute this command
-        /// &lt;/summary&gt;
+        /// </summary>
         object Faction { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Validate command parameters before execution
-        /// &lt;/summary&gt;
-        /// &lt;returns&gt;True if command is valid and ready for execution&lt;/returns&gt;
+        /// </summary>
+        /// <returns>True if command is valid and ready for execution</returns>
         bool IsValid();
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get human-readable description of command for debugging
-        /// &lt;/summary&gt;
+        /// </summary>
         string GetDescription();
     }
 }

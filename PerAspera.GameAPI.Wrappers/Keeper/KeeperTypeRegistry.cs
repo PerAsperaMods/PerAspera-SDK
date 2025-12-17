@@ -91,7 +91,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get ResourceType by key (e.g., "resource_water", "resource_silicon")
-        /// Uses StaticDataCollectionItem&lt;ResourceType&gt;.Get(key) pattern
+        /// Uses StaticDataCollectionItem<ResourceType>.Get(key) pattern
         /// Returns null if not found
         /// </summary>
         /// <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
@@ -140,7 +140,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get BuildingType by key (e.g., "building_solar_panel")
-        /// Uses StaticDataCollectionItem&lt;BuildingType&gt;.Get(key) pattern
+        /// Uses StaticDataCollectionItem<BuildingType>.Get(key) pattern
         /// Returns null if not found
         /// </summary>
         /// <param name="buildingKey">Building key from YAML</param>
@@ -187,7 +187,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get TechnologyType by key (e.g., "tech_basic_chemistry")
-        /// Uses StaticDataCollectionItem&lt;TechnologyType&gt;.Get(key) pattern
+        /// Uses StaticDataCollectionItem<TechnologyType>.Get(key) pattern
         /// Returns null if not found
         /// </summary>
         /// <param name="technologyKey">Technology key from YAML</param>

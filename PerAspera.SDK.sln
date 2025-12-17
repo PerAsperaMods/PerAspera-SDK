@@ -19,8 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerAspera.GameAPI.Climate",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerAspera.GameAPI.Overrides", "PerAspera.GameAPI.Overrides\PerAspera.GameAPI.Overrides.csproj", "{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerAspera.GameAPI.Commands", "PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj", "{1A2B3C4D-5E6F-7890-ABCD-123456789012}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,18 +125,6 @@ Global
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x64.Build.0 = Release|Any CPU
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x86.ActiveCfg = Release|Any CPU
 		{9E73A6A0-2BBA-407E-AE56-C2B239B4E516}.Release|x86.Build.0 = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x64.Build.0 = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Debug|x86.Build.0 = Debug|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x64.ActiveCfg = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x64.Build.0 = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x86.ActiveCfg = Release|Any CPU
-		{1A2B3C4D-5E6F-7890-ABCD-123456789012}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

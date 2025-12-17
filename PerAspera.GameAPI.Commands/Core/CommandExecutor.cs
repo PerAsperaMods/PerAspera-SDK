@@ -9,26 +9,26 @@ using PerAspera.GameAPI.Commands.Native;
 
 namespace PerAspera.GameAPI.Commands.Core
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Core executor for game commands - bridges SDK to native CommandBus
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandExecutor
     {
         private readonly object _commandBus;
         private readonly object _keeper;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Initialize executor with access to native CommandBus and Keeper
-        /// &lt;/summary&gt;
+        /// </summary>
         public CommandExecutor(object commandBus, object keeper)
         {
             _commandBus = commandBus ?? throw new ArgumentNullException(nameof(commandBus));
             _keeper = keeper ?? throw new ArgumentNullException(nameof(keeper));
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute a single command synchronously
-        /// &lt;/summary&gt;
+        /// </summary>
         public CommandResult Execute(IGameCommand command)
         {
             if (command == null)
@@ -69,20 +69,20 @@ namespace PerAspera.GameAPI.Commands.Core
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute a single command asynchronously
-        /// &lt;/summary&gt;
-        public async Task&lt;CommandResult&gt; ExecuteAsync(IGameCommand command)
+        /// </summary>
+        public async Task<CommandResult> ExecuteAsync(IGameCommand command)
         {
-            return await Task.Run(() =&gt; Execute(command));
+            return await Task.Run(() => Execute(command));
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute multiple commands in sequence
-        /// &lt;/summary&gt;
-        public BatchCommandResult ExecuteBatch(IEnumerable&lt;IGameCommand&gt; commands)
+        /// </summary>
+        public BatchCommandResult ExecuteBatch(IEnumerable<IGameCommand> commands)
         {
-            var results = new List&lt;CommandResult&gt;();
+            var results = new List<CommandResult>();
             
             foreach (var command in commands)
             {
@@ -96,13 +96,13 @@ namespace PerAspera.GameAPI.Commands.Core
             return new BatchCommandResult(results);
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execute commands in parallel (use with caution - may cause race conditions)
-        /// &lt;/summary&gt;
-        public async Task&lt;BatchCommandResult&gt; ExecuteBatchParallelAsync(IEnumerable&lt;IGameCommand&gt; commands, int maxConcurrency = 4)
+        /// </summary>
+        public async Task<BatchCommandResult> ExecuteBatchParallelAsync(IEnumerable<IGameCommand> commands, int maxConcurrency = 4)
         {
             var semaphore = new SemaphoreSlim(maxConcurrency);
-            var tasks = commands.Select(async command =&gt;
+            var tasks = commands.Select(async command =>
             {
                 await semaphore.WaitAsync();
                 try
@@ -119,17 +119,17 @@ namespace PerAspera.GameAPI.Commands.Core
             return new BatchCommandResult(results);
         }
         
-        /// &lt;summary&gt;
-        /// Execute native command through CommandBus.Dispatch&lt;T&gt;() → Keeper.Register()
+        /// <summary>
+        /// Execute native command through CommandBus.Dispatch<T>() → Keeper.Register()
         /// This is the core bridge to the Per Aspera command system
-        /// &lt;/summary&gt;
+        /// </summary>
         private bool ExecuteNativeCommand(IGameCommand command)
         {
             try
             {
                 // TODO: Implement actual native command execution
                 // This will use reflection or IL2CPP interop to call:
-                // CommandBus.Dispatch&lt;CommandType&gt;(nativeCommandInstance)
+                // CommandBus.Dispatch<CommandType>(nativeCommandInstance)
                 // which then calls Keeper.Register() internally
                 
                 LogAspera.Debug($"Executing native command: {command.CommandType}");
@@ -137,7 +137,7 @@ namespace PerAspera.GameAPI.Commands.Core
                 // Placeholder for native execution
                 // In real implementation, this would:
                 // 1. Convert SDK command to native Command class instance
-                // 2. Call CommandBus.Dispatch&lt;T&gt;(nativeCommand)
+                // 2. Call CommandBus.Dispatch<T>(nativeCommand)
                 // 3. Return success/failure based on result
                 
                 return true; // Placeholder return

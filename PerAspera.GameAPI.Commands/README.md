@@ -41,7 +41,7 @@ var result = Commands.Create("ImportResource")
 This module implements a bridge between the Per Aspera SDK and the native CommandBus system:
 
 ```
-SDK Commands API → CommandBus.Dispatch&lt;T&gt;() → Keeper.Register() → Game Engine
+SDK Commands API → CommandBus.Dispatch<T>() → Keeper.Register() → Game Engine
 ```
 
 See the [Commands System Specification](../../../DOC/SDK/GameAPI/Commands-System-Specification.md) for detailed architecture information.

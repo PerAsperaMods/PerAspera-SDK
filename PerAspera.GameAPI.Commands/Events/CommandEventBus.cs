@@ -5,20 +5,20 @@ using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Commands.Events
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Statistics about command execution
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandStatistics
     {
         public int TotalCommandsExecuted { get; set; }
         public int SuccessfulCommands { get; set; }
         public int FailedCommands { get; set; }
         public long TotalExecutionTimeMs { get; set; }
-        public double AverageExecutionTimeMs =&gt; TotalCommandsExecuted &gt; 0 ? (double)TotalExecutionTimeMs / TotalCommandsExecuted : 0;
-        public double SuccessRate =&gt; TotalCommandsExecuted &gt; 0 ? (double)SuccessfulCommands / TotalCommandsExecuted : 0;
+        public double AverageExecutionTimeMs => TotalCommandsExecuted > 0 ? (double)TotalExecutionTimeMs / TotalCommandsExecuted : 0;
+        public double SuccessRate => TotalCommandsExecuted > 0 ? (double)SuccessfulCommands / TotalCommandsExecuted : 0;
         
-        public Dictionary&lt;string, int&gt; CommandTypeCounts { get; set; } = new Dictionary&lt;string, int&gt;();
-        public Dictionary&lt;string, long&gt; CommandTypeExecutionTimes { get; set; } = new Dictionary&lt;string, long&gt;();
+        public Dictionary<string, int> CommandTypeCounts { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, long> CommandTypeExecutionTimes { get; set; } = new Dictionary<string, long>();
         
         public override string ToString()
         {
@@ -26,26 +26,26 @@ namespace PerAspera.GameAPI.Commands.Events
         }
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Event bus for command system events
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandEventBus
     {
         private readonly CommandStatistics _statistics = new CommandStatistics();
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Event fired when a command is executed successfully
-        /// &lt;/summary&gt;
-        public event Action&lt;CommandExecutedEvent&gt; CommandExecuted;
+        /// </summary>
+        public event Action<CommandExecutedEvent> CommandExecuted;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Event fired when a command execution fails
-        /// &lt;/summary&gt;
-        public event Action&lt;CommandFailedEvent&gt; CommandFailed;
+        /// </summary>
+        public event Action<CommandFailedEvent> CommandFailed;
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Publish command executed event
-        /// &lt;/summary&gt;
+        /// </summary>
         public void PublishCommandExecuted(CommandExecutedEvent eventData)
         {
             try
@@ -64,9 +64,9 @@ namespace PerAspera.GameAPI.Commands.Events
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Publish command failed event
-        /// &lt;/summary&gt;
+        /// </summary>
         public void PublishCommandFailed(CommandFailedEvent eventData)
         {
             try
@@ -85,9 +85,9 @@ namespace PerAspera.GameAPI.Commands.Events
             }
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Get command execution statistics
-        /// &lt;/summary&gt;
+        /// </summary>
         public CommandStatistics GetStatistics()
         {
             return new CommandStatistics
@@ -96,14 +96,14 @@ namespace PerAspera.GameAPI.Commands.Events
                 SuccessfulCommands = _statistics.SuccessfulCommands,
                 FailedCommands = _statistics.FailedCommands,
                 TotalExecutionTimeMs = _statistics.TotalExecutionTimeMs,
-                CommandTypeCounts = new Dictionary&lt;string, int&gt;(_statistics.CommandTypeCounts),
-                CommandTypeExecutionTimes = new Dictionary&lt;string, long&gt;(_statistics.CommandTypeExecutionTimes)
+                CommandTypeCounts = new Dictionary<string, int>(_statistics.CommandTypeCounts),
+                CommandTypeExecutionTimes = new Dictionary<string, long>(_statistics.CommandTypeExecutionTimes)
             };
         }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Reset statistics
-        /// &lt;/summary&gt;
+        /// </summary>
         public void ResetStatistics()
         {
             _statistics.TotalCommandsExecuted = 0;

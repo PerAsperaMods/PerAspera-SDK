@@ -2,24 +2,24 @@ using System;
 
 namespace PerAspera.GameAPI.Commands.Events
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Event published when a command is executed successfully
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandExecutedEvent
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Command that was executed
-        /// &lt;/summary&gt;
+        /// </summary>
         public Core.IGameCommand Command { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Result of the execution
-        /// &lt;/summary&gt;
+        /// </summary>
         public Core.CommandResult Result { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// When the event occurred
-        /// &lt;/summary&gt;
+        /// </summary>
         public DateTime Timestamp { get; }
         
         public CommandExecutedEvent(Core.IGameCommand command, Core.CommandResult result)
@@ -35,29 +35,29 @@ namespace PerAspera.GameAPI.Commands.Events
         }
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Event published when a command execution fails
-    /// &lt;/summary&gt;
+    /// </summary>
     public class CommandFailedEvent
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Command that failed
-        /// &lt;/summary&gt;
+        /// </summary>
         public Core.IGameCommand Command { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Error message
-        /// &lt;/summary&gt;
+        /// </summary>
         public string Error { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// Execution time before failure
-        /// &lt;/summary&gt;
+        /// </summary>
         public long ExecutionTimeMs { get; }
         
-        /// &lt;summary&gt;
+        /// <summary>
         /// When the event occurred
-        /// &lt;/summary&gt;
+        /// </summary>
         public DateTime Timestamp { get; }
         
         public CommandFailedEvent(Core.IGameCommand command, string error, long executionTimeMs)
