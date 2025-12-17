@@ -49,14 +49,14 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
         {
             var command = new SetOverrideCommand();
             
-            if (parameters.TryGetValue("OverrideType", out var overrideType))
+            if (parameters.TryGetValue("SystemName", out var systemName))
             {
-                command.OverrideType = overrideType?.ToString();
+                command.SystemName = systemName?.ToString();
             }
             
-            if (parameters.TryGetValue("Value", out var value))
+            if (parameters.TryGetValue("OverrideValue", out var overrideValue))
             {
-                command.Value = value;
+                command.OverrideValue = overrideValue;
             }
             
             return command;

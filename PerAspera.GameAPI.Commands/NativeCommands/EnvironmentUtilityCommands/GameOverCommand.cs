@@ -51,7 +51,7 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands
             
             if (parameters.TryGetValue("IsWin", out var isWin) && bool.TryParse(isWin?.ToString(), out var isWinValue))
             {
-                command.IsWin = isWinValue;
+                command.IsVictory = isWinValue;
             }
             
             if (parameters.TryGetValue("Reason", out var reason))
