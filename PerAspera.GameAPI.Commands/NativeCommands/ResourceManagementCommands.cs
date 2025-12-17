@@ -190,29 +190,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Quantity] = quantity;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
-            if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
-                return false;
-            }
-            
-            if (Resource == null)
-            {
-                errorMessage = "Resource cannot be null";
-                return false;
-            }
-            
-            if (Quantity <= 0)
-            {
-                errorMessage = $"Quantity must be positive, got {Quantity}";
-                return false;
-            }
-            
-            return true;
+            return Faction != null && Resource != null && Quantity > 0;
         }
         
         public override string GetDescription()

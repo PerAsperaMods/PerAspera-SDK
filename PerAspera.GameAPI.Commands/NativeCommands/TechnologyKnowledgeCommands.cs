@@ -29,7 +29,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction that will research the technology
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.ResearchTechnology;
         
         /// <summary>
         /// The technology to research
@@ -52,21 +54,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Technology] = technology;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
             if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
                 return false;
-            }
             
             if (Technology == null)
-            {
-                errorMessage = "Technology cannot be null";
                 return false;
-            }
             
             // Note: Additional validation could check:
             // - If technology prerequisites are met
@@ -119,7 +113,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction that will gain the knowledge
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.UnlockKnowledge;
         
         /// <summary>
         /// The knowledge to unlock
@@ -141,21 +137,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Knowledge] = knowledge;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
             if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
                 return false;
-            }
             
             if (Knowledge == null)
-            {
-                errorMessage = "Knowledge cannot be null";
                 return false;
-            }
             
             // Additional validation could check:
             // - If knowledge prerequisites are met
@@ -203,7 +191,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction that will lose the knowledge
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.LockKnowledge;
         
         /// <summary>
         /// The knowledge to lock
@@ -225,21 +215,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Knowledge] = knowledge;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
             if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
                 return false;
-            }
             
             if (Knowledge == null)
-            {
-                errorMessage = "Knowledge cannot be null";
                 return false;
-            }
             
             return true;
         }

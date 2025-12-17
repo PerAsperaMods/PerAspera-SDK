@@ -6,11 +6,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 {
     public class WinGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.WinGame;
+        
         public WinGameCommand() : base(NativeCommandTypes.WinGame) { }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -24,11 +26,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class LoseGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.LoseGame;
+        
         public LoseGameCommand() : base(NativeCommandTypes.LoseGame) { }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -42,11 +46,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class PauseGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.PauseGame;
+        
         public PauseGameCommand() : base(NativeCommandTypes.PauseGame) { }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -60,11 +66,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class ResumeGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.ResumeGame;
+        
         public ResumeGameCommand() : base(NativeCommandTypes.ResumeGame) { }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -78,6 +86,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class SaveGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.SaveGame;
+        
         public string SaveName { get; }
         
         public SaveGameCommand(string saveName) : base(NativeCommandTypes.SaveGame)
@@ -86,9 +97,8 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Key] = saveName;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -103,6 +113,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class LoadGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.LoadGame;
+        
         public string SaveName { get; }
         
         public LoadGameCommand(string saveName) : base(NativeCommandTypes.LoadGame)
@@ -111,10 +124,10 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Key] = saveName;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            if (string.IsNullOrEmpty(SaveName)) { errorMessage = "Save name cannot be null or empty"; return false; }
+            if (string.IsNullOrEmpty(SaveName)) 
+                return false;
             return true;
         }
         
@@ -128,11 +141,13 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class RestartGameCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.RestartGame;
+        
         public RestartGameCommand() : base(NativeCommandTypes.RestartGame) { }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
             return true;
         }
         
@@ -146,6 +161,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
 
     public class SetGameSpeedCommand : GameCommandBase
     {
+        public override object Faction { get; }
+        public override string CommandType => NativeCommandTypes.SetGameSpeed;
+        
         public float Speed { get; }
         
         public SetGameSpeedCommand(float speed) : base(NativeCommandTypes.SetGameSpeed)
@@ -155,10 +173,10 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Value] = speed;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            if (Speed <= 0) { errorMessage = "Speed must be positive"; return false; }
+            if (Speed <= 0) 
+                return false;
             return true;
         }
         

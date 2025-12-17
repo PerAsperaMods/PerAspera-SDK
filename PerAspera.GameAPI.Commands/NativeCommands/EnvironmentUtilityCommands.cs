@@ -31,6 +31,8 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// </summary>
         public override object Faction { get; }
         
+        public override string CommandType => NativeCommandTypes.SpawnResourceVein;
+        
         /// <summary>
         /// The type of resource vein to spawn
         /// </summary>
@@ -110,7 +112,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction to sabotage
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.Sabotage;
         
         /// <summary>
         /// Create a new Sabotage command
@@ -124,17 +128,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Faction] = faction;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
-            if (Faction == null)
-            {
-                errorMessage = "Faction cannot be null";
-                return false;
-            }
-            
-            return true;
+            return Faction != null;
         }
         
         public override string GetDescription()
@@ -172,6 +168,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
     /// </example>
     public class SetOverrideCommand : GameCommandBase
     {
+        public override object Faction => null; // Global command
+        
+        public override string CommandType => NativeCommandTypes.SetOverride;
         /// <summary>
         /// The configuration key to override
         /// </summary>
@@ -200,23 +199,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
             Parameters[ParameterNames.Value] = value;
         }
         
-        protected override bool ValidateCommand(out string errorMessage)
+        public override bool IsValid()
         {
-            errorMessage = null;
-            
-            if (string.IsNullOrWhiteSpace(Key))
-            {
-                errorMessage = "Key cannot be null or empty";
-                return false;
-            }
-            
-            if (Value == null)
-            {
-                errorMessage = "Value cannot be null";
-                return false;
-            }
-            
-            return true;
+            return !string.IsNullOrWhiteSpace(Key) && Value != null;
         }
         
         public override string GetDescription()
@@ -257,7 +242,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction to show the message to
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.ShowMessage;
         
         /// <summary>
         /// The message to display
@@ -342,7 +329,9 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         /// <summary>
         /// The faction to show the tutorial message to
         /// </summary>
-        public object Faction { get; }
+        public override object Faction { get; }
+        
+        public override string CommandType => NativeCommandTypes.ShowTutorialMessage;
         
         /// <summary>
         /// The tutorial message to display
