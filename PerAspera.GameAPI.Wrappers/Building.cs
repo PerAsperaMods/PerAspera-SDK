@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
@@ -6,10 +7,15 @@ namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
     /// Wrapper for the native Building class
-    /// Provides safe access to building properties and methods
+    /// Provides safe access to building properties and operations
+    /// DOC: Building.md - Factory, infrastructure, and production buildings
     /// </summary>
     public class Building : WrapperBase
     {
+        /// <summary>
+        /// Initialize Building wrapper with native building object
+        /// </summary>
+        /// <param name="nativeBuilding">Native building instance from game</param>
         public Building(object nativeBuilding) : base(nativeBuilding)
         {
         }
@@ -22,19 +28,46 @@ namespace PerAspera.GameAPI.Wrappers
             return nativeBuilding != null ? new Building(nativeBuilding) : null;
         }
         
-        // ==================== BASIC PROPERTIES ====================
+        // ==================== CORE IDENTIFICATION ====================
         
         /// <summary>
-        /// Building unique number/ID
+        /// Unique building identifier number
+        /// Maps to: _number_k__BackingField
         /// </summary>
         public int Number
         {
+            get => SafeInvoke<int?>("get_number") ?? 0;
+        }
+        
+        /// <summary>
+        /// Building type definition (factory, hab, etc.)
+        /// Maps to: _buildingType field
+        /// </summary>
+        public object? BuildingType
+        {
+            get => SafeInvoke<object>("get_buildingType");
+        }
+        
+        /// <summary>
+        /// Building name from its type
+        /// Elegant wrapper around BuildingType.name access
+        /// </summary>
+        public string BuildingTypeName
+        {
             get
             {
-                var result = SafeInvoke<int?>("get_number");
-                return result ?? -1;
+                try
+                {
+                    return BuildingType?.GetFieldValue<string>("name") ?? "Unknown";
+                }
+                catch
+                {
+                    return "Unknown";
+                }
             }
         }
+        
+        // ==================== BASIC PROPERTIES ====================
         
         /// <summary>
         /// Building type key (e.g., "SolarPanel", "Mine")
@@ -161,10 +194,24 @@ namespace PerAspera.GameAPI.Wrappers
         
         // ==================== INFO ====================
         
+        /// <summary>
+        /// Returns detailed building status as formatted string
+        /// </summary>
+        /// <returns>Building status with core properties</returns>
         public override string ToString()
         {
-            return $"Building #{Number}: {TypeKey} at ({Position.x:F1}, {Position.y:F1}) - " +
-                   $"Alive: {IsAlive}, Built: {IsBuilt}, Operative: {IsOperative}";
+            try
+            {
+                var position = Position;
+                var positionStr = $"({position.x:F1}, {position.y:F1})";
+                
+                return $"Building #{Number}: {TypeKey} at {positionStr} - " +
+                       $"Alive: {IsAlive}, Built: {IsBuilt}, Operative: {IsOperative}";
+            }
+            catch
+            {
+                return $"Building #{Number}: {TypeKey} - Status unavailable";
+            }
         }
     }
 }

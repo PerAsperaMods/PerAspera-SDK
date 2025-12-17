@@ -20,6 +20,7 @@ namespace PerAspera.GameAPI.Wrappers
         public static BaseGame? GetCurrent()
         {
             var instance = GameTypeInitializer.GetBaseGameInstance();
+            
             return instance != null ? new BaseGame(instance) : null;
         }
         
@@ -129,6 +130,38 @@ namespace PerAspera.GameAPI.Wrappers
         {
             SafeInvokeVoid("OnFinishLoading");
         }
+        
+        // ==================== SYSTEM REFERENCES ====================
+        
+        /// <summary>
+        /// Get camera controller reference
+        /// Maps to: cameraController field
+        /// </summary>
+        public object? CameraController
+        {
+            get => SafeInvoke<object>("get_cameraController");
+        }
+        
+        /// <summary>
+        /// Get mars terrain manager
+        /// Maps to: marsManager field
+        /// </summary>
+        public object? MarsManager
+        {
+            get => SafeInvoke<object>("get_marsManager");
+        }
+        
+        /// <summary>
+        /// Get input raycaster for UI interactions
+        /// Maps to: inputRaycaster field
+        /// </summary>
+        public object? InputRaycaster
+        {
+            get => SafeInvoke<object>("get_inputRaycaster");
+        }
+        
+        
+
         
         /// <summary>
         /// Exit to main menu

@@ -17,14 +17,24 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         
         /// <summary>
         /// Initialize wrapper with native CommandBus instance
+        /// Uses GameTypeInitializer for enhanced type discovery
         /// </summary>
         public CommandBusWrapper(object nativeCommandBus)
         {
             _nativeCommandBus = nativeCommandBus ?? throw new ArgumentNullException(nameof(nativeCommandBus));
-            _commandBusType = nativeCommandBus.GetType();
+            
+            // First try to get type via GameTypeInitializer for better accuracy
+            _commandBusType = GameTypeInitializer.GetCommandBusType() ?? nativeCommandBus.GetType();
+            
+            // Validate that the provided instance matches the expected type
+            if (!_commandBusType.IsInstanceOfType(nativeCommandBus))
+            {
+                LogAspera.Warning($"CommandBus instance type mismatch. Expected: {_commandBusType.Name}, Actual: {nativeCommandBus.GetType().Name}");
+                _commandBusType = nativeCommandBus.GetType(); // Fallback to runtime type
+            }
             
             ValidateCommandBusType();
-            LogAspera.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName}");
+            LogAspera.Info($"CommandBusWrapper initialized for type: {_commandBusType.FullName} (via GameTypeInitializer: {GameTypeInitializer.GetCommandBusType() != null})");
         }
         
         /// <summary>
@@ -208,5 +218,72 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return null;
             }
         }
-    }
+        /// <summary>
+        /// Create CommandBusWrapper using GameTypeInitializer for automatic CommandBus discovery
+        /// </summary>
+        /// <returns>CommandBusWrapper instance or null if CommandBus not found</returns>
+        public static CommandBusWrapper CreateFromGame()
+        {
+            try
+            {
+                // Initialize GameTypeInitializer if needed
+                GameTypeInitializer.Initialize();
+
+                // Get BaseGame instance
+                var baseGameType = GameTypeInitializer.GetBaseGameType();
+                if (baseGameType == null)
+                {
+                    LogAspera.Error("BaseGame type not found via GameTypeInitializer");
+                    return null;
+                }
+
+                var baseGameInstance = baseGameType.GetProperty("Instance", 
+                    BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+
+                if (baseGameInstance == null)
+                {
+                    LogAspera.Error("BaseGame.Instance not found");
+                    return null;
+                }
+
+                // Try to find CommandBus on BaseGame instance
+                var commandBusProperty = baseGameType.GetProperty("CommandBus", 
+                    BindingFlags.Public | BindingFlags.Instance);
+
+                if (commandBusProperty != null)
+                {
+                    var commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
+                    if (commandBusInstance != null)
+                    {
+                        LogAspera.Info("CommandBus found via BaseGame.CommandBus property");
+                        return new CommandBusWrapper(commandBusInstance);
+                    }
+                }
+
+                // Try alternative field names
+                var commandBusFields = baseGameType.GetFields(
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                foreach (var field in commandBusFields)
+                {
+                    if (field.Name.Contains("CommandBus") || field.Name.Contains("commandBus"))
+                    {
+                        var commandBusInstance = field.GetValue(baseGameInstance);
+                        if (commandBusInstance != null)
+                        {
+                            LogAspera.Info($"CommandBus found via BaseGame field: {field.Name}");
+                            return new CommandBusWrapper(commandBusInstance);
+                        }
+                    }
+                }
+
+                LogAspera.Error("CommandBus instance not found on BaseGame");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Failed to create CommandBusWrapper from game: {ex.Message}");
+                return null;
+            }
+        }    }
 }

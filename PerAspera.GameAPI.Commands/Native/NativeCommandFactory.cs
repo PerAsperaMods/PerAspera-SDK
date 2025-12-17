@@ -167,36 +167,65 @@ namespace PerAspera.GameAPI.Commands.Native
             {
                 LogAspera.Info("Scanning assemblies for command types...");
                 
+                // Initialize GameTypeInitializer to get access to game assemblies
+                GameTypeInitializer.Initialize();
+                
                 // Get all loaded assemblies
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 
+                // Priority scan: Focus on Assembly-CSharp (Per Aspera game assembly)
+                var gameAssembly = assemblies.FirstOrDefault(a => a.GetName().Name == "Assembly-CSharp");
+                if (gameAssembly != null)
+                {
+                    ScanAssemblyForCommands(gameAssembly, isPriorityAssembly: true);
+                }
+                
+                // Scan other assemblies
                 foreach (var assembly in assemblies)
                 {
-                    try
-                    {
-                        // Look for types that look like commands
-                        var commandTypes = assembly.GetTypes()
-                            .Where(t => IsCommandType(t))
-                            .ToArray();
-                            
-                        foreach (var type in commandTypes)
-                        {
-                            RegisterCommandType(type);
-                        }
-                        
-                        if (commandTypes.Length > 0)
-                        {
-                            LogAspera.Debug($"Found {commandTypes.Length} command types in {assembly.GetName().Name}");
-                        }
-                    }
-                    catch (ReflectionTypeLoadException ex)
-                    {
-                        LogAspera.Debug($"Could not load all types from {assembly.GetName().Name}: {ex.Message}");
-                    }
-                    catch (Exception ex)
-                    {
-                        LogAspera.Debug($"Error scanning assembly {assembly.GetName().Name}: {ex.Message}");
-                    }
+                    if (assembly == gameAssembly) continue; // Already scanned
+                    
+                    ScanAssemblyForCommands(assembly, isPriorityAssembly: false);
+                }
+                
+                LogAspera.Info($"Command type scanning complete: {_commandTypes.Count} types found");
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Error during command type scanning: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Scan a single assembly for command types
+        /// </summary>
+        private void ScanAssemblyForCommands(Assembly assembly, bool isPriorityAssembly)
+        {
+            try
+            {
+                // Look for types that look like commands
+                var commandTypes = assembly.GetTypes()
+                    .Where(t => IsCommandType(t))
+                    .ToArray();
+                    
+                foreach (var type in commandTypes)
+                {
+                    RegisterCommandType(type);
+                }
+                
+                if (commandTypes.Length > 0)
+                {
+                    LogAspera.Info($"Found {commandTypes.Length} command types in {assembly.GetName().Name}{(isPriorityAssembly ? " (game assembly)" : "")}");
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                LogAspera.Debug($"Could not load all types from {assembly.GetName().Name}: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Debug($"Error scanning assembly {assembly.GetName().Name}: {ex.Message}");
+            }
                 }
                 
                 LogAspera.Info($"Command type scan complete. Found {_commandTypes.Count} total command types");
@@ -320,6 +349,72 @@ namespace PerAspera.GameAPI.Commands.Native
                 NativeCommandTypes.SetOverride => "CmdSetOverride",
                 _ => sdkCommandType.StartsWith("Cmd") ? sdkCommandType : "Cmd" + sdkCommandType
             };
+        }
+
+        /// <summary>
+        /// Create ImportResource command with MVP parameters
+        /// Phase 1.2: Specialized factory method for testing
+        /// </summary>
+        public CommandBaseWrapper CreateImportResourceCommand(string resourceName, float amount)
+        {
+            try
+            {
+                LogAspera.Debug($"Creating ImportResource command: {resourceName} x {amount}");
+
+                // Try to create CmdImportResource using discovered types
+                var commandWrapper = CreateCommand("ImportResource", resourceName, amount);
+                
+                if (commandWrapper == null)
+                {
+                    // Fallback: try alternative command names
+                    commandWrapper = CreateCommand("CmdImportResource", resourceName, amount);
+                }
+
+                if (commandWrapper == null)
+                {
+                    LogAspera.Error($"Failed to create ImportResource command for {resourceName}");
+                }
+                else
+                {
+                    LogAspera.Info($"Successfully created ImportResource command: {resourceName} x {amount}");
+                }
+
+                return commandWrapper;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Error creating ImportResource command: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get diagnostic information about discovered command types
+        /// Useful for debugging command discovery issues
+        /// </summary>
+        public string GetDiagnosticInfo()
+        {
+            try
+            {
+                var info = new System.Text.StringBuilder();
+                info.AppendLine($"NativeCommandFactory Diagnostic Info:");
+                info.AppendLine($"  Total Command Types: {_commandTypes.Count}");
+                info.AppendLine($"  GameTypeInitializer Available: {GameTypeInitializer.GetBaseGameType() != null}");
+                info.AppendLine($"  CommandBus Type Available: {GameTypeInitializer.GetCommandBusType() != null}");
+                info.AppendLine();
+                info.AppendLine("Discovered Command Types:");
+
+                foreach (var kvp in _commandTypes.OrderBy(x => x.Key))
+                {
+                    info.AppendLine($"  - {kvp.Key} → {kvp.Value.FullName}");
+                }
+
+                return info.ToString();
+            }
+            catch (Exception ex)
+            {
+                return $"Error generating diagnostic info: {ex.Message}";
+            }
         }
     }
 }

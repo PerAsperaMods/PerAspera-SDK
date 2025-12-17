@@ -13,7 +13,7 @@ namespace PerAspera.GameAPI.Commands.Native
     public class CommandBusAccessor
     {
         private readonly CommandBusWrapper _commandBusWrapper;
-        private readonly KeeperWrapper _keeperWrapper;
+        private readonly KeeperWrapper? _keeperWrapper;
         private readonly NativeCommandFactory _factory;
         private static CommandBusAccessor _instance;
         
@@ -43,6 +43,104 @@ namespace PerAspera.GameAPI.Commands.Native
             _instance = new CommandBusAccessor(nativeCommandBus, nativeKeeper);
             LogAspera.Info("CommandBusAccessor initialized successfully");
         }
+
+        /// <summary>
+        /// Auto-initialize using GameTypeInitializer (Phase 1.1 integration)
+        /// Attempts to find CommandBus and Keeper from BaseGame automatically
+        /// </summary>
+        public static bool TryAutoInitialize()
+        {
+            if (_instance != null)
+            {
+                LogAspera.Debug("CommandBusAccessor already initialized");
+                return true;
+            }
+
+            try
+            {
+                LogAspera.Info("Attempting auto-initialization via GameTypeInitializer...");
+
+                // Initialize GameTypeInitializer first
+                GameTypeInitializer.Initialize();
+
+                // Get BaseGame instance
+                var baseGameType = GameTypeInitializer.GetBaseGameType();
+                if (baseGameType == null)
+                {
+                    LogAspera.Error("BaseGame type not found via GameTypeInitializer");
+                    return false;
+                }
+
+                var baseGameInstance = baseGameType.GetProperty("Instance", 
+                    BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+
+                if (baseGameInstance == null)
+                {
+                    LogAspera.Error("BaseGame.Instance not found");
+                    return false;
+                }
+
+                // Find CommandBus on BaseGame
+                object commandBusInstance = null;
+                var commandBusProperty = baseGameType.GetProperty("CommandBus", BindingFlags.Public | BindingFlags.Instance);
+                if (commandBusProperty != null)
+                {
+                    commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
+                }
+
+                if (commandBusInstance == null)
+                {
+                    // Try field search
+                    var commandBusFields = baseGameType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (var field in commandBusFields)
+                    {
+                        if (field.Name.Contains("CommandBus") || field.Name.Contains("commandBus"))
+                        {
+                            commandBusInstance = field.GetValue(baseGameInstance);
+                            if (commandBusInstance != null) break;
+                        }
+                    }
+                }
+
+                if (commandBusInstance == null)
+                {
+                    LogAspera.Error("CommandBus instance not found on BaseGame");
+                    return false;
+                }
+
+                // Find Keeper (similar approach)
+                object keeperInstance = null;
+                var keeperProperty = baseGameType.GetProperty("Keeper", BindingFlags.Public | BindingFlags.Instance);
+                if (keeperProperty != null)
+                {
+                    keeperInstance = keeperProperty.GetValue(baseGameInstance);
+                }
+
+                if (keeperInstance == null)
+                {
+                    // Try field search for Keeper
+                    var keeperFields = baseGameType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (var field in keeperFields)
+                    {
+                        if (field.Name.Contains("Keeper") || field.Name.Contains("keeper"))
+                        {
+                            keeperInstance = field.GetValue(baseGameInstance);
+                            if (keeperInstance != null) break;
+                        }
+                    }
+                }
+
+                // Initialize with found instances (keeper can be null for now)
+                _instance = new CommandBusAccessor(commandBusInstance, keeperInstance);
+                LogAspera.Info($"CommandBusAccessor auto-initialized successfully (CommandBus: {commandBusInstance != null}, Keeper: {keeperInstance != null})");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Auto-initialization failed: {ex.Message}");
+                return false;
+            }
+        }
         
         /// <summary>
         /// Reset global instance (for testing)
@@ -58,7 +156,18 @@ namespace PerAspera.GameAPI.Commands.Native
         private CommandBusAccessor(object nativeCommandBus, object nativeKeeper)
         {
             _commandBusWrapper = new CommandBusWrapper(nativeCommandBus);
-            _keeperWrapper = new KeeperWrapper(nativeKeeper);
+            
+            // Only create KeeperWrapper if keeper instance is available
+            if (nativeKeeper != null)
+            {
+                _keeperWrapper = new KeeperWrapper(nativeKeeper);
+            }
+            else
+            {
+                _keeperWrapper = null;
+                LogAspera.Warning("CommandBusAccessor initialized without Keeper - some functionality may be limited");
+            }
+            
             _factory = NativeCommandFactory.Instance;
             
             ValidateInitialization();
@@ -151,6 +260,12 @@ namespace PerAspera.GameAPI.Commands.Native
                     return null;
                 }
                 
+                if (_keeperWrapper == null)
+                {
+                    LogAspera.Error("KeeperWrapper is null - cannot register");
+                    return null;
+                }
+                
                 return _keeperWrapper.RegisterHandleable(handleableObject);
             }
             catch (Exception ex)
@@ -170,6 +285,12 @@ namespace PerAspera.GameAPI.Commands.Native
                 if (!IsAvailable())
                 {
                     LogAspera.Error("Keeper not available for unregistration");
+                    return false;
+                }
+                
+                if (_keeperWrapper == null)
+                {
+                    LogAspera.Error("KeeperWrapper is null - cannot unregister");
                     return false;
                 }
                 
@@ -232,9 +353,9 @@ namespace PerAspera.GameAPI.Commands.Native
         }
         
         /// <summary>
-        /// Access Keeper wrapper for advanced scenarios
+        /// Access Keeper wrapper for advanced scenarios (may be null)
         /// </summary>
-        public KeeperWrapper GetKeeperWrapper()
+        public KeeperWrapper? GetKeeperWrapper()
         {
             return _keeperWrapper;
         }

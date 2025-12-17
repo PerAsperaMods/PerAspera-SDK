@@ -221,6 +221,24 @@
             Method: OnFinishLoading()
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.CameraController">
+            <summary>
+            Get camera controller reference
+            Maps to: cameraController field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.MarsManager">
+            <summary>
+            Get mars terrain manager
+            Maps to: marsManager field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGame.InputRaycaster">
+            <summary>
+            Get input raycaster for UI interactions
+            Maps to: inputRaycaster field
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.ExitToMainMenu">
             <summary>
             Exit to main menu
@@ -236,8 +254,15 @@
         <member name="T:PerAspera.GameAPI.Wrappers.Building">
             <summary>
             Wrapper for the native Building class
-            Provides safe access to building properties and methods
+            Provides safe access to building properties and operations
+            DOC: Building.md - Factory, infrastructure, and production buildings
             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.#ctor(System.Object)">
+            <summary>
+            Initialize Building wrapper with native building object
+            </summary>
+            <param name="nativeBuilding">Native building instance from game</param>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Building.FromNative(System.Object)">
             <summary>
@@ -246,7 +271,20 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Building.Number">
             <summary>
-            Building unique number/ID
+            Unique building identifier number
+            Maps to: _number_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.BuildingType">
+            <summary>
+            Building type definition (factory, hab, etc.)
+            Maps to: _buildingType field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.BuildingTypeName">
+            <summary>
+            Building name from its type
+            Elegant wrapper around BuildingType.name access
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Building.TypeKey">
@@ -321,6 +359,167 @@
             Cancel scrapping
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.ToString">
+            <summary>
+            Returns detailed building status as formatted string
+            </summary>
+            <returns>Building status with core properties</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Drone">
+            <summary>
+            Elegant wrapper for the native Drone class
+            Transforms technical decompiled field names into beautiful, intuitive properties
+            DOC REFERENCES: Drone.md - Decompiled drone class analysis
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Drone.#ctor(System.Object)">
+            <summary>
+            Initialize Drone wrapper with native drone object
+            </summary>
+            <param name="nativeDrone">Native drone instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Drone.GetByHandle(System.Object)">
+            <summary>
+            Get drone from Keeper registry by handle
+            </summary>
+            <param name="handle">Native drone handle</param>
+            <returns>Drone wrapper or null if not found</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.DroneNumber">
+            <summary>
+            Unique drone identifier number
+            Maps to: _number_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Position">
+            <summary>
+            Current 3D position on the planet
+            Maps to: _position3D_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Direction">
+            <summary>
+            Current movement direction and rotation
+            Maps to: _directionRotation_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.MaxCargoCapacity">
+            <summary>
+            Maximum cargo capacity of this drone
+            Maps to: _cargoCapacity_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.IsCarryingCargo">
+            <summary>
+            Whether drone is currently carrying resources
+            Maps to: _hasResource_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.CurrentCargoLoad">
+            <summary>
+            Current cargo load (calculated property)
+            Elegant wrapper combining cargo state checks
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.CargoUtilization">
+            <summary>
+            Percentage of cargo capacity currently used
+            Elegant computed property for cargo utilization
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.StateId">
+            <summary>
+            Current operational state ID
+            Maps to: _stateId_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.NavigationPath">
+            <summary>
+            Current navigation path being followed
+            Maps to: _currentWay_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.IsNavigating">
+            <summary>
+            Whether drone is currently following a path
+            Elegant wrapper around navigation state
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.IsAlive">
+            <summary>
+            Whether drone is alive and operational
+            Maps to: _alive_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Health">
+            <summary>
+            Current health points
+            Maps to: _health_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.IsVisible">
+            <summary>
+            Whether drone is visible in the game world
+            Maps to: _IsVisible_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.OperationalStatus">
+            <summary>
+            Operational status combining multiple state checks
+            Elegant property for overall drone condition
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Universe">
+            <summary>
+            Reference to the universe this drone exists in
+            Maps to: _universe_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Planet">
+            <summary>
+            Reference to the planet this drone operates on
+            Maps to: _planet_k__BackingField
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Drone.Handle">
+            <summary>
+            Drone handle for system operations
+            Maps to: _handle_k__BackingField
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Drone.ToString">
+            <summary>
+            Get detailed drone information for debugging
+            Elegant summary combining multiple properties
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.DroneOperationalStatus">
+            <summary>
+            Elegant enum for drone operational status
+            Replaces complex state ID checking with clear status names
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Destroyed">
+            <summary>Drone has been destroyed and is no longer functional</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Damaged">
+            <summary>Drone is damaged but potentially repairable</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Hidden">
+            <summary>Drone exists but is not visible in the game world</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Idle">
+            <summary>Drone is idle and waiting for tasks</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Moving">
+            <summary>Drone is currently moving to a destination</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Loaded">
+            <summary>Drone is carrying cargo</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Working">
+            <summary>Drone is actively working on a task</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry">
             <summary>
             Central registry for accessing Keeper-managed game entities
@@ -383,6 +582,12 @@
             Provides safe access to planetary properties and climate data
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.#ctor(System.Object)">
+            <summary>
+            Initialize Planet wrapper with native planet object
+            </summary>
+            <param name="nativePlanet">Native planet instance from game</param>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetCurrent">
             <summary>
             Get the current planet instance
@@ -397,26 +602,73 @@
         <member name="P:PerAspera.GameAPI.Wrappers.Planet.WaterStock">
             <summary>
             Water stock on the planet (direct access for convenience)
+            Maps to: GetWaterStock() / SetWaterStock() methods
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.SiliconStock">
+            <summary>
+            Silicon reserves on the planet
+            Maps to: GetResourceStock("resource_silicon")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.IronStock">
+            <summary>
+            Iron ore reserves on the planet
+            Maps to: GetResourceStock("resource_iron")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.CarbonStock">
+            <summary>
+            Carbon reserves on the planet
+            Maps to: GetResourceStock("resource_carbon")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.CalciteStock">
+            <summary>
+            Calcite (limestone) reserves on the planet
+            Maps to: GetResourceStock("resource_calcite")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.HasSufficientWater">
+            <summary>
+            Check if planet has sufficient water for operations
+            Elegant wrapper around water stock checking
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.HasBalancedResources">
+            <summary>
+            Check if planet has balanced resource reserves
+            Combines multiple resource checks in elegant property
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetResourceStock(System.String)">
             <summary>
-            Get stock of a specific resource
+            Get stock of a specific resource with elegant error handling
+            Maps to: Complex resource lookup via KeeperTypeRegistry
             </summary>
             <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
             <returns>Current stock amount or 0 if resource not found</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.AddResource(System.String,System.Single)">
             <summary>
-            Add resource to planet stock
+            Add resource to planet stock with elegant validation
+            Maps to: Complex resource addition via KeeperTypeRegistry
             </summary>
             <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
             <param name="amount">Amount to add (can be negative to remove)</param>
+            <returns>True if operation succeeded</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetNativeObject">
             <summary>
             Get the native game object (for Harmony patches)
             </summary>
+            <returns>Native planet object or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.ToString">
+            <summary>
+            Returns detailed planet status as formatted string
+            </summary>
+            <returns>Planet status with atmosphere and resource information</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Universe">
             <summary>

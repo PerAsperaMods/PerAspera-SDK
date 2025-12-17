@@ -122,31 +122,170 @@ namespace PerAspera.GameAPI.Commands.Core
         /// <summary>
         /// Execute native command through CommandBus.Dispatch<T>() → Keeper.Register()
         /// This is the core bridge to the Per Aspera command system
+        /// Phase 1.1: Now integrated with GameTypeInitializer
         /// </summary>
         private bool ExecuteNativeCommand(IGameCommand command)
         {
             try
             {
-                // TODO: Implement actual native command execution
-                // This will use reflection or IL2CPP interop to call:
-                // CommandBus.Dispatch<CommandType>(nativeCommandInstance)
-                // which then calls Keeper.Register() internally
-                
                 LogAspera.Debug($"Executing native command: {command.CommandType}");
+
+                // Phase 1.1: Auto-initialize CommandBusAccessor if needed
+                CommandBusAccessor accessor;
+                try
+                {
+                    accessor = CommandBusAccessor.Instance;
+                }
+                catch (InvalidOperationException)
+                {
+                    // Not initialized yet, try auto-initialization
+                    LogAspera.Info("CommandBusAccessor not initialized, attempting auto-initialization...");
+                    if (!CommandBusAccessor.TryAutoInitialize())
+                    {
+                        LogAspera.Error("CommandBusAccessor auto-initialization failed");
+                        return false;
+                    }
+                    accessor = CommandBusAccessor.Instance;
+                }
+
+                if (!accessor.IsAvailable())
+                {
+                    LogAspera.Error("CommandBusAccessor still not available after initialization");
+                    return false;
+                }
+
+                // Convert SDK command to native command via NativeCommandFactory
+                var nativeCommand = ConvertToNativeCommand(command);
+                if (nativeCommand == null)
+                {
+                    LogAspera.Error($"Failed to convert SDK command to native: {command.CommandType}");
+                    return false;
+                }
+
+                // Execute via CommandBusAccessor (which uses GameTypeInitializer internally)
+                var success = accessor.ExecuteCommand(nativeCommand);
                 
-                // Placeholder for native execution
-                // In real implementation, this would:
-                // 1. Convert SDK command to native Command class instance
-                // 2. Call CommandBus.Dispatch<T>(nativeCommand)
-                // 3. Return success/failure based on result
-                
-                return true; // Placeholder return
+                if (success)
+                {
+                    LogAspera.Debug($"Native command executed successfully: {command.CommandType}");
+                    return true;
+                }
+                else
+                {
+                    LogAspera.Warning($"Native command execution failed: {command.CommandType}");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
                 LogAspera.Error($"Failed to execute native command {command.CommandType}: {ex.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Convert SDK command to native Per Aspera command instance
+        /// Phase 1.2: MVP implementation for basic command types
+        /// </summary>
+        private CommandBaseWrapper ConvertToNativeCommand(IGameCommand command)
+        {
+            try
+            {
+                var factory = NativeCommandFactory.Instance;
+                
+                // Phase 1.2 MVP: Special handling for ImportResource
+                if (command.CommandType == "ImportResource")
+                {
+                    // Try to extract resource and amount from command
+                    if (TryExtractImportResourceParameters(command, out string resourceName, out float amount))
+                    {
+                        LogAspera.Debug($"Converting SDK ImportResource to native: {resourceName} x {amount}");
+                        return factory.CreateImportResourceCommand(resourceName, amount);
+                    }
+                    else
+                    {
+                        LogAspera.Warning("Could not extract parameters from ImportResource command");
+                    }
+                }
+                
+                // Fallback: Generic parameter extraction
+                var parameters = ExtractCommandParameters(command);
+                var nativeCommand = factory.CreateCommand(command.CommandType, parameters);
+                
+                if (nativeCommand == null)
+                {
+                    LogAspera.Error($"NativeCommandFactory failed to create command: {command.CommandType}");
+                }
+
+                return nativeCommand;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Error converting command {command.CommandType}: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Try to extract ImportResource parameters from SDK command
+        /// Phase 1.2: MVP parameter extraction for testing
+        /// </summary>
+        private bool TryExtractImportResourceParameters(IGameCommand command, out string resourceName, out float amount)
+        {
+            resourceName = null;
+            amount = 0f;
+
+            try
+            {
+                // Use reflection to find resource and amount properties
+                var commandType = command.GetType();
+                var properties = commandType.GetProperties();
+
+                foreach (var prop in properties)
+                {
+                    if (prop.Name.Contains("Resource") && prop.PropertyType == typeof(string))
+                    {
+                        resourceName = (string)prop.GetValue(command);
+                    }
+                    else if ((prop.Name.Contains("Amount") || prop.Name.Contains("Quantity")) && 
+                             (prop.PropertyType == typeof(float) || prop.PropertyType == typeof(double) || prop.PropertyType == typeof(int)))
+                    {
+                        var value = prop.GetValue(command);
+                        amount = Convert.ToSingle(value);
+                    }
+                }
+
+                var hasValidParams = !string.IsNullOrEmpty(resourceName) && amount > 0;
+                
+                if (hasValidParams)
+                {
+                    LogAspera.Debug($"Extracted ImportResource parameters: {resourceName} x {amount}");
+                }
+                else
+                {
+                    LogAspera.Warning($"ImportResource parameter extraction failed: resource='{resourceName}', amount={amount}");
+                }
+
+                return hasValidParams;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.Error($"Error extracting ImportResource parameters: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Extract parameters from SDK command for native command creation
+        /// Phase 1.2: Basic parameter extraction
+        /// </summary>
+        private object[] ExtractCommandParameters(IGameCommand command)
+        {
+            // TODO: Implement proper parameter extraction based on command type
+            // This would analyze the command properties and extract native-compatible parameters
+            
+            // For now, return empty array - NativeCommandFactory should handle default construction
+            return new object[0];
         }
     }
 }

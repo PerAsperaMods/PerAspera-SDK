@@ -36,7 +36,19 @@ var result = Commands.Create("ImportResource")
     .Execute();
 ```
 
-## Architecture
+## Documentation
+
+📚 **Complete documentation has been moved to:**
+
+**[DOC/SDK/Commands/](../../DOC/SDK/Commands/README.md)**
+
+### Quick Links
+- **[Getting Started](../../DOC/SDK/Commands/Quick-Start.md)** - Setup and basic usage
+- **[API Reference](../../DOC/SDK/Commands/API-Reference.md)** - Complete API documentation  
+- **[Examples](../../DOC/SDK/Commands/Examples.md)** - Usage patterns and examples
+- **[Integration Guide](../../DOC/SDK/Commands/Integration-Guide.md)** - BepInX IL2CPP setup
+
+### Architecture Overview
 
 This module implements a bridge between the Per Aspera SDK and the native CommandBus system:
 
@@ -44,11 +56,4 @@ This module implements a bridge between the Per Aspera SDK and the native Comman
 SDK Commands API → CommandBus.Dispatch<T>() → Keeper.Register() → Game Engine
 ```
 
-See the [Commands System Specification](../../../DOC/SDK/GameAPI/Commands-System-Specification.md) for detailed architecture information.
-
-## Documentation
-
-- **[API Reference](docs/api-reference.md)** - Complete API documentation
-- **[Command Types](docs/command-types.md)** - List of all 55 native commands
-- **[Examples](docs/examples.md)** - Usage examples and patterns
-- **[Custom Commands](docs/custom-commands.md)** - Creating custom command types
+For detailed architecture information, see **[Architecture Guide](../../DOC/SDK/Commands/Architecture.md)**.
