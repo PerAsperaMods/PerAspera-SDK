@@ -207,5 +207,17 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             _propertyCache.Clear();
             _attributeCache.Clear();
         }
+
+        /// <summary>
+        /// Get cache statistics for diagnostics
+        /// </summary>
+        /// <returns>String with cache statistics information</returns>
+        public string GetCacheStatistics()
+        {
+            return $"Cached Constructors: {_constructorCache.Count}\n" +
+                   $"Cached Methods: {_methodCache.Count}\n" +
+                   $"Cached Properties: {_propertyCache.Count}\n" +
+                   $"Cached Attributes: {_attributeCache.Count}";
+        }
     }
 }

@@ -237,5 +237,15 @@ namespace PerAspera.GameAPI.Commands.Native.Services
             _commandTypes?.Clear();
             _isInitialized = false;
         }
+
+        /// <summary>
+        /// Get diagnostic information about type discovery
+        /// </summary>
+        /// <returns>String with diagnostic information</returns>
+        public string GetDiagnosticInfo()
+        {
+            return $"TypeDiscovery - Initialized: {_isInitialized}, " +
+                   $"Registered Types: {GetRegisteredTypeCount()}";
+        }
     }
 }
