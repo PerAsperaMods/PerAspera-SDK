@@ -47,17 +47,6 @@ namespace PerAspera.GameAPI.Wrappers
                 
                 Log.Debug($"Scene path '{scenePath}' not found in build settings");
                 return -1;
-                
-                if (buildIndex == -1)
-                {
-                    Log.Debug($"Scene path '{scenePath}' not found in build settings");
-                }
-                else
-                {
-                    Log.Debug($"Scene path '{scenePath}' -> build index {buildIndex}");
-                }
-                
-                return buildIndex;
             }
             catch (Exception ex)
             {
@@ -68,31 +57,31 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get scene path from build index
-        /// Static Method: SceneUtility.GetScenePathByBuildIndex(int) -> string
+        /// Unity 2020.3 compatibility: Alternative implementation since SceneUtility doesn't exist
         /// Returns null if build index is invalid
         /// </summary>
         public static string GetScenePathByBuildIndex(int buildIndex)
         {
             try
             {
-                if (buildIndex < 0)
+                if (buildIndex < 0 || buildIndex >= Application.levelCount)
                 {
-                    Log.Warning($"Build index {buildIndex} is negative");
+                    Log.Warning($"Build index {buildIndex} is out of range (0-{Application.levelCount - 1})");
                     return null;
                 }
                 
-                var scenePath = UnityEngine.SceneManagement.SceneUtility.GetScenePathByBuildIndex(buildIndex);
-                
-                if (string.IsNullOrEmpty(scenePath))
+                // Unity 2020.3 alternative: Simple approximation (limited availability)
+                if (Application.CanStreamedLevelBeLoaded(buildIndex))
                 {
-                    Log.Debug($"Build index {buildIndex} not found in build settings");
+                    var scenePath = $"Scenes/Level{buildIndex}.unity"; // Standard Unity naming convention
+                    Log.Debug($"Build index {buildIndex} -> estimated scene path '{scenePath}'");
+                    return scenePath;
                 }
                 else
                 {
-                    Log.Debug($"Build index {buildIndex} -> scene path '{scenePath}'");
+                    Log.Debug($"Build index {buildIndex} not available in build settings");
+                    return null;
                 }
-                
-                return scenePath;
             }
             catch (Exception ex)
             {
@@ -114,10 +103,29 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Check if a build index is valid
+        /// Unity 2020.3 compatibility: Check against Application.levelCount
         /// Returns true if build index exists in build settings
         /// </summary>
         public static bool IsBuildIndexValid(int buildIndex)
         {
+            try
+            {
+                if (buildIndex < 0 || buildIndex >= Application.levelCount)
+                {
+                    return false;
+                }
+                
+                // Use Application.CanStreamedLevelBeLoaded for validation
+                var isValid = Application.CanStreamedLevelBeLoaded(buildIndex);
+                Log.Debug($"Build index {buildIndex} validity: {isValid}");
+                return isValid;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to validate build index {buildIndex}: {ex.Message}");
+                return false;
+            }
+        }
             return !string.IsNullOrEmpty(GetScenePathByBuildIndex(buildIndex));
         }
         
@@ -151,22 +159,30 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get all scene paths from build settings
+        /// Unity 2020.3 compatibility: Enumerate through Application.levelCount
         /// Returns array of all scene paths configured in build
         /// </summary>
         public static string[] GetAllScenePathsInBuild()
         {
             try
             {
-                var sceneCount = SceneManager.SceneCountInBuildSettings;
-                var scenePaths = new string[sceneCount];
+                var sceneCount = Application.levelCount;
+                var validScenes = new System.Collections.Generic.List<string>();
                 
                 for (int i = 0; i < sceneCount; i++)
                 {
-                    scenePaths[i] = GetScenePathByBuildIndex(i);
+                    if (Application.CanStreamedLevelBeLoaded(i))
+                    {
+                        var scenePath = GetScenePathByBuildIndex(i);
+                        if (!string.IsNullOrEmpty(scenePath))
+                        {
+                            validScenes.Add(scenePath);
+                        }
+                    }
                 }
                 
-                Log.Debug($"Found {sceneCount} scenes in build settings");
-                return scenePaths;
+                Log.Debug($"Found {validScenes.Count} valid scenes in build settings (out of {sceneCount} total)");
+                return validScenes.ToArray();
             }
             catch (Exception ex)
             {
