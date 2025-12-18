@@ -294,6 +294,155 @@
             Method: ForceExit()
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetMainBlackBoard">
+            <summary>
+            Get the main blackboard via Universe
+            Convenience method: BaseGame -> Universe -> BlackBoard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetBlackBoard(System.String)">
+            <summary>
+            Get a specific blackboard by name via Universe
+            Convenience method: BaseGame -> Universe -> BlackBoard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.HasBlackBoard(System.String)">
+            <summary>
+            Check if a blackboard exists via Universe
+            Convenience method: BaseGame -> Universe -> BlackBoard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetBlackBoardNames">
+            <summary>
+            Get all blackboard names via Universe
+            Convenience method: BaseGame -> Universe -> BlackBoard
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.BlackBoard">
+            <summary>
+            Wrapper for the native Blackboard class (variable storage system)
+            Provides safe access to Blackboard variables used for quest/dialog state management
+            DOC: Blackboard.md - Variable storage with string/float/bool values
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.#ctor(System.Object)">
+            <summary>
+            Creates a new BlackBoard wrapper around a native blackboard instance
+            </summary>
+            <param name="nativeBlackBoard">Native blackboard object to wrap</param>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BlackBoard.Name">
+            <summary>
+            Get the name of this blackboard instance
+            Field: name (readonly string)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.TryGetValue(System.String,System.Object@)">
+            <summary>
+            Try to get a value from the blackboard
+            Method: TryGetValue(string variableName, out Value value)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetValue(System.String)">
+            <summary>
+            Get a value from the blackboard
+            Method: GetValue(string variableName)
+            Returns: Value (native Yarn.Value type)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.ContainsKey(System.String)">
+            <summary>
+            Check if the blackboard contains a specific key
+            Method: ContainsKey(string variableName)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.SetValue(System.String,System.String)">
+            <summary>
+            Set a string value in the blackboard
+            Method: SetValue(string variableName, string stringValue)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.SetValue(System.String,System.Single)">
+            <summary>
+            Set a float value in the blackboard
+            Method: SetValue(string variableName, float floatValue)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.SetValue(System.String,System.Boolean)">
+            <summary>
+            Set a boolean value in the blackboard
+            Method: SetValue(string variableName, bool boolValue)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.SetNumber(System.String,System.Single)">
+            <summary>
+            Set a number value using the legacy SetNumber method
+            Method: SetNumber(string variableName, float number)
+            Note: Marked as obsolete in native code but still functional
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetNumber(System.String)">
+            <summary>
+            Get a number value using the legacy GetNumber method
+            Method: GetNumber(string variableName)
+            Note: Marked as obsolete in native code but still functional
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetKeys">
+            <summary>
+            Get all variable keys in this blackboard
+            Method: GetKeys()
+            Returns: List&lt;string&gt; of variable names
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetDynamicKeys">
+            <summary>
+            Get all dynamic variable keys in this blackboard
+            Method: GetDynamicKeys()
+            Returns: List&lt;string&gt; of dynamic variable names
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.Increment(System.String,System.Single)">
+            <summary>
+            Increment a numeric variable by the specified amount
+            Method: Increment(string variableName, float amount)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.Clear">
+            <summary>
+            Clear all variables from this blackboard
+            Method: Clear()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.DefaultSetString(System.String,System.String)">
+            <summary>
+            Set a default value for a variable if it doesn't exist
+            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
+            Note: Generic method, requires special handling
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.DefaultSetFloat(System.String,System.Single)">
+            <summary>
+            Set a default numeric value for a variable if it doesn't exist
+            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.DefaultSetBool(System.String,System.Boolean)">
+            <summary>
+            Set a default boolean value for a variable if it doesn't exist
+            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.ToString">
+            <summary>
+            Get a debug-friendly string representation of this blackboard
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetDebugInfo">
+            <summary>
+            Get detailed debug information about this blackboard
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Building">
             <summary>
             Wrapper for the native Building class
@@ -1815,6 +1964,43 @@
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.TogglePause">
             <summary>
             Toggle pause state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetMainBlackBoard">
+            <summary>
+            Get the main blackboard instance
+            Field: blackboardMain (public Blackboard)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBlackBoard(System.String)">
+            <summary>
+            Get a specific blackboard by name from the blackboards dictionary
+            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBlackBoardNames">
+            <summary>
+            Get all blackboard names from the blackboards dictionary
+            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.HasBlackBoard(System.String)">
+            <summary>
+            Check if a blackboard with the given name exists
+            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.AddBlackBoard(PerAspera.GameAPI.Wrappers.BlackBoard)">
+            <summary>
+            Add a new blackboard to the universe
+            Method: AddBlackboard(Blackboard blackboard)
+            Note: Based on decompiled Universe.md method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBlackBoardCount">
+            <summary>
+            Get count of blackboards in the universe
+            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.WrapperBase">

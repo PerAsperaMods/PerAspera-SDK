@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers

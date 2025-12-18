@@ -1,6 +1,8 @@
-using System;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
+using System;
+using System.Collections.Generic;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -13,7 +15,7 @@ namespace PerAspera.GameAPI.Wrappers
         public Universe(object nativeUniverse) : base(nativeUniverse)
         {
         }
-        
+
         /// <summary>
         /// Get the current universe instance
         /// </summary>
@@ -182,13 +184,13 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public void AddBlackBoard(BlackBoard blackboard)
         {
-            if (blackboard?.NativeObject == null)
+            if (blackboard?.GetNativeObject() == null)
             {
                 Log.Warning("Cannot add null blackboard to Universe");
                 return;
             }
             
-            SafeInvokeVoid("AddBlackboard", blackboard.NativeObject);
+            SafeInvokeVoid("AddBlackboard", blackboard);
         }
         
         /// <summary>
@@ -210,9 +212,13 @@ namespace PerAspera.GameAPI.Wrappers
                 return 0;
             }
         }
-        
+        public Blackboard GetBlackboard(string key)
+        {
+            throw new NotImplementedException();    
+        }
+
         // ==================== INFO ====================
-        
+
         public override string ToString()
         {
             var blackboardCount = GetBlackBoardCount();

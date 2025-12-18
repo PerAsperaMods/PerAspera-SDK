@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes;
@@ -266,6 +268,145 @@ namespace PerAspera.Core.IL2CPP
         public static void SetPropertyValue(this object instance, string propertyName, object value)
         {
             SetMemberValue(instance, propertyName, value);
+        }
+
+        // ==================== IL2CPP COLLECTION CONVERSION ====================
+
+        /// <summary>
+        /// Convert IL2CPP List/Collection to managed IList
+        /// Handles both Il2CppSystem.Collections.Generic.List and native collections
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="il2cppCollection">IL2CPP collection object</param>
+        /// <returns>Managed IList or null if conversion fails</returns>
+        public static IList<T>? ConvertIl2CppList<T>(this object il2cppCollection)
+        {
+            if (il2cppCollection == null)
+                return null;
+
+            try
+            {
+                var result = new List<T>();
+                
+                // Method 1: Try to get Count property and iterate via indexer
+                var countProperty = il2cppCollection.GetType().GetProperty("Count");
+                if (countProperty != null)
+                {
+                    var count = (int)countProperty.GetValue(il2cppCollection);
+                    var indexerProperty = il2cppCollection.GetType().GetProperty("Item");
+                    
+                    if (indexerProperty != null)
+                    {
+                        for (int i = 0; i < count; i++)
+                        {
+                            var item = indexerProperty.GetValue(il2cppCollection, new object[] { i });
+                            if (item is T typedItem)
+                            {
+                                result.Add(typedItem);
+                            }
+                            else if (item != null)
+                            {
+                                // Try conversion
+                                try
+                                {
+                                    var converted = ConvertValue<T>(item);
+                                    if (converted != null)
+                                        result.Add(converted);
+                                }
+                                catch
+                                {
+                                    _log.LogWarning($"Failed to convert list item {item} to {typeof(T).Name}");
+                                }
+                            }
+                        }
+                        return result;
+                    }
+                }
+                
+                // Method 2: Try IEnumerable approach via GetEnumerator
+                var getEnumeratorMethod = il2cppCollection.GetType().GetMethod("GetEnumerator");
+                if (getEnumeratorMethod != null)
+                {
+                    var enumerator = getEnumeratorMethod.Invoke(il2cppCollection, null);
+                    if (enumerator != null)
+                    {
+                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var currentProperty = enumerator.GetType().GetProperty("Current");
+                        
+                        if (moveNextMethod != null && currentProperty != null)
+                        {
+                            while ((bool)moveNextMethod.Invoke(enumerator, null))
+                            {
+                                var item = currentProperty.GetValue(enumerator);
+                                if (item is T typedItem)
+                                {
+                                    result.Add(typedItem);
+                                }
+                                else if (item != null)
+                                {
+                                    try
+                                    {
+                                        var converted = ConvertValue<T>(item);
+                                        if (converted != null)
+                                            result.Add(converted);
+                                    }
+                                    catch
+                                    {
+                                        _log.LogWarning($"Failed to convert enumerated item {item} to {typeof(T).Name}");
+                                    }
+                                }
+                            }
+                            return result;
+                        }
+                    }
+                }
+                
+                // Method 3: Try direct cast to IEnumerable (for managed collections)
+                if (il2cppCollection is System.Collections.IEnumerable enumerable)
+                {
+                    foreach (var item in enumerable)
+                    {
+                        if (item is T typedItem)
+                        {
+                            result.Add(typedItem);
+                        }
+                        else if (item != null)
+                        {
+                            try
+                            {
+                                var converted = ConvertValue<T>(item);
+                                if (converted != null)
+                                    result.Add(converted);
+                            }
+                            catch
+                            {
+                                _log.LogWarning($"Failed to convert enumerable item {item} to {typeof(T).Name}");
+                            }
+                        }
+                    }
+                    return result;
+                }
+                
+                _log.LogError($"Unable to convert collection of type {il2cppCollection.GetType().Name} to IList<{typeof(T).Name}>");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError($"Failed to convert IL2CPP collection: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Convert IL2CPP array to managed array
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="il2cppArray">IL2CPP array object</param>
+        /// <returns>Managed array or null if conversion fails</returns>
+        public static T[]? ConvertIl2CppArray<T>(this object il2cppArray)
+        {
+            var list = ConvertIl2CppList<T>(il2cppArray);
+            return list?.ToArray();
         }
     }
 }

@@ -33,7 +33,19 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
-    
+
+
+    public class Blackboard
+    {
+        /// <summary>Native IL2CPP Universe instance</summary>
+        public object NativeInstance { get; }
+
+        public Blackboard(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+
     /// <summary>
     /// Native Planet type alias for Enhanced Events
     /// Represents the actual IL2CPP native Planet object

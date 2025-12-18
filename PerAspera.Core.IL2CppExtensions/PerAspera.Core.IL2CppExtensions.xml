@@ -4,6 +4,23 @@
         <name>PerAspera.Core.IL2CppExtensions</name>
     </assembly>
     <members>
+        <member name="T:PerAspera.Core.IL2CPP.CollectionConversionTests">
+            <summary>
+            Testing utilities for IL2CPP collection conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.CollectionConversionTests.TestCollectionConversion(System.Object)">
+            <summary>
+            Test the ConvertIl2CppList method with various collection types
+            </summary>
+            <param name="testCollection">Collection to test</param>
+            <returns>Test success result</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.CollectionConversionTests.TestManagedListConversion">
+            <summary>
+            Test conversion with a managed List for reference
+            </summary>
+        </member>
         <member name="T:PerAspera.Core.IL2CPP.IL2CppExtensions">
             <summary>
             Extension methods for safe IL2CPP object manipulation
@@ -65,6 +82,23 @@
             <summary>
             Alias for SetMemberValue - specifically for property access
             </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.ConvertIl2CppList``1(System.Object)">
+            <summary>
+            Convert IL2CPP List/Collection to managed IList
+            Handles both Il2CppSystem.Collections.Generic.List and native collections
+            </summary>
+            <typeparam name="T">Element type</typeparam>
+            <param name="il2cppCollection">IL2CPP collection object</param>
+            <returns>Managed IList or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppExtensions.ConvertIl2CppArray``1(System.Object)">
+            <summary>
+            Convert IL2CPP array to managed array
+            </summary>
+            <typeparam name="T">Element type</typeparam>
+            <param name="il2cppArray">IL2CPP array object</param>
+            <returns>Managed array or null if conversion fails</returns>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.ReflectionHelpers">
             <summary>

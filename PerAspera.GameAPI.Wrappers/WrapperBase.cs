@@ -17,6 +17,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         protected object? NativeObject { get; set; }
         
+
         /// <summary>
         /// Check if the native object is valid
         /// </summary>

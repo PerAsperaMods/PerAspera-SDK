@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
+#nullable enable
+
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -12,10 +14,17 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class BlackBoard : WrapperBase
     {
+        /// <summary>
+        /// Creates a new BlackBoard wrapper around a native blackboard instance
+        /// </summary>
+        /// <param name="nativeBlackBoard">Native blackboard object to wrap</param>
         public BlackBoard(object nativeBlackBoard) : base(nativeBlackBoard)
         {
         }
-        
+        public  Native.Blackboard ? GetNativeObject()
+        {
+            return (Native.Blackboard)NativeObject;
+        }
         /// <summary>
         /// Get the name of this blackboard instance
         /// Field: name (readonly string)
@@ -37,11 +46,11 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 // Use reflection to call TryGetValue with out parameter
-                var method = NativeObject.GetType().GetMethod("TryGetValue");
+                var method = NativeObject?.GetType().GetMethod("TryGetValue");
                 if (method == null) return false;
                 
-                var parameters = new object[] { variableName, null };
-                var result = (bool)method.Invoke(NativeObject, parameters);
+                var parameters = new object?[] { variableName, null };
+                var result = (bool)(method.Invoke(NativeObject, parameters) ?? false);
                 value = parameters[1]; // out parameter value
                 return result;
             }
@@ -195,8 +204,8 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var method = NativeObject.GetType().GetMethod("DefaultSet").MakeGenericMethod(typeof(string));
-                method.Invoke(NativeObject, new object[] { variableName, defaultValue });
+                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(string));
+                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
             }
             catch (Exception ex)
             {
@@ -212,8 +221,8 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var method = NativeObject.GetType().GetMethod("DefaultSet").MakeGenericMethod(typeof(float));
-                method.Invoke(NativeObject, new object[] { variableName, defaultValue });
+                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(float));
+                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
             }
             catch (Exception ex)
             {
@@ -229,8 +238,8 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var method = NativeObject.GetType().GetMethod("DefaultSet").MakeGenericMethod(typeof(bool));
-                method.Invoke(NativeObject, new object[] { variableName, defaultValue });
+                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(bool));
+                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
             }
             catch (Exception ex)
             {
