@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Wrappers
         public static object? GetUniverse()
         {
             var baseGame = BaseGame.GetCurrent();
-            return baseGame?.GetUniverse();
+            return baseGame?.SafeInvoke<object>("get_universe"); // Get native object directly
         }
         
         /// <summary>
@@ -68,17 +68,17 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static object? GetPlanet()
         {
-            var universe = GetUniverse();
-            if (universe == null)
+            var nativeUniverse = GetUniverse(); // Now returns native object
+            if (nativeUniverse == null)
             {
                 UnityEngine.Debug.LogWarning($"{LogPrefix} Universe not available yet");
                 return null;
             }
             
-            // Universe.GetPlanet() via reflection
+            // Universe.GetPlanet() via reflection on native object
             try
             {
-                return universe.InvokeMethod<object>("GetPlanet");
+                return nativeUniverse.InvokeMethod<object>("GetPlanet");
             }
             catch (Exception ex)
             {

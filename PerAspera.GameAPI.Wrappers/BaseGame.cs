@@ -11,7 +11,6 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class BaseGame : WrapperBase
     {
-        private PerAspera.GameAPI.Wrappers.Universe _u;
         public BaseGame(object nativeBaseGame) : base(nativeBaseGame)
         {
         }

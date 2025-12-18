@@ -49,19 +49,21 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== GAME STATE ====================
         
         /// <summary>
-        /// Get the planet instance
+        /// Get the planet wrapper instance
         /// </summary>
-        public object? GetPlanet()
+        public Planet? GetPlanet()
         {
-            return SafeInvoke<object>("GetPlanet");
+            var nativePlanet = SafeInvoke<object>("GetPlanet");
+            return nativePlanet != null ? new Planet(nativePlanet) : null;
         }
         
         /// <summary>
-        /// Get the base game instance
+        /// Get the base game wrapper instance
         /// </summary>
-        public object? GetBaseGame()
+        public BaseGame? GetBaseGame()
         {
-            return SafeInvoke<object>("GetBaseGame");
+            var nativeBaseGame = SafeInvoke<object>("GetBaseGame");
+            return nativeBaseGame != null ? new BaseGame(nativeBaseGame) : null;
         }
         
         // ==================== ACTIONS ====================
@@ -211,10 +213,6 @@ namespace PerAspera.GameAPI.Wrappers
                 Log.Error($"Failed to get blackboard count: {ex.Message}");
                 return 0;
             }
-        }
-        public Blackboard GetBlackboard(string key)
-        {
-            throw new NotImplementedException();    
         }
 
         // ==================== INFO ====================

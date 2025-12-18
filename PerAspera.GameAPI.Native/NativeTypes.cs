@@ -33,6 +33,16 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+    public class Building
+    {
+        /// <summary>Native IL2CPP Universe instance</summary>
+        public object NativeInstance { get; }
+
+        public Building(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
 
 
     public class Blackboard

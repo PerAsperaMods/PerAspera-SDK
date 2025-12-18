@@ -1,0 +1,364 @@
+#nullable enable
+using System;
+using PerAspera.Core.IL2CPP;
+using PerAspera.GameAPI.Native;
+
+namespace PerAspera.GameAPI.Wrappers
+{
+    /// <summary>
+    /// Wrapper for the native Technology class
+    /// Provides safe access to technology definitions and research status
+    /// DOC: Technology.md - Research tree and technology progression
+    /// </summary>
+    public class Technology : WrapperBase
+    {
+        /// <summary>
+        /// Initialize Technology wrapper with native technology object
+        /// </summary>
+        /// <param name="nativeTechnology">Native technology instance from game</param>
+        public Technology(object nativeTechnology) : base(nativeTechnology)
+        {
+        }
+        
+        /// <summary>
+        /// Create wrapper from native technology object
+        /// </summary>
+        public static Technology? FromNative(object? nativeTechnology)
+        {
+            return nativeTechnology != null ? new Technology(nativeTechnology) : null;
+        }
+        
+        // ==================== CORE IDENTIFICATION ====================
+        
+        /// <summary>
+        /// Technology name/key identifier
+        /// Maps to: name field (e.g., "tech_advanced_solar", "tech_water_extraction")
+        /// </summary>
+        public string Name
+        {
+            get => SafeInvoke<string>("get_name") ?? "unknown_tech";
+        }
+        
+        /// <summary>
+        /// Technology display name for UI
+        /// Maps to: displayName or localizedName field
+        /// </summary>
+        public string DisplayName
+        {
+            get => SafeInvoke<string>("get_displayName") ?? 
+                   SafeInvoke<string>("get_localizedName") ?? 
+                   SafeInvoke<string>("get_title") ?? Name;
+        }
+        
+        /// <summary>
+        /// Technology description
+        /// Maps to: description field
+        /// </summary>
+        public string Description
+        {
+            get => SafeInvoke<string>("get_description") ?? 
+                   SafeInvoke<string>("get_content") ?? "No description available";
+        }
+        
+        /// <summary>
+        /// Technology index for efficient lookups
+        /// Maps to: index field
+        /// </summary>
+        public int Index
+        {
+            get => SafeInvoke<int?>("get_index") ?? -1;
+        }
+        
+        // ==================== RESEARCH TREE ====================
+        
+        /// <summary>
+        /// Technology category/branch (Engineering, Biology, Space)
+        /// Maps to: category or branch field
+        /// </summary>
+        public string Category
+        {
+            get => SafeInvoke<string>("get_category") ?? 
+                   SafeInvoke<string>("get_branch") ?? 
+                   SafeInvoke<string>("get_tree") ?? "General";
+        }
+        
+        /// <summary>
+        /// Technology tier/level (1, 2, 3, etc.)
+        /// Maps to: tier or level field
+        /// </summary>
+        public int Tier
+        {
+            get => SafeInvoke<int?>("get_tier") ?? 
+                   SafeInvoke<int?>("get_level") ?? 1;
+        }
+        
+        /// <summary>
+        /// Research cost in research points
+        /// Maps to: cost or researchCost field
+        /// </summary>
+        public float ResearchCost
+        {
+            get => SafeInvoke<float?>("get_cost") ?? 
+                   SafeInvoke<float?>("get_researchCost") ?? 0f;
+        }
+        
+        /// <summary>
+        /// Time required to research (in game time units)
+        /// Maps to: researchTime or duration field
+        /// </summary>
+        public float ResearchTime
+        {
+            get => SafeInvoke<float?>("get_researchTime") ?? 
+                   SafeInvoke<float?>("get_duration") ?? 0f;
+        }
+        
+        // ==================== PREREQUISITES ====================
+        
+        /// <summary>
+        /// Prerequisites needed to unlock this technology
+        /// Maps to: prerequisites or requiredTechs array
+        /// </summary>
+        public List<Technology> GetPrerequisites()
+        {
+            try
+            {
+                var prerequisites = SafeInvoke<object>("get_prerequisites") ?? 
+                                  SafeInvoke<object>("get_requiredTechs") ??
+                                  SafeInvoke<object>("get_dependencies");
+                
+                var prereqList = new List<Technology>();
+                
+                if (prerequisites is System.Collections.IEnumerable enumerable)
+                {
+                    foreach (var prereq in enumerable)
+                    {
+                        if (prereq != null)
+                        {
+                            prereqList.Add(new Technology(prereq));
+                        }
+                    }
+                }
+                
+                return prereqList;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Failed to get prerequisites for technology {Name}: {ex.Message}");
+                return new List<Technology>();
+            }
+        }
+        
+        /// <summary>
+        /// Check if all prerequisites are met for a faction
+        /// </summary>
+        /// <param name="faction">Faction to check prerequisites for</param>
+        /// <returns>True if all prerequisites are researched</returns>
+        public bool ArePrerequisitesMet(Faction faction)
+        {
+            if (!faction.IsValid) return false;
+            
+            var prerequisites = GetPrerequisites();
+            return prerequisites.All(prereq => faction.HasTechnology(prereq.Name));
+        }
+        
+        // ==================== UNLOCKS ====================
+        
+        /// <summary>
+        /// Buildings unlocked by this technology
+        /// Maps to: unlockedBuildings array
+        /// </summary>
+        public List<object> GetUnlockedBuildings()
+        {
+            try
+            {
+                var buildings = SafeInvoke<object>("get_unlockedBuildings") ?? 
+                              SafeInvoke<object>("get_buildings") ??
+                              SafeInvoke<object>("get_unlocks");
+                
+                var buildingList = new List<object>();
+                
+                if (buildings is System.Collections.IEnumerable enumerable)
+                {
+                    foreach (var building in enumerable)
+                    {
+                        if (building != null)
+                        {
+                            buildingList.Add(building);
+                        }
+                    }
+                }
+                
+                return buildingList;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Failed to get unlocked buildings for technology {Name}: {ex.Message}");
+                return new List<object>();
+            }
+        }
+        
+        /// <summary>
+        /// Resources unlocked by this technology
+        /// Maps to: unlockedResources array
+        /// </summary>
+        public List<ResourceType> GetUnlockedResources()
+        {
+            try
+            {
+                var resources = SafeInvoke<object>("get_unlockedResources") ?? 
+                              SafeInvoke<object>("get_resources");
+                
+                var resourceList = new List<ResourceType>();
+                
+                if (resources is System.Collections.IEnumerable enumerable)
+                {
+                    foreach (var resource in enumerable)
+                    {
+                        if (resource != null)
+                        {
+                            resourceList.Add(new ResourceType(resource));
+                        }
+                    }
+                }
+                
+                return resourceList;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Failed to get unlocked resources for technology {Name}: {ex.Message}");
+                return new List<ResourceType>();
+            }
+        }
+        
+        // ==================== RESEARCH STATUS ====================
+        
+        /// <summary>
+        /// Check if this technology is researched by a faction
+        /// </summary>
+        /// <param name="faction">Faction to check research status for</param>
+        /// <returns>True if technology is researched</returns>
+        public bool IsResearchedBy(Faction faction)
+        {
+            return faction.IsValid && faction.HasTechnology(Name);
+        }
+        
+        /// <summary>
+        /// Check if this technology can be researched by a faction
+        /// (prerequisites met but not yet researched)
+        /// </summary>
+        /// <param name="faction">Faction to check availability for</param>
+        /// <returns>True if technology can be researched</returns>
+        public bool IsAvailableFor(Faction faction)
+        {
+            return faction.IsValid && 
+                   !IsResearchedBy(faction) && 
+                   ArePrerequisitesMet(faction);
+        }
+        
+        /// <summary>
+        /// Start research of this technology for a faction
+        /// </summary>
+        /// <param name="faction">Faction to research technology for</param>
+        /// <returns>True if research was initiated successfully</returns>
+        public bool StartResearch(Faction faction)
+        {
+            if (!faction.IsValid) return false;
+            
+            return faction.ResearchTechnology(Name);
+        }
+        
+        // ==================== UTILITIES ====================
+        
+        /// <summary>
+        /// Get technology icon path
+        /// Maps to: iconPath or icon field
+        /// </summary>
+        public string IconPath
+        {
+            get => SafeInvoke<string>("get_iconPath") ?? 
+                   SafeInvoke<string>("get_icon") ?? 
+                   $"Technology Icons/{Name}";
+        }
+        
+        /// <summary>
+        /// Check if this is a key/milestone technology
+        /// </summary>
+        public bool IsMilestoneTechnology()
+        {
+            var milestones = new[] { "terraforming", "colonization", "space", "advanced", "expert" };
+            return milestones.Any(milestone => Name.Contains(milestone, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        /// <summary>
+        /// Get technology complexity rating (1-5)
+        /// </summary>
+        public int GetComplexityRating()
+        {
+            if (Tier <= 1) return 1;
+            if (Tier <= 2) return 2;
+            if (Tier <= 3) return 3;
+            if (IsMilestoneTechnology()) return 5;
+            return 4;
+        }
+        
+        /// <summary>
+        /// Get estimated research time in human-readable format
+        /// </summary>
+        public string GetEstimatedResearchTime()
+        {
+            var time = ResearchTime;
+            if (time < 60) return $"{time:F0} minutes";
+            if (time < 1440) return $"{time/60:F1} hours";
+            return $"{time/1440:F1} days";
+        }
+        
+        /// <summary>
+        /// Get the native game object (for Harmony patches)
+        /// </summary>
+        public object? GetNativeObject()
+        {
+            return NativeObject;
+        }
+        
+        /// <summary>
+        /// String representation for debugging
+        /// </summary>
+        public override string ToString()
+        {
+            return $"Technology[{Name}] (Tier {Tier}, Category: {Category}, Valid: {IsValid})";
+        }
+        
+        // ==================== STATIC UTILITIES ====================
+        
+        /// <summary>
+        /// Common technology constants for easy reference
+        /// </summary>
+        public static class CommonTechnologies
+        {
+            // Basic Technologies
+            public const string BasicEngineering = "tech_basic_engineering";
+            public const string BasicPhysics = "tech_basic_physics";
+            public const string BasicChemistry = "tech_basic_chemistry";
+            
+            // Solar Power
+            public const string SolarPowerTier1 = "tech_solar_power_1";
+            public const string SolarPowerTier2 = "tech_solar_power_2";
+            public const string AdvancedSolar = "tech_advanced_solar";
+            
+            // Resource Extraction
+            public const string WaterExtractionTier1 = "tech_water_extraction_1";
+            public const string MiningTier1 = "tech_mining_1";
+            public const string AdvancedMining = "tech_advanced_mining";
+            
+            // Manufacturing
+            public const string BasicManufacturing = "tech_basic_manufacturing";
+            public const string AdvancedManufacturing = "tech_advanced_manufacturing";
+            public const string Automation = "tech_automation";
+            
+            // Terraforming
+            public const string AtmosphericProcessing = "tech_atmospheric_processing";
+            public const string TerraformingTier1 = "tech_terraforming_1";
+            public const string AdvancedTerraforming = "tech_advanced_terraforming";
+        }
+    }
+}
