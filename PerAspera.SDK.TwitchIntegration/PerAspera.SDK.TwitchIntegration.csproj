@@ -39,7 +39,6 @@
   <ItemGroup>
     <ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
     <ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
-    <ProjectReference Include="..\PerAspera.Abstractions\PerAspera.Abstractions.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />

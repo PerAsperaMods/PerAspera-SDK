@@ -25,7 +25,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             {
                 if (_readThread?.IsAlive == true)
                 {
-                    LogAspera.Warning("Read thread already running");
+                    _logger.Warning("Read thread already running");
                     return;
                 }
                 
@@ -37,7 +37,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 };
                 _readThread.Start();
                 
-                LogAspera.Debug("Read thread started");
+                _logger.Debug("Read thread started");
             }
         }
         
@@ -47,7 +47,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             {
                 if (_writeThread?.IsAlive == true)
                 {
-                    LogAspera.Warning("Write thread already running");
+                    _logger.Warning("Write thread already running");
                     return;
                 }
                 
@@ -59,7 +59,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 };
                 _writeThread.Start();
                 
-                LogAspera.Debug("Write thread started");
+                _logger.Debug("Write thread started");
             }
         }
         
@@ -69,14 +69,14 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             {
                 if (_tcpClient?.GetStream() is not NetworkStream stream)
                 {
-                    LogAspera.Error("Cannot get NetworkStream for reading");
+                    _logger.Error("Cannot get NetworkStream for reading");
                     return;
                 }
                 
                 var buffer = new byte[_readBufferSize];
                 var messageBuilder = new StringBuilder();
                 
-                LogAspera.Debug("Read thread worker started");
+                _logger.Debug("Read thread worker started");
                 
                 while (!_shouldStop && _tcpClient.Connected)
                 {
@@ -98,7 +98,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                     }
                     catch (Exception ex) when (!_shouldStop)
                     {
-                        LogAspera.Error($"Read thread error: {ex.Message}");
+                        _logger.Error($"Read thread error: {ex.Message}");
                         OnError?.Invoke(ex);
                         
                         // Wait before retry
@@ -108,12 +108,12 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Read thread fatal error: {ex.Message}");
+                _logger.Error($"Read thread fatal error: {ex.Message}");
                 OnError?.Invoke(ex);
             }
             finally
             {
-                LogAspera.Debug("Read thread stopped");
+                _logger.Debug("Read thread stopped");
             }
         }
         
@@ -123,11 +123,11 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             {
                 if (_tcpClient?.GetStream() is not NetworkStream stream)
                 {
-                    LogAspera.Error("Cannot get NetworkStream for writing");
+                    _logger.Error("Cannot get NetworkStream for writing");
                     return;
                 }
                 
-                LogAspera.Debug("Write thread worker started");
+                _logger.Debug("Write thread worker started");
                 
                 while (!_shouldStop && _tcpClient.Connected)
                 {
@@ -139,14 +139,14 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                             stream.Write(data, 0, data.Length);
                             stream.Flush();
                             
-                            LogAspera.Debug($"Sent IRC: {message}");
+                            _logger.Debug($"Sent IRC: {message}");
                         }
                         
                         Thread.Sleep(_writeInterval);
                     }
                     catch (Exception ex) when (!_shouldStop)
                     {
-                        LogAspera.Error($"Write thread error: {ex.Message}");
+                        _logger.Error($"Write thread error: {ex.Message}");
                         OnError?.Invoke(ex);
                         
                         // Wait before retry
@@ -156,12 +156,12 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Write thread fatal error: {ex.Message}");
+                _logger.Error($"Write thread fatal error: {ex.Message}");
                 OnError?.Invoke(ex);
             }
             finally
             {
-                LogAspera.Debug("Write thread stopped");
+                _logger.Debug("Write thread stopped");
             }
         }
         
@@ -193,7 +193,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
         {
             try
             {
-                LogAspera.Debug($"Received IRC: {message}");
+                _logger.Debug($"Received IRC: {message}");
                 
                 // Handle PING/PONG to keep connection alive
                 if (message.StartsWith("PING "))
@@ -218,7 +218,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Error processing IRC message: {ex.Message}");
+                _logger.Error($"Error processing IRC message: {ex.Message}");
                 OnError?.Invoke(ex);
             }
         }
@@ -240,7 +240,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Error parsing chat message: {ex.Message}");
+                _logger.Error($"Error parsing chat message: {ex.Message}");
                 return string.Empty;
             }
         }
@@ -256,7 +256,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             }
             catch (Exception ex)
             {
-                LogAspera.Warning($"Error stopping threads: {ex.Message}");
+                _logger.Warning($"Error stopping threads: {ex.Message}");
             }
         }
     }
