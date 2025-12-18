@@ -186,6 +186,53 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get Person by key (e.g., "person_ami")
+        /// Uses StaticDataCollectionItem<Person>.Get(key) pattern
+        /// Returns null if not found
+        /// </summary>
+        /// <param name="personKey">Person key from YAML (e.g., "person_ami")</param>
+        /// <returns>Person instance or null</returns>
+        public static object? GetPerson(string personKey)
+        {
+            if (string.IsNullOrEmpty(personKey))
+            {
+                UnityEngine.Debug.LogWarning($"{LogPrefix} GetPerson called with null/empty key");
+                return null;
+            }
+            
+            try
+            {
+                var personTypeClass = GameTypeInitializer.GetPersonType();
+                if (personTypeClass == null)
+                {
+                    UnityEngine.Debug.LogError($"{LogPrefix} Person class not found");
+                    return null;
+                }
+                
+                var getMethod = personTypeClass.GetMethod("Get", 
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (getMethod == null)
+                {
+                    UnityEngine.Debug.LogError($"{LogPrefix} Person.Get method not found");
+                    return null;
+                }
+                
+                var result = getMethod.Invoke(null, new object[] { personKey });
+                if (result == null)
+                {
+                    UnityEngine.Debug.LogWarning($"{LogPrefix} Person not found for key: {personKey}");
+                }
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get Person '{personKey}': {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
         /// Get TechnologyType by key (e.g., "tech_basic_chemistry")
         /// Uses StaticDataCollectionItem<TechnologyType>.Get(key) pattern
         /// Returns null if not found
