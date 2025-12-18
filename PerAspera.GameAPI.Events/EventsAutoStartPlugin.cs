@@ -4,6 +4,7 @@ using PerAspera.Core;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using PerAspera.GameAPI.Events.Native;
+using HarmonyLib;
 
 namespace PerAspera.GameAPI.Events
 {
@@ -28,8 +29,12 @@ namespace PerAspera.GameAPI.Events
                 // Initialize event system integration
                 EventSystemIntegration.Initialize();
 
+                // ✅ Apply Harmony patches for game initialization events
+                ApplyGameInitializationPatches();
+
                 _logger.Info("✅ Enhanced Event System initialized successfully");
                 _logger.Info("🎯 All native events now use SDK wrappers automatically");
+                _logger.Info("🎮 Game initialization events (GameHubInitialized, GameFullyLoaded) ready");
                 
                 // Log system status
                 LogSystemStatus();
@@ -37,6 +42,29 @@ namespace PerAspera.GameAPI.Events
             catch (System.Exception ex)
             {
                 _logger.Error($"❌ Failed to initialize Enhanced Event System: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Apply Harmony patches for game initialization detection
+        /// </summary>
+        private void ApplyGameInitializationPatches()
+        {
+            try
+            {
+                _logger.Info("Applying game initialization patches...");
+                
+                var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.GameInitialization");
+                
+                // Apply patches from GameInitializationPatches class
+                harmony.PatchAll(typeof(Patches.GameInitializationPatches));
+                
+                _logger.Info("✅ Game initialization patches applied successfully");
+            }
+            catch (System.Exception ex)
+            {
+                _logger.Error($"❌ Failed to apply game initialization patches: {ex.Message}");
                 throw;
             }
         }

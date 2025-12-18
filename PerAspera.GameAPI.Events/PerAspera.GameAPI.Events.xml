@@ -118,6 +118,12 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BaseGameDetected">
             <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameHubInitialized">
+            <summary>Event: GameHub/GameHubManager initialized (early game access)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameFullyLoaded">
+            <summary>Event: Game fully loaded with all systems ready</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.SDKInitialized">
             <summary>Event: SDK initialized and ready</summary>
         </member>
@@ -402,6 +408,11 @@
             <summary>
             Automatic initialization for enhanced event system
             Provides seamless upgrade from legacy event system to wrapper-enabled events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameInitializationPatches">
+            <summary>
+            Apply Harmony patches for game initialization detection
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeWrapperFactory">
@@ -926,6 +937,43 @@
             DOC: BaseGame.md - OnEvent_WayOperativeChanged (Way sender, ref GameEvent evt)
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Patches.GameInitializationPatches">
+            <summary>
+            Harmony patches for game initialization events
+            Triggers Enhanced Events when specific game systems initialize
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnGameHubManagerAwake">
+            <summary>
+            Patch GameHubManager.Awake() to trigger GameHubInitializedEvent
+            Based on log pattern: "GameHubManager:Awake() (at :0)"
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnBaseGameAwake">
+            <summary>
+            Patch BaseGame.Awake() or similar to ensure we have BaseGame access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnPlanetAwake">
+            <summary>
+            Patch Planet.Awake() or scene load completion to trigger GameFullyLoadedEvent
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetBaseGameInstance">
+            <summary>
+            Try to get BaseGame instance using wrapper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetUniverseInstance">
+            <summary>
+            Try to get Universe instance using wrapper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetPlanetInstance">
+            <summary>
+            Try to get Planet instance using wrapper
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemInitializedEvent">
             <summary>
             Event triggered when a mod system is initialized
@@ -1013,8 +1061,26 @@
         <member name="T:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent">
             <summary>
             Event triggered when game is fully loaded (BaseGame + Universe + Planet)
-            Equivalent to legacy GameFullyLoadedEvent
+            ✅ Enhanced: Uses SDK wrappers for type-safe access
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame (type-safe access)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.UniverseWrapper">
+            <summary>SDK wrapper for Universe (type-safe access)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.PlanetWrapper">
+            <summary>SDK wrapper for Planet (type-safe access)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativeBaseGame">
+            <summary>Native IL2CPP BaseGame instance</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativeUniverse">
+            <summary>Native IL2CPP Universe instance</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativePlanet">
+            <summary>Native IL2CPP Planet instance</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.GameLoadedEvent">
             <summary>
@@ -1050,6 +1116,25 @@
             <summary>
             Event triggered when climate analysis is complete
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent">
+            <summary>
+            Event triggered when GameHub/GameHubManager is initialized
+            ✅ Enhanced: Early initialization event for mods that need immediate setup
+            This fires before GameFullyLoadedEvent and provides BaseGame access
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame (available early in initialization)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.NativeBaseGame">
+            <summary>Native IL2CPP BaseGame instance</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.IsReady">
+            <summary>Whether the GameHub is fully ready for mod interaction</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.InitializedAt">
+            <summary>Initialization timestamp</summary>
         </member>
     </members>
 </doc>

@@ -10,6 +10,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class BaseGame : WrapperBase
     {
+        private PerAspera.GameAPI.Wrappers.Universe _u;
         public BaseGame(object nativeBaseGame) : base(nativeBaseGame)
         {
         }
@@ -37,13 +38,14 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get Universe instance (time, factions, planet)
+        /// Get Universe wrapper instance (time, factions, planet)
         /// Property: universe { get; }
         /// Backing field: _universe_k__BackingField
         /// </summary>
-        public object? GetUniverse()
+        public Universe? GetUniverse()
         {
-            return SafeInvoke<object>("get_universe");
+            var nativeUniverse = SafeInvoke<object>("get_universe");
+            return nativeUniverse != null ? new Universe(nativeUniverse) : null;
         }
         
         /// <summary>

@@ -23,6 +23,15 @@ namespace PerAspera.GameAPI.Wrappers
         public bool IsValid => NativeObject != null;
         
         /// <summary>
+        /// Get the Type of the native IL2CPP object (for debugging/inspection)
+        /// Returns null if no native object is wrapped
+        /// </summary>
+        public System.Type? GetNativeType()
+        {
+            return NativeObject?.GetType();
+        }
+        
+        /// <summary>
         /// Constructor with native object
         /// </summary>
         protected WrapperBase(object? nativeObject)

@@ -2,6 +2,11 @@ using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Wrappers;
 using System;
 
+// Enhanced Events Native type aliases for IL2CPP objects
+using NativeBaseGame = PerAspera.GameAPI.Native.BaseGame;
+using NativeUniverse = PerAspera.GameAPI.Native.Universe;
+using NativePlanet = PerAspera.GameAPI.Native.Planet;
+
 namespace PerAspera.GameAPI.Events.SDK
 {
     // ==================== SYSTEM EVENTS ====================
@@ -33,21 +38,41 @@ namespace PerAspera.GameAPI.Events.SDK
 
     /// <summary>
     /// Event triggered when game is fully loaded (BaseGame + Universe + Planet)
-    /// Equivalent to legacy GameFullyLoadedEvent
+    /// ✅ Enhanced: Uses SDK wrappers for type-safe access
     /// </summary>
     public class GameFullyLoadedEvent : SDKEventBase
     {
         public override string EventType => "GameFullyLoaded";
         
-        public object BaseGameInstance { get; }
-        public object UniverseInstance { get; }
-        public object PlanetInstance { get; }
+        /// <summary>SDK wrapper for BaseGame (type-safe access)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        
+        /// <summary>SDK wrapper for Universe (type-safe access)</summary>
+        public PerAspera.GameAPI.Wrappers.Universe UniverseWrapper { get; }
+        
+        /// <summary>SDK wrapper for Planet (type-safe access)</summary>
+        public PerAspera.GameAPI.Wrappers.Planet PlanetWrapper { get; }
+        
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public NativeBaseGame NativeBaseGame { get; }
+        
+        /// <summary>Native IL2CPP Universe instance</summary>
+        public NativeUniverse NativeUniverse { get; }
+        
+        /// <summary>Native IL2CPP Planet instance</summary>
+        public NativePlanet NativePlanet { get; }
 
-        public GameFullyLoadedEvent(object baseGame, object universe, object planet)
+        public GameFullyLoadedEvent(object nativeBaseGame, object nativeUniverse, object nativePlanet)
         {
-            BaseGameInstance = baseGame;
-            UniverseInstance = universe;
-            PlanetInstance = planet;
+            // Store native instances using explicit native type aliases
+            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
+            NativeUniverse = new NativeUniverse(nativeUniverse ?? throw new ArgumentNullException(nameof(nativeUniverse)));
+            NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
+            
+            // Create SDK wrappers from native instances
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            UniverseWrapper = new PerAspera.GameAPI.Wrappers.Universe(nativeUniverse);
+            PlanetWrapper = new PerAspera.GameAPI.Wrappers.Planet(nativePlanet);
         }
     }
 
@@ -175,6 +200,40 @@ namespace PerAspera.GameAPI.Events.SDK
             AnalysisType = analysisType;
             AnalysisData = analysisData;
             Recommendations = recommendations ?? System.Array.Empty<string>();
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when GameHub/GameHubManager is initialized
+    /// ✅ Enhanced: Early initialization event for mods that need immediate setup
+    /// This fires before GameFullyLoadedEvent and provides BaseGame access
+    /// </summary>
+    public class GameHubInitializedEvent : SDKEventBase
+    {
+        public override string EventType => "GameHubInitialized";
+        
+        /// <summary>SDK wrapper for BaseGame (available early in initialization)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public NativeBaseGame NativeBaseGame { get; }
+        
+        /// <summary>Whether the GameHub is fully ready for mod interaction</summary>
+        public bool IsReady { get; }
+        
+        /// <summary>Initialization timestamp</summary>
+        public DateTime InitializedAt { get; }
+
+        public GameHubInitializedEvent(object nativeBaseGame, bool isReady = true)
+        {
+            // Store native instance using explicit native type alias
+            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
+            
+            // Create SDK wrapper from native instance  
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            
+            IsReady = isReady;
+            InitializedAt = DateTime.Now;
         }
     }
 }

@@ -21,5 +21,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Native\PerAspera.GameAPI.Native.csproj" />
 	</ItemGroup>
 </Project>

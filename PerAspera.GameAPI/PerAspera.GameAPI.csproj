@@ -33,5 +33,6 @@
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Overrides\PerAspera.GameAPI.Overrides.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Native\PerAspera.GameAPI.Native.csproj" />
 	</ItemGroup>
 </Project>

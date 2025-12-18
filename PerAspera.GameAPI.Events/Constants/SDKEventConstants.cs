@@ -11,6 +11,12 @@ namespace PerAspera.GameAPI.Events.Constants
         /// <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         public const string BaseGameDetected = "BaseGameDetected";
         
+        /// <summary>Event: GameHub/GameHubManager initialized (early game access)</summary>
+        public const string GameHubInitialized = "GameHubInitialized";
+        
+        /// <summary>Event: Game fully loaded with all systems ready</summary>
+        public const string GameFullyLoaded = "GameFullyLoaded";
+        
         /// <summary>Event: SDK initialized and ready</summary>
         public const string SDKInitialized = "SDKInitialized";
         

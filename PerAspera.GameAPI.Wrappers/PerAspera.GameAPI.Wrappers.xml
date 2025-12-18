@@ -207,7 +207,7 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetUniverse">
             <summary>
-            Get Universe instance (time, factions, planet)
+            Get Universe wrapper instance (time, factions, planet)
             Property: universe { get; }
             Backing field: _universe_k__BackingField
             </summary>
@@ -1826,6 +1826,12 @@
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid">
             <summary>
             Check if the native object is valid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.GetNativeType">
+            <summary>
+            Get the Type of the native IL2CPP object (for debugging/inspection)
+            Returns null if no native object is wrapped
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
