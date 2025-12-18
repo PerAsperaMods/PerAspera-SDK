@@ -196,10 +196,67 @@ public class Drone : WrapperBase
 }
 ```
 
+## 🎭 Unity Scene Management
+
+Wrappers for Unity SceneManagement system with IL2CPP compatibility.
+
+| Wrapper | Native Class | Purpose |
+|---------|-------------|----------|
+| `Scene` | `UnityEngine.SceneManagement.Scene` | Scene information and GameObject access |
+| `SceneManager` | `UnityEngine.SceneManagement.SceneManager` | Scene loading, unloading, and management |
+| `SceneUtility` | Alternative implementation | Scene path and build index utilities |
+
+### Scene Management Examples
+
+```csharp
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Events.SDK;
+
+// Get current scene
+var currentScene = SceneManager.GetActiveScene();
+Log.Info($"Current scene: {currentScene.Name}");
+
+// Get all root GameObjects in scene
+var rootObjects = currentScene.GetRootGameObjects();
+Log.Info($"Scene has {rootObjects.Length} root GameObjects");
+
+// Load scene asynchronously
+var loadOperation = SceneManager.LoadSceneAsync("NewLevel", LoadSceneMode.Additive);
+
+// Scene utility functions
+var scenePath = SceneUtility.GetScenePathByBuildIndex(1);
+var buildIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/MainMenu.unity");
+
+// Subscribe to scene events
+SceneEvents.OnSceneLoaded(sceneEvent => {
+    Log.Info($"Scene '{sceneEvent.Scene.Name}' loaded with mode {sceneEvent.Mode}");
+});
+
+SceneEvents.OnActiveSceneChanged(sceneEvent => {
+    var prev = sceneEvent.PreviousScene?.Name ?? "None";
+    Log.Info($"Active scene changed from '{prev}' to '{sceneEvent.NewScene.Name}'");
+});
+```
+
+### Unity 2020.3 LTS Compatibility Notes
+
+⚠️ **SceneUtility Adaptation**: Unity 2020.3 doesn't include `SceneUtility` class, so we provide an alternative implementation.
+
+✅ **Supported Features**:
+- Scene struct with all properties (Name, Path, BuildIndex, Handle, etc.)
+- SceneManager static methods (GetActiveScene, LoadSceneAsync, etc.)
+- GameObject enumeration via GetRootGameObjects()
+- Async loading/unloading operations
+
+❌ **Known Limitations**:
+- `SceneManager.GetAllScenes()` throws NotSupportedException → Use manual enumeration via `GetSceneAt()`
+- Some SceneUtility methods require alternative implementation
+
 ## 📚 See Also
 
 - [PerAspera.Core](../PerAspera.Core/README.md) - Low-level utilities
 - [PerAspera.GameAPI](../PerAspera.GameAPI/README.md) - Native events and internals
+- [PerAspera.GameAPI.Events.SDK](../PerAspera.GameAPI.Events/README.md) - Scene events and subscriptions
 - [PerAspera.ModSDK](../PerAspera.ModSDK/README.md) - Complete SDK
 
 ## 🆘 Support

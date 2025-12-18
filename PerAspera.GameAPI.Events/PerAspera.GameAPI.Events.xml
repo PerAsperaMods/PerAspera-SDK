@@ -613,6 +613,49 @@
             Event triggered when player executes an action
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.SceneLoadedEvent">
+            <summary>
+            Event triggered when a scene is loaded
+            Provides safe access to loaded scene information
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.SceneLoadedEvent.Scene">
+            <summary>
+            The scene that was loaded
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.SceneLoadedEvent.Mode">
+            <summary>
+            The mode used to load the scene (Single or Additive)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.SceneUnloadedEvent">
+            <summary>
+            Event triggered when a scene is unloaded
+            Provides information about the unloaded scene
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.SceneUnloadedEvent.Scene">
+            <summary>
+            The scene that was unloaded
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ActiveSceneChangedEvent">
+            <summary>
+            Event triggered when the active scene changes
+            Provides both previous and new active scene information
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ActiveSceneChangedEvent.PreviousScene">
+            <summary>
+            The previously active scene (null if this is the first scene)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ActiveSceneChangedEvent.NewScene">
+            <summary>
+            The newly active scene
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent">
             <summary>
             Event triggered when BaseGame and Universe are detected

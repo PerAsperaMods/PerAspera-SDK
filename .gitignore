@@ -1,4 +1,5 @@
 ﻿# Build output
+!*
 bin/
 obj/
 [Bb]in/
@@ -68,7 +69,7 @@ Desktop.ini
 # Game Libs (moved to NuGet package)
 GameLibs/
 GameLibs-Package/
-
+*.dll
 # Documentation (except README and doc/)
 *.md
 !README.md
@@ -82,3 +83,4 @@ GameLibs-Package/
 Directory.Build.props.backup
 *.csproj.bak
 *.props.bak
+
