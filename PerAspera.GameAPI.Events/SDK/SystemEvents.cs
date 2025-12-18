@@ -93,16 +93,26 @@ namespace PerAspera.GameAPI.Events.SDK
 
     /// <summary>
     /// Event triggered when the main Blackboard is initialized
+    /// ✅ Enhanced: Uses BlackBoard wrapper for type-safe access
     /// </summary>
     public class BlackboardInitializedEvent : SDKEventBase
     {
         public override string EventType => "BlackboardInitialized";
         
-        public object Blackboard { get; }
+        /// <summary>
+        /// The native blackboard object (for compatibility)
+        /// </summary>
+        public object NativeBlackboard { get; }
+        
+        /// <summary>
+        /// Type-safe BlackBoard wrapper instance
+        /// </summary>
+        public BlackBoard BlackBoard { get; }
 
         public BlackboardInitializedEvent(object blackboard)
         {
-            Blackboard = blackboard;
+            NativeBlackboard = blackboard ?? throw new ArgumentNullException(nameof(blackboard));
+            BlackBoard = new BlackBoard(blackboard);
         }
     }
 

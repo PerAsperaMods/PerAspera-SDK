@@ -232,5 +232,65 @@ namespace PerAspera.GameAPI.Events.Patches
                 return null;
             }
         }
+
+        // ==================== BLACKBOARD INITIALIZATION PATCHES ====================
+
+        /// <summary>
+        /// Patch Universe.AddBlackboard() to trigger BlackboardInitializedEvent
+        /// Method: AddBlackboard(Blackboard blackboard)
+        /// </summary>
+        [HarmonyPatch("Universe", "AddBlackboard")]
+        [HarmonyPostfix]
+        public static void OnUniverseAddBlackboard(object blackboard)
+        {
+            try
+            {
+                if (blackboard == null) return;
+
+                _logger.Info("🗂️ Universe.AddBlackboard() detected - triggering BlackboardInitializedEvent");
+
+                // Create enhanced event with BlackBoard wrapper
+                var evt = new BlackboardInitializedEvent(blackboard);
+                
+                // Publish through Enhanced Event Bus
+                EnhancedEventBus.Publish(SDKEventConstants.BlackboardInitialized, evt);
+                
+                var blackboardName = evt.BlackBoard?.Name ?? "Unknown";
+                _logger.Info($"✅ BlackboardInitializedEvent published for '{blackboardName}'");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"❌ Error in Universe.AddBlackboard patch: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Patch Blackboard constructor to catch individual blackboard creation
+        /// Constructor: Blackboard(string name, Blackboard parent)
+        /// </summary>
+        [HarmonyPatch("Blackboard", ".ctor", new System.Type[] { typeof(string), typeof(object) })]
+        [HarmonyPostfix]
+        public static void OnBlackboardConstructor(object __instance, string name)
+        {
+            try
+            {
+                if (__instance == null || string.IsNullOrEmpty(name)) return;
+
+                _logger.Info($"🗂️ Blackboard constructor detected for '{name}'");
+
+                // Only trigger event for main blackboards to avoid spam
+                if (name.Contains("main") || name.Contains("universe") || name.Contains("global"))
+                {
+                    var evt = new BlackboardInitializedEvent(__instance);
+                    EnhancedEventBus.Publish(SDKEventConstants.BlackboardInitialized, evt);
+                    
+                    _logger.Info($"✅ BlackboardInitializedEvent published for main blackboard '{name}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"❌ Error in Blackboard constructor patch: {ex.Message}");
+            }
+        }
     }
 }

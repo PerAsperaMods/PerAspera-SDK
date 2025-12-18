@@ -30,6 +30,13 @@ namespace PerAspera.GameAPI.Wrappers
             return planet != null ? new Planet(planet) : null;
         }
         
+        // ==================== PLANET IDENTITY ====================
+        
+        /// <summary>
+        /// Planet name - Hardcoded to "Mars" for Per Aspera (future extensibility for multi-planet mods)
+        /// </summary>
+        public string Name => "Mars";
+        
         // ==================== ATMOSPHERE ====================
         
         /// <summary>

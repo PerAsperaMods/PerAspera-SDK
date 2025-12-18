@@ -88,11 +88,136 @@ namespace PerAspera.GameAPI.Wrappers
             SafeInvokeVoid("SetPaused", !IsPaused);
         }
         
+        // ==================== BLACKBOARD SYSTEM ====================
+        
+        /// <summary>
+        /// Get the main blackboard instance
+        /// Field: blackboardMain (public Blackboard)
+        /// </summary>
+        public BlackBoard? GetMainBlackBoard()
+        {
+            var nativeBlackboard = SafeGetField<object>("blackboardMain");
+            return nativeBlackboard != null ? new BlackBoard(nativeBlackboard) : null;
+        }
+        
+        /// <summary>
+        /// Get a specific blackboard by name from the blackboards dictionary
+        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+        /// </summary>
+        public BlackBoard? GetBlackBoard(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                Log.Warning("GetBlackBoard called with null or empty name");
+                return null;
+            }
+            
+            var blackboardsDict = SafeGetField<object>("blackboards");
+            if (blackboardsDict == null)
+            {
+                Log.Warning("blackboards dictionary is null in Universe");
+                return null;
+            }
+            
+            try
+            {
+                // Access Dictionary<string, Blackboard> using IL2CPP interop
+                var nativeBlackboard = blackboardsDict.InvokeMethod<object>("get_Item", name);
+                return nativeBlackboard != null ? new BlackBoard(nativeBlackboard) : null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get blackboard '{name}': {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// Get all blackboard names from the blackboards dictionary
+        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+        /// </summary>
+        public IList<string>? GetBlackBoardNames()
+        {
+            var blackboardsDict = SafeGetField<object>("blackboards");
+            if (blackboardsDict == null) return null;
+            
+            try
+            {
+                var keys = blackboardsDict.InvokeMethod<object>("get_Keys");
+                return keys?.ConvertIl2CppList<string>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get blackboard names: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// Check if a blackboard with the given name exists
+        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+        /// </summary>
+        public bool HasBlackBoard(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return false;
+            
+            var blackboardsDict = SafeGetField<object>("blackboards");
+            if (blackboardsDict == null) return false;
+            
+            try
+            {
+                return blackboardsDict.InvokeMethod<bool>("ContainsKey", name);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to check if blackboard '{name}' exists: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Add a new blackboard to the universe
+        /// Method: AddBlackboard(Blackboard blackboard)
+        /// Note: Based on decompiled Universe.md method
+        /// </summary>
+        public void AddBlackBoard(BlackBoard blackboard)
+        {
+            if (blackboard?.NativeObject == null)
+            {
+                Log.Warning("Cannot add null blackboard to Universe");
+                return;
+            }
+            
+            SafeInvokeVoid("AddBlackboard", blackboard.NativeObject);
+        }
+        
+        /// <summary>
+        /// Get count of blackboards in the universe
+        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+        /// </summary>
+        public int GetBlackBoardCount()
+        {
+            var blackboardsDict = SafeGetField<object>("blackboards");
+            if (blackboardsDict == null) return 0;
+            
+            try
+            {
+                return blackboardsDict.InvokeMethod<int>("get_Count");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get blackboard count: {ex.Message}");
+                return 0;
+            }
+        }
+        
         // ==================== INFO ====================
         
         public override string ToString()
         {
-            return $"Universe: Sol {CurrentSol}, Speed={GameSpeed}x, Paused={IsPaused}";
+            var blackboardCount = GetBlackBoardCount();
+            var mainBlackboardName = GetMainBlackBoard()?.Name ?? "None";
+            return $"Universe: Sol {CurrentSol}, Speed={GameSpeed}x, Paused={IsPaused}, Blackboards={blackboardCount}, MainBB={mainBlackboardName}";
         }
     }
 }

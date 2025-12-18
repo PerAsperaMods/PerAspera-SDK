@@ -1258,6 +1258,11 @@
             Get the current planet instance
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Planet.Name">
+            <summary>
+            Planet name - Hardcoded to "Mars" for Per Aspera (future extensibility for multi-planet mods)
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Planet.Atmosphere">
             <summary>
             Planet atmosphere (composition, temperature, pressure, effects)

@@ -183,9 +183,53 @@ namespace PerAspera.GameAPI.Wrappers
             SafeInvokeVoid("ForceExit");
         }
         
+        // ==================== BLACKBOARD ACCESS ====================
+        
+        /// <summary>
+        /// Get the main blackboard via Universe
+        /// Convenience method: BaseGame -> Universe -> BlackBoard
+        /// </summary>
+        public BlackBoard? GetMainBlackBoard()
+        {
+            var universe = GetUniverse();
+            return universe?.GetMainBlackBoard();
+        }
+        
+        /// <summary>
+        /// Get a specific blackboard by name via Universe
+        /// Convenience method: BaseGame -> Universe -> BlackBoard
+        /// </summary>
+        public BlackBoard? GetBlackBoard(string name)
+        {
+            var universe = GetUniverse();
+            return universe?.GetBlackBoard(name);
+        }
+        
+        /// <summary>
+        /// Check if a blackboard exists via Universe
+        /// Convenience method: BaseGame -> Universe -> BlackBoard
+        /// </summary>
+        public bool HasBlackBoard(string name)
+        {
+            var universe = GetUniverse();
+            return universe?.HasBlackBoard(name) ?? false;
+        }
+        
+        /// <summary>
+        /// Get all blackboard names via Universe
+        /// Convenience method: BaseGame -> Universe -> BlackBoard
+        /// </summary>
+        public IList<string>? GetBlackBoardNames()
+        {
+            var universe = GetUniverse();
+            return universe?.GetBlackBoardNames();
+        }
+        
         public override string ToString()
         {
-            return $"BaseGame [Loading:{IsLoading}, Quitting:{IsQuitting}, HasMods:{HasMods}]";
+            var universe = GetUniverse();
+            var blackboardCount = universe?.GetBlackBoardCount() ?? 0;
+            return $"BaseGame [Loading:{IsLoading}, Quitting:{IsQuitting}, HasMods:{HasMods}, Blackboards:{blackboardCount}]";
         }
     }
 }
