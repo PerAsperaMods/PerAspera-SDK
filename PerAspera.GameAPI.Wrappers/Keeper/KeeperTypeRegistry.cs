@@ -202,7 +202,7 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                var personTypeClass = GameTypeInitializer.GetPersonType();
+                var personTypeClass = GameTypeInitializer.GetPerson();
                 if (personTypeClass == null)
                 {
                     UnityEngine.Debug.LogError($"{LogPrefix} Person class not found");

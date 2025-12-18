@@ -25,6 +25,7 @@ namespace PerAspera.GameAPI
         private static System.Type? _technologyType;
         private static System.Type? _blackboardType;
         private static System.Type? _commandBusType;
+        private static System.Type? _PersonType;
 
         // Cached singleton instances
         private static object? _baseGameInstance;
@@ -202,7 +203,14 @@ namespace PerAspera.GameAPI
             }
             return _resourceType;
         }
-
+        public static System.Type? GetPerson()
+        {
+            if (_resourceType == null)
+            {
+                _resourceType = FindGameType("Person");
+            }
+            return _resourceType;
+        }
         /// <summary>
         /// Get Building type
         /// </summary>

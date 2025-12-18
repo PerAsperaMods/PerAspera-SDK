@@ -8,7 +8,7 @@ namespace PerAspera.GameAPI.Events.Constants
     {
         // ==================== SYSTEM EVENTS ====================
         
-        /// <summary>Event: Base game finished loading</summary>
+        /// <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         public const string BaseGameDetected = "BaseGameDetected";
         
         /// <summary>Event: SDK initialized and ready</summary>

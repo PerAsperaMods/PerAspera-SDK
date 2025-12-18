@@ -116,7 +116,7 @@
             </summary>
         </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BaseGameDetected">
-            <summary>Event: Base game finished loading</summary>
+            <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.SDKInitialized">
             <summary>Event: SDK initialized and ready</summary>
@@ -209,6 +209,63 @@
             When the event occurred
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.NativeEventConverter">
+            <summary>
+            Automatically converts native event data properties to SDK wrappers
+            Processes event objects and replaces native IL2CPP instances with type-safe wrappers
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.ConvertEventProperties(System.Object)">
+            <summary>
+            Convert all compatible properties in an event from native instances to SDK wrappers
+            Modifies the event object in-place
+            </summary>
+            <param name="eventObject">Event object to convert</param>
+            <returns>True if any conversions were performed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.ConvertPropertyValue(System.Object,System.Reflection.PropertyInfo)">
+            <summary>
+            Convert a specific property value from native to wrapper if possible
+            </summary>
+            <param name="value">Current property value</param>
+            <param name="property">Property info for context</param>
+            <returns>Converted value (wrapper) or original value</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.ShouldSkipProperty(System.Reflection.PropertyInfo)">
+            <summary>
+            Determine if a property should be skipped during conversion
+            </summary>
+            <param name="property">Property to check</param>
+            <returns>True if property should be skipped</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.IsWrapperType(System.Type)">
+            <summary>
+            Check if a type is likely a wrapper type (in SDK namespace)
+            </summary>
+            <param name="type">Type to check</param>
+            <returns>True if type appears to be a wrapper</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.ConvertEventsBatch(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Batch convert multiple event objects
+            </summary>
+            <param name="events">Collection of events to convert</param>
+            <returns>Number of events that had conversions applied</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.NativeEventConverter.ConvertEventCopy``1(``0)">
+            <summary>
+            Create a copy of an event object with all properties converted to wrappers
+            Useful when original event should remain unchanged
+            </summary>
+            <typeparam name="T">Event type</typeparam>
+            <param name="originalEvent">Original event</param>
+            <returns>New event instance with converted properties</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.NoWrapperConversionAttribute">
+            <summary>
+            Attribute to mark properties that should not be converted to wrappers
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Core.NativeGameEventBase">
             <summary>
             Base class for all native game events from Universe.gameEventBus
@@ -255,6 +312,69 @@
             Optional mod identifier that created this event
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Core.WrapperFactory">
+            <summary>
+            Factory for automatically converting native IL2CPP instances to SDK wrappers
+            Provides type-safe access to game objects through SDK wrapper classes
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.ConvertToWrapper``1(System.Object)">
+            <summary>
+            Convert a native IL2CPP instance to its corresponding SDK wrapper
+            Returns null if conversion fails or input is null
+            </summary>
+            <typeparam name="T">Expected wrapper type</typeparam>
+            <param name="nativeInstance">Native IL2CPP instance</param>
+            <returns>SDK wrapper instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.ConvertToWrapper(System.Object,System.Type)">
+            <summary>
+            Convert a native IL2CPP instance to SDK wrapper (type determined at runtime)
+            </summary>
+            <param name="nativeInstance">Native IL2CPP instance</param>
+            <param name="targetWrapperType">Target wrapper type</param>
+            <returns>SDK wrapper instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.RegisterConverters">
+            <summary>
+            Register all known native type → wrapper converters
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.GetWrapperTypeForNative(System.Type)">
+            <summary>
+            Attempt to detect wrapper type for a native type based on naming conventions
+            </summary>
+            <param name="nativeType">Native IL2CPP type</param>
+            <returns>Corresponding wrapper type or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.TryReflectionConversion(System.Object,System.Type)">
+            <summary>
+            Fallback reflection-based converter for types not explicitly registered
+            </summary>
+            <param name="nativeInstance">Native instance</param>
+            <param name="wrapperType">Target wrapper type</param>
+            <returns>Wrapper instance or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.IsWrapperSupported(System.Type)">
+            <summary>
+            Check if a wrapper type is registered for conversion
+            </summary>
+            <param name="wrapperType">Wrapper type to check</param>
+            <returns>True if converter is available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.GetSupportedWrapperTypes">
+            <summary>
+            Get all supported wrapper types
+            </summary>
+            <returns>Collection of supported wrapper types</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Core.WrapperFactory.RegisterConverter``1(System.Func{System.Object,``0})">
+            <summary>
+            Register a custom converter for a specific wrapper type
+            </summary>
+            <typeparam name="T">Wrapper type</typeparam>
+            <param name="converter">Conversion function</param>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Data.BuildingEventData">
             <summary>
             Building event data
@@ -277,6 +397,80 @@
             Martian day change event data
             Fired when a new Martian sol begins (GevUniverseDayPassed)
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.EventsAutoStartPlugin">
+            <summary>
+            Automatic initialization for enhanced event system
+            Provides seamless upgrade from legacy event system to wrapper-enabled events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeWrapperFactory">
+            <summary>
+            Initialize the wrapper factory with all available wrappers
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.LogSystemStatus">
+            <summary>
+            Log current system status for debugging
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.Unload">
+            <summary>
+            Plugin shutdown
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.EnhancedEvents">
+            <summary>
+            Public API for mods to interact with the enhanced event system
+            Provides a clean interface that automatically handles wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe to a native game event with automatic wrapper conversion
+            </summary>
+            <param name="eventType">Event type from NativeEventConstants</param>
+            <param name="handler">Event handler (receives wrappers automatically)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.Unsubscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Unsubscribe from a native game event
+            </summary>
+            <param name="eventType">Event type from NativeEventConstants</param>
+            <param name="handler">Event handler to remove</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.Subscribe``1(System.String,System.Action{``0})">
+            <summary>
+            Subscribe to a native event with strong typing
+            </summary>
+            <typeparam name="T">Event type (e.g., BuildingSpawnedNativeEvent)</typeparam>
+            <param name="eventType">Event type constant</param>
+            <param name="handler">Typed event handler</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.Publish(System.String,System.Object)">
+            <summary>
+            Publish a custom event through the enhanced system
+            </summary>
+            <param name="eventType">Event type</param>
+            <param name="eventData">Event data (will be converted if needed)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.IsAvailable">
+            <summary>
+            Check if the enhanced event system is available
+            </summary>
+            <returns>True if enhanced events are active</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.GetStats">
+            <summary>
+            Get current event system statistics
+            </summary>
+            <returns>Event system statistics</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EnhancedEvents.SetWrapperConversion(System.Boolean)">
+            <summary>
+            Enable or disable automatic wrapper conversion
+            </summary>
+            <param name="enabled">True to enable wrapper conversion</param>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Helpers.EventHelpers">
             <summary>
@@ -368,6 +562,62 @@
             Create a filter function for milestone sols
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Integration.EventSystemIntegration">
+            <summary>
+            Automatic integration bridge that connects native game events to SDK event system
+            Replaces legacy ModEventBus with enhanced wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.Initialize">
+            <summary>
+            Initialize the enhanced event system integration
+            Replaces legacy event routing with wrapper-enabled system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ConnectToLegacyEventSystem">
+            <summary>
+            Connect to existing EventSystem and route events through enhanced bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.FindEventSystemType">
+            <summary>
+            Find the existing EventSystem type using reflection
+            </summary>
+            <returns>EventSystem type or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.SetupEventSystemBridge(System.Type)">
+            <summary>
+            Setup bridge between legacy EventSystem and enhanced event bus
+            </summary>
+            <param name="eventSystemType">Legacy EventSystem type</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.RouteNativeEvent(System.String,System.Object)">
+            <summary>
+            Route a native game event through the enhanced system
+            This is called by the event patching system
+            </summary>
+            <param name="eventType">Native event type</param>
+            <param name="nativeEventData">Raw native event data</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ConvertNativeToSDKEvent(System.String,System.Object)">
+            <summary>
+            Convert raw native event data to appropriate SDK event object
+            </summary>
+            <param name="eventType">Event type constant</param>
+            <param name="nativeEventData">Raw native data</param>
+            <returns>SDK event object</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.Shutdown">
+            <summary>
+            Shutdown the event system integration
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.IsInitialized">
+            <summary>
+            Get integration status
+            </summary>
+            <returns>True if integration is active</returns>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent">
             <summary>
             Native event: Building spawned/created
@@ -375,13 +625,13 @@
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.Building">
-            <summary>Building instance that was spawned</summary>
+            <summary>Building instance that was spawned (SDK wrapper)</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.BuildingTypeKey">
             <summary>Building type key (e.g., "SolarPanel", "Mine")</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.OwnerFaction">
-            <summary>Owner faction of the building</summary>
+            <summary>Owner faction of the building (SDK wrapper)</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.PositionX">
             <summary>Position X coordinate</summary>
@@ -502,6 +752,94 @@
         <member name="T:PerAspera.GameAPI.Events.Native.DroneDespawnedNativeEvent">
             <summary>
             Native event: Drone despawned/destroyed
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.EnhancedEventBus">
+            <summary>
+            Enhanced event bus that automatically converts native IL2CPP instances to SDK wrappers
+            Provides type-safe event handling with automatic wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe to an event with automatic wrapper conversion
+            </summary>
+            <param name="eventType">Event type constant</param>
+            <param name="handler">Event handler (will receive converted wrappers)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Unsubscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Unsubscribe from an event
+            </summary>
+            <param name="eventType">Event type constant</param>
+            <param name="handler">Event handler to remove</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Publish(System.String,System.Object)">
+            <summary>
+            Publish an event with automatic wrapper conversion
+            </summary>
+            <param name="eventType">Event type constant</param>
+            <param name="eventData">Event data (will be converted)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.PrepareEventForDelivery(System.Object)">
+            <summary>
+            Prepare event data for delivery by converting native instances to wrappers
+            </summary>
+            <param name="eventData">Raw event data</param>
+            <returns>Event data with wrappers</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.SetAutoConversion(System.Boolean)">
+            <summary>
+            Enable or disable automatic wrapper conversion
+            </summary>
+            <param name="enabled">True to enable conversion</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.IsAutoConversionEnabled">
+            <summary>
+            Get current auto conversion status
+            </summary>
+            <returns>True if auto conversion is enabled</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetSubscribedEventTypes">
+            <summary>
+            Get all subscribed event types
+            </summary>
+            <returns>Collection of event type names</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetSubscriberCount(System.String)">
+            <summary>
+            Get subscriber count for a specific event type
+            </summary>
+            <param name="eventType">Event type to check</param>
+            <returns>Number of subscribers</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.ClearAllSubscriptions">
+            <summary>
+            Clear all subscriptions (for testing/cleanup)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.PublishLegacyEvent(System.String,System.Object)">
+            <summary>
+            Bridge method for legacy EventSystem compatibility
+            Allows existing code to work through enhanced bus
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.NormalizeEventKey(System.String)">
+            <summary>
+            Normalize legacy event keys to new format
+            </summary>
+            <param name="eventKey">Original event key</param>
+            <returns>Normalized event key</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetStats">
+            <summary>
+            Get statistics about event bus performance
+            </summary>
+            <returns>Performance statistics</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.EventBusStats">
+            <summary>
+            Statistics about event bus performance and state
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Native.FactionCloseAllWindowsNativeEvent">
@@ -659,6 +997,17 @@
         <member name="T:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent">
             <summary>
             Event triggered when BaseGame and Universe are detected
+            Uses SDK wrapper classes for type-safe access
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.BaseGame">
+            <summary>
+            SDK wrapper for BaseGame (type-safe access)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.Universe">
+            <summary>
+            SDK wrapper for Universe (type-safe access)
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent">

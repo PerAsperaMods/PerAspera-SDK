@@ -11,6 +11,7 @@
 // - IL2CPP-safe: Uses System.Type, object references instead of dynamic
 
 using PerAspera.GameAPI.Events.Core;
+using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Events.Native
 {
@@ -25,13 +26,13 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingSpawned";
         
-        /// <summary>Building instance that was spawned</summary>
-        public object? Building { get; set; }
+        /// <summary>Building instance that was spawned (SDK wrapper)</summary>
+        public Building? Building { get; set; }
         
         /// <summary>Building type key (e.g., "SolarPanel", "Mine")</summary>
         public string BuildingTypeKey { get; set; } = string.Empty;
         
-        /// <summary>Owner faction of the building</summary>
+        /// <summary>Owner faction of the building (SDK wrapper)</summary>
         public object? OwnerFaction { get; set; }
         
         /// <summary>Position X coordinate</summary>
@@ -52,7 +53,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingDespawned";
         
-        public object? Building { get; set; }
+        public Building? Building { get; set; }
         public string BuildingTypeKey { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
         public float? PositionX { get; set; }
@@ -70,7 +71,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingUpgraded";
         
-        public object? Building { get; set; }
+        public Building? Building { get; set; }
         public string PreviousTypeKey { get; set; } = string.Empty;
         public string NewTypeKey { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
@@ -87,7 +88,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingScrapped";
         
-        public object? Building { get; set; }
+        public Building? Building { get; set; }
         public string BuildingTypeKey { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
         
@@ -110,7 +111,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingPreRemove";
         
-        public object? Building { get; set; }
+        public Building? Building { get; set; }
         public string BuildingTypeKey { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
         public float? PositionX { get; set; }
@@ -129,7 +130,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:BuildingSpawnedSpatialAdd";
         
-        public object? Building { get; set; }
+        public Building? Building { get; set; }
         public string BuildingTypeKey { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
         public float? PositionX { get; set; }

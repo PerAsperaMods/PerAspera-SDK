@@ -1223,6 +1223,7 @@
         </member>
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceType(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetBuildingType(System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetPerson(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetTechnologyType(System.String)" -->
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetByHandle(System.Object)">
             <summary>
@@ -1689,6 +1690,35 @@
             <summary>
             Validate scene configuration and log any issues
             Useful for troubleshooting scene setup
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
+            <summary>
+            Wrapper léger pour interagir avec le système de dialogues du jeu.
+            Utilise la réflexion pour éviter une dépendance forte sur les assemblies IL2CPP.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.StartDialogue(System.String,System.String,System.String)">
+            <summary>
+            Tente de démarrer un dialogue en appelant une méthode statique native probable.
+            Signature attendue (exemples) : Universe.StartDialogue(string factionKey, string personKey, string dialogueKey)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.NotifyDialogue(System.String,System.String,System.String)">
+            <summary>
+            Notification pour un dialogue (ex: NotifyMandatoryDialogue via commandes du moteur)
+            Si une méthode dédiée existe, tente de l'appeler.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.ContainsDialogue(System.String)">
+            <summary>
+            Vérifie de manière heuristique si un dialogue est présent via DialogueManager.ContainsDialogue
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.BuildDialogue(System.String,System.String,PerAspera.GameAPI.Wrappers.DialogueLine[])">
+            <summary>
+            Helper pour construire un objet représentant un dialogue léger côté mod (non-persisté).
+            Utile pour tests et génération dynamique de dialogues avant conversion en YAML/TextAsset.
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">

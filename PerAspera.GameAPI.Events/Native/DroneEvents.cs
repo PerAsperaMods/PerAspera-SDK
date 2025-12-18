@@ -2,6 +2,7 @@
 // - BaseGame.md: lambda handlers _SubscribeEventHandlers_b__198_1/2 (Drone sender, ref GameEvent evt)
 
 using PerAspera.GameAPI.Events.Core;
+using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Events.Native
 {
@@ -16,7 +17,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:DroneSpawned";
         
-        public object? Drone { get; set; }
+        public Drone? Drone { get; set; }
         public string DroneType { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
 
@@ -31,7 +32,7 @@ namespace PerAspera.GameAPI.Events.Native
     {
         public override string EventType => "Native:DroneDespawned";
         
-        public object? Drone { get; set; }
+        public Drone? Drone { get; set; }
         public string DroneType { get; set; } = string.Empty;
         public object? OwnerFaction { get; set; }
 

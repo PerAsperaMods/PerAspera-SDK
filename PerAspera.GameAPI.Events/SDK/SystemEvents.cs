@@ -1,5 +1,6 @@
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Wrappers;
+using System;
 
 namespace PerAspera.GameAPI.Events.SDK
 {
@@ -7,18 +8,26 @@ namespace PerAspera.GameAPI.Events.SDK
 
     /// <summary>
     /// Event triggered when BaseGame and Universe are detected
+    /// Uses SDK wrapper classes for type-safe access
     /// </summary>
     public class BaseGameDetectedEvent : SDKEventBase
     {
         public override string EventType => "BaseGameDetected";
         
-        public object BaseGame { get; }
+        /// <summary>
+        /// SDK wrapper for BaseGame (type-safe access)
+        /// </summary>
+        public BaseGame BaseGame { get; }
+        
+        /// <summary>
+        /// SDK wrapper for Universe (type-safe access)
+        /// </summary>
         public Universe Universe { get; }
 
-        public BaseGameDetectedEvent(object baseGame, Universe universe)
+        public BaseGameDetectedEvent(BaseGame baseGame, Universe universe)
         {
-            BaseGame = baseGame;
-            Universe = universe;
+            BaseGame = baseGame ?? throw new ArgumentNullException(nameof(baseGame));
+            Universe = universe ?? throw new ArgumentNullException(nameof(universe));
         }
     }
 
