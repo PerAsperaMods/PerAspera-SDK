@@ -266,9 +266,10 @@ namespace PerAspera.GameAPI.Events.Patches
 
         /// <summary>
         /// Patch Blackboard constructor to catch individual blackboard creation
-        /// Constructor: Blackboard(string name, Blackboard parent)
+        /// Constructor: Blackboard(string name, object parent)
         /// </summary>
-        [HarmonyPatch("Blackboard", ".ctor", new System.Type[] { typeof(string), typeof(object) })]
+        [HarmonyPatch("Blackboard", MethodType.Constructor)]
+        [HarmonyPatch(new System.Type[] { typeof(string), typeof(object) })]
         [HarmonyPostfix]
         public static void OnBlackboardConstructor(object __instance, string name)
         {

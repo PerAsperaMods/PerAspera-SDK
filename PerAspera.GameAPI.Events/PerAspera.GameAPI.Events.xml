@@ -124,6 +124,9 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameFullyLoaded">
             <summary>Event: Game fully loaded with all systems ready</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BlackboardInitialized">
+            <summary>Event: Blackboard system initialized (variable storage ready)</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.SDKInitialized">
             <summary>Event: SDK initialized and ready</summary>
         </member>
@@ -974,6 +977,18 @@
             Try to get Planet instance using wrapper
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnUniverseAddBlackboard(System.Object)">
+            <summary>
+            Patch Universe.AddBlackboard() to trigger BlackboardInitializedEvent
+            Method: AddBlackboard(Blackboard blackboard)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnBlackboardConstructor(System.Object,System.String)">
+            <summary>
+            Patch Blackboard constructor to catch individual blackboard creation
+            Constructor: Blackboard(string name, object parent)
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemInitializedEvent">
             <summary>
             Event triggered when a mod system is initialized
@@ -1090,6 +1105,17 @@
         <member name="T:PerAspera.GameAPI.Events.SDK.BlackboardInitializedEvent">
             <summary>
             Event triggered when the main Blackboard is initialized
+            ✅ Enhanced: Uses BlackBoard wrapper for type-safe access
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BlackboardInitializedEvent.NativeBlackboard">
+            <summary>
+            The native blackboard object (for compatibility)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BlackboardInitializedEvent.BlackBoard">
+            <summary>
+            Type-safe BlackBoard wrapper instance
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.PlanetInitializedEvent">

@@ -17,6 +17,8 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
     /// </summary>
     public partial class TwitchConnection : IDisposable
     {
+        private static readonly LogAspera _logger = new LogAspera("TwitchConnection");
+        
         private TcpClient? _tcpClient;
         private string _oauth = string.Empty;
         private string _nick = string.Empty;
@@ -52,11 +54,11 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 _readInterval = config.ReadInterval;
                 _writeInterval = config.WriteInterval;
                 
-                LogAspera.Info($"TwitchConnection created for {_nick}@{_channel}");
+                _logger.Info($"TwitchConnection created for {_nick}@{_channel}");
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Failed to create TwitchConnection: {ex.Message}");
+                _logger.Error($"Failed to create TwitchConnection: {ex.Message}");
                 _tcpClient = null;
                 OnError?.Invoke(ex);
             }
@@ -68,7 +70,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             {
                 if (_tcpClient?.Connected != true)
                 {
-                    LogAspera.Warning("TcpClient not connected, attempting reconnection...");
+                    _logger.Warning("TcpClient not connected, attempting reconnection...");
                     return false;
                 }
                 
@@ -81,13 +83,13 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 
                 _isConnected = true;
                 OnConnected?.Invoke();
-                LogAspera.Info($"Successfully connected to Twitch IRC for {_channel}");
+                _logger.Info($"Successfully connected to Twitch IRC for {_channel}");
                 
                 return true;
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Connection failed: {ex.Message}");
+                _logger.Error($"Connection failed: {ex.Message}");
                 OnError?.Invoke(ex);
                 return false;
             }
@@ -97,13 +99,13 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
         {
             if (!IsConnected)
             {
-                LogAspera.Warning("Cannot send message - not connected");
+                _logger.Warning("Cannot send message - not connected");
                 return;
             }
             
             var ircMessage = $"PRIVMSG #{_channel} :{message}";
             _writeQueue.Enqueue(ircMessage);
-            LogAspera.Debug($"Queued message: {message}");
+            _logger.Debug($"Queued message: {message}");
         }
         
         private async Task SendIRCAuthenticationAsync()
@@ -130,11 +132,11 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 _isConnected = false;
                 _tcpClient?.Close();
                 OnDisconnected?.Invoke();
-                LogAspera.Info("Disconnected from Twitch IRC");
+                _logger.Info("Disconnected from Twitch IRC");
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Error during disconnect: {ex.Message}");
+                _logger.Error($"Error during disconnect: {ex.Message}");
                 OnError?.Invoke(ex);
             }
         }
@@ -147,7 +149,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             _tcpClient?.Dispose();
             _disposed = true;
             
-            LogAspera.Debug("TwitchConnection disposed");
+            _logger.Debug("TwitchConnection disposed");
         }
     }
     
