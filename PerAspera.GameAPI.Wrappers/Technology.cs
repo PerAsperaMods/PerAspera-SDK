@@ -1,27 +1,29 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for the native Technology class
-    /// Provides safe access to technology definitions and research status
-    /// DOC: Technology.md - Research tree and technology progression
+    /// Wrapper for the native TechnologyType class
+    /// Provides safe access to technology type definitions and properties
+    /// DOC: TechnologyType.md - Technology definitions loaded from YAML
     /// </summary>
     public class Technology : WrapperBase
     {
         /// <summary>
-        /// Initialize Technology wrapper with native technology object
+        /// Initialize Technology wrapper with native TechnologyType object
         /// </summary>
-        /// <param name="nativeTechnology">Native technology instance from game</param>
+        /// <param name="nativeTechnology">Native TechnologyType instance from game</param>
         public Technology(object nativeTechnology) : base(nativeTechnology)
         {
         }
         
         /// <summary>
-        /// Create wrapper from native technology object
+        /// Create wrapper from native TechnologyType object
         /// </summary>
         public static Technology? FromNative(object? nativeTechnology)
         {
@@ -313,6 +315,42 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get localized display name from game data
+        /// Uses native DisplayName property loaded from YAML
+        /// </summary>
+        /// <returns>Localized display name from game data</returns>
+        public string GetDisplayName()
+        {
+            // Use native display name from YAML data
+            var displayName = DisplayName;
+            if (!string.IsNullOrEmpty(displayName) && displayName != Name)
+            {
+                return displayName;
+            }
+            
+            // Fallback to formatted key name
+            return ToTitleCase(Name.Replace("tech_", "").Replace("technology_", "").Replace("_", " "));
+        }
+        
+        /// <summary>
+        /// Convert string to title case
+        /// </summary>
+        private static string ToTitleCase(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            
+            var words = text.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + (words[i].Length > 1 ? words[i].Substring(1).ToLower() : "");
+                }
+            }
+            return string.Join(" ", words);
+        }
+        
+        /// <summary>
         /// Get the native game object (for Harmony patches)
         /// </summary>
         public object? GetNativeObject()
@@ -331,33 +369,79 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== STATIC UTILITIES ====================
         
         /// <summary>
-        /// Common technology constants for easy reference
+        /// Common technology key constants for easy reference
+        /// These are the YAML keys used in the game data files
         /// </summary>
         public static class CommonTechnologies
         {
             // Basic Technologies
+            /// <summary>
+            /// Basic engineering technology identifier
+            /// </summary>
             public const string BasicEngineering = "tech_basic_engineering";
+            /// <summary>
+            /// Basic physics technology identifier
+            /// </summary>
             public const string BasicPhysics = "tech_basic_physics";
+            /// <summary>
+            /// Basic chemistry technology identifier
+            /// </summary>
             public const string BasicChemistry = "tech_basic_chemistry";
             
             // Solar Power
+            /// <summary>
+            /// Solar power tier 1 technology identifier
+            /// </summary>
             public const string SolarPowerTier1 = "tech_solar_power_1";
+            /// <summary>
+            /// Solar power tier 2 technology identifier
+            /// </summary>
             public const string SolarPowerTier2 = "tech_solar_power_2";
+            /// <summary>
+            /// Advanced solar power technology identifier
+            /// </summary>
             public const string AdvancedSolar = "tech_advanced_solar";
             
             // Resource Extraction
+            /// <summary>
+            /// Water extraction tier 1 technology identifier
+            /// </summary>
             public const string WaterExtractionTier1 = "tech_water_extraction_1";
+            /// <summary>
+            /// Mining tier 1 technology identifier
+            /// </summary>
             public const string MiningTier1 = "tech_mining_1";
+            /// <summary>
+            /// Advanced mining technology identifier
+            /// </summary>
             public const string AdvancedMining = "tech_advanced_mining";
             
             // Manufacturing
+            /// <summary>
+            /// Basic manufacturing technology identifier
+            /// </summary>
             public const string BasicManufacturing = "tech_basic_manufacturing";
+            /// <summary>
+            /// Advanced manufacturing technology identifier
+            /// </summary>
             public const string AdvancedManufacturing = "tech_advanced_manufacturing";
+            /// <summary>
+            /// Automation technology identifier
+            /// </summary>
             public const string Automation = "tech_automation";
             
             // Terraforming
+            /// <summary>
+            /// Atmospheric processing technology identifier
+            /// </summary>
             public const string AtmosphericProcessing = "tech_atmospheric_processing";
+            /// <summary>
+            /// Terraforming tier 1 technology identifier
+            /// </summary>
             public const string TerraformingTier1 = "tech_terraforming_1";
+            /// <summary>
+            /// Advanced terraforming technology identifier
+            /// </summary>
             public const string AdvancedTerraforming = "tech_advanced_terraforming";
         }
     }

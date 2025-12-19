@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
@@ -152,9 +153,10 @@ namespace PerAspera.GameAPI.Wrappers
                     {
                         foreach (var icon in enumerable)
                         {
-                            if (icon?.ToString() != null)
+                            var iconString = icon?.ToString();
+                            if (!string.IsNullOrEmpty(iconString))
                             {
-                                iconList.Add(icon.ToString());
+                                iconList.Add(iconString);
                             }
                         }
                     }
@@ -263,55 +265,128 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== STATIC UTILITIES ====================
         
         /// <summary>
-        /// Common resource type constants for easy reference
+        /// Common resource type key constants for easy reference
+        /// These are the YAML keys used in the game data files
         /// </summary>
         public static class CommonResources
         {
+            /// <summary>
+            /// Water resource identifier
+            /// </summary>
             public const string Water = "resource_water";
+            /// <summary>
+            /// Iron ore resource identifier
+            /// </summary>
             public const string Iron = "resource_iron";
+            /// <summary>
+            /// Silicon resource identifier
+            /// </summary>
             public const string Silicon = "resource_silicon";
+            /// <summary>
+            /// Carbon resource identifier
+            /// </summary>
             public const string Carbon = "resource_carbon";
+            /// <summary>
+            /// Aluminum resource identifier
+            /// </summary>
             public const string Aluminum = "resource_aluminum";
+            /// <summary>
+            /// Uranium resource identifier
+            /// </summary>
             public const string Uranium = "resource_uranium";
+            /// <summary>
+            /// Chemicals resource identifier
+            /// </summary>
             public const string Chemicals = "resource_chemicals";
             
+            /// <summary>
+            /// Steel manufactured resource identifier
+            /// </summary>
             public const string Steel = "resource_steel";
+            /// <summary>
+            /// Glass manufactured resource identifier
+            /// </summary>
             public const string Glass = "resource_glass";
+            /// <summary>
+            /// Parts manufactured resource identifier
+            /// </summary>
             public const string Parts = "resource_parts";
+            /// <summary>
+            /// Polymers manufactured resource identifier
+            /// </summary>
             public const string Polymers = "resource_polymers";
+            /// <summary>
+            /// Electronics manufactured resource identifier
+            /// </summary>
             public const string Electronics = "resource_electronics";
+            /// <summary>
+            /// Food resource identifier
+            /// </summary>
             public const string Food = "resource_food";
+            /// <summary>
+            /// Fuel resource identifier
+            /// </summary>
             public const string Fuel = "resource_fuel";
             
+            /// <summary>
+            /// Energy resource identifier
+            /// </summary>
             public const string Energy = "resource_energy";
+            /// <summary>
+            /// Oxygen atmospheric resource identifier
+            /// </summary>
             public const string Oxygen = "resource_oxygen";
         }
         
         /// <summary>
-        /// Get display name for common resources
+        /// Get display name using native DisplayName property or fallback to formatted name
+        /// This is dynamic and uses the actual game data loaded from YAML
         /// </summary>
-        public static string GetDisplayName(string resourceKey)
+        /// <param name="resourceWrapper">ResourceType wrapper instance</param>
+        /// <returns>Localized display name from game data</returns>
+        public static string GetDynamicDisplayName(ResourceType resourceWrapper)
         {
-            return resourceKey switch
+            if (resourceWrapper?.IsValid == true)
             {
-                CommonResources.Water => "Water",
-                CommonResources.Iron => "Iron",
-                CommonResources.Silicon => "Silicon",
-                CommonResources.Carbon => "Carbon",
-                CommonResources.Aluminum => "Aluminum",
-                CommonResources.Uranium => "Uranium",
-                CommonResources.Chemicals => "Chemicals",
-                CommonResources.Steel => "Steel",
-                CommonResources.Glass => "Glass",
-                CommonResources.Parts => "Parts",
-                CommonResources.Polymers => "Polymers",
-                CommonResources.Electronics => "Electronics",
-                CommonResources.Food => "Food",
-                CommonResources.Fuel => "Fuel",
-                CommonResources.Energy => "Energy",
-                CommonResources.Oxygen => "Oxygen",
-                _ => resourceKey.Replace("resource_", "").Replace("_", " ").ToTitleCase()
-            };
+                // Use native display name from YAML data
+                var displayName = resourceWrapper.DisplayName;
+                if (!string.IsNullOrEmpty(displayName) && displayName != resourceWrapper.Name)
+                {
+                    return displayName;
+                }
+            }
+            
+            // Fallback to formatted key name
+            var resourceKey = resourceWrapper?.Name ?? "unknown";
+            return ToTitleCase(resourceKey.Replace("resource_", "").Replace("_", " "));
+        }
+        
+        /// <summary>
+        /// Get display name using instance method (preferred)
+        /// Uses native DisplayName property loaded from YAML
+        /// </summary>
+        /// <returns>Localized display name from game data</returns>
+        public string GetDisplayName()
+        {
+            return GetDynamicDisplayName(this);
+        }
+        
+        /// <summary>
+        /// Convert string to title case
+        /// </summary>
+        private static string ToTitleCase(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            
+            var words = text.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + (words[i].Length > 1 ? words[i].Substring(1).ToLower() : "");
+                }
+            }
+            return string.Join(" ", words);
         }
     }
 }

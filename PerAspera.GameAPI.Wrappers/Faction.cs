@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
@@ -176,12 +178,38 @@ namespace PerAspera.GameAPI.Wrappers
                 var buildings = SafeInvoke<object>("get_buildings");
                 if (buildings == null)
                 {
-                    // Fall back to planet filtering
-                    var planet = Planet.GetCurrent();
-                    if (planet?.IsValid == true)
+                    // Use BaseGame architecture (corrected approach)
+                    // DOC: BaseGame-Architecture-Corrections.md - Direct planet access
+                    try
                     {
-                        return planet.GetBuildingsByFaction(this);
+                        var planet = Planet.GetCurrent();
+                        if (planet != null)
+                        {
+                            var planetBuildings = SafeInvoke<object>("get_buildings", planet.GetNativeObject());
+                            if (planetBuildings is System.Collections.IEnumerable planetEnumerable)
+                            {
+                                var planetBuildingWrappers = new List<Building>();
+                                foreach (var building in planetEnumerable)
+                                {
+                                    if (building != null)
+                                    {
+                                        // Filter by faction ownership if possible
+                                        var buildingWrapper = new Building(building);
+                                        if (buildingWrapper.IsValid)
+                                        {
+                                            planetBuildingWrappers.Add(buildingWrapper);
+                                        }
+                                    }
+                                }
+                                return planetBuildingWrappers;
+                            }
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        Log.Debug($"Failed to access buildings via BaseGame: {ex.Message}");
+                    }
+                    
                     return new List<Building>();
                 }
                 

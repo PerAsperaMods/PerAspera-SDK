@@ -427,8 +427,8 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                var result = SafeInvoke<bool?>("IsUnlockedFor", faction.NativeObject) ??
-                           SafeInvoke<bool?>("IsAvailable", faction.NativeObject);
+                var result = SafeInvoke<bool?>("IsUnlockedFor", faction.GetNativeObject()) ??
+                           SafeInvoke<bool?>("IsAvailable", faction.GetNativeObject());
                            
                 if (result.HasValue) return result.Value;
                 
@@ -477,6 +477,42 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get localized display name from game data
+        /// Uses native DisplayName property loaded from YAML
+        /// </summary>
+        /// <returns>Localized display name from game data</returns>
+        public string GetDisplayName()
+        {
+            // Use native display name from YAML data
+            var displayName = DisplayName;
+            if (!string.IsNullOrEmpty(displayName) && displayName != Name)
+            {
+                return displayName;
+            }
+            
+            // Fallback to formatted key name
+            return ToTitleCase(Name.Replace("building_", "").Replace("power_", "").Replace("_", " "));
+        }
+        
+        /// <summary>
+        /// Convert string to title case
+        /// </summary>
+        private static string ToTitleCase(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            
+            var words = text.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + (words[i].Length > 1 ? words[i].Substring(1).ToLower() : "");
+                }
+            }
+            return string.Join(" ", words);
+        }
+        
+        /// <summary>
         /// Get the native game object (for Harmony patches)
         /// </summary>
         public object? GetNativeObject()
@@ -495,35 +531,87 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== STATIC UTILITIES ====================
         
         /// <summary>
-        /// Common building type constants for easy reference
+        /// Common building type key constants for easy reference
+        /// These are the YAML keys used in the game data files
         /// </summary>
         public static class CommonBuildings
         {
             // Power Buildings
             public const string SolarPanel = "building_solar_panel";
+            /// <summary>
+            /// Solar panel field building identifier
+            /// </summary>
             public const string SolarPanelField = "power_solar_panel_field";
+            /// <summary>
+            /// Nuclear reactor building identifier
+            /// </summary>
             public const string NuclearReactor = "power_nuclear_reactor";
+            /// <summary>
+            /// Geothermal plant building identifier
+            /// </summary>
             public const string GeothermalPlant = "power_geothermal_plant";
             
             // Mining Buildings
             public const string WaterMine = "building_water_mine";
+            /// <summary>
+            /// Iron mine building identifier
+            /// </summary>
             public const string IronMine = "building_iron_mine";
+            /// <summary>
+            /// Silicon mine building identifier
+            /// </summary>
             public const string SiliconMine = "building_silicon_mine";
+            /// <summary>
+            /// Carbon mine building identifier
+            /// </summary>
             public const string CarbonMine = "building_carbon_mine";
+            /// <summary>
+            /// Aluminum mine building identifier
+            /// </summary>
             public const string AluminumMine = "building_aluminum_mine";
             
             // Manufacturing
+            /// <summary>
+            /// Steel factory building identifier
+            /// </summary>
             public const string SteelFactory = "building_steel_factory";
+            /// <summary>
+            /// Glass factory building identifier
+            /// </summary>
             public const string GlassFactory = "building_glass_factory";
+            /// <summary>
+            /// Electronics factory building identifier
+            /// </summary>
             public const string ElectronicsFactory = "building_electronics_factory";
+            /// <summary>
+            /// Parts factory building identifier
+            /// </summary>
             public const string PartsFactory = "building_parts_factory";
+            /// <summary>
+            /// Food factory building identifier
+            /// </summary>
             public const string FoodFactory = "building_food_factory";
             
             // Infrastructure
+            /// <summary>
+            /// Basic colony building identifier
+            /// </summary>
             public const string ColonyBasic = "building_colony_basic";
+            /// <summary>
+            /// Drone base building identifier
+            /// </summary>
             public const string DroneBase = "building_drone_base";
+            /// <summary>
+            /// Research lab building identifier
+            /// </summary>
             public const string ResearchLab = "building_research_lab";
+            /// <summary>
+            /// Spaceport building identifier
+            /// </summary>
             public const string Spaceport = "building_spaceport";
+            /// <summary>
+            /// Maintenance facility building identifier
+            /// </summary>
             public const string MaintenanceFacility = "building_maintenance_facility";
         }
     }

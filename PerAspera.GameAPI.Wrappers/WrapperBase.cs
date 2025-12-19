@@ -33,6 +33,15 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get the native object for use in other wrapper methods
+        /// This allows wrappers to pass native objects to other wrapper method calls
+        /// </summary>
+        public object? GetNativeObject()
+        {
+            return NativeObject;
+        }
+        
+        /// <summary>
         /// Constructor with native object
         /// </summary>
         protected WrapperBase(object? nativeObject)

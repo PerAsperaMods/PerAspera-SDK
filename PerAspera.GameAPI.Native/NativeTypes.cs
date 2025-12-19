@@ -71,4 +71,14 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+    public class Faction
+    {
+        /// <summary>Native IL2CPP Planet instance</summary>
+        public object NativeInstance { get; }
+
+        public Faction(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
 }

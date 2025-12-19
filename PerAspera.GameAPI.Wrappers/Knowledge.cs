@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
@@ -232,9 +234,9 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                return SafeInvoke<bool?>("IsUnlockedFor", faction.NativeObject) ??
-                       SafeInvoke<bool?>("IsKnown", faction.NativeObject) ??
-                       SafeInvoke<bool?>("HasKnowledge", faction.NativeObject) ?? false;
+                return SafeInvoke<bool?>("IsUnlockedFor", faction.GetNativeObject()) ??
+                       SafeInvoke<bool?>("IsKnown", faction.GetNativeObject()) ??
+                       SafeInvoke<bool?>("HasKnowledge", faction.GetNativeObject()) ?? false;
             }
             catch (Exception ex)
             {
@@ -254,9 +256,9 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                var result = SafeInvoke<bool?>("UnlockFor", faction.NativeObject) ??
-                           SafeInvoke<bool?>("Unlock", faction.NativeObject) ??
-                           SafeInvoke<bool?>("Grant", faction.NativeObject);
+                var result = SafeInvoke<bool?>("UnlockFor", faction.GetNativeObject()) ??
+                           SafeInvoke<bool?>("Unlock", faction.GetNativeObject()) ??
+                           SafeInvoke<bool?>("Grant", faction.GetNativeObject());
                 
                 if (result.HasValue) return result.Value;
                 
@@ -328,6 +330,42 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get localized display title from game data
+        /// Uses native Title property loaded from YAML
+        /// </summary>
+        /// <returns>Localized title from game data</returns>
+        public string GetDisplayTitle()
+        {
+            // Use native title from YAML data
+            var title = Title;
+            if (!string.IsNullOrEmpty(title) && title != Name)
+            {
+                return title;
+            }
+            
+            // Fallback to formatted key name
+            return ToTitleCase(Name.Replace("knowledge_", "").Replace("_", " "));
+        }
+        
+        /// <summary>
+        /// Convert string to title case
+        /// </summary>
+        private static string ToTitleCase(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            
+            var words = text.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + (words[i].Length > 1 ? words[i].Substring(1).ToLower() : "");
+                }
+            }
+            return string.Join(" ", words);
+        }
+        
+        /// <summary>
         /// Get the native game object (for Harmony patches)
         /// </summary>
         public object? GetNativeObject()
@@ -351,9 +389,20 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class KnowledgeTableEntry
     {
+        /// <summary>
+        /// Field name in the knowledge table
+        /// </summary>
         public string Field { get; }
+        /// <summary>
+        /// Text content for the field
+        /// </summary>
         public string Text { get; }
         
+        /// <summary>
+        /// Initialize knowledge table entry
+        /// </summary>
+        /// <param name="field">Field name</param>
+        /// <param name="text">Text content</param>
         public KnowledgeTableEntry(string field, string text)
         {
             Field = field ?? "";
