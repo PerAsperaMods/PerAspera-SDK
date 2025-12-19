@@ -1,3 +1,4 @@
+#nullable enable
 using Iced.Intel;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Core;
