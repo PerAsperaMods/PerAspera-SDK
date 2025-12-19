@@ -8,6 +8,9 @@ namespace PerAspera.GameAPI.Events.Constants
     {
         // ==================== SYSTEM EVENTS ====================
         
+        /// <summary>Event: Early mods can start loading (GameHub ready, BaseGame available)</summary>
+        public const string EarlyModsReady = "EarlyModsReady";
+        
         /// <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         public const string BaseGameDetected = "BaseGameDetected";
         

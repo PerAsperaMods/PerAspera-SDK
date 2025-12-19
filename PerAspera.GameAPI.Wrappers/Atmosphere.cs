@@ -16,7 +16,9 @@ namespace PerAspera.GameAPI.Wrappers
         
         public string Name { get; }
         public string Symbol { get; }
-        
+
+        ResourceType resourceType = null;
+
         internal AtmosphericGas(object nativePlanet, string name, string symbol, string getterMethod, string? setterMethod = null)
         {
             _nativePlanet = nativePlanet;
@@ -164,6 +166,7 @@ namespace PerAspera.GameAPI.Wrappers
             gases["O2"] = new AtmosphericGas(_nativePlanet, "Oxygen", "O2", "GetO2Pressure", null);
             gases["N2"] = new AtmosphericGas(_nativePlanet, "Nitrogen", "N2", "GetN2Pressure", null);
             gases["GHG"] = new AtmosphericGas(_nativePlanet, "Greenhouse Gas", "GHG", "GetGHGPressure", null);
+            gases["H2O"] = new AtmosphericGas(_nativePlanet, "Water Vapor", "H2O", "GetH2OPressure", null);
         }
         
         /// <summary>
@@ -419,6 +422,7 @@ namespace PerAspera.GameAPI.Wrappers
             throw new NotImplementedException("Modded gas registration not yet implemented - planned for v2.0");
         }
         
+
         public override string ToString()
         {
             _composition.UpdatePercentages();

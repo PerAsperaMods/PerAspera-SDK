@@ -134,7 +134,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? GetFaction()
         {
-            return SafeInvoke<object>("get_faction");
+            return new GameAPI.Wrappers.Faction(SafeInvoke<object>("get_faction"));
         }
         
         // ==================== STOCKPILE ====================
@@ -165,6 +165,8 @@ namespace PerAspera.GameAPI.Wrappers
             var cargoQty = stockpile.InvokeMethod<object>("get_Item", resourceType);
             return cargoQty?.GetFieldValue<float>("quantity") ?? 0f;
         }
+        
+        
         
         // ==================== ACTIONS ====================
         

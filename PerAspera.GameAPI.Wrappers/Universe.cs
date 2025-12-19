@@ -58,12 +58,63 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get the current planet instance (alias for GetPlanet for convenience)
+        /// </summary>
+        public Planet? CurrentPlanet => GetPlanet();
+        
+        /// <summary>
         /// Get the base game wrapper instance
         /// </summary>
         public BaseGame? GetBaseGame()
         {
             var nativeBaseGame = SafeInvoke<object>("GetBaseGame");
             return nativeBaseGame != null ? new BaseGame(nativeBaseGame) : null;
+        }
+        
+        /// <summary>
+        /// Get the player faction wrapper
+        /// Maps to: playerFaction field or GetPlayerFaction() method
+        /// </summary>
+        public Faction? GetPlayerFaction()
+        {
+            var nativePlayerFaction = SafeInvoke<object>("get_playerFaction") ?? 
+                                     SafeInvoke<object>("GetPlayerFaction");
+            return nativePlayerFaction != null ? new Faction(nativePlayerFaction) : null;
+        }
+        
+        /// <summary>
+        /// Get all factions in the universe
+        /// Maps to: factions field or GetFactions() method
+        /// </summary>
+        public List<Faction> GetFactions()
+        {
+            try
+            {
+                var nativeFactions = SafeInvoke<object>("get_factions") ?? 
+                                   SafeInvoke<object>("GetFactions");
+                
+                if (nativeFactions == null) return new List<Faction>();
+                
+                var factionWrappers = new List<Faction>();
+                var enumerable = nativeFactions as System.Collections.IEnumerable;
+                if (enumerable != null)
+                {
+                    foreach (var faction in enumerable)
+                    {
+                        if (faction != null)
+                        {
+                            factionWrappers.Add(new Faction(faction));
+                        }
+                    }
+                }
+                
+                return factionWrappers;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get factions: {ex.Message}");
+                return new List<Faction>();
+            }
         }
         
         // ==================== ACTIONS ====================

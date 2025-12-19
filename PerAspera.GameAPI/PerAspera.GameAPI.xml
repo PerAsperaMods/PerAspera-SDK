@@ -358,6 +358,16 @@
             Get CommandBus type
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetKeeper">
+            <summary>
+            Get Keeper type for entity registration system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetIHandleable">
+            <summary>
+            Get IHandleable interface type for registered entities
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetDiscoveryStats">
             <summary>
             Get discovery statistics

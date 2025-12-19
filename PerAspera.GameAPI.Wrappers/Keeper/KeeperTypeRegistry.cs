@@ -57,8 +57,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static object? GetUniverse()
         {
-            var baseGame = BaseGame.GetCurrent();
-            return baseGame?.SafeInvoke<object>("get_universe"); // Get native object directly
+            var baseGameWrapper = BaseGame.GetCurrent();
+            if (!baseGameWrapper.IsValid) return null;
+            return baseGameWrapper.GetUniverse()?.GetNativeObject(); // Get native object directly
         }
         
         /// <summary>

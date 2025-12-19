@@ -7,9 +7,10 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 using PerAspera.Core;
-using PerAspera.SDK.Enhancement.Registration;
+using PerAspera.GameAPI.Wrappers.Enhanced.Registration;
+using BepInEx.Unity.IL2CPP;
 
-namespace PerAspera.SDK.Enhancement.Events
+namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
 {
     /// <summary>
     /// Feature 2: Event System Enhancement with Generic Type Safety

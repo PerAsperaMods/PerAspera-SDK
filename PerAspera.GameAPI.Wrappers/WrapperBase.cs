@@ -21,7 +21,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Check if the native object is valid
         /// </summary>
-        public bool IsValid => NativeObject != null;
+        protected bool IsValid => NativeObject != null;
         
         /// <summary>
         /// Get the Type of the native IL2CPP object (for debugging/inspection)

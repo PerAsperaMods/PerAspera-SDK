@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
@@ -53,6 +54,8 @@ namespace PerAspera.GameAPI.Wrappers
             }
         }
         
+
+
         // ==================== RESOURCES ====================
         
         /// <summary>
@@ -176,6 +179,113 @@ namespace PerAspera.GameAPI.Wrappers
             catch (System.Exception ex)
             {
                 Log.Error($"Failed to add resource {resourceKey}: {ex.Message}");
+                return false;
+            }
+        }
+        
+        // ==================== INFO ====================
+        
+        // ==================== BUILDING MANAGEMENT ====================
+        
+        /// <summary>
+        /// Get all buildings on this planet
+        /// Maps to: buildings field or GetBuildings() method
+        /// </summary>
+        /// <returns>List of all buildings on the planet</returns>
+        public List<Building> GetBuildings()
+        {
+            try
+            {
+                var nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
+                                    SafeInvoke<object>("GetBuildings");
+                
+                if (nativeBuildings == null) return new List<Building>();
+                
+                var buildingWrappers = new List<Building>();
+                var enumerable = nativeBuildings as System.Collections.IEnumerable;
+                if (enumerable != null)
+                {
+                    foreach (var building in enumerable)
+                    {
+                        if (building != null)
+                        {
+                            buildingWrappers.Add(new Building(building));
+                        }
+                    }
+                }
+                
+                return buildingWrappers;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get buildings for planet: {ex.Message}");
+                return new List<Building>();
+            }
+        }
+        
+        /// <summary>
+        /// Get all buildings owned by a specific faction on this planet
+        /// </summary>
+        /// <param name="faction">Faction to filter by</param>
+        /// <returns>List of buildings owned by the faction</returns>
+        public List<Building> GetBuildingsByFaction(Faction faction)
+        {
+            if (!faction.IsValid) return new List<Building>();
+            
+            try
+            {
+                // Get all buildings and filter by faction
+                var allBuildings = GetBuildings();
+                var factionBuildings = new List<Building>();
+                
+                foreach (var building in allBuildings)
+                {
+                    try
+                    {
+                        var buildingFaction = building.GetFaction();
+                        if (buildingFaction != null && AreSameFaction(buildingFaction, faction.GetNativeObject()))
+                        {
+                            factionBuildings.Add(building);
+                        }
+                    }
+                    catch
+                    {
+                        // Skip buildings that can't be checked
+                        continue;
+                    }
+                }
+                
+                return factionBuildings;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get buildings for faction {faction.Name}: {ex.Message}");
+                return new List<Building>();
+            }
+        }
+        
+        /// <summary>
+        /// Helper method to compare if two faction objects are the same
+        /// </summary>
+        private bool AreSameFaction(object faction1, object? faction2)
+        {
+            if (faction1 == null || faction2 == null) return false;
+            
+            try
+            {
+                // Try comparing by reference first
+                if (ReferenceEquals(faction1, faction2)) return true;
+                
+                // Try comparing by faction name/id
+                var name1 = faction1.GetFieldValue<string>("name") ?? 
+                           faction1.InvokeMethod<string>("get_name");
+                var name2 = faction2.GetFieldValue<string>("name") ?? 
+                           faction2.InvokeMethod<string>("get_name");
+                
+                return !string.IsNullOrEmpty(name1) && name1 == name2;
+            }
+            catch
+            {
                 return false;
             }
         }

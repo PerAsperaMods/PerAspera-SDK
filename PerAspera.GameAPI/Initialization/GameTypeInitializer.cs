@@ -26,6 +26,8 @@ namespace PerAspera.GameAPI
         private static System.Type? _blackboardType;
         private static System.Type? _commandBusType;
         private static System.Type? _PersonType;
+        private static System.Type? _keeperType;
+        private static System.Type? _iHandleableType;
 
         // Cached singleton instances
         private static object? _baseGameInstance;
@@ -260,6 +262,30 @@ namespace PerAspera.GameAPI
         }
 
         /// <summary>
+        /// Get Keeper type for entity registration system
+        /// </summary>
+        public static System.Type? GetKeeper()
+        {
+            if (_keeperType == null)
+            {
+                _keeperType = FindGameType("Keeper") ?? FindGameType("EntityKeeper") ?? FindGameType("GameKeeper");
+            }
+            return _keeperType;
+        }
+
+        /// <summary>
+        /// Get IHandleable interface type for registered entities
+        /// </summary>
+        public static System.Type? GetIHandleable()
+        {
+            if (_iHandleableType == null)
+            {
+                _iHandleableType = FindGameType("IHandleable") ?? FindGameType("IHandleableEntity") ?? FindGameType("IRegistrable");
+            }
+            return _iHandleableType;
+        }
+
+        /// <summary>
         /// Get discovery statistics
         /// </summary>
         public static TypeDiscoveryStats GetDiscoveryStats()
@@ -275,6 +301,8 @@ namespace PerAspera.GameAPI
                 HasFaction = GetFactionType() != null,
                 HasResourceType = GetResourceType() != null,
                 HasCommandBus = GetCommandBusType() != null,
+                HasKeeper = GetKeeper() != null,
+                HasIHandleable = GetIHandleable() != null,
                 TotalTypesFound = CountFoundTypes(),
                 IsInitialized = _isInitialized,
                 Timestamp = DateTime.Now,
@@ -357,9 +385,11 @@ namespace PerAspera.GameAPI
                 GetFactionType();
                 GetResourceType();
                 GetCommandBusType();
+                GetKeeper();
+                GetIHandleable();
 
                 var stats = GetDiscoveryStats();
-                _log.Info($"?? Type discovery complete: {stats.TotalTypesFound}/7 types found");
+                _log.Info($"✅ Type discovery complete: {stats.TotalTypesFound}/9 types found");
             }
             catch (Exception ex)
             {
@@ -380,6 +410,8 @@ namespace PerAspera.GameAPI
             if (_factionType != null) count++;
             if (_resourceType != null) count++;
             if (_commandBusType != null) count++;
+            if (_keeperType != null) count++;
+            if (_iHandleableType != null) count++;
             return count;
         }
 
@@ -397,8 +429,8 @@ namespace PerAspera.GameAPI
             _buildingType = null;
             _technologyType = null;
             _blackboardType = null;
-            _commandBusType = null;
-            _isInitialized = false;
+            _commandBusType = null;            _keeperType = null;
+            _iHandleableType = null;            _isInitialized = false;
         }
 
         /// <summary>
@@ -544,6 +576,8 @@ namespace PerAspera.GameAPI
         public bool HasFaction { get; set; }
         public bool HasResourceType { get; set; }
         public bool HasCommandBus { get; set; }
+        public bool HasKeeper { get; set; }
+        public bool HasIHandleable { get; set; }
         public int TotalTypesFound { get; set; }
         public bool IsInitialized { get; set; }
         public DateTime Timestamp { get; set; }
@@ -554,8 +588,8 @@ namespace PerAspera.GameAPI
 
         public override string ToString()
         {
-            return $"TypeDiscovery: {TotalTypesFound}/7 types found " +
-                   $"(BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet}) " +
+            return $"TypeDiscovery: {TotalTypesFound}/9 types found " +
+                   $"(BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet}, Keeper:{HasKeeper}) " +
                    $"Cache: {CacheEntriesCount} entries, {CacheHitRate:F1}% hit rate";
         }
     }

@@ -12,6 +12,41 @@ namespace PerAspera.GameAPI.Events.SDK
     // ==================== SYSTEM EVENTS ====================
 
     /// <summary>
+    /// Event triggered when early mods can start loading
+    /// Fires immediately after GameHub initialization, before full game load
+    /// ✅ Use this for mods that need immediate initialization (UI, Twitch, logging, etc.)
+    /// </summary>
+    public class EarlyModsReadyEvent : SDKEventBase
+    {
+        public override string EventType => "EarlyModsReady";
+        
+        /// <summary>SDK wrapper for BaseGame (basic access available)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGame? BaseGameWrapper { get; }
+        
+        /// <summary>Whether BaseGame is available for wrapper creation</summary>
+        public bool BaseGameAvailable { get; }
+        
+        /// <summary>Whether this is safe for early mod initialization</summary>
+        public bool SafeForEarlyInit { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime EventTime { get; }
+
+        public EarlyModsReadyEvent(object? nativeBaseGame = null)
+        {
+            BaseGameAvailable = nativeBaseGame != null;
+            SafeForEarlyInit = true;
+            EventTime = DateTime.Now;
+            
+            // Create wrapper only if BaseGame is available
+            if (BaseGameAvailable && nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            }
+        }
+    }
+
+    /// <summary>
     /// Event triggered when BaseGame and Universe are detected
     /// Uses SDK wrapper classes for type-safe access
     /// </summary>

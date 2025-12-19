@@ -6,12 +6,14 @@ using System.Reflection;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Wrappers;
 
-namespace PerAspera.SDK.Enhancement.Registration
+namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
 {
     /// <summary>
     /// Feature 1: Registration Enhancement with HarmonyX Advanced Patterns

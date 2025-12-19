@@ -39,7 +39,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
         {
             try
             {
-                SafeInvoke("Enter");
+                SafeInvoke<object>("Enter");
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
         {
             try
             {
-                SafeInvoke("Exit");
+                SafeInvoke<object>("Exit");
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
         {
             try
             {
-                SafeInvoke("OnTick", deltaDays);
+                SafeInvoke<object>("OnTick", deltaDays);
             }
             catch (Exception ex)
             {

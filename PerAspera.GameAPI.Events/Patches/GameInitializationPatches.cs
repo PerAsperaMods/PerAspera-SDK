@@ -33,18 +33,21 @@ namespace PerAspera.GameAPI.Events.Patches
                 if (_gameHubInitialized) return;
                 _gameHubInitialized = true;
 
-                _logger.Info("🎮 GameHubManager.Awake() detected - triggering GameHubInitializedEvent");
+                _logger.Info("🎮 GameHubManager.Awake() detected - triggering EarlyModsReady event");
 
                 // Try to get BaseGame instance early
                 var baseGameInstance = TryGetBaseGameInstance();
+                
+                // Always trigger EarlyModsReady event (even if BaseGame not available yet)
+                var earlyEvent = new EarlyModsReadyEvent(baseGameInstance);
+                EnhancedEventBus.Publish(SDKEventConstants.EarlyModsReady, earlyEvent);
+                _logger.Info($"✅ EarlyModsReadyEvent published - BaseGame available: {earlyEvent.BaseGameAvailable}");
+                
+                // Also trigger GameHubInitialized for compatibility
                 if (baseGameInstance != null)
                 {
-                    // Create enhanced event with wrapper
                     var evt = new GameHubInitializedEvent(baseGameInstance, isReady: true);
-                    
-                    // Publish through Enhanced Event Bus
                     EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, evt);
-                    
                     _logger.Info("✅ GameHubInitializedEvent published successfully");
                 }
                 else
