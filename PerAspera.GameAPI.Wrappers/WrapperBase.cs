@@ -24,6 +24,11 @@ namespace PerAspera.GameAPI.Wrappers
         protected bool IsValid => NativeObject != null;
         
         /// <summary>
+        /// Public accessor for IsValid - allows cross-wrapper validation
+        /// </summary>
+        public bool IsValidWrapper => IsValid;
+        
+        /// <summary>
         /// Get the Type of the native IL2CPP object (for debugging/inspection)
         /// Returns null if no native object is wrapped
         /// </summary>

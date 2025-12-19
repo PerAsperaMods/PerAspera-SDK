@@ -115,6 +115,9 @@
             These are events created by the SDK itself for modder convenience.
             </summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.EarlyModsReady">
+            <summary>Event: Early mods can start loading (GameHub ready, BaseGame available)</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BaseGameDetected">
             <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         </member>
@@ -1056,6 +1059,25 @@
             <summary>
             The newly active scene
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent">
+            <summary>
+            Event triggered when early mods can start loading
+            Fires immediately after GameHub initialization, before full game load
+            ✅ Use this for mods that need immediate initialization (UI, Twitch, logging, etc.)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame (basic access available)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent.BaseGameAvailable">
+            <summary>Whether BaseGame is available for wrapper creation</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent.SafeForEarlyInit">
+            <summary>Whether this is safe for early mod initialization</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent.EventTime">
+            <summary>Event timestamp</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent">
             <summary>

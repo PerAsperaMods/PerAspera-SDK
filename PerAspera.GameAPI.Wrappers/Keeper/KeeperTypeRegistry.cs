@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Wrappers
         public static object? GetUniverse()
         {
             var baseGameWrapper = BaseGame.GetCurrent();
-            if (!baseGameWrapper.IsValid) return null;
+            if (!baseGameWrapper.IsValidWrapper) return null;
             return baseGameWrapper.GetUniverse()?.GetNativeObject(); // Get native object directly
         }
         

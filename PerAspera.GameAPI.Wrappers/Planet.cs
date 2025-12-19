@@ -230,7 +230,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>List of buildings owned by the faction</returns>
         public List<Building> GetBuildingsByFaction(Faction faction)
         {
-            if (!faction.IsValid) return new List<Building>();
+            if (!faction.IsValidWrapper) return new List<Building>();
             
             try
             {

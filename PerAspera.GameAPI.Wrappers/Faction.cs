@@ -195,7 +195,7 @@ namespace PerAspera.GameAPI.Wrappers
                                     {
                                         // Filter by faction ownership if possible
                                         var buildingWrapper = new Building(building);
-                                        if (buildingWrapper.IsValid)
+                                        if (buildingWrapper.IsValidWrapper)
                                         {
                                             planetBuildingWrappers.Add(buildingWrapper);
                                         }

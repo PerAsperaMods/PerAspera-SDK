@@ -230,7 +230,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if knowledge is unlocked</returns>
         public bool IsUnlockedFor(Faction faction)
         {
-            if (!faction.IsValid) return false;
+            if (!faction.IsValidWrapper) return false;
             
             try
             {
@@ -252,7 +252,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if knowledge was unlocked successfully</returns>
         public bool UnlockFor(Faction faction)
         {
-            if (!faction.IsValid) return false;
+            if (!faction.IsValidWrapper) return false;
             
             try
             {

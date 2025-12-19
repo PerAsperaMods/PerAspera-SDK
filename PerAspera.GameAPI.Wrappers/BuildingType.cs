@@ -423,7 +423,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if building is unlocked</returns>
         public bool IsUnlockedFor(Faction faction)
         {
-            if (!faction.IsValid) return false;
+            if (!faction.IsValidWrapper) return false;
             
             try
             {

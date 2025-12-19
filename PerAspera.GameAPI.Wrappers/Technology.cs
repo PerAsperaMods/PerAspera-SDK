@@ -157,7 +157,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if all prerequisites are researched</returns>
         public bool ArePrerequisitesMet(Faction faction)
         {
-            if (!faction.IsValid) return false;
+            if (!faction.IsValidWrapper) return false;
             
             var prerequisites = GetPrerequisites();
             return prerequisites.All(prereq => faction.HasTechnology(prereq.Name));
@@ -241,7 +241,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if technology is researched</returns>
         public bool IsResearchedBy(Faction faction)
         {
-            return faction.IsValid && faction.HasTechnology(Name);
+            return faction.IsValidWrapper && faction.HasTechnology(Name);
         }
         
         /// <summary>
@@ -252,7 +252,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if technology can be researched</returns>
         public bool IsAvailableFor(Faction faction)
         {
-            return faction.IsValid && 
+            return faction.IsValidWrapper && 
                    !IsResearchedBy(faction) && 
                    ArePrerequisitesMet(faction);
         }
@@ -264,7 +264,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if research was initiated successfully</returns>
         public bool StartResearch(Faction faction)
         {
-            if (!faction.IsValid) return false;
+            if (!faction.IsValidWrapper) return false;
             
             return faction.ResearchTechnology(Name);
         }

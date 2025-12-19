@@ -281,4 +281,113 @@ namespace PerAspera.GameAPI.Events.SDK
             InitializedAt = DateTime.Now;
         }
     }
+
+    /// <summary>
+    /// Event triggered when GameHub/GameHubManager is first loaded
+    /// ✅ This is the EARLIEST event - fires when GameHubManager.Awake() occurs
+    /// Use this for mods that need immediate initialization before any game systems
+    /// </summary>
+    public class GameHubReadyEvent : SDKEventBase
+    {
+        public override string EventType => "GameHubReady";
+        
+        /// <summary>Whether GameHub scene is fully loaded</summary>
+        public bool SceneLoaded { get; }
+        
+        /// <summary>Whether GameHubManager is available</summary>
+        public bool ManagerReady { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime ReadyAt { get; }
+
+        public GameHubReadyEvent(bool sceneLoaded = true, bool managerReady = true)
+        {
+            SceneLoaded = sceneLoaded;
+            ManagerReady = managerReady;
+            ReadyAt = DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when BaseGame instance is created
+    /// Fires when BaseGame.Awake() or initialization occurs
+    /// </summary>
+    public class BaseGameCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "BaseGameCreated";
+        
+        /// <summary>SDK wrapper for BaseGame</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public NativeBaseGame NativeBaseGame { get; }
+        
+        /// <summary>Whether BaseGame is fully initialized</summary>
+        public bool IsInitialized { get; }
+
+        public BaseGameCreatedEvent(object nativeBaseGame, bool isInitialized = false)
+        {
+            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            IsInitialized = isInitialized;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when Universe instance is created
+    /// Fires when Universe is instantiated and attached to BaseGame
+    /// </summary>
+    public class UniverseCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "UniverseCreated";
+        
+        /// <summary>SDK wrapper for Universe</summary>
+        public PerAspera.GameAPI.Wrappers.Universe UniverseWrapper { get; }
+        
+        /// <summary>SDK wrapper for BaseGame (parent)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        
+        /// <summary>Native IL2CPP Universe instance</summary>
+        public NativeUniverse NativeUniverse { get; }
+
+        public UniverseCreatedEvent(object nativeUniverse, object nativeBaseGame)
+        {
+            NativeUniverse = new NativeUniverse(nativeUniverse ?? throw new ArgumentNullException(nameof(nativeUniverse)));
+            UniverseWrapper = new PerAspera.GameAPI.Wrappers.Universe(nativeUniverse);
+            
+            if (nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when Planet instance is created
+    /// Fires when Planet is instantiated and attached to Universe
+    /// </summary>
+    public class PlanetCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "PlanetCreated";
+        
+        /// <summary>SDK wrapper for Planet</summary>
+        public PerAspera.GameAPI.Wrappers.Planet PlanetWrapper { get; }
+        
+        /// <summary>SDK wrapper for Universe (parent)</summary>
+        public PerAspera.GameAPI.Wrappers.Universe UniverseWrapper { get; }
+        
+        /// <summary>Native IL2CPP Planet instance</summary>
+        public NativePlanet NativePlanet { get; }
+
+        public PlanetCreatedEvent(object nativePlanet, object nativeUniverse)
+        {
+            NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
+            PlanetWrapper = new PerAspera.GameAPI.Wrappers.Planet(nativePlanet);
+            
+            if (nativeUniverse != null)
+            {
+                UniverseWrapper = new PerAspera.GameAPI.Wrappers.Universe(nativeUniverse);
+            }
+        }
+    }
 }

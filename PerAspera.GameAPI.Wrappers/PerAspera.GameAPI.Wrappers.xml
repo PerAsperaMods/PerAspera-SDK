@@ -331,6 +331,11 @@
             </summary>
             <param name="nativeBlackBoard">Native blackboard object to wrap</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoard.GetNativeObject">
+            <summary>
+            Get the native blackboard object (safely typed)
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BlackBoard.Name">
             <summary>
             Get the name of this blackboard instance
@@ -557,6 +562,277 @@
             </summary>
             <returns>Building status with core properties</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.BuildingType">
+            <summary>
+            Wrapper for the native BuildingType class
+            Provides safe access to building type definitions and properties
+            DOC: BuildingType.md - Building definitions and construction properties
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.#ctor(System.Object)">
+            <summary>
+            Initialize BuildingType wrapper with native building type object
+            </summary>
+            <param name="nativeBuildingType">Native building type instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native building type object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.Name">
+            <summary>
+            Building type name/key identifier
+            Maps to: name field (e.g., "building_solar_panel", "building_water_mine")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.DisplayName">
+            <summary>
+            Building display name for UI
+            Maps to: displayName or localizedName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.Description">
+            <summary>
+            Building description
+            Maps to: description field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.Index">
+            <summary>
+            Building index for efficient lookups
+            Maps to: index field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.Category">
+            <summary>
+            Building category (Power, Mining, Manufacturing, etc.)
+            Maps to: category or buildingCategory field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.SubCategory">
+            <summary>
+            Building subcategory for detailed organization
+            Maps to: subCategory field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.IsPowerBuilding">
+            <summary>
+            Check if this is a power generation building
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.IsMiningBuilding">
+            <summary>
+            Check if this is a resource extraction building
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.IsManufacturingBuilding">
+            <summary>
+            Check if this is a manufacturing building
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.ConstructionCost">
+            <summary>
+            Construction cost in resources
+            Maps to: constructionCost or cost field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.ConstructionTime">
+            <summary>
+            Construction time in game time units
+            Maps to: constructionTime or buildTime field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetConstructionResources">
+            <summary>
+            Required resources for construction
+            Maps to: requiredResources array
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.MaintenanceCost">
+            <summary>
+            Maintenance cost per time unit
+            Maps to: maintenanceCost field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.BaseEnergyOutput">
+            <summary>
+            Base energy production (for power buildings)
+            Maps to: baseEnergyOutput or energyProduction field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.EnergyConsumption">
+            <summary>
+            Energy consumption (for non-power buildings)
+            Maps to: energyConsumption or powerConsumption field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetProductionRates">
+            <summary>
+            Base resource production rates
+            Maps to: productionRates or outputs field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetConsumptionRates">
+            <summary>
+            Resource consumption rates
+            Maps to: consumptionRates or inputs field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetSize">
+            <summary>
+            Building size (width, height)
+            Maps to: size or dimensions field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.PrefabName">
+            <summary>
+            Building prefab name for instantiation
+            Maps to: prefabName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingType.IconName">
+            <summary>
+            Icon name for UI display
+            Maps to: iconName field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetRequiredTechnologies">
+            <summary>
+            Required technologies to unlock this building
+            Maps to: requiredTechs or prerequisites field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.IsUnlockedFor(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Check if building is unlocked for a faction
+            </summary>
+            <param name="faction">Faction to check unlock status for</param>
+            <returns>True if building is unlocked</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetEfficiencyRating">
+            <summary>
+            Get building efficiency rating (1-5)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetConstructionComplexity">
+            <summary>
+            Get construction complexity rating (1-5)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetDisplayName">
+            <summary>
+            Get localized display name from game data
+            Uses native DisplayName property loaded from YAML
+            </summary>
+            <returns>Localized display name from game data</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.ToTitleCase(System.String)">
+            <summary>
+            Convert string to title case
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingType.ToString">
+            <summary>
+            String representation for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings">
+            <summary>
+            Common building type key constants for easy reference
+            These are the YAML keys used in the game data files
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.SolarPanelField">
+            <summary>
+            Solar panel field building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.NuclearReactor">
+            <summary>
+            Nuclear reactor building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.GeothermalPlant">
+            <summary>
+            Geothermal plant building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.IronMine">
+            <summary>
+            Iron mine building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.SiliconMine">
+            <summary>
+            Silicon mine building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.CarbonMine">
+            <summary>
+            Carbon mine building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.AluminumMine">
+            <summary>
+            Aluminum mine building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.SteelFactory">
+            <summary>
+            Steel factory building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.GlassFactory">
+            <summary>
+            Glass factory building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.ElectronicsFactory">
+            <summary>
+            Electronics factory building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.PartsFactory">
+            <summary>
+            Parts factory building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.FoodFactory">
+            <summary>
+            Food factory building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.ColonyBasic">
+            <summary>
+            Basic colony building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.DroneBase">
+            <summary>
+            Drone base building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.ResearchLab">
+            <summary>
+            Research lab building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.Spaceport">
+            <summary>
+            Spaceport building identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.BuildingType.CommonBuildings.MaintenanceFacility">
+            <summary>
+            Maintenance facility building identifier
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Drone">
             <summary>
             Elegant wrapper for the native Drone class
@@ -711,6 +987,534 @@
         </member>
         <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Working">
             <summary>Drone is actively working on a task</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper">
+            <summary>
+            Wrapper for the abstract ABCBuilding base class
+            Provides safe access to building functionality and IHandleable implementation
+            DOC: ABCBuilding is the base class for all buildings, implements IHandleable
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize ABCBuildingWrapper with native ABCBuilding instance
+            </summary>
+            <param name="nativeBuilding">Native ABCBuilding instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native building object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetHandle">
+            <summary>
+            Get the Handle for this building (IHandleable.GetHandle())
+            Essential for Keeper system integration
+            </summary>
+            <returns>Handle object for Keeper lookup</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsRegistered">
+            <summary>
+            Check if this building is registered in the Keeper system
+            </summary>
+            <returns>True if building has a valid handle and is registered</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetBuildingType">
+            <summary>
+            Get building type definition
+            Maps to: buildingType property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetPosition">
+            <summary>
+            Get building position in world space
+            Maps to: transform.position or position property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetEnergyProduction">
+            <summary>
+            Get building's energy production rate
+            Maps to: energyProduction property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetHealth">
+            <summary>
+            Get building's health/condition
+            Maps to: health property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsOperational">
+            <summary>
+            Check if building is operational/functioning
+            Maps to: IsOperational() or operational property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsBuilt">
+            <summary>
+            Check if building construction is complete
+            Maps to: IsBuilt property or method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetWorkProgress">
+            <summary>
+            Get building's work progress (0-100%)
+            Maps to: workProgress property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetEfficiency">
+            <summary>
+            Get building efficiency rating (0-1.0)
+            Calculated from health, operational status, and environment factors
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetOwner">
+            <summary>
+            Get the faction/owner of this building
+            Maps to: faction or owner property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetBuildingInfo">
+            <summary>
+            Get comprehensive building information for debugging/monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetDisplayName">
+            <summary>
+            Get building name/identifier for display
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsOfType(System.String)">
+            <summary>
+            Check if this building matches a specific building type
+            </summary>
+            <param name="buildingTypeName">Building type name to check</param>
+            <returns>True if building matches the type</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.Validate">
+            <summary>
+            Perform validation checks on the building
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo">
+            <summary>
+            Comprehensive building information for monitoring and debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation">
+            <summary>
+            Building validation results for health checking
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper">
+            <summary>
+            Wrapper for the abstract ABCDroneState class
+            Provides safe access to drone state machine functionality
+            DOC: F:\ModPeraspera\Internal_doc\Decompiled_ILcpp2_Class\ABCDroneState.cs
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize ABCDroneStateWrapper with native ABCDroneState instance
+            </summary>
+            <param name="nativeDroneState">Native ABCDroneState from drone state machine</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native drone state object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.Enter">
+            <summary>
+            Enter the drone state
+            Maps to: ABCDroneState.Enter() - virtual void method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.Exit">
+            <summary>
+            Exit the drone state  
+            Maps to: ABCDroneState.Exit() - virtual void method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.OnTick(System.Single)">
+            <summary>
+            Tick the drone state with delta time
+            Maps to: ABCDroneState.OnTick(float deltaDays) - abstract method
+            </summary>
+            <param name="deltaDays">Time delta in game days</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.OnFeed(System.Object)">
+            <summary>
+            Feed input to the drone state machine
+            Maps to: ABCDroneState.OnFeed(InputEvent input) - abstract method
+            Returns: StateID for next state transition
+            </summary>
+            <param name="inputEvent">Input event for state machine</param>
+            <returns>StateID enum value or null if error</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetDebugInfo">
+            <summary>
+            Get detailed debug information for this state
+            Maps to: ABCDroneState.DebugDetailedInfo() - abstract method
+            </summary>
+            <returns>Debug string information</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetStateTypeName">
+            <summary>
+            Get the type name of this drone state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.IsStateType(System.String)">
+            <summary>
+            Check if this is a specific state type
+            </summary>
+            <param name="expectedTypeName">Expected state type name</param>
+            <returns>True if matches expected type</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetStateInfo">
+            <summary>
+            Get runtime information about the state
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo">
+            <summary>
+            Information about a drone state for diagnostics
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemEnhancementPlugin" -->
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem">
+            <summary>
+            Typed Event System with Generic Type Safety
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.Subscribe``1(System.Action{``0})">
+            <summary>
+            Subscribe to events of type T with type safety
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.Unsubscribe``1(System.Action{``0})">
+            <summary>
+            Unsubscribe from events of type T
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.EmitEvent``1(``0)">
+            <summary>
+            Emit event with type safety and error isolation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.ProcessEvent(System.Type,System.Object)">
+            <summary>
+            Process individual event with subscriber notification
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.EmitRegistrationEvent(System.Object,System.Int32,PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventType)">
+            <summary>
+            Integration with Feature 1 Registration Events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.EnableBatchProcessing">
+            <summary>
+            Enable batch processing for high-frequency scenarios
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.ProcessBatchedEvents">
+            <summary>
+            Process all queued events in batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem.GetStats">
+            <summary>
+            Get event system performance statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEvent">
+            <summary>
+            Base class for all Keeper events
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventType">
+            <summary>
+            Event types for Keeper system
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.BuildingKeeperEvent">
+            <summary>
+            Building-specific Keeper event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.DroneKeeperEvent">
+            <summary>
+            Drone-specific Keeper event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EntityKeeperEvent">
+            <summary>
+            Generic entity Keeper event
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemStats">
+            <summary>
+            Event system performance statistics
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches">
+            <summary>
+            HarmonyX patches for game state events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.BaseGameUpdatePostfix(System.Object)">
+            <summary>
+            Patch BaseGame.Update for periodic event processing
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK">
+            <summary>
+            SDK Public API for Feature 2
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK.Subscribe``1(System.Action{``0})">
+            <summary>
+            Subscribe to typed Keeper events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK.Unsubscribe``1(System.Action{``0})">
+            <summary>
+            Unsubscribe from typed Keeper events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK.EmitEvent``1(``0)">
+            <summary>
+            Emit custom Keeper event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK.EnableBatchProcessing">
+            <summary>
+            Enable batch processing for high-frequency scenarios
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK.GetEventStats">
+            <summary>
+            Get event system statistics
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationEnhancementPlugin" -->
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker">
+            <summary>
+            Enhanced Registration Tracker with Event Emission
+            Thread-safe tracking with WeakReference for IL2CPP safety
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker.TrackRegistration(System.Object,System.Int32)">
+            <summary>
+            Track entity registration from HarmonyX patch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker.TrackUnregistration(System.Object,System.Int32)">
+            <summary>
+            Track entity unregistration from HarmonyX patch
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker.GetRegisteredEntities``1">
+            <summary>
+            Get all registered entities of type T
+            Uses cached type information for O(1) filtering
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker.GetRegistrationStats">
+            <summary>
+            Get registration statistics for monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationTracker.CleanupDeadReferences">
+            <summary>
+            Cleanup dead weak references for memory optimization
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches">
+            <summary>
+            HarmonyX Advanced Patches with EmitDelegate and CodeMatcher
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.RegisterPostfix(System.Object,System.Object,System.Object)">
+            <summary>
+            HarmonyX Postfix for Keeper.Register()
+            Captures registration events and enables SDK integration
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.UnregisterPrefix(System.Object,System.Object)">
+            <summary>
+            HarmonyX Prefix for Keeper.Unregister()
+            Captures entity before unregistration for event emission
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.ExtractHandleValue(System.Object)">
+            <summary>
+            Extract integer value from Handle object
+            Handle types may vary, so try multiple approaches
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK">
+            <summary>
+            SDK Public API for Feature 1
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK.GetRegisteredEntities``1">
+            <summary>
+            Get all entities of type T currently registered in Keeper system
+            Uses tracked registration data for O(1) type filtering
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK.GetRegistrationStats">
+            <summary>
+            Get real-time registration statistics
+            Performance: O(1) for counts, O(n) for active count with weak reference validation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK.SubscribeToRegistrationEvents(System.Action{System.Object,System.Int32},System.Action{System.Object,System.Int32})">
+            <summary>
+            Subscribe to real-time registration events
+            Integration point for Feature 2 (Events)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK.UnsubscribeFromRegistrationEvents(System.Action{System.Object,System.Int32},System.Action{System.Object,System.Int32})">
+            <summary>
+            Unsubscribe from registration events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK.OptimizeMemory">
+            <summary>
+            Force cleanup of dead weak references
+            Call periodically in high-registration scenarios
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Faction">
+            <summary>
+            Wrapper for the native Faction class
+            Provides safe access to faction properties and operations
+            DOC: Faction.md - Player and AI faction management
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.#ctor(System.Object)">
+            <summary>
+            Initialize Faction wrapper with native faction object
+            </summary>
+            <param name="nativeFaction">Native faction instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native faction object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.Name">
+            <summary>
+            Faction name identifier
+            Maps to: name field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.DisplayName">
+            <summary>
+            Faction display name for UI
+            Maps to: displayName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.FactionType">
+            <summary>
+            Faction type (Player, AI, etc.)
+            Maps to: factionType field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.IsPlayerFaction">
+            <summary>
+            Is this the player faction?
+            Maps to: isPlayerFaction property or comparison with playerFaction
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.MainStockpile">
+            <summary>
+            Main faction stockpile for resources
+            Maps to: mainStockpile field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetResourceStock(System.String)">
+            <summary>
+            Get resource stock amount safely
+            Maps to: mainStockpile resource lookup
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_water")</param>
+            <returns>Current stock amount or 0 if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.AddResource(System.String,System.Single)">
+            <summary>
+            Add resource to faction with safe error handling
+            Maps to: AddResource method or mainStockpile.AddResource
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_water")</param>
+            <param name="amount">Amount to add (can be negative to remove)</param>
+            <returns>True if operation succeeded</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetRelationshipWith(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Get relationship status with another faction
+            Maps to: relations or diplomacy system
+            </summary>
+            <param name="otherFaction">Other faction to check relationship with</param>
+            <returns>Relationship value (-100 to 100, or null if unknown)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetBuildings">
+            <summary>
+            Get all buildings owned by this faction
+            Maps to: buildings collection or planet filtering
+            </summary>
+            <returns>List of buildings owned by this faction</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.AIDifficulty">
+            <summary>
+            AI difficulty level (for AI factions)
+            Maps to: aiDifficulty or difficultyLevel field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.IsAI">
+            <summary>
+            Is this faction controlled by AI?
+            Maps to: isAI field or !isPlayerFaction
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Faction.AIPersonality">
+            <summary>
+            AI personality type (aggressive, defensive, etc.)
+            Maps to: aiPersonality or behaviorType field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.HasTechnology(System.String)">
+            <summary>
+            Check if faction has researched a specific technology
+            Maps to: researchedTechnologies or techTree system
+            </summary>
+            <param name="technologyKey">Technology key to check</param>
+            <returns>True if technology is researched</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.ResearchTechnology(System.String)">
+            <summary>
+            Research a technology for this faction
+            Maps to: ResearchTechnology method
+            </summary>
+            <param name="technologyKey">Technology key to research</param>
+            <returns>True if research was initiated successfully</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetColor">
+            <summary>
+            Get faction color for UI display
+            Maps to: color or factionColor field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.ToString">
+            <summary>
+            String representation for debugging
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.HandleConversionUtils">
             <summary>
@@ -1390,6 +2194,190 @@
             Get initialization status report for debugging
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Knowledge">
+            <summary>
+            Wrapper for the native Knowledge class
+            Provides safe access to knowledge entries and content
+            DOC: Knowledge.md - Knowledge base entries and information
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.#ctor(System.Object)">
+            <summary>
+            Initialize Knowledge wrapper with native knowledge object
+            </summary>
+            <param name="nativeKnowledge">Native knowledge instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native knowledge object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Name">
+            <summary>
+            Knowledge entry name/key identifier
+            Maps to: name field (e.g., "knowledge_water", "knowledge_solar_panel")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Title">
+            <summary>
+            Knowledge title for display
+            Maps to: title field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Content">
+            <summary>
+            Knowledge content/description
+            Maps to: content field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Index">
+            <summary>
+            Knowledge index for efficient lookups
+            Maps to: index field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Path">
+            <summary>
+            Knowledge path for hierarchical organization
+            Maps to: path field (e.g., "Buildings/Power/SolarPanel")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.LocalizedPath">
+            <summary>
+            Localized path for UI navigation
+            Maps to: localizedPath field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Category">
+            <summary>
+            Knowledge category (Buildings, Resources, Technologies, etc.)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.SubCategory">
+            <summary>
+            Knowledge subcategory
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetContentTable">
+            <summary>
+            Content table with structured information
+            Maps to: contentTable array
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Image">
+            <summary>
+            Associated image for knowledge entry
+            Maps to: image field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.IconName">
+            <summary>
+            Icon name for UI display
+            Maps to: iconName field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsBuildingKnowledge">
+            <summary>
+            Check if this is building-related knowledge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsResourceKnowledge">
+            <summary>
+            Check if this is resource-related knowledge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsTechnologyKnowledge">
+            <summary>
+            Check if this is technology-related knowledge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsTerraformingKnowledge">
+            <summary>
+            Check if this is terraforming-related knowledge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsGameplayKnowledge">
+            <summary>
+            Check if this is gameplay mechanics knowledge
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsUnlockedFor(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Check if this knowledge is unlocked for a faction
+            </summary>
+            <param name="faction">Faction to check unlock status for</param>
+            <returns>True if knowledge is unlocked</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.UnlockFor(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Unlock this knowledge for a faction
+            </summary>
+            <param name="faction">Faction to unlock knowledge for</param>
+            <returns>True if knowledge was unlocked successfully</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.MatchesSearch(System.String[])">
+            <summary>
+            Check if knowledge matches search terms
+            </summary>
+            <param name="searchTerms">Terms to search for</param>
+            <returns>True if any term matches title, content, or path</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetSearchRelevance(System.String[])">
+            <summary>
+            Get knowledge relevance score for search terms
+            </summary>
+            <param name="searchTerms">Terms to score against</param>
+            <returns>Relevance score (0-100)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetContentSummary(System.Int32)">
+            <summary>
+            Get content summary (first 200 characters)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetDisplayTitle">
+            <summary>
+            Get localized display title from game data
+            Uses native Title property loaded from YAML
+            </summary>
+            <returns>Localized title from game data</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.ToTitleCase(System.String)">
+            <summary>
+            Convert string to title case
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.ToString">
+            <summary>
+            String representation for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KnowledgeTableEntry">
+            <summary>
+            Represents a content table entry in knowledge
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.KnowledgeTableEntry.Field">
+            <summary>
+            Field name in the knowledge table
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.KnowledgeTableEntry.Text">
+            <summary>
+            Text content for the field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KnowledgeTableEntry.#ctor(System.String,System.String)">
+            <summary>
+            Initialize knowledge table entry
+            </summary>
+            <param name="field">Field name</param>
+            <param name="text">Text content</param>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Planet">
             <summary>
             Wrapper for the native Planet class
@@ -1477,6 +2465,25 @@
             <param name="amount">Amount to add (can be negative to remove)</param>
             <returns>True if operation succeeded</returns>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetBuildings">
+            <summary>
+            Get all buildings on this planet
+            Maps to: buildings field or GetBuildings() method
+            </summary>
+            <returns>List of all buildings on the planet</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetBuildingsByFaction(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Get all buildings owned by a specific faction on this planet
+            </summary>
+            <param name="faction">Faction to filter by</param>
+            <returns>List of buildings owned by the faction</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Planet.AreSameFaction(System.Object,System.Object)">
+            <summary>
+            Helper method to compare if two faction objects are the same
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.GetNativeObject">
             <summary>
             Get the native game object (for Harmony patches)
@@ -1548,6 +2555,240 @@
         <member name="P:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.IsReady">
             <summary>
             Statut du loader pour debug
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceType">
+            <summary>
+            Wrapper for the native ResourceType class
+            Provides safe access to resource type definitions and properties
+            DOC: Resource.md - Resource definitions and properties
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.#ctor(System.Object)">
+            <summary>
+            Initialize ResourceType wrapper with native resource type object
+            </summary>
+            <param name="nativeResourceType">Native resource type instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native resource type object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.Name">
+            <summary>
+            Resource type name/key identifier
+            Maps to: name field (e.g., "resource_water", "resource_iron")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.DisplayName">
+            <summary>
+            Resource display name for UI
+            Maps to: displayName or localizedName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.Index">
+            <summary>
+            Resource index for efficient lookups
+            Maps to: index field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.ColorHex">
+            <summary>
+            Resource color for UI display
+            Maps to: color field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.MaterialType">
+            <summary>
+            Material type category (Mined, Manufactured, etc.)
+            Maps to: materialType field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.IsMined">
+            <summary>
+            Is this a mined/extracted resource?
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.IsManufactured">
+            <summary>
+            Is this a manufactured/processed resource?
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.PrefabName">
+            <summary>
+            Resource prefab name for instantiation
+            Maps to: prefabName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.IconName">
+            <summary>
+            Icon name for UI display
+            Maps to: iconName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.Knowledge">
+            <summary>
+            Associated knowledge entry for this resource
+            Maps to: knowledge field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetKnowledge">
+            <summary>
+            Get knowledge wrapper for this resource
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.VeinIconNames">
+            <summary>
+            Vein icon names for resource deposits
+            Maps to: veinIconsName array
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.CubeMaterial">
+            <summary>
+            Cube material for resource display
+            Maps to: cubeMaterial field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetColor">
+            <summary>
+            Get resource color as System.Drawing.Color
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.IsPrimaryResource">
+            <summary>
+            Check if this is a primary/base resource
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.IsEnergyResource">
+            <summary>
+            Check if this is an energy-related resource
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.IsConstructionMaterial">
+            <summary>
+            Check if this is a construction material
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetCategory">
+            <summary>
+            Get resource category for organization
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.ToString">
+            <summary>
+            String representation for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources">
+            <summary>
+            Common resource type key constants for easy reference
+            These are the YAML keys used in the game data files
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Water">
+            <summary>
+            Water resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Iron">
+            <summary>
+            Iron ore resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Silicon">
+            <summary>
+            Silicon resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Carbon">
+            <summary>
+            Carbon resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Aluminum">
+            <summary>
+            Aluminum resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Uranium">
+            <summary>
+            Uranium resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Chemicals">
+            <summary>
+            Chemicals resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Steel">
+            <summary>
+            Steel manufactured resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Glass">
+            <summary>
+            Glass manufactured resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Parts">
+            <summary>
+            Parts manufactured resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Polymers">
+            <summary>
+            Polymers manufactured resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Electronics">
+            <summary>
+            Electronics manufactured resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Food">
+            <summary>
+            Food resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Fuel">
+            <summary>
+            Fuel resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Energy">
+            <summary>
+            Energy resource identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Oxygen">
+            <summary>
+            Oxygen atmospheric resource identifier
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceType)">
+            <summary>
+            Get display name using native DisplayName property or fallback to formatted name
+            This is dynamic and uses the actual game data loaded from YAML
+            </summary>
+            <param name="resourceWrapper">ResourceType wrapper instance</param>
+            <returns>Localized display name from game data</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetDisplayName">
+            <summary>
+            Get display name using instance method (preferred)
+            Uses native DisplayName property loaded from YAML
+            </summary>
+            <returns>Localized display name from game data</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.ToTitleCase(System.String)">
+            <summary>
+            Convert string to title case
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Scene">
@@ -1875,6 +3116,243 @@
             Utile pour tests et génération dynamique de dialogues avant conversion en YAML/TextAsset.
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Technology">
+            <summary>
+            Wrapper for the native TechnologyType class
+            Provides safe access to technology type definitions and properties
+            DOC: TechnologyType.md - Technology definitions loaded from YAML
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.#ctor(System.Object)">
+            <summary>
+            Initialize Technology wrapper with native TechnologyType object
+            </summary>
+            <param name="nativeTechnology">Native TechnologyType instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native TechnologyType object
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.Name">
+            <summary>
+            Technology name/key identifier
+            Maps to: name field (e.g., "tech_advanced_solar", "tech_water_extraction")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.DisplayName">
+            <summary>
+            Technology display name for UI
+            Maps to: displayName or localizedName field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.Description">
+            <summary>
+            Technology description
+            Maps to: description field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.Index">
+            <summary>
+            Technology index for efficient lookups
+            Maps to: index field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.Category">
+            <summary>
+            Technology category/branch (Engineering, Biology, Space)
+            Maps to: category or branch field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.Tier">
+            <summary>
+            Technology tier/level (1, 2, 3, etc.)
+            Maps to: tier or level field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.ResearchCost">
+            <summary>
+            Research cost in research points
+            Maps to: cost or researchCost field
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.ResearchTime">
+            <summary>
+            Time required to research (in game time units)
+            Maps to: researchTime or duration field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetPrerequisites">
+            <summary>
+            Prerequisites needed to unlock this technology
+            Maps to: prerequisites or requiredTechs array
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.ArePrerequisitesMet(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Check if all prerequisites are met for a faction
+            </summary>
+            <param name="faction">Faction to check prerequisites for</param>
+            <returns>True if all prerequisites are researched</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetUnlockedBuildings">
+            <summary>
+            Buildings unlocked by this technology
+            Maps to: unlockedBuildings array
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetUnlockedResources">
+            <summary>
+            Resources unlocked by this technology
+            Maps to: unlockedResources array
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.IsResearchedBy(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Check if this technology is researched by a faction
+            </summary>
+            <param name="faction">Faction to check research status for</param>
+            <returns>True if technology is researched</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.IsAvailableFor(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Check if this technology can be researched by a faction
+            (prerequisites met but not yet researched)
+            </summary>
+            <param name="faction">Faction to check availability for</param>
+            <returns>True if technology can be researched</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.StartResearch(PerAspera.GameAPI.Wrappers.Faction)">
+            <summary>
+            Start research of this technology for a faction
+            </summary>
+            <param name="faction">Faction to research technology for</param>
+            <returns>True if research was initiated successfully</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Technology.IconPath">
+            <summary>
+            Get technology icon path
+            Maps to: iconPath or icon field
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.IsMilestoneTechnology">
+            <summary>
+            Check if this is a key/milestone technology
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetComplexityRating">
+            <summary>
+            Get technology complexity rating (1-5)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetEstimatedResearchTime">
+            <summary>
+            Get estimated research time in human-readable format
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetDisplayName">
+            <summary>
+            Get localized display name from game data
+            Uses native DisplayName property loaded from YAML
+            </summary>
+            <returns>Localized display name from game data</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.ToTitleCase(System.String)">
+            <summary>
+            Convert string to title case
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.GetNativeObject">
+            <summary>
+            Get the native game object (for Harmony patches)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Technology.ToString">
+            <summary>
+            String representation for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies">
+            <summary>
+            Common technology key constants for easy reference
+            These are the YAML keys used in the game data files
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.BasicEngineering">
+            <summary>
+            Basic engineering technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.BasicPhysics">
+            <summary>
+            Basic physics technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.BasicChemistry">
+            <summary>
+            Basic chemistry technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.SolarPowerTier1">
+            <summary>
+            Solar power tier 1 technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.SolarPowerTier2">
+            <summary>
+            Solar power tier 2 technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.AdvancedSolar">
+            <summary>
+            Advanced solar power technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.WaterExtractionTier1">
+            <summary>
+            Water extraction tier 1 technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.MiningTier1">
+            <summary>
+            Mining tier 1 technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.AdvancedMining">
+            <summary>
+            Advanced mining technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.BasicManufacturing">
+            <summary>
+            Basic manufacturing technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.AdvancedManufacturing">
+            <summary>
+            Advanced manufacturing technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.Automation">
+            <summary>
+            Automation technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.AtmosphericProcessing">
+            <summary>
+            Atmospheric processing technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.TerraformingTier1">
+            <summary>
+            Terraforming tier 1 technology identifier
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Technology.CommonTechnologies.AdvancedTerraforming">
+            <summary>
+            Advanced terraforming technology identifier
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">
             <summary>
             Wrapper Unity GUI basique - utilise RealUnityGuiLoader pour accès aux vraies DLLs
@@ -1943,12 +3421,29 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetPlanet">
             <summary>
-            Get the planet instance
+            Get the planet wrapper instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Universe.CurrentPlanet">
+            <summary>
+            Get the current planet instance (alias for GetPlanet for convenience)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBaseGame">
             <summary>
-            Get the base game instance
+            Get the base game wrapper instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetPlayerFaction">
+            <summary>
+            Get the player faction wrapper
+            Maps to: playerFaction field or GetPlayerFaction() method
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetFactions">
+            <summary>
+            Get all factions in the universe
+            Maps to: factions field or GetFactions() method
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.Pause">
@@ -2019,10 +3514,21 @@
             Check if the native object is valid
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValidWrapper">
+            <summary>
+            Public accessor for IsValid - allows cross-wrapper validation
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.GetNativeType">
             <summary>
             Get the Type of the native IL2CPP object (for debugging/inspection)
             Returns null if no native object is wrapped
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.GetNativeObject">
+            <summary>
+            Get the native object for use in other wrapper methods
+            This allows wrappers to pass native objects to other wrapper method calls
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
