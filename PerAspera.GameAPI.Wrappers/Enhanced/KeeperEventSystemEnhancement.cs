@@ -378,15 +378,12 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
         /// Patch BaseGame.Update for periodic event processing
         /// </summary>
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(object), "Update")]
-        public static void BaseGameUpdatePostfix(object __instance)
+        [HarmonyPatch(typeof(BaseGame), "Update")]
+        public static void BaseGameUpdatePostfix(BaseGame __instance)
         {
             try
             {
-                // Only process for BaseGame instances
-                if (__instance?.GetType().Name != "BaseGame") return;
-                
-                // Process batched events every frame
+                // Process batched events every frame in BaseGame
                 KeeperEventSystem.ProcessBatchedEvents();
             }
             catch (Exception ex)

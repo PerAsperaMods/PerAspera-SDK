@@ -27,6 +27,7 @@ namespace PerAspera.GameAPI.Climate
         
         private readonly ClimateSimulator _simulator;
         private readonly ClimateConfig _config;
+        private TerraformingEffectsController? _terraformingController;
         
         private PlanetWrapped? _planet;
         private bool _isActive = false;
@@ -52,7 +53,11 @@ namespace PerAspera.GameAPI.Climate
             // Active les patches Harmony pour ce planet
             PlanetClimatePatches.EnableClimateControl(planet.GetNativeObject());
             
-            Log.Info("Climate control activated with Harmony patches - full bidirectional control enabled");
+            // Initialise le contrôleur d'effets de terraformation
+            _terraformingController = new TerraformingEffectsController(planet);
+            _terraformingController.EnableControl();
+            
+            Log.Info("Climate control activated with Harmony patches - full bidirectional control enabled + terraforming effects");
         }
         
         /// <summary>
@@ -70,6 +75,12 @@ namespace PerAspera.GameAPI.Climate
             _planet = null;
             Log.Info("Climate control deactivated - game takes over, Harmony patches disabled");
         }
+        
+        /// <summary>
+        /// Accès au contrôleur d'effets de terraformation
+        /// Permet d'ajouter des effets personnalisés (heatwaves, cold snaps, etc.)
+        /// </summary>
+        public TerraformingEffectsController? TerraformingEffects => _terraformingController;
         
         /// <summary>
         /// Update climate simulation and synchronize with game if active
@@ -187,7 +198,25 @@ namespace PerAspera.GameAPI.Climate
             var atmosphere = _planet.Atmosphere;
             var status = _simulator.GetClimateStatus(atmosphere);
             
-            return $"Climate Control: ACTIVE (Harmony) | {status}";
+            return $"Climate Control: ACTIVE (Harmony) | {status} | {_terraformingController?.GetStatus() ?? "Terraforming: INACTIVE"}";
+        }
+        
+        /// <summary>
+        /// Méthode de convenance pour ajouter rapidement un effet de terraformation
+        /// Idéal pour les événements Twitch ou autres triggers externes
+        /// </summary>
+        /// <param name="effectName">Nom de l'effet</param>
+        /// <param name="temperatureChange">Changement de température en Kelvin</param>
+        /// <param name="source">Source de l'effet</param>
+        public void AddTerraformingEffect(string effectName, float temperatureChange, string source = "External")
+        {
+            if (_terraformingController == null)
+            {
+                Log.Warning("Cannot add terraforming effect: terraforming controller not initialized");
+                return;
+            }
+            
+            _terraformingController.AddTempEffect(effectName, temperatureChange, source);
         }
     }
 }

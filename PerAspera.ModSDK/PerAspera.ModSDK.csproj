@@ -48,7 +48,7 @@
 		<PropertyGroup>
 			<SDKDeployPath>$(PerAsperaGamePath)\BepInEx\plugins\PerAspera-SDK</SDKDeployPath>
 		</PropertyGroup>
-		<MakeDir Directories="$(SDKDeployPath)" />
+		<MakeDir Directories="$(PerAsperaGamePath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.Core.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.Core.IL2CppExtensions.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.dll" DestinationFolder="$(SDKDeployPath)" />

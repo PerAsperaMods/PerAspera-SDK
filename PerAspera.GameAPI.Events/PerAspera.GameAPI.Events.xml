@@ -25,6 +25,87 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingStateChanged">
             <summary>Event: Building state changed (operative/broken/powered)</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingInternalAdd">
+            <summary>Event: Building internal add (core system)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingInternalAddNew">
+            <summary>Event: Building internal add new (fresh creation)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingInternalLoad">
+            <summary>Event: Building internal load (from save)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingInternalRemove">
+            <summary>Event: Building internal remove</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingPreRemove">
+            <summary>Event: Building pre-removal (before despawn)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingSpawnedSpatialAdd">
+            <summary>Event: Building spawned spatial add</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingBuilt">
+            <summary>Event: Building completed construction</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingCitizenBorn">
+            <summary>Event: Citizen born in building</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingCitizenStarving">
+            <summary>Event: Citizen starving in building</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingCitizenDied">
+            <summary>Event: Citizen died in building</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingFactoryProducedResource">
+            <summary>Event: Factory/building produced resource</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingBeforeChangeBuildingType">
+            <summary>Event: Building before changing type</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingAttacked">
+            <summary>Event: Building was attacked</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingDestroyedByDamage">
+            <summary>Event: Building destroyed by damage</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingDamagedByAsteroid">
+            <summary>Event: Building damaged by asteroid</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingOutOfPower">
+            <summary>Event: Building ran out of power</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingOperativeChanged">
+            <summary>Event: Building operational state changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingAudioRelevantPropertyChanged">
+            <summary>Event: Building audio property changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingExtendsClusterRangeChanged">
+            <summary>Event: Building cluster range changed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingToggledScrapping">
+            <summary>Event: Building scrapping toggled</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingCanceledScrapping">
+            <summary>Event: Building scrapping cancelled</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingStartedScrapping">
+            <summary>Event: Building started scrapping</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingStartedRebuild">
+            <summary>Event: Building started rebuild</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingUpgradeCanceled">
+            <summary>Event: Building upgrade cancelled</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingUpgradeStarted">
+            <summary>Event: Building upgrade started</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingUpgradeToggled">
+            <summary>Event: Building upgrade toggled</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.BuildingDistrictChangedActive">
+            <summary>Event: Building district changed active</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.NativeEventConstants.DroneSpawned">
             <summary>Event: Drone spawned/created</summary>
         </member>
@@ -445,9 +526,16 @@
             🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Events.md
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeSDKBasedGameDetection">
+            <summary>
+            Initialize SDK-based game state detection (replacing problematic Harmony patches)
+            Uses existing SDK wrapper system for clean game initialization detection
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameInitializationPatches">
             <summary>
-            Apply Harmony patches for game initialization detection
+            DEPRECATED: Apply Harmony patches for game initialization detection
+            Replaced by SDK-based detection for better reliability
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeWrapperFactory">
@@ -577,6 +665,95 @@
             <summary>
             Log Martian day event with year calculation
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper">
+            <summary>
+            Helper class for automatically converting native IL2CPP instances to SDK wrappers in events
+            Provides type-safe wrapper creation with automatic fallback handling
+            
+            USAGE: When an event receives a native object, use this helper to convert it to SDK wrapper:
+            - eventData.Building = EventWrapperHelper.CreateBuildingWrapper(nativeBuildingInstance);
+            - eventData.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(nativeFactionInstance);
+            
+            PRINCIPLE: Events should ALWAYS return wrappers, never native instances for modder safety
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateBuildingWrapper(System.Object)">
+            <summary>
+            Convert native Building instance to Building wrapper for events
+            </summary>
+            <param name="nativeBuilding">Native building instance from game</param>
+            <returns>Building wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateBuildingTypeWrapper(System.Object)">
+            <summary>
+            Convert native BuildingType instance to BuildingType wrapper for events
+            </summary>
+            <param name="nativeBuildingType">Native building type instance</param>
+            <returns>BuildingType wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateFactionWrapper(System.Object)">
+            <summary>
+            Convert native Faction instance to Faction wrapper for events
+            </summary>
+            <param name="nativeFaction">Native faction instance from game</param>
+            <returns>Faction wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateResourceTypeWrapper(System.Object)">
+            <summary>
+            Convert native ResourceType instance to ResourceType wrapper for events
+            </summary>
+            <param name="nativeResourceType">Native resource type instance</param>
+            <returns>ResourceType wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateTechnologyWrapper(System.Object)">
+            <summary>
+            Convert native Technology instance to Technology wrapper for events
+            </summary>
+            <param name="nativeTechnology">Native technology instance</param>
+            <returns>Technology wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.CreateDroneWrapper(System.Object)">
+            <summary>
+            Convert native Drone instance to Drone wrapper for events
+            </summary>
+            <param name="nativeDrone">Native drone instance</param>
+            <returns>Drone wrapper or null if conversion fails</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.ConvertToWrapper``1(System.Object)">
+            <summary>
+            Universal wrapper converter using WrapperFactory
+            Automatically detects the appropriate wrapper type and creates it
+            </summary>
+            <typeparam name="T">Expected wrapper type</typeparam>
+            <param name="nativeInstance">Native IL2CPP instance</param>
+            <returns>Wrapper instance of type T or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.ConvertCollectionToWrappers``1(System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>
+            Batch wrapper conversion for collections
+            Converts a collection of native instances to wrapper collection
+            </summary>
+            <typeparam name="T">Wrapper type</typeparam>
+            <param name="nativeInstances">Collection of native instances</param>
+            <returns>Collection of wrapper instances (nulls filtered out)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.ValidateWrapper(System.Object,System.String)">
+            <summary>
+            Validate that a wrapper was created successfully
+            </summary>
+            <param name="wrapper">Wrapper to validate</param>
+            <param name="contextName">Context for logging (e.g., "BuildingSpawned event")</param>
+            <returns>True if wrapper is valid</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Helpers.EventWrapperHelper.LogWrapperCreation(System.Type,System.Type,System.Boolean,System.String)">
+            <summary>
+            Log wrapper creation success/failure for debugging
+            </summary>
+            <param name="nativeType">Type of native instance</param>
+            <param name="wrapperType">Type of wrapper created</param>
+            <param name="success">Whether creation succeeded</param>
+            <param name="contextName">Context for logging</param>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Helpers.TimeHelpers">
             <summary>
@@ -862,6 +1039,284 @@
         <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedSpatialAddNativeEvent.AddedToSpatialGrid">
             <summary>Added to spatial grid</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalAddNativeEvent">
+            <summary>
+            Native event: Building internal add (core game system)
+            Maps to: GevBuildingInternalAdd
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalAddNewNativeEvent">
+            <summary>
+            Native event: Building internal add new (fresh building creation)
+            Maps to: GevBuildingInternalAddNew
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalLoadNativeEvent">
+            <summary>
+            Native event: Building internal load (loading from save)
+            Maps to: GevBuildingInternalLoad
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalRemoveNativeEvent">
+            <summary>
+            Native event: Building internal remove (core game system)
+            Maps to: GevBuildingInternalRemove
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingBuiltNativeEvent">
+            <summary>
+            Native event: Building completed construction (built and ready)
+            Maps to: GevBuildingBuilt
+            Different from Spawned - this is when construction finishes
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingBuiltNativeEvent.ConstructionTime">
+            <summary>Construction time in game ticks</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent">
+            <summary>
+            Native event: Citizen born in a building
+            Maps to: GevBuildingCitizenBorn
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent.CitizenInstance">
+            <summary>Citizen information (wrapped if possible)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent.PopulationCount">
+            <summary>Population count after birth</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent">
+            <summary>
+            Native event: Citizen starving in a building
+            Maps to: GevBuildingCitizenStarving
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent.MissingResource">
+            <summary>Missing resource causing starvation</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent.StarvationTime">
+            <summary>Starvation duration in ticks</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent">
+            <summary>
+            Native event: Citizen died in a building
+            Maps to: GevBuildingCitizenDied
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent.CauseOfDeath">
+            <summary>Cause of death</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent.PopulationCount">
+            <summary>Population count after death</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent">
+            <summary>
+            Native event: Factory/building produced a resource
+            Maps to: GevFactoryProducedResource
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProducedResourceType">
+            <summary>Resource type that was produced (SDK ResourceType wrapper)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProducedResourceKey">
+            <summary>Resource type key (e.g., "water", "silicon")</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.AmountProduced">
+            <summary>Amount produced</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProductionEfficiency">
+            <summary>Production efficiency at time of production</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingBeforeChangeBuildingTypeNativeEvent">
+            <summary>
+            Native event: Building before changing building type
+            Maps to: GevBuildingBeforeChangeBuildingType
+            Triggered BEFORE the type change happens
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent">
+            <summary>
+            Native event: Building was attacked
+            Maps to: GevBuildingAttacked
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.Attacker">
+            <summary>Attacking faction/entity (could be Faction or other entity)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.DamageAmount">
+            <summary>Damage amount dealt</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.HealthAfterAttack">
+            <summary>Building health after attack</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent">
+            <summary>
+            Native event: Building destroyed by damage
+            Maps to: GevBuildingDestroyedByDamage
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent.DamageSource">
+            <summary>Source of damage that destroyed building</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent.FinalDamageAmount">
+            <summary>Final damage amount that caused destruction</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent">
+            <summary>
+            Native event: Building damaged by asteroid
+            Maps to: GevBuildingDamagedByAsteroid
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.AsteroidInstance">
+            <summary>Asteroid impact information</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.AsteroidDamage">
+            <summary>Damage dealt by asteroid</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.ImpactX">
+            <summary>Impact coordinates</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent">
+            <summary>
+            Native event: Building ran out of power
+            Maps to: GevBuildingOutOfPower
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent.PowerDemand">
+            <summary>Power demand when outage occurred</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent.AvailablePower">
+            <summary>Available power when outage occurred</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent">
+            <summary>
+            Native event: Building operational state changed
+            Maps to: GevBuildingOperativeChanged
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.WasOperational">
+            <summary>Previous operational state</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.IsOperational">
+            <summary>Current operational state</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.StateChangeReason">
+            <summary>Reason for state change</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent">
+            <summary>
+            Native event: Building audio-relevant property changed
+            Maps to: GevBuildingAudioRelevantPropertyChanged
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.ChangedProperty">
+            <summary>Property that changed (for audio system)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.PreviousValue">
+            <summary>Previous value</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.NewValue">
+            <summary>New value</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent">
+            <summary>
+            Native event: Building cluster range extension changed
+            Maps to: GevBuildingExtendsClusterRangeChanged
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.PreviousRange">
+            <summary>Previous cluster range</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.NewRange">
+            <summary>New cluster range</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.AffectedCluster">
+            <summary>Affected cluster</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingToggledScrappingNativeEvent">
+            <summary>
+            Native event: Building scrapping toggled
+            Maps to: GevBuildingToggledScrapping
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingToggledScrappingNativeEvent.ScrappingEnabled">
+            <summary>Whether scrapping was enabled or disabled</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCanceledScrappingNativeEvent">
+            <summary>
+            Native event: Building scrapping cancelled
+            Maps to: GevBuildingCanceledScrapping
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCanceledScrappingNativeEvent.CancellationReason">
+            <summary>Reason for cancellation</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingStartedScrappingNativeEvent">
+            <summary>
+            Native event: Building started scrapping
+            Maps to: GevBuildingStartedScrapping
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingStartedScrappingNativeEvent.EstimatedScrappingTime">
+            <summary>Expected scrapping time</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingStartedRebuildNativeEvent">
+            <summary>
+            Native event: Building started rebuild process
+            Maps to: GevBuildingStartedRebuild
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingStartedRebuildNativeEvent.EstimatedRebuildTime">
+            <summary>Expected rebuild time</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeCanceledNativeEvent">
+            <summary>
+            Native event: Building upgrade cancelled
+            Maps to: GevBuildingUpgradeCanceled
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeCanceledNativeEvent.CancellationReason">
+            <summary>Reason for upgrade cancellation</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent">
+            <summary>
+            Native event: Building upgrade started
+            Maps to: GevBuildingUpgradeStarted
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent.EstimatedUpgradeTime">
+            <summary>Expected upgrade time</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent.RequiredResources">
+            <summary>Resources required for upgrade</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent">
+            <summary>
+            Native event: Building upgrade toggled
+            Maps to: GevBuildingUpgradeToggled
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent.UpgradeEnabled">
+            <summary>Whether upgrade queue was enabled or disabled</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent.TargetUpgradeType">
+            <summary>Target upgrade type</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent">
+            <summary>
+            Native event: Building district changed active state
+            Maps to: GevBuildingDistrictChangedActive
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.District">
+            <summary>District that changed</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.WasActive">
+            <summary>Previous active state</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.IsActive">
+            <summary>Current active state</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Native.ClimateEvents">
             <summary>
             Native climate events from Planet class
@@ -1113,51 +1568,29 @@
         </member>
         <member name="T:PerAspera.GameAPI.Events.Patches.GameInitializationPatches">
             <summary>
-            Harmony patches for game initialization events
-            Triggers Enhanced Events when specific game systems initialize
+            SDK-based game initialization detection (NO MORE HARMONY PATCHES)
+            Uses existing SDK wrapper system instead of problematic IL2CPP patches
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnGameHubManagerAwake">
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.InitializeSDKBasedEvents">
             <summary>
-            Patch GameHubManager.Awake() to trigger GameHubInitializedEvent
-            Based on log pattern: "GameHubManager:Awake() (at :0)"
+            Initialize game events using SDK wrapper detection instead of IL2CPP patches
+            Called from EventsAutoStartPlugin after SDK wrappers are ready
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnBaseGameAwake">
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetBaseGameWrapper">
             <summary>
-            Patch BaseGame.Awake() or similar to ensure we have BaseGame access
+            Try to get BaseGame using existing SDK wrapper system
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnPlanetAwake">
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TriggerGameHubInitialized(PerAspera.GameAPI.Wrappers.BaseGame)">
             <summary>
-            Patch Planet.Awake() or scene load completion to trigger GameFullyLoadedEvent
+            Trigger GameHubInitialized event using SDK wrapper
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetBaseGameInstance">
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.ScheduleSDKBasedCheck">
             <summary>
-            Try to get BaseGame instance using wrapper
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetUniverseInstance">
-            <summary>
-            Try to get Universe instance using wrapper
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetPlanetInstance">
-            <summary>
-            Try to get Planet instance using wrapper
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnUniverseAddBlackboard(System.Object)">
-            <summary>
-            Patch Universe.AddBlackboard() to trigger BlackboardInitializedEvent
-            Method: AddBlackboard(Blackboard blackboard)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.OnBlackboardConstructor(System.Object,System.String)">
-            <summary>
-            Patch Blackboard constructor to catch individual blackboard creation
-            Constructor: Blackboard(string name, object parent)
+            Schedule periodic SDK-based check for game initialization
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemInitializedEvent">

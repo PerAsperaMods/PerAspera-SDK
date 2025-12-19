@@ -257,20 +257,17 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
         /// Captures registration events and enables SDK integration
         /// </summary>
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(object), "Register")] // Will be resolved to actual Keeper type
-        public static void RegisterPostfix(object __instance, object __0, object __result)
+        [HarmonyPatch(typeof(Keeper), nameof(Keeper.Register))]
+        public static void RegisterPostfix(Keeper __instance, IHandleable handleable, Handle __result)
         {
             try
             {
-                // Validate this is actually a Keeper instance
-                if (__instance?.GetType().Name != "Keeper") return;
-                
                 // Extract entity and handle from parameters and result
-                var entity = __0; // IHandleable entity parameter
+                var entity = handleable; // IHandleable entity parameter
                 
-                if (entity != null && __result != null)
+                if (entity != null && __result != default(Handle))
                 {
-                    // Convert handle to int (assuming Handle has ToInt() or similar)
+                    // Handle is already the right type
                     var handleValue = ExtractHandleValue(__result);
                     if (handleValue.HasValue)
                     {
@@ -289,20 +286,17 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
         /// Captures entity before unregistration for event emission
         /// </summary>
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(object), "Unregister")]
-        public static void UnregisterPrefix(object __instance, object __0)
+        [HarmonyPatch(typeof(Keeper), nameof(Keeper.Unregister))]
+        public static void UnregisterPrefix(Keeper __instance, IHandleable handleable)
         {
             try
             {
-                // Validate this is actually a Keeper instance
-                if (__instance?.GetType().Name != "Keeper") return;
-                
-                var entity = __0; // IHandleable entity parameter
+                var entity = handleable; // IHandleable entity parameter
                 
                 if (entity != null)
                 {
-                    // Get handle before unregistration
-                    var handle = entity.InvokeMethod<object>("GetHandle");
+                    // Get handle before unregistration - IHandleable has handle property
+                    var handle = entity.handle;
                     var handleValue = ExtractHandleValue(handle);
                     
                     if (handleValue.HasValue)

@@ -48,7 +48,7 @@ namespace PerAspera.GameAPI.Events.SDK
         {
             try
             {
-                var baseGame = PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
                 if (baseGame?.GetUniverse()?.GetPlanet() != null)
                 {
                     return new TwitchGameContext(baseGame);
@@ -165,7 +165,7 @@ namespace PerAspera.GameAPI.Events.SDK
             try
             {
                 // Apply climate boost via Climate wrapper
-                GameAPI.Wrappers.Planet _p= PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
+                GameAPI.Wrappers.Planet _p= GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
                 var climateWrapper = _p;
                 climateWrapper?.Atmosphere.ModifyTemperature(SuggestedTemperatureBoost, EffectDuration, $"Twitch follower: {DisplayName}");
                 
@@ -241,7 +241,7 @@ namespace PerAspera.GameAPI.Events.SDK
             
             try
             {
-                GameAPI.Wrappers.Planet _p= PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
+                GameAPI.Wrappers.Planet _p= GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
                 var climateWrapper = _p.Atmosphere;
                 if (climateWrapper == null) return false;
                 
@@ -319,7 +319,7 @@ namespace PerAspera.GameAPI.Events.SDK
             try
             {
                 // For immediate effect, apply a temporary massive boost
-                GameAPI.Wrappers.Planet _p= PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
+                GameAPI.Wrappers.Planet _p= GameAPI.Wrappers.BaseGame.GetCurrent().GetUniverse().GetPlanet();
                 var climateWrapper = _p.Atmosphere;
                 if (climateWrapper != null)
                 {

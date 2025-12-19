@@ -149,7 +149,8 @@ namespace PerAspera.SDK.TwitchIntegration.Client
         {
             try
             {
-                _logger.LogInformation($"Connected to Twitch IRC: {e.AutoJoinChannel}");\n                Log.Info($\"Connected to Twitch IRC server: {e.BotUsername}\");
+                _logger.LogInformation($"Connected to Twitch IRC: {e.AutoJoinChannel}");
+                Log.Info($"Connected to Twitch IRC server: {e.BotUsername}");
                 
                 // Auto-join configured channel
                 if (!string.IsNullOrEmpty(_currentChannel))

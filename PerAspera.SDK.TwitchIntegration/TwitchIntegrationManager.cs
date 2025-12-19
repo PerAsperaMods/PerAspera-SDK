@@ -155,7 +155,7 @@ namespace PerAspera.SDK.TwitchIntegration
         /// <param name="args">Command arguments</param>
         /// <param name="username">Twitch username</param>
         /// <returns>Response message for chat</returns>
-        public static string ProcessCommand(string command, string[] args, string username = \"viewer\")
+        public static string ProcessCommand(string command, string[] args, string username = "viewer")
         {
             lock (_lock)
             {

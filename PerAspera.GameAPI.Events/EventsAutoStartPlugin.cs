@@ -35,8 +35,8 @@ namespace PerAspera.GameAPI.Events
                 // Initialize event system integration
                 EventSystemIntegration.Initialize();
 
-                // ✅ Apply Harmony patches for game initialization events
-                ApplyGameInitializationPatches();
+                // ✅ Initialize SDK-based game initialization detection
+                InitializeSDKBasedGameDetection();
 
                 _logger.Info("✅ Enhanced Event System initialized successfully");
                 _logger.Info("🎯 All native events now use SDK wrappers automatically");
@@ -53,7 +53,30 @@ namespace PerAspera.GameAPI.Events
         }
 
         /// <summary>
-        /// Apply Harmony patches for game initialization detection
+        /// Initialize SDK-based game state detection (replacing problematic Harmony patches)
+        /// Uses existing SDK wrapper system for clean game initialization detection
+        /// </summary>
+        private void InitializeSDKBasedGameDetection()
+        {
+            try
+            {
+                _logger.Info("🔧 Initializing SDK-based game detection...");
+                
+                // Use existing SDK wrapper architecture instead of raw IL2CPP patches
+                Patches.GameInitializationPatches.InitializeSDKBasedEvents();
+                
+                _logger.Info("✅ SDK-based game detection initialized successfully");
+            }
+            catch (System.Exception ex)
+            {
+                _logger.Error($"❌ Failed to initialize SDK-based game detection: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// DEPRECATED: Apply Harmony patches for game initialization detection
+        /// Replaced by SDK-based detection for better reliability
         /// </summary>
         private void ApplyGameInitializationPatches()
         {

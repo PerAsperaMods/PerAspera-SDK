@@ -1281,7 +1281,7 @@
             HarmonyX patches for game state events
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.BaseGameUpdatePostfix(System.Object)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.BaseGameUpdatePostfix(PerAspera.GameAPI.Wrappers.BaseGame)">
             <summary>
             Patch BaseGame.Update for periodic event processing
             </summary>
@@ -1354,13 +1354,13 @@
             HarmonyX Advanced Patches with EmitDelegate and CodeMatcher
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.RegisterPostfix(System.Object,System.Object,System.Object)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.RegisterPostfix(Keeper,IHandleable,Handle)">
             <summary>
             HarmonyX Postfix for Keeper.Register()
             Captures registration events and enables SDK integration
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.UnregisterPrefix(System.Object,System.Object)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.UnregisterPrefix(Keeper,IHandleable)">
             <summary>
             HarmonyX Prefix for Keeper.Unregister()
             Captures entity before unregistration for event emission

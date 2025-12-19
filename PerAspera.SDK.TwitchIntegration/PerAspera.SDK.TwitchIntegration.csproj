@@ -28,6 +28,12 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>  <!-- Temporarily disabled for TwitchLib migration -->
     <WarningsNotAsErrors>CS1591;NU1605;NU1603</WarningsNotAsErrors> <!-- Missing XML comments, package downgrades -->
+    
+    <!-- RISK ALERT: Microsoft.Extensions.* 10.0.0 packages not officially tested with net6.0 -->
+    <!-- These packages use Microsoft backward compatibility but generate build warnings -->
+    <!-- Alternative: Downgrade to Microsoft.Extensions.*.8.0.0 if compatibility issues arise -->
+    <!-- Constraint: BepInX 6.x + Unity 2020.3.49 LTS prevent net8.0 migration -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <!-- NuGet Configuration -->
