@@ -18,7 +18,7 @@ namespace PerAspera.SDK.TwitchIntegration
     /// - Simple Task-based initialization without complex event dependencies
     /// 
     /// EVENT SYSTEM:
-    /// - EnhancedEvents.Subscribe<EventType>(handler) for typed events
+    /// - EnhancedEvents.Subscribe(eventType, handler) for typed events
     /// - Building events: BuildingSpawnedNativeEvent, BuildingDespawnedNativeEvent
     /// - Automatic wrapper conversion from native to SDK types
     /// </summary>

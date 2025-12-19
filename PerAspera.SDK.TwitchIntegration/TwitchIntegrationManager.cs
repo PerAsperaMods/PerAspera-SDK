@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PerAspera.Core;
+using PerAspera.GameAPI;
 using PerAspera.GameAPI.Events;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Native;
@@ -59,7 +60,7 @@ namespace PerAspera.SDK.TwitchIntegration
                 if (!_config.IsValid())
                 {
                     Log.Warning("⚠️ Invalid Twitch configuration, integration disabled");
-                    Log.Info(_config.GetSetupInstructions());
+                    Log.Info(TwitchConfiguration.GetSetupInstructions());
                     return;
                 }
                 
@@ -357,7 +358,7 @@ namespace PerAspera.SDK.TwitchIntegration
             
             try
             {
-                var baseGame = GameApi.wrapper.basegame;
+                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
                 if (baseGame?.GetUniverse()?.GetPlanet() == null)
                     return "🎮 Game Status: Planet data not available";
                 
@@ -372,24 +373,46 @@ namespace PerAspera.SDK.TwitchIntegration
         }
         
         /// <summary>
-        /// Get resource status
+        /// Get resource status using Keeper API to access Faction.knownResourceTypes
         /// </summary>
         private static string GetResourceStatus()
         {
             try
             {
-                var baseGame = GameApi.wrapper.basegame;
-                var planet = baseGame?.GetUniverse()?.GetPlanet();
-                if (planet?.Resources == null)
-                    return "📦 Resources: Data not available";
+                if (!Keeper.IsReady)
+                {
+                    return "📦 Resources: Keeper not ready (data available after game loads)";
+                }
                 
-                // Basic resource info using SDK wrappers
-                return "📦 Resources: Available (detailed breakdown coming soon)";
+                var knownResources = FactionHelper.GetKnownResources();
+                
+                if (knownResources.Count == 0)
+                {
+                    return "📦 Resources: No known resource types found";
+                }
+                
+                // Get resource categories for summary
+                var categories = FactionHelper.GetResourceCategories();
+                var categoryList = categories.Count > 0 ? string.Join(", ", categories) : "Unknown";
+                
+                // Sample some resource names for display
+                var sampleResources = knownResources.Values
+                    .Take(5)
+                    .Select(r => r.DisplayName)
+                    .ToArray();
+                
+                var resourceSample = string.Join(", ", sampleResources);
+                if (knownResources.Count > 5)
+                {
+                    resourceSample += $" (+{knownResources.Count - 5} more)";
+                }
+                
+                return $"📦 Resources: {knownResources.Count} known types | Categories: {categoryList} | Examples: {resourceSample}";
             }
             catch (Exception ex)
             {
                 Log.Warning($"Error getting resource status: {ex.Message}");
-                return "📦 Resources: Data unavailable";
+                return "📦 Resources: Data unavailable (error accessing faction data)";
             }
         }
         
@@ -400,7 +423,7 @@ namespace PerAspera.SDK.TwitchIntegration
         {
             try
             {
-                var baseGame = GameApi.wrapper.basegame;
+                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
                 if (planet?.Atmosphere == null)
                     return "🌍 Atmosphere: Data not available";
