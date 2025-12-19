@@ -5,6 +5,7 @@ using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using PerAspera.GameAPI.Events.Native;
 using HarmonyLib;
+using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 
 namespace PerAspera.GameAPI.Events
 {
@@ -196,7 +197,7 @@ namespace PerAspera.GameAPI.Events
         /// Get current event system statistics
         /// </summary>
         /// <returns>Event system statistics</returns>
-        public static EventBusStats GetStats()
+        public static EventSystemStats GetStats()
         {
             return EnhancedEventBus.GetStats();
         }

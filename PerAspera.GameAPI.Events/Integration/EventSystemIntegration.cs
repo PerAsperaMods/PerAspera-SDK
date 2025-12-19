@@ -4,6 +4,7 @@ using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Events.Constants;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.Core;
+using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 
 namespace PerAspera.GameAPI.Events.Integration
 {

@@ -579,6 +579,111 @@
             Create a filter function for milestone sols
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Integration.EnhancedEventBus">
+            <summary>
+            Enhanced Event Bus providing static subscription methods for SDK events
+            Provides type-safe event subscription with automatic wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameHubReady(System.Action)">
+            <summary>
+            Subscribe to GameHub initialization event (earliest possible mod loading)
+            Fires when GameHub scene is loaded and manager is available
+            ✅ Use this for mods that need immediate initialization (UI, Twitch, logging, etc.)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToEarlyModsReady(System.Action{PerAspera.GameAPI.Events.SDK.EarlyModsReadyEvent})">
+            <summary>
+            Subscribe to early mods ready event
+            Fires after GameHub initialization, before full game load
+            ✅ Use this for mods that need immediate initialization but require BaseGame access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToBaseGameDetected(System.Action{PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent})">
+            <summary>
+            Subscribe to BaseGame detection event
+            Fires when BaseGame and Universe instances are available
+            ✅ Use this for mods that need game state but not full planet access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameFullyLoaded(System.Action{PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent})">
+            <summary>
+            Subscribe to game fully loaded event
+            Fires when BaseGame + Universe + Planet are all available
+            ✅ Use this for mods that need full game state access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToBaseGameCreated(System.Action{PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent})">
+            <summary>
+            Subscribe to BaseGame creation event
+            Fires when BaseGame instance is first created
+            ✅ Use this for early game initialization hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToUniverseCreated(System.Action{PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent})">
+            <summary>
+            Subscribe to Universe creation event
+            Fires when Universe instance is first created
+            ✅ Use this for universe-level initialization hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToPlanetCreated(System.Action{PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent})">
+            <summary>
+            Subscribe to Planet creation event  
+            Fires when Planet instance is first created
+            ✅ Use this for planet-level initialization hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Subscribe``1(System.Action{``0})">
+            <summary>
+            Generic event subscription method
+            Supports any event type with automatic wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Subscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Subscribe to a named event with object-based handler
+            For compatibility with string-based event subscriptions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Unsubscribe(System.String,System.Action{System.Object})">
+            <summary>
+            Unsubscribe from a named event
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.TriggerEvent``1(``0)">
+            <summary>
+            Trigger an SDK event for all subscribers
+            Internal method used by game hooks and other SDK components
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SetAutoConversion(System.Boolean)">
+            <summary>
+            Enable or disable automatic wrapper conversion
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.GetStats">
+            <summary>
+            Get event system statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Publish(System.String,System.Object)">
+            <summary>
+            Publish an event to all registered handlers
+            </summary>
+            <param name="eventType">Type of the event</param>
+            <param name="eventData">Event data to publish</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.ClearAllSubscriptions">
+            <summary>
+            Clear all event subscriptions
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Integration.EventSystemStats">
+            <summary>
+            Event system statistics
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Integration.EventSystemIntegration">
             <summary>
             Automatic integration bridge that connects native game events to SDK event system
@@ -1183,6 +1288,67 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.InitializedAt">
             <summary>Initialization timestamp</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameHubReadyEvent">
+            <summary>
+            Event triggered when GameHub/GameHubManager is first loaded
+            ✅ This is the EARLIEST event - fires when GameHubManager.Awake() occurs
+            Use this for mods that need immediate initialization before any game systems
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubReadyEvent.SceneLoaded">
+            <summary>Whether GameHub scene is fully loaded</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubReadyEvent.ManagerReady">
+            <summary>Whether GameHubManager is available</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubReadyEvent.ReadyAt">
+            <summary>Event timestamp</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent">
+            <summary>
+            Event triggered when BaseGame instance is created
+            Fires when BaseGame.Awake() or initialization occurs
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.NativeBaseGame">
+            <summary>Native IL2CPP BaseGame instance</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.IsInitialized">
+            <summary>Whether BaseGame is fully initialized</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent">
+            <summary>
+            Event triggered when Universe instance is created
+            Fires when Universe is instantiated and attached to BaseGame
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent.UniverseWrapper">
+            <summary>SDK wrapper for Universe</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame (parent)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent.NativeUniverse">
+            <summary>Native IL2CPP Universe instance</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent">
+            <summary>
+            Event triggered when Planet instance is created
+            Fires when Planet is instantiated and attached to Universe
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.PlanetWrapper">
+            <summary>SDK wrapper for Planet</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.UniverseWrapper">
+            <summary>SDK wrapper for Universe (parent)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.NativePlanet">
+            <summary>Native IL2CPP Planet instance</summary>
         </member>
     </members>
 </doc>

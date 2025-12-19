@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.SDK;
@@ -116,6 +117,82 @@ namespace PerAspera.GameAPI.Events.Integration
             RegisterHandler(typeof(PlanetCreatedEvent), onPlanetCreated);
         }
 
+        // ==================== TWITCH INTEGRATION SUBSCRIPTIONS ====================
+
+        /// <summary>
+        /// Subscribe to Twitch follower events
+        /// Fires when someone follows the Twitch channel
+        /// ✅ Use this for immediate reactions to new followers (climate boosts, notifications)
+        /// </summary>
+        public static void SubscribeToTwitchFollow(Action<TwitchFollowSDKEvent> onTwitchFollow)
+        {
+            if (onTwitchFollow == null)
+                throw new ArgumentNullException(nameof(onTwitchFollow));
+
+            _logger.Info("Subscribed to Twitch follow events");
+            RegisterHandler(typeof(TwitchFollowSDKEvent), onTwitchFollow);
+        }
+
+        /// <summary>
+        /// Subscribe to Twitch bits events
+        /// Fires when someone cheers bits in chat
+        /// ✅ Use this for scaled effects based on bits amount (major bits = major effects)
+        /// </summary>
+        public static void SubscribeToTwitchBits(Action<TwitchBitsSDKEvent> onTwitchBits)
+        {
+            if (onTwitchBits == null)
+                throw new ArgumentNullException(nameof(onTwitchBits));
+
+            _logger.Info("Subscribed to Twitch bits events");
+            RegisterHandler(typeof(TwitchBitsSDKEvent), onTwitchBits);
+        }
+
+        /// <summary>
+        /// Subscribe to Twitch subscription events
+        /// Fires when someone subscribes to the channel
+        /// ✅ Use this for permanent bonuses and celebration effects
+        /// </summary>
+        public static void SubscribeToTwitchSubscription(Action<TwitchSubscriptionSDKEvent> onTwitchSubscription)
+        {
+            if (onTwitchSubscription == null)
+                throw new ArgumentNullException(nameof(onTwitchSubscription));
+
+            _logger.Info("Subscribed to Twitch subscription events");
+            RegisterHandler(typeof(TwitchSubscriptionSDKEvent), onTwitchSubscription);
+        }
+
+        /// <summary>
+        /// Subscribe to Twitch channel points redemption events
+        /// Fires when someone redeems a custom reward with channel points
+        /// ✅ Use this for custom viewer interactions with game systems
+        /// </summary>
+        public static void SubscribeToTwitchChannelPoints(Action<TwitchChannelPointsSDKEvent> onTwitchChannelPoints)
+        {
+            if (onTwitchChannelPoints == null)
+                throw new ArgumentNullException(nameof(onTwitchChannelPoints));
+
+            _logger.Info("Subscribed to Twitch channel points events");
+            RegisterHandler(typeof(TwitchChannelPointsSDKEvent), onTwitchChannelPoints);
+        }
+
+        /// <summary>
+        /// Subscribe to all Twitch events with a unified handler
+        /// ✅ Use this for comprehensive Twitch integration or analytics
+        /// </summary>
+        public static void SubscribeToAllTwitchEvents(Action<TwitchSDKEventBase> onTwitchEvent)
+        {
+            if (onTwitchEvent == null)
+                throw new ArgumentNullException(nameof(onTwitchEvent));
+
+            _logger.Info("Subscribed to all Twitch events");
+            
+            // Subscribe to each specific event type and forward to unified handler
+            SubscribeToTwitchFollow(evt => onTwitchEvent(evt));
+            SubscribeToTwitchBits(evt => onTwitchEvent(evt));
+            SubscribeToTwitchSubscription(evt => onTwitchEvent(evt));
+            SubscribeToTwitchChannelPoints(evt => onTwitchEvent(evt));
+        }
+
         // ==================== GENERIC EVENT SUBSCRIPTIONS ====================
 
         /// <summary>
@@ -129,6 +206,46 @@ namespace PerAspera.GameAPI.Events.Integration
 
             _logger.Info($"Subscribed to {typeof(T).Name}");
             RegisterHandler(typeof(T), handler);
+        }
+
+        /// <summary>
+        /// Subscribe to a named event with object-based handler
+        /// For compatibility with string-based event subscriptions
+        /// </summary>
+        public static void Subscribe(string eventType, Action<object> handler)
+        {
+            if (string.IsNullOrEmpty(eventType))
+                throw new ArgumentException("Event type cannot be null or empty", nameof(eventType));
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+
+            _logger.Info($"Subscribed to event type: {eventType}");
+            
+            // Store handler in a special registry for string-based events
+            var stringEventType = eventType.GetType();
+            if (!_eventHandlers.ContainsKey(stringEventType))
+            {
+                _eventHandlers[stringEventType] = new List<Delegate>();
+            }
+            _eventHandlers[stringEventType].Add(handler);
+        }
+
+        /// <summary>
+        /// Unsubscribe from a named event
+        /// </summary>
+        public static void Unsubscribe(string eventType, Action<object> handler)
+        {
+            if (string.IsNullOrEmpty(eventType))
+                throw new ArgumentException("Event type cannot be null or empty", nameof(eventType));
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+
+            var stringEventType = eventType.GetType();
+            if (_eventHandlers.TryGetValue(stringEventType, out var handlers))
+            {
+                handlers.Remove(handler);
+                _logger.Info($"Unsubscribed from event type: {eventType}");
+            }
         }
 
         // ==================== EVENT TRIGGERING ====================
@@ -211,6 +328,56 @@ namespace PerAspera.GameAPI.Events.Integration
                 TotalHandlers = totalHandlers,
                 AutoConversionEnabled = _autoConversionEnabled
             };
+        }
+
+        /// <summary>
+        /// Publish an event to all registered handlers
+        /// </summary>
+        /// <param name="eventType">Type of the event</param>
+        /// <param name="eventData">Event data to publish</param>
+        public static void Publish(string eventType, object eventData)
+        {
+            try
+            {
+                if (eventData == null) return;
+
+                var dataType = eventData.GetType();
+                if (_eventHandlers.TryGetValue(dataType, out var handlers))
+                {
+                    foreach (var handler in handlers)
+                    {
+                        try
+                        {
+                            handler.DynamicInvoke(eventData);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error($"Error invoking event handler for {eventType}: {ex.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error publishing event {eventType}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Clear all event subscriptions
+        /// </summary>
+        public static void ClearAllSubscriptions()
+        {
+            try
+            {
+                var totalHandlers = _eventHandlers.Values.Sum(handlers => handlers.Count);
+                _eventHandlers.Clear();
+                _logger.Info($"Cleared {totalHandlers} event handlers from {_eventHandlers.Count} event types");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error clearing subscriptions: {ex.Message}");
+            }
         }
 
         // ==================== INTERNAL METHODS ====================

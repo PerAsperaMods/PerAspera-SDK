@@ -428,5 +428,20 @@ namespace PerAspera.GameAPI.Wrappers
             _composition.UpdatePercentages();
             return $"Atmosphere [Temp:{TemperatureCelsius:F1}°C, Pressure:{TotalPressure:F2}kPa, {_composition}, Habitable:{HabitabilityScore:F0}%]";
         }
+
+        public void ModifyTemperature(float suggestedTemperatureBoost, float effectDuration, string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyPressure(float pressureChange, float duration, string source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyGas(string v, float oxygenChange, float duration, string source)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
