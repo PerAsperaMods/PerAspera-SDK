@@ -98,7 +98,21 @@ namespace PerAspera.GameAPI.Events.Core
                 // BaseGame wrapper
                 _converters[typeof(BaseGame)] = native => new PerAspera.GameAPI.Wrappers.BaseGame(native);
                 
-                // Add more wrappers as needed
+                // Faction wrapper
+                _converters[typeof(Faction)] = native => new PerAspera.GameAPI.Wrappers.Faction(native);
+                
+                // Technology wrapper
+                _converters[typeof(Technology)] = native => new PerAspera.GameAPI.Wrappers.Technology(native);
+                
+                // BuildingType wrapper
+                _converters[typeof(BuildingType)] = native => new PerAspera.GameAPI.Wrappers.BuildingType(native);
+                
+                // ResourceType wrapper
+                _converters[typeof(ResourceType)] = native => new PerAspera.GameAPI.Wrappers.ResourceType(native);
+                
+                // Knowledge wrapper
+                _converters[typeof(Knowledge)] = native => new PerAspera.GameAPI.Wrappers.Knowledge(native);
+                
                 _logger.Info($"Registered {_converters.Count} wrapper converters");
             }
         }

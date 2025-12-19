@@ -8,7 +8,11 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Wrapper for the native Building class
     /// Provides safe access to building properties and operations
-    /// DOC: Building.md - Factory, infrastructure, and production buildings
+    /// 
+    /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Building.md
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Buildings.md
+    /// 🔧 Override System: F:\ModPeraspera\SDK\PerAspera.GameAPI.Overrides\ProductionOverrides.cs
     /// </summary>
     public class Building : WrapperBase
     {
@@ -43,9 +47,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Building type definition (factory, hab, etc.)
         /// Maps to: _buildingType field
         /// </summary>
-        public object? BuildingType
+        public BuildingType GetBuildingType()
         {
-            get => SafeInvoke<object>("get_buildingType");
+            
+            return  new BuildingType(SafeInvoke<GameAPI.Native.BuildingType>("get_buildingType"));
         }
         
         /// <summary>
@@ -58,7 +63,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 try
                 {
-                    return BuildingType?.GetFieldValue<string>("name") ?? "Unknown";
+                    return GetBuildingType()?.GetFieldValue<string>("name") ?? "Unknown";
                 }
                 catch
                 {
@@ -108,6 +113,12 @@ namespace PerAspera.GameAPI.Wrappers
         public bool IsOperative => SafeGetField<bool>("_activated");
         
         /// <summary>
+        /// Is the building active (alive, built, operational and not broken)
+        /// Convenience property for common usage patterns
+        /// </summary>
+        public bool IsActive => IsAlive && IsBuilt && IsOperative && !IsBroken;
+        
+        /// <summary>
         /// Is the building fully built (not under construction)
         /// </summary>
         public bool IsBuilt => SafeGetField<bool>("_built");
@@ -116,7 +127,11 @@ namespace PerAspera.GameAPI.Wrappers
         /// Is the building powered
         /// </summary>
         public bool IsPowered => SafeGetField<bool>("_powered");
-        
+
+
+
+
+
         /// <summary>
         /// Is the building broken
         /// </summary>

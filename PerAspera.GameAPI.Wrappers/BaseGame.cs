@@ -7,7 +7,11 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Wrapper for BaseGame singleton
     /// Provides type-safe access to main game systems
-    /// DOC: BaseGame.md - Main game controller and singleton
+    /// 
+    /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+    /// 📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
     /// </summary>
     public class BaseGame : WrapperBase
     {

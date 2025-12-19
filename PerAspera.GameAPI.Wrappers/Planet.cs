@@ -9,6 +9,12 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Wrapper for the native Planet class
     /// Provides safe access to planetary properties and climate data
+    /// 
+    /// 📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator 
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+    /// 🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
+    /// 🎯 Examples: F:\ModPeraspera\Individual-Mods\MasterGui2\PlanetWrapper usage
     /// </summary>
     public class Planet : WrapperBase
     {

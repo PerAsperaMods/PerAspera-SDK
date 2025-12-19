@@ -30,6 +30,39 @@ namespace PerAspera.GameAPI.Wrappers
             return nativeResourceType != null ? new ResourceType(nativeResourceType) : null;
         }
         
+        /// <summary>
+        /// Get ResourceType wrapper by key (e.g., "resource_water", "resource_silicon")
+        /// Uses KeeperTypeRegistry to access native ResourceType collection
+        /// </summary>
+        /// <param name="resourceKey">Resource key from YAML definitions</param>
+        /// <returns>ResourceType wrapper or null if not found</returns>
+        /// <example>
+        /// var water = ResourceType.GetByKey("resource_water");
+        /// var silicon = ResourceType.GetByKey("resource_silicon");
+        /// if (water != null) {
+        ///     Console.WriteLine($"Water: {water.DisplayName}");
+        /// }
+        /// </example>
+        public static ResourceType? GetByKey(string resourceKey)
+        {
+            if (string.IsNullOrEmpty(resourceKey))
+            {
+                Log.Warning("GetByKey called with null/empty resource key");
+                return null;
+            }
+            
+            try
+            {
+                var nativeResourceType = KeeperTypeRegistry.GetResourceType(resourceKey);
+                return FromNative(nativeResourceType);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get ResourceType for key '{resourceKey}': {ex.Message}");
+                return null;
+            }
+        }
+        
         // ==================== CORE IDENTIFICATION ====================
         
         /// <summary>
@@ -265,77 +298,68 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== STATIC UTILITIES ====================
         
         /// <summary>
-        /// Common resource type key constants for easy reference
-        /// These are the YAML keys used in the game data files
+        /// SDK-Friendly resource discovery utilities for modable games
+        /// ⚠️ NOTE: Per Aspera is fully modable - mods can add any resource keys via YAML
+        /// Always use ResourceType.GetByKey("resource_name") for dynamic discovery
+        /// These constants are for convenience only, not an exhaustive list
         /// </summary>
-        public static class CommonResources
+        public static class VanillaResources
         {
             /// <summary>
-            /// Water resource identifier
+            /// Core vanilla mined resources (verified in game YAML)
             /// </summary>
-            public const string Water = "resource_water";
-            /// <summary>
-            /// Iron ore resource identifier
-            /// </summary>
-            public const string Iron = "resource_iron";
-            /// <summary>
-            /// Silicon resource identifier
-            /// </summary>
-            public const string Silicon = "resource_silicon";
-            /// <summary>
-            /// Carbon resource identifier
-            /// </summary>
-            public const string Carbon = "resource_carbon";
-            /// <summary>
-            /// Aluminum resource identifier
-            /// </summary>
-            public const string Aluminum = "resource_aluminum";
-            /// <summary>
-            /// Uranium resource identifier
-            /// </summary>
-            public const string Uranium = "resource_uranium";
-            /// <summary>
-            /// Chemicals resource identifier
-            /// </summary>
-            public const string Chemicals = "resource_chemicals";
+            public static readonly string[] Mined = 
+            {
+                "resource_water", "resource_iron", "resource_carbon", "resource_silicon", 
+                "resource_aluminum", "resource_chemicals", "resource_uranium"
+            };
             
             /// <summary>
-            /// Steel manufactured resource identifier
+            /// Core vanilla manufactured resources (verified in game YAML)
             /// </summary>
-            public const string Steel = "resource_steel";
-            /// <summary>
-            /// Glass manufactured resource identifier
-            /// </summary>
-            public const string Glass = "resource_glass";
-            /// <summary>
-            /// Parts manufactured resource identifier
-            /// </summary>
-            public const string Parts = "resource_parts";
-            /// <summary>
-            /// Polymers manufactured resource identifier
-            /// </summary>
-            public const string Polymers = "resource_polymers";
-            /// <summary>
-            /// Electronics manufactured resource identifier
-            /// </summary>
-            public const string Electronics = "resource_electronics";
-            /// <summary>
-            /// Food resource identifier
-            /// </summary>
-            public const string Food = "resource_food";
-            /// <summary>
-            /// Fuel resource identifier
-            /// </summary>
-            public const string Fuel = "resource_fuel";
+            public static readonly string[] Manufactured = 
+            {
+                "resource_steel", "resource_glass", "resource_parts", 
+                "resource_polymers", "resource_electronics", "resource_food"
+            };
             
             /// <summary>
-            /// Energy resource identifier
+            /// Other vanilla resources (fuel, placement, etc.)
             /// </summary>
-            public const string Energy = "resource_energy";
+            public static readonly string[] Other = 
+            {
+                "resource_fuel", "resource_crater", "resource_heat", "resource_special_site"
+            };
+            
             /// <summary>
-            /// Oxygen atmospheric resource identifier
+            /// Get all vanilla resource keys (non-exhaustive - mods can add more!)
             /// </summary>
-            public const string Oxygen = "resource_oxygen";
+            public static string[] GetAllVanilla() => 
+                Mined.Concat(Manufactured).Concat(Other).ToArray();
+        }
+        
+        /// <summary>
+        /// Discover all available resources dynamically from the loaded game
+        /// This respects mod additions and YAML modifications
+        /// </summary>
+        /// <returns>List of all resource keys currently available in game</returns>
+        public static List<string> DiscoverAllResourceKeys()
+        {
+            var availableKeys = new List<string>();
+            
+            // Try vanilla resources first
+            foreach (var key in VanillaResources.GetAllVanilla())
+            {
+                if (GetByKey(key) != null)
+                {
+                    availableKeys.Add(key);
+                }
+            }
+            
+            // TODO: Add reflection-based discovery of all ResourceType instances
+            // This would find mod-added resources automatically
+            
+            return availableKeys;
         }
         
         /// <summary>

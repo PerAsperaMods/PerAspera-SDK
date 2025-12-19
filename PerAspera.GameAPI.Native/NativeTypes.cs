@@ -17,7 +17,27 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
-    
+
+    public class ResourceType
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public ResourceType(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class BuildingType
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public BuildingType(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
     /// <summary>
     /// Native Universe type alias for Enhanced Events
     /// Represents the actual IL2CPP native Universe object

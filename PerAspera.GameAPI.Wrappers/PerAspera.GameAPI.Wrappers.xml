@@ -7,6 +7,12 @@
         <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericGas">
             <summary>
             Represents a single atmospheric gas component
+            
+            🚨 SDK EXCLUSIVE - NOT IN VANILLA GAME CLASS
+            💫 Enhanced Feature: Complete atmospheric composition access
+            📋 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md#atmosphere-api
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            📊 Climate Module: F:\ModPeraspera\SDK\PerAspera.GameAPI.Climate\ClimateSnapshot.cs
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.PartialPressure">
@@ -190,7 +196,11 @@
             <summary>
             Wrapper for BaseGame singleton
             Provides type-safe access to main game systems
-            DOC: BaseGame.md - Main game controller and singleton
+            
+            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+            📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent">
@@ -452,7 +462,11 @@
             <summary>
             Wrapper for the native Building class
             Provides safe access to building properties and operations
-            DOC: Building.md - Factory, infrastructure, and production buildings
+            
+            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Building.md
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Buildings.md
+            🔧 Override System: F:\ModPeraspera\SDK\PerAspera.GameAPI.Overrides\ProductionOverrides.cs
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Building.#ctor(System.Object)">
@@ -472,7 +486,7 @@
             Maps to: _number_k__BackingField
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Building.BuildingType">
+        <member name="M:PerAspera.GameAPI.Wrappers.Building.GetBuildingType">
             <summary>
             Building type definition (factory, hab, etc.)
             Maps to: _buildingType field
@@ -502,6 +516,12 @@
         <member name="P:PerAspera.GameAPI.Wrappers.Building.IsOperative">
             <summary>
             Is the building operational
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Building.IsActive">
+            <summary>
+            Is the building active (alive, built, operational and not broken)
+            Convenience property for common usage patterns
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Building.IsBuilt">
@@ -2175,6 +2195,14 @@
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceType(System.String)" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetResourceTypeWrapper(System.String)">
+            <summary>
+            Get ResourceType wrapper by key (e.g., "resource_water", "resource_silicon")
+            Returns wrapped ResourceType for type-safe access
+            </summary>
+            <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
+            <returns>ResourceType wrapper or null if not found</returns>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetBuildingType(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetPerson(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetTechnologyType(System.String)" -->
@@ -2382,6 +2410,12 @@
             <summary>
             Wrapper for the native Planet class
             Provides safe access to planetary properties and climate data
+            
+            📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
+            🤖 Agent Expert: @per-aspera-sdk-coordinator 
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+            🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
+            🎯 Examples: F:\ModPeraspera\Individual-Mods\MasterGui2\PlanetWrapper usage
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Planet.#ctor(System.Object)">
@@ -2575,6 +2609,21 @@
             Create wrapper from native resource type object
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetByKey(System.String)">
+            <summary>
+            Get ResourceType wrapper by key (e.g., "resource_water", "resource_silicon")
+            Uses KeeperTypeRegistry to access native ResourceType collection
+            </summary>
+            <param name="resourceKey">Resource key from YAML definitions</param>
+            <returns>ResourceType wrapper or null if not found</returns>
+            <example>
+            var water = ResourceType.GetByKey("resource_water");
+            var silicon = ResourceType.GetByKey("resource_silicon");
+            if (water != null) {
+                Console.WriteLine($"Water: {water.DisplayName}");
+            }
+            </example>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceType.Name">
             <summary>
             Resource type name/key identifier
@@ -2685,91 +2734,40 @@
             String representation for debugging
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources">
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceType.VanillaResources">
             <summary>
-            Common resource type key constants for easy reference
-            These are the YAML keys used in the game data files
+            SDK-Friendly resource discovery utilities for modable games
+            ⚠️ NOTE: Per Aspera is fully modable - mods can add any resource keys via YAML
+            Always use ResourceType.GetByKey("resource_name") for dynamic discovery
+            These constants are for convenience only, not an exhaustive list
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Water">
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.VanillaResources.Mined">
             <summary>
-            Water resource identifier
+            Core vanilla mined resources (verified in game YAML)
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Iron">
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.VanillaResources.Manufactured">
             <summary>
-            Iron ore resource identifier
+            Core vanilla manufactured resources (verified in game YAML)
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Silicon">
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.VanillaResources.Other">
             <summary>
-            Silicon resource identifier
+            Other vanilla resources (fuel, placement, etc.)
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Carbon">
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.VanillaResources.GetAllVanilla">
             <summary>
-            Carbon resource identifier
+            Get all vanilla resource keys (non-exhaustive - mods can add more!)
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Aluminum">
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.DiscoverAllResourceKeys">
             <summary>
-            Aluminum resource identifier
+            Discover all available resources dynamically from the loaded game
+            This respects mod additions and YAML modifications
             </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Uranium">
-            <summary>
-            Uranium resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Chemicals">
-            <summary>
-            Chemicals resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Steel">
-            <summary>
-            Steel manufactured resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Glass">
-            <summary>
-            Glass manufactured resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Parts">
-            <summary>
-            Parts manufactured resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Polymers">
-            <summary>
-            Polymers manufactured resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Electronics">
-            <summary>
-            Electronics manufactured resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Food">
-            <summary>
-            Food resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Fuel">
-            <summary>
-            Fuel resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Energy">
-            <summary>
-            Energy resource identifier
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.ResourceType.CommonResources.Oxygen">
-            <summary>
-            Oxygen atmospheric resource identifier
-            </summary>
+            <returns>List of all resource keys currently available in game</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceType.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceType)">
             <summary>
@@ -3397,6 +3395,11 @@
             <summary>
             Wrapper for the native Universe class
             Provides safe access to time, game state and universe-level properties
+            
+            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Universe.md (290 fields, 143 methods)
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+            🕰️ Time System: Game state, pause, time management functionality
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetCurrent">
@@ -3502,6 +3505,11 @@
             <summary>
             Base class for all game object wrappers
             Provides common functionality for wrapping native IL2CPP game objects
+            
+            📚 Architecture Guide: F:\ModPeraspera\Organization-Wiki\architecture\SDK-Components.md
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            🔧 Core Utilities: F:\ModPeraspera\SDK\PerAspera.Core\IL2CPP\SafeInvoke patterns
+            🎯 Best Practices: Always inherit for new game object wrappers
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.NativeObject">

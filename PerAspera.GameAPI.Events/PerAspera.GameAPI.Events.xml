@@ -154,6 +154,30 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.ModError">
             <summary>Event: Mod encountered an error</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchFollow">
+            <summary>Event: Someone followed the Twitch channel</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchBits">
+            <summary>Event: Someone cheered bits in Twitch chat</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchSubscription">
+            <summary>Event: Someone subscribed to the Twitch channel</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchChannelPoints">
+            <summary>Event: Someone redeemed channel points on Twitch</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchRaid">
+            <summary>Event: Someone raided the Twitch channel</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchHost">
+            <summary>Event: Someone hosted the Twitch channel</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchChatCommand">
+            <summary>Event: Twitch chat command was processed</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.TwitchStatusChanged">
+            <summary>Event: Twitch integration status changed</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Core.GameEventBase">
             <summary>
             Base class for all game events
@@ -414,6 +438,11 @@
             <summary>
             Automatic initialization for enhanced event system
             Provides seamless upgrade from legacy event system to wrapper-enabled events
+            
+            📋 Event Documentation: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\MODDER-GUIDE.md
+            🤖 Agent Expert: @per-aspera-sdk-coordinator (Events expertise)
+            📡 Usage Examples: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\USAGE-EXAMPLES.md
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Events.md
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameInitializationPatches">
@@ -632,6 +661,40 @@
             Subscribe to Planet creation event  
             Fires when Planet instance is first created
             ✅ Use this for planet-level initialization hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToTwitchFollow(System.Action{PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent})">
+            <summary>
+            Subscribe to Twitch follower events
+            Fires when someone follows the Twitch channel
+            ✅ Use this for immediate reactions to new followers (climate boosts, notifications)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToTwitchBits(System.Action{PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent})">
+            <summary>
+            Subscribe to Twitch bits events
+            Fires when someone cheers bits in chat
+            ✅ Use this for scaled effects based on bits amount (major bits = major effects)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToTwitchSubscription(System.Action{PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent})">
+            <summary>
+            Subscribe to Twitch subscription events
+            Fires when someone subscribes to the channel
+            ✅ Use this for permanent bonuses and celebration effects
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToTwitchChannelPoints(System.Action{PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent})">
+            <summary>
+            Subscribe to Twitch channel points redemption events
+            Fires when someone redeems a custom reward with channel points
+            ✅ Use this for custom viewer interactions with game systems
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToAllTwitchEvents(System.Action{PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase})">
+            <summary>
+            Subscribe to all Twitch events with a unified handler
+            ✅ Use this for comprehensive Twitch integration or analytics
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Subscribe``1(System.Action{``0})">
@@ -1349,6 +1412,135 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.NativePlanet">
             <summary>Native IL2CPP Planet instance</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase">
+            <summary>
+            Base class for all Twitch-related events in the Per Aspera SDK event system
+            Integrates seamlessly with EnhancedEventBus and provides game context
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.ChannelId">
+            <summary>Twitch channel ID where the event occurred</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.Username">
+            <summary>Twitch username (login name)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.DisplayName">
+            <summary>Twitch display name (formatted name)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.EventTimestamp">
+            <summary>Event timestamp</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.GameContext">
+            <summary>Game context at the time of the event</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase.TryCreateGameContext">
+            <summary>
+            Safely create game context if available
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchGameContext">
+            <summary>
+            Game context snapshot for Twitch events
+            Provides safe access to current game state
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent">
+            <summary>
+            Twitch follower event integrated with Per Aspera SDK event system
+            Triggered when someone follows the channel
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent.SuggestedTemperatureBoost">
+            <summary>Suggested climate boost for new follower</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent.EffectDuration">
+            <summary>Effect duration in seconds</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent.ShouldTriggerEffects">
+            <summary>Whether this event should trigger immediate game effects</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent.TryApplyFollowerEffect">
+            <summary>
+            Apply the follower effect to the game if possible
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent">
+            <summary>
+            Twitch bits/cheer event integrated with Per Aspera SDK event system
+            Triggered when someone cheers bits in chat
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent.BitsAmount">
+            <summary>Number of bits cheered</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent.ChatMessage">
+            <summary>Chat message with the bits</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent.EffectMultiplier">
+            <summary>Calculated effect multiplier based on bits amount</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent.SuggestedEffects">
+            <summary>Suggested climate effects</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.SDK.TwitchBitsSDKEvent.TryApplyBitsEffects">
+            <summary>
+            Apply bits effects to the game if possible
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent">
+            <summary>
+            Twitch subscription event integrated with Per Aspera SDK event system
+            Triggered when someone subscribes to the channel
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent.SubscriptionTier">
+            <summary>Subscription tier (Tier 1, Tier 2, Tier 3, Prime)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent.IsGift">
+            <summary>Whether this is a gift subscription</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent.PermanentBonusPercentage">
+            <summary>Calculated permanent bonus percentage</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent.BuildingEfficiencyBoost">
+            <summary>Suggested building efficiency boost</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.SDK.TwitchSubscriptionSDKEvent.TryApplySubscriptionBonus">
+            <summary>
+            Apply subscription bonus effects to the game
+            Note: Permanent bonuses require special handling in mod implementation
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent">
+            <summary>
+            Twitch channel points redemption event integrated with Per Aspera SDK event system
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.RewardTitle">
+            <summary>Name of the redeemed reward</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.RewardCost">
+            <summary>Cost of the reward in channel points</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.UserInput">
+            <summary>User input for the redemption</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.ParsedGameAction">
+            <summary>Parsed game action from reward title</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.EffectIntensity">
+            <summary>Calculated effect intensity</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.SDK.TwitchChannelPointsSDKEvent.TryApplyChannelPointsEffect">
+            <summary>
+            Apply channel points effect based on parsed action
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TwitchClimateEffects">
+            <summary>
+            Climate effects structure for Twitch events
+            </summary>
         </member>
     </members>
 </doc>

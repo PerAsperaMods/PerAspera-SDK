@@ -9,6 +9,11 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Wrapper for the native Universe class
     /// Provides safe access to time, game state and universe-level properties
+    /// 
+    /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Universe.md (290 fields, 143 methods)
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+    /// 🕰️ Time System: Game state, pause, time management functionality
     /// </summary>
     public class Universe : WrapperBase
     {

@@ -5,6 +5,7 @@ using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PerAspera.GameAPI.Events.SDK
 {
@@ -47,7 +48,7 @@ namespace PerAspera.GameAPI.Events.SDK
         {
             try
             {
-                var baseGame = PerAspera.GameAPI.Wrappers.BaseGame.GetInstance();
+                var baseGame = PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent();
                 if (baseGame?.GetUniverse()?.GetPlanet() != null)
                 {
                     return new TwitchGameContext(baseGame);
@@ -55,7 +56,8 @@ namespace PerAspera.GameAPI.Events.SDK
             }
             catch (Exception ex)
             {
-                PerAspera.Core.LogAspera.Warning($"Failed to create game context for Twitch event: {ex.Message}");
+                var logger = new PerAspera.Core.LogAspera("TwitchEvents");
+                logger.Warning($"Failed to create game context for Twitch event: {ex.Message}");
             }
             return null;
         }
@@ -98,13 +100,20 @@ namespace PerAspera.GameAPI.Events.SDK
 
                     // Safely get building counts
                     var faction = _u.GetPlayerFaction();
-                    List<GameAPI.Wrappers.Building> _lb = faction.GetBuildings();
-                    TotalBuildings = _lb?.Count ?? 0;
-                    ActiveBuildings = _lb?.Count(b => b.IsActive) ?? 0;
+                    var buildingsList = faction.GetBuildings();
+                    TotalBuildings = buildingsList?.Count ?? 0;
+                    if (buildingsList != null)
+                    {
+                        ActiveBuildings = buildingsList.Where(b => b != null && b.IsActive).Count();
+                    }
+                    else
+                    {
+                        ActiveBuildings = 0;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    LogAspera.LogError($"Failed to capture complete game context: {ex.Message}");
+                    PerAspera.Core.LogAspera.LogError($"Failed to capture complete game context: {ex.Message}");
                 }
             }
             else
@@ -165,7 +174,7 @@ namespace PerAspera.GameAPI.Events.SDK
             }
             catch (Exception ex)
             {
-                LogAspera.LogError($"Failed to apply follower effect: {ex.Message}");
+                PerAspera.Core.LogAspera.LogError($"Failed to apply follower effect: {ex.Message}");
                 return false;
             }
         }
@@ -249,7 +258,7 @@ namespace PerAspera.GameAPI.Events.SDK
             }
             catch (Exception ex)
             {
-                LogAspera.LogError($"Failed to apply bits effects: {ex.Message}");
+                PerAspera.Core.LogAspera.LogError($"Failed to apply bits effects: {ex.Message}");
                 return false;
             }
         }
@@ -324,7 +333,7 @@ namespace PerAspera.GameAPI.Events.SDK
             }
             catch (Exception ex)
             {
-                LogAspera.LogError($"Failed to apply subscription bonus: {ex.Message}");
+                PerAspera.Core.LogAspera.LogError($"Failed to apply subscription bonus: {ex.Message}");
                 return false;
             }
         }
@@ -424,7 +433,7 @@ namespace PerAspera.GameAPI.Events.SDK
             }
             catch (Exception ex)
             {
-                LogAspera.LogError($"Failed to apply channel points effect: {ex.Message}");
+                PerAspera.Core.LogAspera.LogError($"Failed to apply channel points effect: {ex.Message}");
                 return false;
             }
         }

@@ -12,6 +12,11 @@ namespace PerAspera.GameAPI.Events
     /// <summary>
     /// Automatic initialization for enhanced event system
     /// Provides seamless upgrade from legacy event system to wrapper-enabled events
+    /// 
+    /// 📋 Event Documentation: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\MODDER-GUIDE.md
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator (Events expertise)
+    /// 📡 Usage Examples: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\USAGE-EXAMPLES.md
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Events.md
     /// </summary>
     [BepInPlugin("peraspera.events.autostart", "PerAspera Enhanced Events", "1.0.0")]
     public class EventsAutoStartPlugin : BasePlugin

@@ -7,6 +7,12 @@ namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
     /// Represents a single atmospheric gas component
+    /// 
+    /// 🚨 SDK EXCLUSIVE - NOT IN VANILLA GAME CLASS
+    /// 💫 Enhanced Feature: Complete atmospheric composition access
+    /// 📋 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md#atmosphere-api
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 📊 Climate Module: F:\ModPeraspera\SDK\PerAspera.GameAPI.Climate\ClimateSnapshot.cs
     /// </summary>
     public class AtmosphericGas
     {
@@ -137,7 +143,7 @@ namespace PerAspera.GameAPI.Wrappers
         private readonly AtmosphericComposition _composition;
         private readonly Dictionary<string, TerraformingEffect> _effects;
         
-        internal Atmosphere(object nativePlanet)
+        public Atmosphere(object nativePlanet)
         {
             _nativePlanet = nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet));
             

@@ -15,6 +15,11 @@ namespace PerAspera.GameAPI.Climate
     /// Master controller for climate simulation integration with Per Aspera
     /// Manages bidirectional synchronization between simulation and game state
     /// Provides the requested bidirectional control over atmospheric values.
+    /// 
+    /// 📋 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md#atmosphere-api
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator (Climate expertise)
+    /// 🌡️ User Guide: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Climate.md
+    /// 🔄 Integration: F:\ModPeraspera\SDK\PerAspera.GameAPI.Wrappers\Atmosphere.cs
     /// </summary>
     public class ClimateController
     {

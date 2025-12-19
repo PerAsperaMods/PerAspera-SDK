@@ -140,6 +140,18 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get ResourceType wrapper by key (e.g., "resource_water", "resource_silicon")
+        /// Returns wrapped ResourceType for type-safe access
+        /// </summary>
+        /// <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
+        /// <returns>ResourceType wrapper or null if not found</returns>
+        public static ResourceType? GetResourceTypeWrapper(string resourceKey)
+        {
+            var nativeResourceType = GetResourceType(resourceKey);
+            return nativeResourceType != null ? new ResourceType(nativeResourceType) : null;
+        }
+        
+        /// <summary>
         /// Get BuildingType by key (e.g., "building_solar_panel")
         /// Uses StaticDataCollectionItem<BuildingType>.Get(key) pattern
         /// Returns null if not found

@@ -7,6 +7,11 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Base class for all game object wrappers
     /// Provides common functionality for wrapping native IL2CPP game objects
+    /// 
+    /// 📚 Architecture Guide: F:\ModPeraspera\Organization-Wiki\architecture\SDK-Components.md
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 🔧 Core Utilities: F:\ModPeraspera\SDK\PerAspera.Core\IL2CPP\SafeInvoke patterns
+    /// 🎯 Best Practices: Always inherit for new game object wrappers
     /// </summary>
     public abstract class WrapperBase
     {
