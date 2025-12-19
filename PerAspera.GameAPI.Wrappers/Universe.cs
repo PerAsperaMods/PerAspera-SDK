@@ -29,9 +29,16 @@ namespace PerAspera.GameAPI.Wrappers
             var universe = KeeperTypeRegistry.GetUniverse();
             return universe != null ? new Universe(universe) : null;
         }
-        
+        public Faction GetPlayerFaction()
+        {
+            return NativeObject.InvokeMethod<object>("GetPlayerFaction") is { } nativeFaction
+                ? new GameAPI.Wrappers.Faction(nativeFaction)
+                : null;
+        }
+
+
         // ==================== TIME PROPERTIES ====================
-        
+
         /// <summary>
         /// Get current Martian sol (days passed)
         /// </summary>
@@ -76,16 +83,7 @@ namespace PerAspera.GameAPI.Wrappers
             return nativeBaseGame != null ? new BaseGame(nativeBaseGame) : null;
         }
         
-        /// <summary>
-        /// Get the player faction wrapper
-        /// Maps to: playerFaction field or GetPlayerFaction() method
-        /// </summary>
-        public Faction? GetPlayerFaction()
-        {
-            var nativePlayerFaction = SafeInvoke<object>("get_playerFaction") ?? 
-                                     SafeInvoke<object>("GetPlayerFaction");
-            return nativePlayerFaction != null ? new Faction(nativePlayerFaction) : null;
-        }
+
         
         /// <summary>
         /// Get all factions in the universe

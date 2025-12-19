@@ -1201,6 +1201,12 @@
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemEnhancementPlugin" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemEnhancementPlugin.OnGameInitialized">
+            <summary>
+            Called by external systems when BaseGame becomes available
+            Triggers deferred patch application
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventSystem">
             <summary>
             Typed Event System with Generic Type Safety
@@ -1279,11 +1285,17 @@
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches">
             <summary>
             HarmonyX patches for game state events
+            SOLUTION: Dynamic patching after game initialization instead of static patches
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.BaseGameUpdatePostfix(PerAspera.GameAPI.Wrappers.BaseGame)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.ApplyDynamicPatches(HarmonyLib.Harmony)">
             <summary>
-            Patch BaseGame.Update for periodic event processing
+            Apply BaseGame.Update patch dynamically once BaseGame is available
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventPatches.BaseGameUpdatePostfix(System.Object)">
+            <summary>
+            BaseGame.Update postfix - only called after dynamic patching
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Events.KeeperEventsSDK">
@@ -1418,6 +1430,12 @@
             Initialize Faction wrapper with native faction object
             </summary>
             <param name="nativeFaction">Native faction instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetHandle">
+            <summary>
+            Get the Handle for this Faction instance
+            </summary>
+            <returns>Handle for Keeper system access</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Faction.FromNative(System.Object)">
             <summary>
@@ -2067,6 +2085,96 @@
             </summary>
             <returns>Formatted string with cache statistics and system status</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperHelper">
+            <summary>
+            High-level helper class for common Keeper operations
+            Provides convenient methods for entity access and management
+            Built on top of KeeperWrapper and KeeperMapWrapper for optimal performance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.IsKeeperReady">
+            <summary>
+            Check if Keeper system is available and ready
+            Combines BaseGame availability + Keeper initialization checks
+            </summary>
+            <returns>True if Keeper system is fully operational</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.GetSystemStatus">
+            <summary>
+            Get comprehensive Keeper system status for debugging
+            Includes BaseGame, Keeper, and KeeperMap availability
+            </summary>
+            <returns>Detailed system status information</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.FindEntity``1(Handle,System.Boolean)">
+            <summary>
+            Find entity by Handle with automatic error handling and logging
+            Preferred method for Handle-based entity lookup
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handle">Entity Handle</param>
+            <param name="logErrors">Whether to log errors (default: true)</param>
+            <returns>Typed entity instance or null if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.EntityExists(Handle)">
+            <summary>
+            Check if entity exists by Handle (fast Contains check)
+            More efficient than FindEntity when you only need existence verification
+            </summary>
+            <param name="handle">Handle to check</param>
+            <returns>True if entity exists in KeeperMap</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.FindEntities``1(System.Collections.Generic.IEnumerable{Handle})">
+            <summary>
+            Find multiple entities by Handle list with batch optimization
+            More efficient than multiple FindEntity calls
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handles">Collection of Handles to lookup</param>
+            <returns>Dictionary mapping Handle to entity (null if not found)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.GetAllEntities``1">
+            <summary>
+            Get all entities of a specific type from KeeperMap
+            Performance: O(n) where n = total entities - use sparingly
+            </summary>
+            <typeparam name="T">Entity type to enumerate</typeparam>
+            <returns>All entities of type T currently registered</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.CountEntities``1">
+            <summary>
+            Count entities of a specific type without enumeration
+            More efficient than GetAllEntities().Count() for large datasets
+            </summary>
+            <typeparam name="T">Entity type to count</typeparam>
+            <returns>Number of entities of type T</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.ValidateHandles(System.Collections.Generic.IEnumerable{Handle})">
+            <summary>
+            Validate multiple Handles efficiently
+            More efficient than multiple EntityExists calls
+            </summary>
+            <param name="handles">Handles to validate</param>
+            <returns>Dictionary mapping Handle to existence status</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.LogSystemDiagnostics">
+            <summary>
+            Print comprehensive Keeper system diagnostics to log
+            Useful for debugging and system monitoring
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperHelper.GetEntityTypeDistribution">
+            <summary>
+            Get entity type distribution for performance monitoring
+            Helps identify memory usage patterns and hotspots
+            </summary>
+            <returns>Dictionary mapping type name to entity count</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperSystemStatus">
+            <summary>
+            Comprehensive status information for Keeper system diagnostics
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.KeeperMapWrapper">
             <summary>
             Direct wrapper around native KeeperMap class
@@ -2220,6 +2328,87 @@
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperTypeRegistry.GetStatus">
             <summary>
             Get initialization status report for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperWrapper">
+            <summary>
+            Direct wrapper around native Keeper class
+            Provides safe access to Keeper properties and operations
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize KeeperWrapper with native Keeper instance
+            </summary>
+            <param name="nativeKeeper">Native Keeper from BaseGame.keeper</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetCurrent">
+            <summary>
+            Get current Keeper from BaseGame.keeper
+            Factory method for wrapper creation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetKeeperMap">
+            <summary>
+            Get KeeperMap wrapper for Handle→Object operations
+            Performance: O(1) field access
+            </summary>
+            <returns>KeeperMapWrapper instance or null if unavailable</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.Register(System.Object)">
+            <summary>
+            Register an entity with the Keeper system
+            Returns Handle for future lookups
+            </summary>
+            <param name="handleable">Entity to register (must implement IHandleable)</param>
+            <returns>Handle for the registered entity</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.Unregister(System.Object)">
+            <summary>
+            Unregister an entity from the Keeper system
+            Removes the Handle→Object mapping
+            </summary>
+            <param name="handleable">Entity to unregister</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetHandleManager">
+            <summary>
+            Get HandleManager for low-level Handle operations
+            Advanced usage only - prefer KeeperMapWrapper for normal operations
+            </summary>
+            <returns>Native HandleManager object or null</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetECSWorld">
+            <summary>
+            Get ECS World instance for Entity-Component-System operations
+            Advanced usage - requires Unity ECS knowledge
+            </summary>
+            <returns>Unity ECS World or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetEntityManager">
+            <summary>
+            Get EntityManager for ECS entity operations
+            Advanced usage - requires Unity ECS knowledge
+            </summary>
+            <returns>Unity EntityManager or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.IsReady">
+            <summary>
+            Check if Keeper is properly initialized and ready for use
+            Validates core components: map, handleManager, ecsWorld
+            </summary>
+            <returns>True if Keeper is fully functional</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetDiagnostics">
+            <summary>
+            Get comprehensive Keeper diagnostics for debugging
+            Useful for monitoring system health and performance
+            </summary>
+            <returns>Diagnostic information about Keeper state</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperDiagnostics">
+            <summary>
+            Keeper diagnostic information for debugging and monitoring
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Knowledge">
@@ -3435,12 +3624,6 @@
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetBaseGame">
             <summary>
             Get the base game wrapper instance
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetPlayerFaction">
-            <summary>
-            Get the player faction wrapper
-            Maps to: playerFaction field or GetPlayerFaction() method
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetFactions">

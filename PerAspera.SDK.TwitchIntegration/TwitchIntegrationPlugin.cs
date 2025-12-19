@@ -24,8 +24,6 @@ namespace PerAspera.SDK.TwitchIntegration
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("PerAspera.GameAPI.Events")]
-    [BepInDependency("PerAspera.GameAPI.Climate")]
-    [BepInDependency("PerAspera.GameAPI.Wrappers")]
     public class TwitchIntegrationPlugin : BasePlugin
     {
         public const string PluginGuid = "PerAspera.SDK.TwitchIntegration";

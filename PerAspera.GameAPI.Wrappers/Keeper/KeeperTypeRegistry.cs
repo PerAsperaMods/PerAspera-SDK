@@ -45,10 +45,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get Keeper instance (entity registry)
         /// Safe to call after BaseGame.Awake()
         /// </summary>
-        public static object? GetKeeper()
+        public static Keeper ? GetKeeper()
         {
-            var baseGame = BaseGame.GetCurrent();
-            return baseGame?.GetKeeper();
+            
+            return (Keeper)BaseGame.GetCurrent()?.GetKeeper();
         }
         
         /// <summary>

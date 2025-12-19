@@ -20,8 +20,28 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="nativeFaction">Native faction instance from game</param>
         public Faction(object nativeFaction) : base(nativeFaction)
         {
+            NativeObject = nativeFaction;
         }
-        
+        /// <summary>
+        /// Get the Handle for this Faction instance
+        /// </summary>
+        /// <returns>Handle for Keeper system access</returns>
+        public Handle GetHandle()
+        {
+            try
+            {
+                if (NativeObject == null) return default;
+                
+                // Native Faction objects have a handle property
+                return SafeInvoke<Handle>("get_handle");
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogWarning($"[Faction] GetHandle failed: {ex.Message}");
+                return default;
+            }
+        }
+
         /// <summary>
         /// Create wrapper from native faction object
         /// </summary>

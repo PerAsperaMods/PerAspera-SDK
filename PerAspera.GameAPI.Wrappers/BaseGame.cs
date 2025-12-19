@@ -36,9 +36,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// Property: keeper { get; private set; }
         /// Backing field: _keeper_k__BackingField
         /// </summary>
-        public object? GetKeeper()
+        public Keeper? GetKeeper()
         {
-            return SafeInvoke<object>("get_keeper");
+            return SafeInvoke<Keeper>("get_keeper");
         }
         
         /// <summary>

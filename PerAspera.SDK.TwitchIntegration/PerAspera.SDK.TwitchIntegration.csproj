@@ -40,6 +40,18 @@
     <PackageReference Include="TwitchLib.Api" Version="3.11.0" />
     <PackageReference Include="TwitchLib.PubSub" Version="4.0.1" />
     -->
+
+	  
+	  
+	  
   </ItemGroup>
 
+	<Target Name="SDK_DLL" AfterTargets="Build">
+		<PropertyGroup>
+			<SDKDeployPath>F:\ModPeraspera\SDK_DLL</SDKDeployPath>
+		</PropertyGroup>
+		<MakeDir Directories="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.SDK.TwitchIntegration.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
+	</Target>
 </Project>

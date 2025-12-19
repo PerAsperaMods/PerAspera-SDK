@@ -18,7 +18,7 @@ namespace PerAspera.GameAPI.Events
     /// 📡 Usage Examples: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\USAGE-EXAMPLES.md
     /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Events.md
     /// </summary>
-    [BepInPlugin("peraspera.events.autostart", "PerAspera Enhanced Events", "1.0.0")]
+    [BepInPlugin("PerAspera.GameAPI.Events", "PerAspera Enhanced Events", "1.0.0")]
     public class EventsAutoStartPlugin : BasePlugin
     {
         public static LogAspera _logger = new LogAspera("EventsAutoStart");

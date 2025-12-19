@@ -168,10 +168,13 @@ namespace PerAspera.GameAPI.Events.Patches
 
         /// <summary>
         /// Target method resolution for BaseGame.OnFinishLoading patch
-        /// Resolves the real IL2CPP BaseGame type dynamically
+        /// TEMPORAIREMENT DÉSACTIVÉ - causes "Patching exception in method null" errors
         /// </summary>
+        /*
         [HarmonyTargetMethod]
         static System.Reflection.MethodBase TargetMethodBaseGame()
+        */
+        static System.Reflection.MethodBase TargetMethodBaseGame_DISABLED()
         {
             try
             {
@@ -200,12 +203,16 @@ namespace PerAspera.GameAPI.Events.Patches
         }
 
         /// <summary>
-        /// Patch BaseGame.OnFinishLoading() - public method for game initialization
-        /// Triggers when the game finishes loading and is ready
+        /// PATCH TEMPORAIREMENT DÉSACTIVÉ - BaseGame.OnFinishLoading() method not accessible at initialization
+        /// Error: "Patching exception in method null" - method not found during BepInX loading
+        /// SOLUTION: Use SDK wrapper detection instead of HarmonyX patches
         /// </summary>
+        /*
         [HarmonyPatch]
         [HarmonyPostfix]
         public static void OnBaseGameAwake(object __instance)
+        */
+        public static void OnBaseGameAwake_DISABLED(object __instance)
         {
             try
             {

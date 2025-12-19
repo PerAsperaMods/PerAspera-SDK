@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI;
 
 namespace PerAspera.SDK.TwitchIntegration
@@ -33,57 +34,38 @@ namespace PerAspera.SDK.TwitchIntegration
         private static readonly LogAspera Log = new LogAspera("FactionHelper");
         
         /// <summary>
-        /// Get the player faction using Keeper API with caching
+        /// Get the player faction using proper Keeper/Handle system
         /// </summary>
-        public static Faction? GetPlayerFaction()
+        public static GameAPI.Wrappers.Faction? GetPlayerFaction()
         {
             try
             {
-                if (!Keeper.IsReady)
+                Log.Debug("Getting player faction via Universe wrapper");
+                
+                // 1. Get Universe via BaseGame wrapper
+                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                if (baseGame == null)
                 {
-                    Log.Warning("Keeper not ready for faction access");
+                    Log.Warning("BaseGame not available");
                     return null;
                 }
                 
-                // Try cache first (performance optimization)
-                var cached = Keeper.Instances.GetCached<Faction>("player_faction");
-                if (cached != null)
+                var universe = baseGame.GetUniverse();
+                if (universe == null)
                 {
-                    Log.Debug("Retrieved player faction from cache");
-                    return cached;
+                    Log.Warning("Universe not available");
+                    return null;
                 }
                 
-                // Find via type registry
-                Log.Debug("Searching for player faction via Keeper Type Registry");
-                var allFactions = Keeper.Types.Get<Faction>();
-                
-                // Look for player faction (typically the first one or one with specific properties)
-                var playerFaction = allFactions.FirstOrDefault(f => 
+                // 2. Get player faction via Universe wrapper
+                var playerFaction = universe.GetPlayerFaction();
+                if (playerFaction == null)
                 {
-                    // Try multiple approaches to identify player faction
-                    try
-                    {
-                        // Method 1: Check if it's the main/first faction
-                        return f != null && (f.factionID == 0 || f.IsPlayerFaction == true);
-                    }
-                    catch
-                    {
-                        // Method 2: Fallback - just use first valid faction
-                        return f != null;
-                    }
-                });
-                
-                if (playerFaction != null)
-                {
-                    // Cache for next time (30-second timeout)
-                    Keeper.Instances.Cache("player_faction", playerFaction);
-                    Log.Info($"Found player faction: ID={playerFaction.factionID}");
-                }
-                else
-                {
-                    Log.Warning($"No player faction found among {allFactions.Count()} total factions");
+                    Log.Warning("Player faction not available via Universe");
+                    return null;
                 }
                 
+                Log.Info($"Successfully retrieved player faction via wrapper");
                 return playerFaction;
             }
             catch (Exception ex)
@@ -94,49 +76,185 @@ namespace PerAspera.SDK.TwitchIntegration
         }
         
         /// <summary>
-        /// Get all known resource types for the player faction
+        /// Get all known resource types using proper Keeper Handle system
         /// </summary>
         public static Dictionary<string, ResourceInfo> GetKnownResources()
         {
             try
             {
-                var playerFaction = GetPlayerFaction();
-                if (playerFaction?.knownResourceTypes == null)
+                Log.Debug("Getting known resources via Faction wrapper to native");
+                
+                // 1. Get player faction wrapper
+                var playerFactionWrapper = GetPlayerFaction();
+                if (playerFactionWrapper == null)
                 {
-                    Log.Warning("Player faction or knownResourceTypes is null");
+                    Log.Warning("Player faction wrapper not available");
                     return new Dictionary<string, ResourceInfo>();
                 }
                 
+                // 2. Get native faction object via Handle system
+                var nativeFaction = GetNativeFactionFromWrapper(playerFactionWrapper);
+                if (nativeFaction == null)
+                {
+                    Log.Warning("Could not get native faction object");
+                    return new Dictionary<string, ResourceInfo>();
+                }
+                
+                // 3. Access knownResourceTypes field from native faction
+                var knownResourceTypes = nativeFaction.GetFieldValue<object>("knownResourceTypes");
+                if (knownResourceTypes == null)
+                {
+                    Log.Warning("knownResourceTypes field not accessible");
+                    return new Dictionary<string, ResourceInfo>();
+                }
+                
+                Log.Info("Successfully accessed knownResourceTypes, processing...");
+                
+                // 4. Process resource types
                 var resourceDict = new Dictionary<string, ResourceInfo>();
+                int processedCount = 0;
                 
-                Log.Info($"Processing {playerFaction.knownResourceTypes.Count} known resource types");
-                
-                foreach (var resourceType in playerFaction.knownResourceTypes)
+                foreach (var resourceType in EnumerateArraySet(knownResourceTypes))
                 {
                     if (resourceType == null) continue;
                     
-                    var resourceInfo = new ResourceInfo
+                    try
                     {
-                        Name = resourceType.name ?? "Unknown",
-                        DisplayName = resourceType.displayName ?? resourceType.name ?? "Unknown",
-                        Category = resourceType.category?.name ?? "Unknown",
-                        Description = resourceType.description ?? "No description available",
-                        IsKnown = true,
-                        // Note: Current amounts would need additional access to Stock/ResourceManager
-                        CurrentAmount = 0.0,
-                        MaxStorage = 0.0
-                    };
-                    
-                    resourceDict[resourceInfo.Name] = resourceInfo;
+                        var resourceInfo = new ResourceInfo
+                        {
+                            Name = resourceType.GetFieldValue<string>("name") ?? "Unknown",
+                            DisplayName = resourceType.GetFieldValue<string>("displayName") ?? "Unknown",
+                            Category = GetResourceCategory(resourceType),
+                            Description = resourceType.GetFieldValue<string>("description") ?? "No description",
+                            IsKnown = true,
+                            CurrentAmount = 0.0, // TODO: Get from Stock system if needed
+                            MaxStorage = 0.0     // TODO: Get from Stock system if needed
+                        };
+                        
+                        if (!string.IsNullOrEmpty(resourceInfo.Name) && resourceInfo.Name != "Unknown")
+                        {
+                            resourceDict[resourceInfo.Name] = resourceInfo;
+                            processedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning($"Failed to process individual resource type: {ex.Message}");
+                    }
                 }
                 
-                Log.Info($"Successfully processed {resourceDict.Count} resources");
+                Log.Info($"Successfully processed {processedCount} resource types");
                 return resourceDict;
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get known resources: {ex.Message}");
+                Log.Error($"GetKnownResources failed: {ex.Message}");
                 return new Dictionary<string, ResourceInfo>();
+            }
+        }
+        
+        /// <summary>
+        /// Get native faction object from wrapper using KeeperMapWrapper
+        /// </summary>
+        private static object? GetNativeFactionFromWrapper(GameAPI.Wrappers.Faction factionWrapper)
+        {
+            try
+            {
+                // 1. Get Handle from wrapper
+                var handle = factionWrapper.GetHandle();
+                if (handle.Equals(default(Handle)))
+                {
+                    Log.Warning("Faction wrapper has invalid handle");
+                    return null;
+                }
+                
+                // 2. Get KeeperMapWrapper directly (much cleaner!)
+                var keeperMapWrapper = GameAPI.Wrappers.KeeperMapWrapper.GetCurrent();
+                if (keeperMapWrapper == null)
+                {
+                    Log.Warning("KeeperMapWrapper not available for handle lookup");
+                    return null;
+                }
+                
+                // 3. Use KeeperMapWrapper.Find() with Handle - type-safe!
+                var nativeFaction = keeperMapWrapper.Find<object>(handle);
+                if (nativeFaction == null)
+                {
+                    Log.Warning($"Handle {handle} not found in KeeperMap");
+                    return null;
+                }
+                
+                Log.Debug($"Successfully retrieved native faction via KeeperMapWrapper with Handle {handle}");
+                return nativeFaction;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"GetNativeFactionFromWrapper failed: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// Enumerate an ArraySet collection safely
+        /// </summary>
+        private static IEnumerable<object> EnumerateArraySet(object arraySet)
+        {
+            if (arraySet == null) yield break;
+            
+            var results = new List<object>();
+            
+            try
+            {
+                // Try to get enumerator first
+                var enumerator = arraySet.InvokeMethod<object>("GetEnumerator");
+                if (enumerator != null)
+                {
+                    while (enumerator.InvokeMethod<bool>("MoveNext"))
+                    {
+                        var current = enumerator.GetPropertyValue<object>("Current");
+                        if (current != null) results.Add(current);
+                    }
+                }
+                else
+                {
+                    // Fallback: try to access _items directly
+                    var items = arraySet.GetFieldValue<object>("_items");
+                    if (items != null)
+                    {
+                        var count = items.GetPropertyValue<int>("Count");
+                        for (int i = 0; i < count; i++)
+                        {
+                            var item = items.InvokeMethod<object>("get_Item", i);
+                            if (item != null) results.Add(item);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"EnumerateArraySet failed: {ex.Message}");
+            }
+            
+            foreach (var result in results)
+                yield return result;
+        }
+        
+        /// <summary>
+        /// Get resource category name safely
+        /// </summary>
+        private static string GetResourceCategory(object resourceType)
+        {
+            try
+            {
+                var category = resourceType.GetFieldValue<object>("category");
+                if (category == null) return "Unknown";
+                
+                var categoryName = category.GetFieldValue<string>("name");
+                return categoryName ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
             }
         }
         
@@ -147,12 +265,10 @@ namespace PerAspera.SDK.TwitchIntegration
         {
             try
             {
-                var playerFaction = GetPlayerFaction();
-                if (playerFaction?.knownResourceTypes == null)
-                    return false;
-                
-                return playerFaction.knownResourceTypes.Any(rt => 
-                    rt?.name?.Equals(resourceName, StringComparison.OrdinalIgnoreCase) == true);
+                var knownResources = GetKnownResources();
+                return knownResources.ContainsKey(resourceName) ||
+                       knownResources.Values.Any(r => 
+                           r.DisplayName.Equals(resourceName, StringComparison.OrdinalIgnoreCase));
             }
             catch (Exception ex)
             {

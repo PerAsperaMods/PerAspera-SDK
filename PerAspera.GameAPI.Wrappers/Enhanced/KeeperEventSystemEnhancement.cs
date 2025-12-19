@@ -34,18 +34,34 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
                 // Initialize event system
                 KeeperEventSystem.Initialize();
                 
-                // Apply HarmonyX patches for game state events
-                harmony.PatchAll(typeof(EventPatches));
+                // DO NOT apply patches immediately - wait for game initialization
+                // harmony.PatchAll(typeof(EventPatches)); // REMOVED - causes "method null" errors
+                
+                // Instead, set up deferred patching when BaseGame becomes available
+                logger.LogInfo("⏳ Event patches deferred until BaseGame initialization");
                 
                 // Integrate with Feature 1 if available
                 IntegrateWithRegistrationSystem();
                 
-                logger.LogInfo("✅ Event System Enhancement loaded successfully");
+                logger.LogInfo("✅ Event System Enhancement loaded successfully (patches deferred)");
             }
             catch (Exception ex)
             {
                 logger.LogError($"❌ Failed to load Event System Enhancement: {ex.Message}");
                 throw;
+            }
+        }
+        
+        /// <summary>
+        /// Called by external systems when BaseGame becomes available
+        /// Triggers deferred patch application
+        /// </summary>
+        public static void OnGameInitialized()
+        {
+            if (logger != null && harmony != null)
+            {
+                logger.LogInfo("🎮 Game initialized - applying deferred BaseGame patches");
+                EventPatches.ApplyDynamicPatches(harmony);
             }
         }
         
@@ -368,18 +384,57 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
 
     /// <summary>
     /// HarmonyX patches for game state events
+    /// SOLUTION: Dynamic patching after game initialization instead of static patches
     /// </summary>
-    [HarmonyPatch]
     public static class EventPatches
     {
         private static readonly LogAspera _log = new LogAspera("EventPatches");
+        private static bool _isPatched = false;
         
         /// <summary>
-        /// Patch BaseGame.Update for periodic event processing
+        /// Apply BaseGame.Update patch dynamically once BaseGame is available
         /// </summary>
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(BaseGame), "Update")]
-        public static void BaseGameUpdatePostfix(BaseGame __instance)
+        public static void ApplyDynamicPatches(Harmony harmony)
+        {
+            if (_isPatched) return;
+            
+            try
+            {
+                // Wait for BaseGame to be available before patching
+                var baseGameInstance = BaseGame.GetCurrent();
+                if (baseGameInstance == null) 
+                {
+                    _log.Info("⏳ BaseGame not yet available - deferring patch application");
+                    return;
+                }
+                
+                // Get BaseGame type from the instance
+                var baseGameType = baseGameInstance.GetType();
+                var updateMethod = baseGameType.GetMethod("Update");
+                
+                if (updateMethod != null)
+                {
+                    var postfix = typeof(EventPatches).GetMethod(nameof(BaseGameUpdatePostfix));
+                    harmony.Patch(updateMethod, postfix: new HarmonyMethod(postfix));
+                    
+                    _isPatched = true;
+                    _log.Info("✅ BaseGame.Update patch applied dynamically");
+                }
+                else
+                {
+                    _log.Warning("⚠️ BaseGame.Update method not found - skipping patch");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"❌ Failed to apply dynamic BaseGame patch: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// BaseGame.Update postfix - only called after dynamic patching
+        /// </summary>
+        public static void BaseGameUpdatePostfix(object __instance)
         {
             try
             {
