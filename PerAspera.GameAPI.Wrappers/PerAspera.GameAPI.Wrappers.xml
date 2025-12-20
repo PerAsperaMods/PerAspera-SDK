@@ -2719,67 +2719,6 @@
             </summary>
             <returns>Planet status with atmosphere and resource information</returns>
         </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader">
-            <summary>
-            Unity GUI Loader - charge les vraies DLLs Unity depuis unity-libs
-            DÉCOUVERTE: Les unity-libs contiennent les vraies implémentations Unity !
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.IsReady">
-            <summary>
-            Test si le loader est prêt
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.GetGuiEnabled">
-            <summary>
-            GET GUI.enabled depuis les vraies DLLs Unity
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.SetGuiEnabled(System.Boolean)">
-            <summary>
-            SET GUI.enabled depuis les vraies DLLs Unity
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.CallBeginVertical">
-            <summary>
-            Appelle GUILayout.BeginVertical depuis les vraies DLLs Unity
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiRealLoader.CallEndVertical">
-            <summary>
-            Appelle GUILayout.EndVertical depuis les vraies DLLs Unity
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper">
-            <summary>
-            Wrapper simple utilisant le vrai loader Unity
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeBeginVertical">
-            <summary>
-            Wrapper pour GUILayout.BeginVertical avec les vraies DLLs
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeEndVertical">
-            <summary>
-            Wrapper pour GUILayout.EndVertical avec les vraies DLLs
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeSetGuiEnabled(System.Boolean)">
-            <summary>
-            Sauvegarde et définit GUI.enabled avec les vraies DLLs
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.SafeRestoreGuiEnabled">
-            <summary>
-            Restaure GUI.enabled avec les vraies DLLs
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.RealUnityGuiWrapper.IsReady">
-            <summary>
-            Statut du loader pour debug
-            </summary>
-        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceType">
             <summary>
             Wrapper for the native ResourceType class
@@ -3542,7 +3481,8 @@
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">
             <summary>
-            Wrapper Unity GUI basique - utilise RealUnityGuiLoader pour accès aux vraies DLLs
+            Wrapper Unity GUI basique - utilise RealUnityGuiWrapper pour accès aux vraies DLLs Unity
+            Architecture: Interface publique → RealUnityGuiWrapper → chargement dynamique DLL
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeBeginVertical">
@@ -3567,17 +3507,177 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeToggle(System.Boolean,System.String,System.Single)">
             <summary>
-            Wrapper sécurisé pour GUILayout.Toggle - placeholder
+            Wrapper sécurisé pour GUILayout.Toggle - implémentation complète
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeButton(System.String)">
+            <summary>
+            Wrapper sécurisé pour GUILayout.Button
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeLabel(System.String)">
+            <summary>
+            Wrapper sécurisé pour GUILayout.Label
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.SafeHorizontalSlider(System.Single,System.Single,System.Single)">
             <summary>
-            Wrapper sécurisé pour GUILayout.HorizontalSlider - placeholder 
+            Wrapper sécurisé pour GUILayout.HorizontalSlider - TODO: implémenter dans RealUnityGuiWrapper
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UnityGuiWrapper.IsReady">
             <summary>
             Statut du système Unity GUI
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.Initialize">
+            <summary>
+            Initialize Unity IMGUI wrapper with dynamic DLL loading
+            Priority: unity-libs > interop > direct fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.LoadUnityImguiModule">
+            <summary>
+            Load Unity IMGUI module with fallback priority
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.GetCachedMethod(System.String,System.String,System.Type[])">
+            <summary>
+            Get method via reflection with caching
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeInvoke``1(System.Func{``0},System.Func{``0},``0,System.String)">
+            <summary>
+            Safe method invocation with fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeInvokeVoid(System.Action,System.Action,System.String)">
+            <summary>
+            Safe void method invocation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeBeginVertical">
+            <summary>
+            🎨 Safe GUILayout.BeginVertical implementation
+            FIXES: UnityGuiWrapper.SafeBeginVertical() calls
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeEndVertical">
+            <summary>
+            🎨 Safe GUILayout.EndVertical implementation
+            FIXES: UnityGuiWrapper.SafeEndVertical() calls
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeButton(System.String)">
+            <summary>
+            Safe GUILayout.Button implementation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeLabel(System.String)">
+            <summary>
+            Safe GUILayout.Label implementation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeToggle(System.Boolean,System.String)">
+            <summary>
+            Safe GUILayout.Toggle implementation
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeSetGuiEnabled(System.Boolean)">
+            <summary>
+            🎛️ Safe GUI.enabled management - FIXES: UnityGuiWrapper.SafeSetGuiEnabled()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.SafeRestoreGuiEnabled">
+            <summary>
+            🎛️ Safe GUI.enabled restore - FIXES: UnityGuiWrapper.SafeRestoreGuiEnabled()
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.IsReady">
+            <summary>
+            GUI system status for diagnostics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.GetStatusReport">
+            <summary>
+            Get detailed status report for troubleshooting
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.ClearCache">
+            <summary>
+            Clear method cache
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.GUI.RealUnityGuiWrapper.ForceReinitialize">
+            <summary>
+            Force re-initialization (for testing)
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.Initialize">
+            <summary>
+            Initialize Unity Input wrapper with dynamic DLL loading
+            Priority: unity-libs (real implementations) > interop (stripped) > direct fallback
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.LoadUnityInputModule">
+            <summary>
+            Load Unity Input module with fallback priority
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.GetCachedMethod(System.String,System.String,System.Type[])">
+            <summary>
+            Get method via reflection with caching for performance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.SafeInvoke``1(System.Func{``0},System.Func{``0},``0,System.String)">
+            <summary>
+            Safe method invocation with fallback strategies
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.SafeGetKeyDown(UnityEngine.KeyCode)">
+            <summary>
+            🎯 CRITICAL: Safe GetKeyDown replacement - fixes F9 CommandsDemo issue
+            
+            USAGE: Replace Input.GetKeyDown(KeyCode.F9) with this method
+            </summary>
+            <param name="keyCode">Key to check</param>
+            <returns>True if key was pressed this frame</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.SafeGetKey(UnityEngine.KeyCode)">
+            <summary>
+            Safe GetKey replacement - checks if key is currently held
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.SafeGetMouseButtonDown(System.Int32)">
+            <summary>
+            Safe GetMouseButtonDown replacement
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.SafeGetMouseButton(System.Int32)">
+            <summary>
+            Safe GetMouseButton replacement
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.IsReady">
+            <summary>
+            Input system status for diagnostics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.GetStatusReport">
+            <summary>
+            Get detailed status report for troubleshooting
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.ClearCache">
+            <summary>
+            Clear method cache (for testing or memory management)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Unity.Input.UnityInputWrapper.ForceReinitialize">
+            <summary>
+            Force re-initialization (for testing)
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Universe">

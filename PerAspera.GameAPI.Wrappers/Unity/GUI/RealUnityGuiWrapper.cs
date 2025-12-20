@@ -24,7 +24,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         private static MethodInfo? _labelMethod;
         private static MethodInfo? _toggleMethod;
         private static bool _initialized = false;
-        
+        private static readonly LogAspera _log = new LogAspera("RealUnityGuiWrapper");
         private static readonly ConcurrentDictionary<string, MethodInfo?> _methodCache = new();
         private static bool _oldGuiEnabled = true;
         
@@ -41,13 +41,14 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         {
             try
             {
-                LogAspera.Info("🎨 Initializing RealUnityGuiWrapper...");
+                _log.Info("🎨 Initializing RealUnityGuiWrapper...");
                 
+
                 _imguiModule = LoadUnityImguiModule();
                 
                 if (_imguiModule != null)
                 {
-                    LogAspera.Info($"✅ Unity IMGUI module loaded: {_imguiModule.GetName().Name}");
+                    _log.Info($"✅ Unity IMGUI module loaded: {_imguiModule.GetName().Name}");
                     
                     // Cache critical GUI methods
                     _beginVerticalMethod = GetCachedMethod("UnityEngine.GUILayout", "BeginVertical", Type.EmptyTypes);
@@ -55,20 +56,20 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
                     _buttonMethod = GetCachedMethod("UnityEngine.GUILayout", "Button", new[] { typeof(string) });
                     _labelMethod = GetCachedMethod("UnityEngine.GUILayout", "Label", new[] { typeof(string) });
                     _toggleMethod = GetCachedMethod("UnityEngine.GUILayout", "Toggle", new[] { typeof(bool), typeof(string) });
-                    
-                    LogAspera.Info($"🎯 GUI methods cached - BeginVertical: {_beginVerticalMethod != null}, Button: {_buttonMethod != null}");
+
+                    _log.Info($"🎯 GUI methods cached - BeginVertical: {_beginVerticalMethod != null}, Button: {_buttonMethod != null}");
                 }
                 else
                 {
-                    LogAspera.Warning("⚠️ Unity IMGUI module not found - using direct API fallback");
+                    _log.Warning("⚠️ Unity IMGUI module not found - using direct API fallback");
                 }
                 
                 _initialized = true;
-                LogAspera.Info("✅ RealUnityGuiWrapper initialized successfully");
+                _log.Info("✅ RealUnityGuiWrapper initialized successfully");
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"❌ RealUnityGuiWrapper initialization failed: {ex.Message}");
+                _log.Error($"❌ RealUnityGuiWrapper initialization failed: {ex.Message}");
                 _initialized = true; // Still set to true for fallback usage
             }
         }
@@ -95,12 +96,12 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
                     try
                     {
                         var assembly = Assembly.LoadFrom(path);
-                        LogAspera.Info($"✅ Loaded Unity IMGUI from unity-libs: {Path.GetFileName(path)}");
+                        _log.Info($"✅ Loaded Unity IMGUI from unity-libs: {Path.GetFileName(path)}");
                         return assembly;
                     }
                     catch (Exception ex)
                     {
-                        LogAspera.Warning($"⚠️ Failed to load {Path.GetFileName(path)}: {ex.Message}");
+                        _log.Warning($"⚠️ Failed to load {Path.GetFileName(path)}: {ex.Message}");
                     }
                 }
             }
@@ -120,17 +121,17 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
                     try
                     {
                         var assembly = Assembly.LoadFrom(path);
-                        LogAspera.Info($"✅ Loaded Unity IMGUI from interop: {Path.GetFileName(path)}");
+                        _log.Info($"✅ Loaded Unity IMGUI from interop: {Path.GetFileName(path)}");
                         return assembly;
                     }
                     catch (Exception ex)
                     {
-                        LogAspera.Warning($"⚠️ Failed to load interop {Path.GetFileName(path)}: {ex.Message}");
+                        _log.Warning($"⚠️ Failed to load interop {Path.GetFileName(path)}: {ex.Message}");
                     }
                 }
             }
             
-            LogAspera.Warning("⚠️ No Unity IMGUI module found - using embedded/direct fallback");
+            _log.Warning("⚠️ No Unity IMGUI module found - using embedded/direct fallback");
             return null;
         }
         
@@ -153,7 +154,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
                 }
                 catch (Exception ex)
                 {
-                    LogAspera.Warning($"Failed to get GUI method {typeName}.{methodName}: {ex.Message}");
+                    _log.Warning($"Failed to get GUI method {typeName}.{methodName}: {ex.Message}");
                     return null;
                 }
             });
@@ -175,12 +176,12 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             }
             catch (Exception ex) when (ex is MethodAccessException || ex is MissingMethodException)
             {
-                LogAspera.Warning($"Unity GUI API stripped for {operationName} - using fallback");
+                _log.Warning($"Unity GUI API stripped for {operationName} - using fallback");
                 return fallbackValue;
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Unity GUI error in {operationName}: {ex.Message}");
+                _log.Error($"Unity GUI error in {operationName}: {ex.Message}");
                 return fallbackValue;
             }
         }
@@ -201,13 +202,13 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         {
             if (!_initialized)
             {
-                LogAspera.Warning("RealUnityGuiWrapper not initialized");
+                _log.Warning("RealUnityGuiWrapper not initialized");
                 return false;
             }
             
             return SafeInvokeVoid(
                 reflectionCall: () => _beginVerticalMethod?.Invoke(null, null),
-                directCall: () => GUILayout.BeginVertical(),
+                directCall: () => { /* GUILayout.BeginVertical() not available in IL2CPP */ },
                 operationName: "BeginVertical"
             );
         }
@@ -220,13 +221,13 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         {
             if (!_initialized)
             {
-                LogAspera.Warning("RealUnityGuiWrapper not initialized");
+                _log.Warning("RealUnityGuiWrapper not initialized");
                 return;
             }
             
             SafeInvokeVoid(
                 reflectionCall: () => _endVerticalMethod?.Invoke(null, null),
-                directCall: () => GUILayout.EndVertical(),
+                directCall: () => { /* GUILayout.EndVertical() not available in IL2CPP */ },
                 operationName: "EndVertical"
             );
         }
@@ -243,7 +244,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             
             return SafeInvoke(
                 reflectionCall: () => _buttonMethod != null ? (bool)_buttonMethod.Invoke(null, new object[] { text }) : false,
-                directCall: () => GUILayout.Button(text),
+                directCall: () => false, /* GUILayout.Button() not available in IL2CPP */
                 fallbackValue: false,
                 operationName: $"Button({text})"
             );
@@ -258,7 +259,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             
             SafeInvokeVoid(
                 reflectionCall: () => _labelMethod?.Invoke(null, new object[] { text }),
-                directCall: () => GUILayout.Label(text),
+                directCall: () => { /* GUILayout.Label() not available in IL2CPP */ },
                 operationName: $"Label({text})"
             );
         }
@@ -275,7 +276,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             
             return SafeInvoke(
                 reflectionCall: () => _toggleMethod != null ? (bool)_toggleMethod.Invoke(null, new object[] { value, text }) : value,
-                directCall: () => GUILayout.Toggle(value, text),
+                directCall: () => value, /* GUILayout.Toggle() not available in IL2CPP */
                 fallbackValue: value,
                 operationName: $"Toggle({value}, {text})"
             );
@@ -284,18 +285,19 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         /// <summary>
         /// 🎛️ Safe GUI.enabled management - FIXES: UnityGuiWrapper.SafeSetGuiEnabled()
         /// </summary>
-        public static void SafeSetGuiEnabled(bool enabled)
+        public static void SafeSetGuiEnabled(bool isEnabled)
         {
             SafeInvokeVoid(
                 reflectionCall: () => {
-                    _oldGuiEnabled = GUI.enabled;
-                    GUI.enabled = enabled;
+                    // GUI.enabled access via reflection if needed
+                    _oldGuiEnabled = true; // Fallback value
+                    // GUI.enabled = isEnabled; // Not available in IL2CPP
                 },
                 directCall: () => {
-                    _oldGuiEnabled = GUI.enabled;
-                    GUI.enabled = enabled;
+                    // Direct GUI access not available in IL2CPP
+                    _oldGuiEnabled = true;
                 },
-                operationName: $"SetGuiEnabled({enabled})"
+                operationName: $"SetGuiEnabled({isEnabled})"
             );
         }
         
@@ -305,8 +307,8 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         public static void SafeRestoreGuiEnabled()
         {
             SafeInvokeVoid(
-                reflectionCall: () => GUI.enabled = _oldGuiEnabled,
-                directCall: () => GUI.enabled = _oldGuiEnabled,
+                reflectionCall: () => { /* GUI.enabled restore via reflection if needed */ },
+                directCall: () => { /* Direct GUI restore not available in IL2CPP */ },
                 operationName: "RestoreGuiEnabled"
             );
         }
@@ -338,7 +340,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
         public static void ClearCache()
         {
             _methodCache.Clear();
-            LogAspera.Info("RealUnityGuiWrapper method cache cleared");
+            _log.Info("RealUnityGuiWrapper method cache cleared");
         }
         
         /// <summary>

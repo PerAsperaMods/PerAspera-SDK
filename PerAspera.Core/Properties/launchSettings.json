@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Per aspra": {
+      "commandName": "Executable",
+      "executablePath": "F:\\SteamLibrary\\steamapps\\common\\Per Aspera\\Per Aspera.exe",
+      "nativeDebugging": true
+    }
+  }
+}

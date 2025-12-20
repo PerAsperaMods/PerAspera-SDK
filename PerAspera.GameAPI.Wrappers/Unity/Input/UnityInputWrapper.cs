@@ -25,7 +25,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
         private static MethodInfo? _getMouseButtonMethod;
         private static MethodInfo? _getMouseButtonDownMethod;
         private static bool _initialized = false;
-        
+        private static readonly LogAspera _log = new LogAspera("UnityInputWrapper");
         private static readonly ConcurrentDictionary<string, MethodInfo?> _methodCache = new();
         
         static UnityInputWrapper()
@@ -39,16 +39,17 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
         /// </summary>
         private static void Initialize()
         {
+
             try
             {
-                LogAspera.LogInfo("🎮 Initializing UnityInputWrapper...");
+                _log.Info("🎮 Initializing UnityInputWrapper...");
                 
                 // Try to load Unity Input modules in priority order
                 _inputModule = LoadUnityInputModule();
                 
                 if (_inputModule != null)
                 {
-                    LogAspera.Info($"✅ Unity Input module loaded: {_inputModule.GetName().Name}");
+                    _log.Info($"✅ Unity Input module loaded: {_inputModule.GetName().Name}");
                     
                     // Cache critical methods for performance
                     _getKeyDownMethod = GetCachedMethod("UnityEngine.Input", "GetKeyDown", new[] { typeof(KeyCode) });
@@ -56,20 +57,20 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
                     _getMouseButtonMethod = GetCachedMethod("UnityEngine.Input", "GetMouseButton", new[] { typeof(int) });
                     _getMouseButtonDownMethod = GetCachedMethod("UnityEngine.Input", "GetMouseButtonDown", new[] { typeof(int) });
                     
-                    LogAspera.Info($"🎯 Input methods cached - GetKeyDown: {_getKeyDownMethod != null}");
+                    _log.Info($"🎯 Input methods cached - GetKeyDown: {_getKeyDownMethod != null}");
                 }
                 else
                 {
-                    LogAspera.Warning("⚠️ Unity Input module not found - using direct API fallback");
+                    _log.Warning("⚠️ Unity Input module not found - using direct API fallback");
                 }
                 
                 _initialized = true;
-                LogAspera.Info("✅ UnityInputWrapper initialized successfully");
+                _log.Info("✅ UnityInputWrapper initialized successfully");
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"❌ UnityInputWrapper initialization failed: {ex.Message}");
-                LogAspera.Error($"Stack trace: {ex.StackTrace}");
+                _log.Error($"❌ UnityInputWrapper initialization failed: {ex.Message}");
+                _log.Error($"Stack trace: {ex.StackTrace}");
                 _initialized = true; // Still set to true to allow fallback usage
             }
         }
@@ -97,12 +98,12 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
                     try
                     {
                         var assembly = Assembly.LoadFrom(path);
-                        LogAspera.Info($"✅ Loaded Unity Input from unity-libs: {Path.GetFileName(path)}");
+                        _log.Info($"✅ Loaded Unity Input from unity-libs: {Path.GetFileName(path)}");
                         return assembly;
                     }
                     catch (Exception ex)
                     {
-                        LogAspera.Warning($"⚠️ Failed to load {Path.GetFileName(path)}: {ex.Message}");
+                        _log.Warning($"⚠️ Failed to load {Path.GetFileName(path)}: {ex.Message}");
                     }
                 }
             }
@@ -123,17 +124,17 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
                     try
                     {
                         var assembly = Assembly.LoadFrom(path);
-                        LogAspera.Info($"✅ Loaded Unity Input from interop: {Path.GetFileName(path)}");
+                        _log.Info($"✅ Loaded Unity Input from interop: {Path.GetFileName(path)}");
                         return assembly;
                     }
                     catch (Exception ex)
                     {
-                        LogAspera.Warning($"⚠️ Failed to load interop {Path.GetFileName(path)}: {ex.Message}");
+                        _log.Warning($"⚠️ Failed to load interop {Path.GetFileName(path)}: {ex.Message}");
                     }
                 }
             }
             
-            LogAspera.Warning("⚠️ No Unity Input module found in unity-libs or interop");
+            _log.Warning("⚠️ No Unity Input module found in unity-libs or interop");
             return null;
         }
         
@@ -156,7 +157,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
                 }
                 catch (Exception ex)
                 {
-                    LogAspera.Warning($"Failed to get method {typeName}.{methodName}: {ex.Message}");
+                    _log.Warning($"Failed to get method {typeName}.{methodName}: {ex.Message}");
                     return null;
                 }
             });
@@ -180,17 +181,17 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
             }
             catch (MethodAccessException)
             {
-                LogAspera.Warning($"Unity API stripped for {operationName} - using fallback value");
+                _log.Warning($"Unity API stripped for {operationName} - using fallback value");
                 return fallbackValue;
             }
             catch (MissingMethodException)
             {
-                LogAspera.Warning($"Unity method missing for {operationName} - using fallback value");
+                _log.Warning($"Unity method missing for {operationName} - using fallback value");
                 return fallbackValue;
             }
             catch (Exception ex)
             {
-                LogAspera.Error($"Unity API error in {operationName}: {ex.Message}");
+                _log.Error($"Unity API error in {operationName}: {ex.Message}");
                 return fallbackValue;
             }
         }
@@ -206,7 +207,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
         {
             if (!_initialized)
             {
-                LogAspera.Warning("UnityInputWrapper not initialized - using direct fallback");
+                _log.Warning("UnityInputWrapper not initialized - using direct fallback");
                 return UnityEngine.Input.GetKeyDown(keyCode);
             }
             
@@ -298,7 +299,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
         public static void ClearCache()
         {
             _methodCache.Clear();
-            LogAspera.Info("UnityInputWrapper method cache cleared");
+            _log.Info("UnityInputWrapper method cache cleared");
         }
         
         /// <summary>

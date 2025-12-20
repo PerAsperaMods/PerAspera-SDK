@@ -101,7 +101,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(resourceKey))
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetResourceType called with null/empty key");
+                Log.Warning($"{LogPrefix} GetResourceType called with null/empty key");
                 return null;
             }
             
@@ -111,7 +111,7 @@ namespace PerAspera.GameAPI.Wrappers
                 var resourceTypeClass = GameTypeInitializer.GetResourceType();
                 if (resourceTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} ResourceType class not found");
+                    Log.Error($"{LogPrefix} ResourceType class not found");
                     return null;
                 }
                 
@@ -120,21 +120,21 @@ namespace PerAspera.GameAPI.Wrappers
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (getMethod == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} ResourceType.Get method not found");
+                    Log.Error($"{LogPrefix} ResourceType.Get method not found");
                     return null;
                 }
                 
                 var result = getMethod.Invoke(null, new object[] { resourceKey });
                 if (result == null)
                 {
-                    UnityEngine.Debug.LogWarning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
+                    Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
                 }
                 
                 return result;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get ResourceType '{resourceKey}': {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to get ResourceType '{resourceKey}': {ex.Message}");
                 return null;
             }
         }

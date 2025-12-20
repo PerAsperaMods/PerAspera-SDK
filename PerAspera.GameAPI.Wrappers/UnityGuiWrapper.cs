@@ -6,7 +6,8 @@ using PerAspera.GameAPI.Wrappers.Unity.GUI;
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper Unity GUI basique - utilise RealUnityGuiLoader pour accès aux vraies DLLs
+    /// Wrapper Unity GUI basique - utilise RealUnityGuiWrapper pour accès aux vraies DLLs Unity
+    /// Architecture: Interface publique → RealUnityGuiWrapper → chargement dynamique DLL
     /// </summary>
     public static class UnityGuiWrapper
     {

@@ -205,6 +205,9 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameHubInitialized">
             <summary>Event: GameHub/GameHubManager initialized (early game access)</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameHubReady">
+            <summary>Event: GameHub ready for mod initialization (earliest initialization point)</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameFullyLoaded">
             <summary>Event: Game fully loaded with all systems ready</summary>
         </member>
@@ -548,6 +551,32 @@
             Log current system status for debugging
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeGameHubDetector">
+            <summary>
+            Initialize native event subscriptions for GameHub detection
+            Much more reliable than patches - listens to actual game events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameHubPatches">
+            <summary>
+            Apply GameHub Harmony patches for immediate detection (works in menu)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.OnGameStarted(PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent)">
+            <summary>
+            Handle new game started - BaseGame should be accessible now
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.OnGameLoaded(PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent)">
+            <summary>
+            Handle game loaded - BaseGame should be accessible now
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.EmitGameHubInitializedEvent(System.String)">
+            <summary>
+            Emit GameHubInitializedEvent when BaseGame is confirmed accessible
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.Unload">
             <summary>
             Plugin shutdown
@@ -605,6 +634,17 @@
             Enable or disable automatic wrapper conversion
             </summary>
             <param name="enabled">True to enable wrapper conversion</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Detector.GameHubDetector">
+            <summary>
+            MonoBehaviour that polls BaseGame.GetCurrent() until available
+            Integrated into EventsAutoStartPlugin to avoid multiple plugins per DLL
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Detector.GameHubDetector.Initialize(BepInEx.Logging.ManualLogSource)">
+            <summary>
+            Initialize the detector with a shared logger
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Helpers.EventHelpers">
             <summary>
@@ -791,7 +831,7 @@
             Provides type-safe event subscription with automatic wrapper conversion
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameHubReady(System.Action)">
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameHubReady(System.Action{PerAspera.GameAPI.Events.SDK.GameHubReadyEvent})">
             <summary>
             Subscribe to GameHub initialization event (earliest possible mod loading)
             Fires when GameHub scene is loaded and manager is available
@@ -1564,6 +1604,28 @@
             <summary>
             Native event: Way operative status changed (active/inactive)
             DOC: BaseGame.md - OnEvent_WayOperativeChanged (Way sender, ref GameEvent evt)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Patches.GameHubManagerPatch">
+            <summary>
+            Harmony patches for GameHubManager methods to detect game initialization
+            Much more reliable than Unity SceneManager events in IL2CPP environment
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameHubManagerPatch.OnStartPing">
+            <summary>
+            Postfix patch on GameHubManager.StartPing() - called when GameHub is fully ready
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameHubManagerPatch.OnHubInitializationComplete">
+            <summary>
+            Postfix patch on Hub_InitializationComplete - alternative detection point
+            Called earlier in the initialization process
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameHubManagerPatch.EmitGameHubInitializedEvent(System.String)">
+            <summary>
+            Common method to emit GameHubInitializedEvent
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Patches.GameInitializationPatches">

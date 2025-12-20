@@ -104,10 +104,9 @@ namespace PerAspera.GameAPI.Events.Patches
         /// </summary>
         private static void ScheduleSDKBasedCheck()
         {
-            // Use Unity coroutine or timer-based approach
-            // This is cleaner than Harmony patches to private methods
-            _logger.Info("⏰ SDK-based periodic checking not yet implemented");
-            _logger.Info("💡 Game events will be available when SDK detects game state");
+            // Deprecated: Now handled by dedicated GameHubDetectorPlugin
+            _logger.Info("⏳ BaseGame monitoring delegated to GameHubDetectorPlugin");
+            _logger.Info("💡 GameHubDetectorPlugin will emit GameHubInitializedEvent when ready");
         }
 
         // ==============================================

@@ -127,6 +127,14 @@ namespace PerAspera.GameAPI
         /// </summary>
         public static object? GetBaseGameInstance()
         {
+            EnsureInitialized(); // Force initialization if not done
+            
+            // Force type discovery if null
+            if (_baseGameType == null)
+            {
+                _baseGameType = GetBaseGameType();
+            }
+            
             if (_baseGameInstance == null && _baseGameType != null)
             {
                 _baseGameInstance = ReflectionHelpers.GetSingletonInstance(_baseGameType);
@@ -139,6 +147,14 @@ namespace PerAspera.GameAPI
         /// </summary>
         public static object? GetUniverseInstance()
         {
+            EnsureInitialized(); // Force initialization if not done
+            
+            // Force type discovery if null
+            if (_universeType == null)
+            {
+                _universeType = GetUniverseType();
+            }
+            
             if (_universeInstance == null && _universeType != null)
             {
                 _universeInstance = ReflectionHelpers.GetSingletonInstance(_universeType);
@@ -259,6 +275,16 @@ namespace PerAspera.GameAPI
                 _commandBusType = FindGameType("CommandBus") ?? FindGameType("GameEventBus");
             }
             return _commandBusType;
+        }
+
+        /// <summary>
+        /// Get InteractionManager type for command execution
+        /// </summary>
+        public static System.Type? GetInteractionManagerType()
+        {
+            return FindGameType("InteractionManager") ?? 
+                   FindGameType("InteractionActionHandler") ??
+                   FindGameType("InteractionHandler");
         }
 
         /// <summary>

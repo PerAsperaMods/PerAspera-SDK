@@ -24,13 +24,13 @@ namespace PerAspera.GameAPI.Events.Integration
         /// Fires when GameHub scene is loaded and manager is available
         /// ✅ Use this for mods that need immediate initialization (UI, Twitch, logging, etc.)
         /// </summary>
-        public static void SubscribeToGameHubReady(Action onGameHubReady)
+        public static void SubscribeToGameHubReady(Action<GameHubReadyEvent> onGameHubReady)
         {
             if (onGameHubReady == null)
                 throw new ArgumentNullException(nameof(onGameHubReady));
 
             _logger.Info("Subscribed to GameHub ready event");
-            RegisterHandler<Action>(typeof(GameHubReadyEvent), onGameHubReady);
+            RegisterHandler(typeof(GameHubReadyEvent), onGameHubReady);
         }
 
         /// <summary>

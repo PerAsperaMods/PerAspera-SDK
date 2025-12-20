@@ -17,6 +17,9 @@ namespace PerAspera.GameAPI.Events.Constants
         /// <summary>Event: GameHub/GameHubManager initialized (early game access)</summary>
         public const string GameHubInitialized = "GameHubInitialized";
         
+        /// <summary>Event: GameHub ready for mod initialization (earliest initialization point)</summary>
+        public const string GameHubReady = "GameHubReady";
+        
         /// <summary>Event: Game fully loaded with all systems ready</summary>
         public const string GameFullyLoaded = "GameFullyLoaded";
         
