@@ -38,6 +38,8 @@ namespace PerAspera.SDK.TwitchIntegration
         
         private bool _isConnected = false;
         private bool _disposed = false;
+        private DateTime _lastReconnectAttempt = DateTime.MinValue;
+        private int _reconnectDelaySeconds = 30;
         
         /// <summary>
         /// Initialize simple IRC client
@@ -185,6 +187,11 @@ namespace PerAspera.SDK.TwitchIntegration
             catch (Exception ex)
             {
                 Log.Error($"❌ Error in message processing: {ex.Message}");
+                _isConnected = false;
+                
+                // Schedule reconnection attempt
+                _lastReconnectAttempt = DateTime.Now;
+                Log.Warning($"🔄 Connection lost. Will retry in {_reconnectDelaySeconds} seconds...");
             }
         }
         

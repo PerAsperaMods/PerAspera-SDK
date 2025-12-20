@@ -39,7 +39,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetCurrent failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} GetCurrent failed: {ex.Message}");
                 return null;
             }
         }
@@ -64,7 +64,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetKeeperMap failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} GetKeeperMap failed: {ex.Message}");
                 return null;
             }
         }
@@ -126,7 +126,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetHandleManager failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} GetHandleManager failed: {ex.Message}");
                 return null;
             }
         }
@@ -146,7 +146,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetECSWorld failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} GetECSWorld failed: {ex.Message}");
                 return null;
             }
         }
@@ -166,7 +166,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetEntityManager failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} GetEntityManager failed: {ex.Message}");
                 return null;
             }
         }
@@ -189,7 +189,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} IsReady check failed: {ex.Message}");
+                Log.Warning($"{LogPrefix} Unregister failed: {ex.Message}");
                 return false;
             }
         }

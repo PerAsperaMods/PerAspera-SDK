@@ -807,7 +807,7 @@ namespace PerAspera.SDK.TwitchIntegration
                 return "❌ Error getting categories";
             }
         }
-        
+
         /// <summary>
         /// Shutdown Twitch integration and clean up all resources.
         /// Disconnects from IRC, disposes clients, and resets initialization state.

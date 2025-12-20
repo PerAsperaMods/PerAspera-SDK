@@ -10,7 +10,7 @@ namespace PerAspera.SDK.TwitchIntegration
     /// Configuration for Twitch integration
     /// 
     /// SETUP INSTRUCTIONS:
-    /// 1. Create twitch_config.json in BepInEx/plugins/ folder
+    /// 1. Create twitch_config.json in BepInEx/config/ folder
     /// 2. Get OAuth token from https://twitchapps.com/tmi/
     /// 3. Configure bot username and channel
     /// 
@@ -22,8 +22,8 @@ namespace PerAspera.SDK.TwitchIntegration
     {
         private static readonly LogAspera Log = new LogAspera("TwitchConfig");
         
-        // Default configuration file path
-        private static readonly string ConfigPath = Path.Combine(BepInEx.Paths.PluginPath, "twitch_config.json");
+        // Default configuration file path - Using standard BepInX config directory
+        private static readonly string ConfigPath = Path.Combine(BepInEx.Paths.ConfigPath, "twitch_config.json");
         
         /// <summary>
         /// Bot username (your Twitch bot account name)
