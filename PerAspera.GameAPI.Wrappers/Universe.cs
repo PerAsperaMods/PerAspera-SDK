@@ -3,6 +3,7 @@ using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -29,10 +30,21 @@ namespace PerAspera.GameAPI.Wrappers
             var universe = KeeperTypeRegistry.GetUniverse();
             return universe != null ? new Universe(universe) : null;
         }
-        public Faction GetPlayerFaction()
+        
+        /// <summary>
+        /// Get Keeper instance for Universe entities (factions, planets, resources)
+        /// Property: keeper { get; }
+        /// </summary>
+        public KeeperWrapper? GetKeeper()
+        {
+            var nativeKeeper = SafeInvoke<object>("get_keeper");
+            return nativeKeeper != null ? new KeeperWrapper(nativeKeeper) : null;
+        }
+        
+        public PerAspera.GameAPI.Wrappers.Faction? GetPlayerFaction()
         {
             return NativeObject.InvokeMethod<object>("GetPlayerFaction") is { } nativeFaction
-                ? new GameAPI.Wrappers.Faction(nativeFaction)
+                ? new PerAspera.GameAPI.Wrappers.Faction(nativeFaction)
                 : null;
         }
 

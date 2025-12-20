@@ -1,5 +1,6 @@
 using System;
 using PerAspera.Core.IL2CPP;
+using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -11,9 +12,10 @@ namespace PerAspera.GameAPI.Wrappers
     public static class KeeperTypeRegistry
     {
         private static readonly string LogPrefix = "[KeeperTypeRegistry]";
-        
+        private static readonly LogAspera Log = new LogAspera("Keeper");
+
         // ==================== INITIALIZATION ====================
-        
+
         /// <summary>
         /// Check if Keeper systems are available
         /// Returns true after BaseGame.Awake() completes
@@ -45,10 +47,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get Keeper instance (entity registry)
         /// Safe to call after BaseGame.Awake()
         /// </summary>
-        public static Keeper ? GetKeeper()
+        public static KeeperWrapper? GetKeeper()
         {
             
-            return (Keeper)BaseGame.GetCurrent()?.GetKeeper();
+            return (KeeperWrapper)BaseGame.GetCurrent()?.GetKeeper();
         }
         
         /// <summary>

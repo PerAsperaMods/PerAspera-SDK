@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
+using PerAspera.GameAPI.Wrappers.Core;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -12,7 +14,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to faction properties and operations
     /// DOC: Faction.md - Player and AI faction management
     /// </summary>
-    public class Faction : WrapperBase
+    public class Faction : NativeWrapper<object>
     {
         /// <summary>
         /// Initialize Faction wrapper with native faction object
@@ -20,26 +22,14 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="nativeFaction">Native faction instance from game</param>
         public Faction(object nativeFaction) : base(nativeFaction)
         {
-            NativeObject = nativeFaction;
         }
         /// <summary>
         /// Get the Handle for this Faction instance
         /// </summary>
         /// <returns>Handle for Keeper system access</returns>
-        public Handle GetHandle()
+        public GameAPI.Native.Handle GetHandle()
         {
-            try
-            {
-                if (NativeObject == null) return default;
-                
-                // Native Faction objects have a handle property
-                return SafeInvoke<Handle>("get_handle");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"[Faction] GetHandle failed: {ex.Message}");
-                return default;
-            }
+            return CallNative<GameAPI.Native.Handle>("GetHandle") ?? default;
         }
 
         /// <summary>
@@ -77,6 +67,25 @@ namespace PerAspera.GameAPI.Wrappers
         public object? FactionType
         {
             get => SafeInvoke<object>("get_factionType");
+        }
+        
+        /// <summary>
+        /// Get the GameEventBus for this faction
+        /// Maps to: _gameEventBus protected field
+        /// Used for InteractionManager.DispatchAction calls
+        /// </summary>
+        public object? GetGameEventBus()
+        {
+            try
+            {
+                // Access protected _gameEventBus field via reflection
+                return this.GetFieldValue<object>("_gameEventBus");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[Faction] GetGameEventBus failed: {ex.Message}");
+                return null;
+            }
         }
         
         /// <summary>
@@ -374,6 +383,16 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 return System.Drawing.Color.Gray;
             }
+        }
+        
+        /// <summary>
+        /// Get the GameEventBus for this faction to dispatch commands
+        /// Accesses protected _gameEventBus field via reflection
+        /// </summary>
+        /// <returns>GameEventBus instance or null if not accessible</returns>
+        public object? GetGameEventBus()
+        {
+            return GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance);
         }
         
         /// <summary>

@@ -358,6 +358,11 @@
             Get CommandBus type
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetInteractionManagerType">
+            <summary>
+            Get InteractionManager type for command execution
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetKeeper">
             <summary>
             Get Keeper type for entity registration system

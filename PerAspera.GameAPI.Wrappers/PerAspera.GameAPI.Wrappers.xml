@@ -1460,6 +1460,13 @@
             Maps to: factionType field
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetGameEventBus">
+            <summary>
+            Get the GameEventBus for this faction
+            Maps to: _gameEventBus protected field
+            Used for InteractionManager.DispatchAction calls
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Faction.IsPlayerFaction">
             <summary>
             Is this the player faction?
@@ -2085,6 +2092,76 @@
             </summary>
             <returns>Formatted string with cache statistics and system status</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.KeeperAccessHelper">
+            <summary>
+            Centralized helper for accessing Keeper instances from all major game systems
+            Provides easy access to distributed Keeper architecture:
+            - Universe.keeper → Factions, planets, resources
+            - BaseGame.keeper → Core game state
+            - GameEventBus._keeper → Event system entities  
+            - Swarm._keeper → Unit swarm management
+            - Way._keeper → Pathfinding entities
+            
+            DOC: F:\ModPeraspera\Internal_doc\ARCHITECTURE\Handle-System-Architecture.md
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetUniverseKeeper">
+            <summary>
+            Get Universe Keeper - manages factions, planets, and resources
+            🎯 PRIMARY for faction resource commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetUniverseKeeperMap">
+            <summary>
+            Get Universe KeeperMap - Handle→Object mapping for factions/planets/resources
+            🎯 IDEAL for InteractionManager.DispatchAction with faction commands
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetBaseGameKeeper">
+            <summary>
+            Get BaseGame Keeper - manages core game state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetBaseGameKeeperMap">
+            <summary>
+            Get BaseGame KeeperMap - Handle→Object mapping for core game entities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetEventBusKeeper">
+            <summary>
+            Get GameEventBus Keeper - manages event system entities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetSwarmKeeper">
+            <summary>
+            Get Swarm Keeper - manages unit swarm entities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetWayKeeper">
+            <summary>
+            Get Way Keeper - manages pathfinding entities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetCommandKeeperMap">
+            <summary>
+            Get the appropriate KeeperMap for faction resource commands
+            Returns Universe.keeper.map (best for faction operations)
+            Fallback to BaseGame.keeper.map if needed
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.ConvertHandleToIHandleable(System.Object)">
+            <summary>
+            Convert any entity Handle to IHandleable using the appropriate KeeperMap
+            🎯 Perfect for InteractionManager.DispatchAction
+            </summary>
+            <param name="handle">Entity Handle</param>
+            <returns>IHandleable for DispatchAction, or null if conversion failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperAccessHelper.GetKeeperSystemStatus">
+            <summary>
+            Get comprehensive status of all Keeper systems for debugging
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.KeeperHelper">
             <summary>
             High-level helper class for common Keeper operations
@@ -2213,12 +2290,6 @@
             <returns>IHandleable instance or null</returns>
         </member>
         <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetObjectsDict" -->
-        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetKeeper">
-            <summary>
-            Get Keeper instance that owns this KeeperMap
-            Back-reference to parent Keeper
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetEntityCount">
             <summary>
             Get total entity count in KeeperMap
@@ -3479,6 +3550,62 @@
             Advanced terraforming technology identifier
             </summary>
         </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.TextAction" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.#ctor(System.Object)">
+            <summary>
+            Create TextAction wrapper from native TextAction instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TextAction.DaysDelay">
+            <summary>
+            Get/Set command delay in days
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TextAction.Command">
+            <summary>
+            Get/Set command name
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TextAction.Arguments">
+            <summary>
+            Get/Set command arguments list
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TextAction.ShowInFrontend">
+            <summary>
+            Get/Set whether to show in frontend
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.Create(System.String,System.String[])">
+            <summary>
+            Create new TextAction with command and arguments
+            </summary>
+            <param name="command">Command name</param>
+            <param name="arguments">Command arguments</param>
+            <returns>TextAction wrapper instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.FromTabbedString(System.String)">
+            <summary>
+            Parse tabbed string format into TextAction
+            Format: "Command\tArg1\tArg2\tArg3"
+            Example: "FactionAddResourceDistributed\tIce\t1000"
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.CreateAddResource(System.String,System.Int32,System.Single)">
+            <summary>
+            Create TextAction for adding resources to faction
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.GetNativeObject">
+            <summary>
+            Get native TextAction object for IL2CPP calls
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.ToString">
+            <summary>
+            Convert to tabbed string representation
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">
             <summary>
             Wrapper Unity GUI basique - utilise RealUnityGuiWrapper pour accès aux vraies DLLs Unity
@@ -3694,6 +3821,12 @@
         <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetCurrent">
             <summary>
             Get the current universe instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Universe.GetKeeper">
+            <summary>
+            Get Keeper instance for Universe entities (factions, planets, resources)
+            Property: keeper { get; }
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Universe.CurrentSol">
