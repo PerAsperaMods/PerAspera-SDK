@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Linq;
 using BepInEx.Logging;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Wrappers.Core;
@@ -17,14 +18,20 @@ namespace PerAspera.GameAPI.Wrappers
     /// var faction = Universe.GetCurrent().GetPlayerFaction();
     /// var textAction = TextAction.CreateAddResource("ice", "PlayerFaction", 10.0f);
     /// var eventBus = faction.GetGameEventBus();
-    /// InteractionManagerWrapper.DispatchAction(faction.GetHandle(), eventBus, textAction, "CommandsDemo");
+    /// InteractionManagerWrapper.DispatchAction(faction.GetNativeObject(), eventBus, textAction, "CommandsDemo");
     /// </code>
     /// </example>
-    public static class InteractionManagerWrapper
+    public  class InteractionManagerWrapper
     {
         private static readonly ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("InteractionManager");
         private static System.Type? _interactionManagerType;
-        
+        private object   nativeObject;
+
+        public InteractionManagerWrapper(object interactionM)
+        {
+            nativeObject = interactionM;
+        }
+
         /// <summary>
         /// Gets the native InteractionManager type via reflection
         /// </summary>
@@ -57,8 +64,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="textAction">The TextAction command to execute (native object)</param>
         /// <param name="context">Context string for debugging (e.g., "CommandsDemo")</param>
         /// <returns>True if dispatch was successful, false otherwise</returns>
-        public static bool DispatchAction(IHandleable handleable, object? gameEventBus, object textAction, string context)
+        public bool DispatchAction(object handleable, object? gameEventBus, object textAction, string context)
         {
+
+           //  (IHandleable)handleable; // Ensure handleable implements IHandleable
             if (InteractionManagerType == null)
             {
                 Log.LogError("❌ InteractionManager type not available");
@@ -69,6 +78,20 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 Log.LogError("❌ DispatchAction: handleable is null");
                 return false;
+            }
+            
+            // If handleable is a wrapper, get the native object
+            if (handleable.GetType().GetMethod("GetNativeObject") != null)
+            {
+                try
+                {
+                    handleable = handleable.GetType().GetMethod("GetNativeObject").Invoke(handleable, null);
+                    Log.LogInfo($"✅ Extracted native object from wrapper: {handleable?.GetType().Name ?? "null"}");
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"⚠️ Failed to get native object from wrapper: {ex.Message}");
+                }
             }
             
             if (textAction == null)
@@ -85,17 +108,17 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                // Find the DispatchAction method: DispatchAction(IHandleable, GameEventBus, TextAction, String)
-                var method = InteractionManagerType.GetMethod("DispatchAction", 
-                    BindingFlags.Public | BindingFlags.Static,
-                    null,
-                    new System.Type[] { 
-                        typeof(IHandleable), 
-                        typeof(object), // GameEventBus (we don't have the exact type, use object)
-                        typeof(object), // TextAction (we don't have the exact type, use object)
-                        typeof(string) 
-                    },
-                    null);
+                // Find the DispatchAction method by parameter count to avoid interface dependencies
+                var methods = InteractionManagerType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(m => m.Name == "DispatchAction" && m.GetParameters().Length == 4).ToArray();
+                
+                if (methods.Length == 0)
+                {
+                    Log.LogError("❌ No DispatchAction methods found with 4 parameters");
+                    return false;
+                }
+                
+                var method = methods[0]; // Take first match
                 
                 if (method == null)
                 {
@@ -132,7 +155,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="gameEventBus">The GameEventBus for event processing</param>
         /// <param name="gameEvent">The GameEvent to dispatch</param>
         /// <returns>True if dispatch was successful, false otherwise</returns>
-        public static bool DispatchEvent(IHandleable handleable, object gameEventBus, object gameEvent)
+        public static bool DispatchEvent(object handleable, object gameEventBus, object gameEvent)
         {
             if (InteractionManagerType == null)
             {
@@ -142,24 +165,19 @@ namespace PerAspera.GameAPI.Wrappers
             
             try
             {
-                // Find the DispatchAction method: DispatchAction(IHandleable, GameEventBus, GameEvent)
-                var method = InteractionManagerType.GetMethod("DispatchAction", 
-                    BindingFlags.Public | BindingFlags.Static,
-                    null,
-                    new System.Type[] { 
-                        typeof(IHandleable), 
-                        typeof(object), // GameEventBus
-                        typeof(object)  // GameEvent
-                    },
-                    null);
+                // Find DispatchAction method with 3 parameters (handleable, GameEventBus, GameEvent)
+                var methods = InteractionManagerType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(m => m.Name == "DispatchAction" && m.GetParameters().Length == 3)
+                    .ToArray();
                 
+                var method = methods.FirstOrDefault();
                 if (method == null)
                 {
-                    Log.LogError("❌ DispatchAction(GameEvent) method not found");
+                    Log.LogError("❌ DispatchAction(GameEvent) method with 3 parameters not found");
                     return false;
                 }
                 
-                Log.LogInfo($"🚀 Dispatching GameEvent");
+                Log.LogInfo($"🚀 Dispatching GameEvent using method: {method}");
                 
                 // Invoke the static method
                 method.Invoke(null, new object[] { handleable, gameEventBus, gameEvent });
@@ -183,7 +201,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="textActions">List of TextAction commands to execute (native objects)</param>
         /// <param name="context">Context string for debugging</param>
         /// <returns>True if all dispatches were successful, false otherwise</returns>
-        public static bool DispatchActions(IHandleable handleable, object gameEventBus, System.Collections.Generic.List<object> textActions, string context)
+        public static bool DispatchActions(object handleable, object gameEventBus, System.Collections.Generic.List<object> textActions, string context)
         {
             if (InteractionManagerType == null)
             {
@@ -196,9 +214,17 @@ namespace PerAspera.GameAPI.Wrappers
                 // Convert wrappers to native objects (already native in this case)
                 var nativeActions = new System.Collections.Generic.List<object>(textActions);
                 
-                // Find the DispatchActions method: DispatchActions(IHandleable, GameEventBus, List<TextAction>, String)
-                var method = InteractionManagerType.GetMethod("DispatchActions", 
-                    BindingFlags.Public | BindingFlags.Static);
+                // Find the DispatchActions method by parameter count to avoid interface dependencies
+                var methods = InteractionManagerType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(m => m.Name == "DispatchActions" && m.GetParameters().Length == 4).ToArray();
+                
+                if (methods.Length == 0)
+                {
+                    Log.LogError("❌ No DispatchActions methods found with 4 parameters");
+                    return false;
+                }
+                
+                var method = methods[0]; // Take first match
                 
                 if (method == null)
                 {

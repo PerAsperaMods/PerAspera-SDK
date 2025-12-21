@@ -16,7 +16,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// - arguments: List<string> - Command parameters
     /// - showInFrontend: bool - Display in UI
     /// </summary>
-    public class TextAction : NativeWrapper<object>
+    public class TextAction : WrapperBase
     {
         /// <summary>
         /// Create TextAction wrapper from native TextAction instance
@@ -30,7 +30,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public float DaysDelay
         {
-            get => GetNativeField<float>("daysDelay") ?? 0f;
+            get => GetNativeField<float?>("daysDelay") ?? 0f;
             set => SetNativeField("daysDelay", value);
         }
         
@@ -57,7 +57,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public bool ShowInFrontend
         {
-            get => GetNativeField<bool>("showInFrontend") ?? false;
+            get => GetNativeField<bool?>("showInFrontend") ?? false;
             set => SetNativeField("showInFrontend", value);
         }
         
@@ -78,26 +78,26 @@ namespace PerAspera.GameAPI.Wrappers
                 
                 if (textActionType == null)
                 {
-                    Log.Error("[TextAction] Native TextAction type not found via ReflectionHelpers");
+                    Log.LogError("[TextAction] Native TextAction type not found via ReflectionHelpers");
                     return null;
                 }
                 
-                Log.Info($"[TextAction] Found TextAction type: {textActionType.FullName}");
+                Log.LogInfo($"[TextAction] Found TextAction type: {textActionType.FullName}");
                 
                 // Create native instance with constructor(string command, params string[] arguments)
                 var nativeInstance = Activator.CreateInstance(textActionType, command, arguments);
                 if (nativeInstance == null)
                 {
-                    Log.Error("[TextAction] Failed to create native TextAction instance");
+                    Log.LogError("[TextAction] Failed to create native TextAction instance");
                     return null;
                 }
                 
-                Log.Info($"[TextAction] Successfully created native TextAction instance");
+                Log.LogInfo($"[TextAction] Successfully created native TextAction instance");
                 return new TextAction(nativeInstance);
             }
             catch (Exception ex)
             {
-                Log.Error($"[TextAction] Create failed: {ex.Message}");
+                Log.LogError($"[TextAction] Create failed: {ex.Message}");
                 return null;
             }
         }
@@ -113,27 +113,27 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (string.IsNullOrEmpty(tabbedString))
                 {
-                    Log.Warning("[TextAction] Empty tabbed string provided");
+                    Log.LogWarning("[TextAction] Empty tabbed string provided");
                     return null;
                 }
                 
                 var parts = tabbedString.Split('\t');
                 if (parts.Length < 1)
                 {
-                    Log.Warning("[TextAction] Invalid tabbed string format - no command found");
+                    Log.LogWarning("[TextAction] Invalid tabbed string format - no command found");
                     return null;
                 }
                 
                 var command = parts[0];
                 var arguments = parts.Skip(1).ToArray();
                 
-                Log.Info($"[TextAction] Parsing: command='{command}', args=[{string.Join(", ", arguments)}]");
+                Log.LogInfo($"[TextAction] Parsing: command='{command}', args=[{string.Join(", ", arguments)}]");
                 
                 return Create(command, arguments);
             }
             catch (Exception ex)
             {
-                Log.Error($"[TextAction] FromTabbedString failed: {ex.Message}");
+                Log.LogError($"[TextAction] FromTabbedString failed: {ex.Message}");
                 return null;
             }
         }

@@ -47,7 +47,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(resourceKey))
             {
-                Log.Warning("GetByKey called with null/empty resource key");
+                Log.LogWarning("GetByKey called with null/empty resource key");
                 return null;
             }
             
@@ -58,7 +58,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get ResourceType for key '{resourceKey}': {ex.Message}");
+                Log.LogError($"Failed to get ResourceType for key '{resourceKey}': {ex.Message}");
                 return null;
             }
         }
@@ -198,7 +198,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning($"Failed to get vein icons for resource {Name}: {ex.Message}");
+                    Log.LogWarning($"Failed to get vein icons for resource {Name}: {ex.Message}");
                     return new List<string>();
                 }
             }
@@ -234,7 +234,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to parse color '{ColorHex}' for resource {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to parse color '{ColorHex}' for resource {Name}: {ex.Message}");
                 return System.Drawing.Color.Gray;
             }
         }

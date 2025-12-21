@@ -853,6 +853,137 @@
             Maintenance facility building identifier
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1">
+            <summary>
+            Base class for all native object wrappers, providing unified method call patterns.
+            Enables type-safe native method invocation with automatic error handling and logging.
+            </summary>
+            <typeparam name="T">The native object type being wrapped</typeparam>
+            <example>
+            <code>
+            public class FactionWrapper : NativeWrapper&lt;object&gt;
+            {
+                public string GetName() => CallNative&lt;string&gt;("get_Name") ?? "Unknown";
+                public void SetActive(bool active) => CallNativeVoid("SetActive", active);
+            }
+            </code>
+            </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1._nativeObject">
+            <summary>
+            The wrapped native object instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeObject">
+            <summary>
+            Gets the underlying native object for direct access when needed
+            </summary>
+            <returns>The native object instance</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.IsValidWrapper">
+            <summary>
+            Check if the native object is valid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.#ctor(`0)">
+            <summary>
+            Initializes the wrapper with a native object instance
+            </summary>
+            <param name="nativeObject">The native object to wrap</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallNative``1(System.String,System.Object[])">
+            <summary>
+            Calls a native method with a return value using IL2CPP extensions
+            </summary>
+            <typeparam name="TResult">Expected return type</typeparam>
+            <param name="methodName">Name of the method to invoke</param>
+            <param name="parameters">Method parameters</param>
+            <returns>Method result or default(TResult) on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallNativeVoid(System.String,System.Object[])">
+            <summary>
+            Calls a native void method using IL2CPP extensions
+            </summary>
+            <param name="methodName">Name of the method to invoke</param>
+            <param name="parameters">Method parameters</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeField``1(System.String,System.Nullable{System.Reflection.BindingFlags})">
+            <summary>
+            Gets a field value from the native object using IL2CPP extensions
+            </summary>
+            <typeparam name="TField">Expected field type</typeparam>
+            <param name="fieldName">Name of the field to access</param>
+            <param name="bindingFlags">Optional binding flags for field access</param>
+            <returns>Field value or default(TField) on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.SetNativeField``1(System.String,``0,System.Nullable{System.Reflection.BindingFlags})">
+            <summary>
+            Sets a field value on the native object using IL2CPP extensions
+            </summary>
+            <typeparam name="TField">Field type</typeparam>
+            <param name="fieldName">Name of the field to set</param>
+            <param name="value">Value to set</param>
+            <param name="bindingFlags">Optional binding flags for field access</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeProperty``1(System.String)">
+            <summary>
+            Gets a property value from the native object using IL2CPP extensions
+            </summary>
+            <typeparam name="TProp">Expected property type</typeparam>
+            <param name="propertyName">Name of the property to access</param>
+            <returns>Property value or default(TProp) on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.SetNativeProperty``1(System.String,``0)">
+            <summary>
+            Sets a property value on the native object using IL2CPP extensions
+            </summary>
+            <typeparam name="TProp">Property type</typeparam>
+            <param name="propertyName">Name of the property to set</param>
+            <param name="value">Value to set</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallStaticNative(System.Type,System.String,System.Object[])">
+            <summary>
+            Static method helper for calling static native methods
+            </summary>
+            <param name="nativeType">The native type containing the static method</param>
+            <param name="methodName">Name of the static method</param>
+            <param name="parameters">Method parameters</param>
+            <returns>Method result or null on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallStaticNative``1(System.Type,System.String,System.Object[])">
+            <summary>
+            Static method helper for calling static native methods with typed return
+            </summary>
+            <typeparam name="TResult">Expected return type</typeparam>
+            <param name="nativeType">The native type containing the static method</param>
+            <param name="methodName">Name of the static method</param>
+            <param name="parameters">Method parameters</param>
+            <returns>Method result or default(TResult) on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeType">
+            <summary>
+            Get the Type of the native IL2CPP object (for debugging/inspection)
+            Returns null if no native object is wrapped
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.ValidateNativeObject(System.String)">
+            <summary>
+            Validate that the native object exists
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.DebugNativeStructure(System.Boolean,System.Boolean)">
+            <summary>
+            Debug function to inspect native object structure
+            Lists all fields and methods with their types for debugging
+            </summary>
+            <param name="includeInherited">Include fields/methods from base classes</param>
+            <param name="includePrivate">Include private members</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.DebugGameEventBus">
+            <summary>
+            Quick debug for GameEventBus specifically - searches for GameEventBus related members
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Drone">
             <summary>
             Elegant wrapper for the native Drone class
@@ -1431,15 +1562,27 @@
             </summary>
             <param name="nativeFaction">Native faction instance from game</param>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetHandle">
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetAsIHandleable">
             <summary>
             Get the Handle for this Faction instance
             </summary>
-            <returns>Handle for Keeper system access</returns>
+            <returns>HandleWrapper for safe access to handle properties</returns>
+            
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetRawHandle">
+            <summary>
+            Get the raw Handle object for InteractionManager compatibility
+            </summary>
+            <returns>Raw handle object for InteractionManager calls</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Faction.FromNative(System.Object)">
             <summary>
             Create wrapper from native faction object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetNativePropertySafe``1(System.String)">
+            <summary>
+            Helper method to get native property with multiple naming conventions
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Faction.Name">
@@ -1458,13 +1601,6 @@
             <summary>
             Faction type (Player, AI, etc.)
             Maps to: factionType field
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetGameEventBus">
-            <summary>
-            Get the GameEventBus for this faction
-            Maps to: _gameEventBus protected field
-            Used for InteractionManager.DispatchAction calls
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Faction.IsPlayerFaction">
@@ -1551,15 +1687,130 @@
             Maps to: color or factionColor field
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetNativeObject">
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetGameEventBus">
             <summary>
-            Get the native game object (for Harmony patches)
+            Get the GameEventBus for this faction to dispatch commands
+            Accesses protected _gameEventBus field via reflection
             </summary>
+            <returns>GameEventBus instance or null if not accessible</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.ExecuteResourceImportCommand(System.String,System.Single)">
+            <summary>
+            Execute a resource import command for this faction
+            </summary>
+            <param name="resourceType">Type of resource to import (e.g., "WATER", "ICE", "CHG")</param>
+            <param name="amount">Amount of resource to import</param>
+            <returns>True if command executed successfully</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.ExecuteCustomCommand(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Execute a custom command for this faction
+            </summary>
+            <param name="commandType">Type of command to execute</param>
+            <param name="parameters">Command parameters as key-value pairs</param>
+            <returns>True if command executed successfully</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Faction.GetCommandDebugInfo">
+            <summary>
+            Get debug information about command execution capabilities
+            </summary>
+            <returns>Debug string with command execution status</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Faction.ToString">
             <summary>
             String representation for debugging
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.HandleWrapper">
+            <summary>
+            Wrapper for Handle struct with safe access to native handle properties
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize HandleWrapper with native handle object
+            </summary>
+            <param name="nativeHandle">Native Handle instance from game</param>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleWrapper.Index">
+            <summary>
+            Get handle index value
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleWrapper.Version">
+            <summary>
+            Get handle version value  
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.HandleWrapper.IsValid">
+            <summary>
+            Check if handle is valid (non-zero index)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleWrapper.FromNative(System.Object)">
+            <summary>
+            Create HandleWrapper from native handle object
+            </summary>
+            <param name="nativeHandle">Native handle object</param>
+            <returns>HandleWrapper instance</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.HandleWrapper.ToString">
+            <summary>
+            String representation of handle
+            </summary>
+            <returns>HandleWrapper info string</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.InteractionManagerWrapper">
+            <summary>
+            Static wrapper for InteractionManager functionality.
+            Provides access to command dispatch system and text action processing.
+            </summary>
+            <example>
+            <code>
+            // Dispatch a resource import command
+            var faction = Universe.GetCurrent().GetPlayerFaction();
+            var textAction = TextAction.CreateAddResource("ice", "PlayerFaction", 10.0f);
+            var eventBus = faction.GetGameEventBus();
+            InteractionManagerWrapper.DispatchAction(faction.GetNativeObject(), eventBus, textAction, "CommandsDemo");
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.InteractionManagerWrapper.InteractionManagerType">
+            <summary>
+            Gets the native InteractionManager type via reflection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.InteractionManagerWrapper.DispatchAction(System.Object,System.Object,System.Object,System.String)">
+            <summary>
+            Dispatches a text action command using the native InteractionManager.
+            This is the main entry point for executing game commands.
+            </summary>
+            <param name="handleable">The handleable object (usually a faction handle)</param>
+            <param name="gameEventBus">The GameEventBus for event processing</param>
+            <param name="textAction">The TextAction command to execute (native object)</param>
+            <param name="context">Context string for debugging (e.g., "CommandsDemo")</param>
+            <returns>True if dispatch was successful, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.InteractionManagerWrapper.DispatchEvent(System.Object,System.Object,System.Object)">
+            <summary>
+            Dispatches a GameEvent using the native InteractionManager.
+            Alternative to text action dispatch for direct event processing.
+            </summary>
+            <param name="handleable">The handleable object</param>
+            <param name="gameEventBus">The GameEventBus for event processing</param>
+            <param name="gameEvent">The GameEvent to dispatch</param>
+            <returns>True if dispatch was successful, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.InteractionManagerWrapper.DispatchActions(System.Object,System.Object,System.Collections.Generic.List{System.Object},System.String)">
+            <summary>
+            Dispatches multiple text actions using the native InteractionManager.
+            Batch processing for multiple commands.
+            </summary>
+            <param name="handleable">The handleable object</param>
+            <param name="gameEventBus">The GameEventBus for event processing</param>
+            <param name="textActions">List of TextAction commands to execute (native objects)</param>
+            <param name="context">Context string for debugging</param>
+            <returns>True if all dispatches were successful, false otherwise</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.HandleConversionUtils">
             <summary>
@@ -2790,6 +3041,42 @@
             </summary>
             <returns>Planet status with atmosphere and resource information</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceCommandHelper">
+            <summary>
+            Resource command execution utilities that handle IHandleable casting internally
+            to avoid exposing native types to mods.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(PerAspera.GameAPI.Wrappers.HandleWrapper,System.String,System.Single)">
+            <summary>
+            Executes a resource import command for the specified faction using the given resource type.
+            Handles IHandleable casting internally to avoid exposing native types to mods.
+            </summary>
+            <param name="factionHandle">The faction handle wrapper to execute the command for</param>
+            <param name="resourceType">The resource type (e.g., "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN")</param>
+            <param name="amount">The amount of resource to add (default: 1000)</param>
+            <returns>True if the command executed successfully, false otherwise</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.GetNativeFactionFromHandle(PerAspera.GameAPI.Wrappers.HandleWrapper)">
+            <summary>
+            Get native faction object from handle using KeeperMap
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.GetGameEventBusFromFaction(System.Object)">
+            <summary>
+            Get GameEventBus from native faction object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.CreateNativeTextAction(System.String,System.Single)">
+            <summary>
+            Create native TextAction object
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.DispatchActionInternal(System.Object,System.Object,System.Object,System.String)">
+            <summary>
+            Execute DispatchAction using cached method
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceType">
             <summary>
             Wrapper for the native ResourceType class
@@ -3596,7 +3883,7 @@
             Create TextAction for adding resources to faction
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.GetNativeObject">
+        <member name="M:PerAspera.GameAPI.Wrappers.TextAction.GetNativeTextActionObject">
             <summary>
             Get native TextAction object for IL2CPP calls
             </summary>
@@ -3917,20 +4204,11 @@
             Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.WrapperBase">
-            <summary>
-            Base class for all game object wrappers
-            Provides common functionality for wrapping native IL2CPP game objects
-            
-            📚 Architecture Guide: F:\ModPeraspera\Organization-Wiki\architecture\SDK-Components.md
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            🔧 Core Utilities: F:\ModPeraspera\SDK\PerAspera.Core\IL2CPP\SafeInvoke patterns
-            🎯 Best Practices: Always inherit for new game object wrappers
-            </summary>
-        </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.WrapperBase" -->
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.NativeObject">
             <summary>
-            The native IL2CPP game object being wrapped
+            Legacy compatibility: The native IL2CPP game object being wrapped
+            Now delegates to base NativeWrapper._nativeObject
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid">
@@ -3949,15 +4227,9 @@
             Returns null if no native object is wrapped
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.GetNativeObject">
-            <summary>
-            Get the native object for use in other wrapper methods
-            This allows wrappers to pass native objects to other wrapper method calls
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
             <summary>
-            Constructor with native object
+            Constructor with native object - now uses NativeWrapper base
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.ValidateNativeObject(System.String)">
@@ -3967,22 +4239,35 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvoke``1(System.String,System.Object[])">
             <summary>
-            Safely invoke a method on the native object
+            Safely invoke a method on the native object - delegates to NativeWrapper
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvokeVoid(System.String,System.Object[])">
             <summary>
-            Safely invoke a void method on the native object
+            Safely invoke a void method on the native object - delegates to NativeWrapper
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeGetField``1(System.String)">
             <summary>
-            Safely get a field value from the native object
+            Safely get a field value from the native object - delegates to NativeWrapper
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeSetField``1(System.String,``0)">
             <summary>
-            Safely set a field value on the native object
+            Safely set a field value on the native object - delegates to NativeWrapper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DebugNativeStructure(System.Boolean,System.Boolean)">
+            <summary>
+            Debug function to inspect native object structure
+            Lists all fields and methods with their types for debugging
+            </summary>
+            <param name="includeInherited">Include fields/methods from base classes</param>
+            <param name="includePrivate">Include private members</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DebugGameEventBus">
+            <summary>
+            Quick debug for GameEventBus specifically - searches for GameEventBus related members
             </summary>
         </member>
     </members>

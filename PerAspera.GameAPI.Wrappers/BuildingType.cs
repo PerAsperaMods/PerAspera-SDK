@@ -191,7 +191,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get construction resources for building {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get construction resources for building {Name}: {ex.Message}");
                 return new Dictionary<string, float>();
             }
         }
@@ -274,7 +274,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get production rates for building {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get production rates for building {Name}: {ex.Message}");
                 return new Dictionary<string, float>();
             }
         }
@@ -323,7 +323,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get consumption rates for building {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get consumption rates for building {Name}: {ex.Message}");
                 return new Dictionary<string, float>();
             }
         }
@@ -353,7 +353,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get size for building {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get size for building {Name}: {ex.Message}");
                 return (1, 1);
             }
         }
@@ -411,7 +411,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get required technologies for building {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get required technologies for building {Name}: {ex.Message}");
                 return new List<string>();
             }
         }
@@ -438,7 +438,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to check unlock status of building {Name} for faction {faction.Name}: {ex.Message}");
+                Log.LogWarning($"Failed to check unlock status of building {Name} for faction {faction.Name}: {ex.Message}");
                 return false;
             }
         }

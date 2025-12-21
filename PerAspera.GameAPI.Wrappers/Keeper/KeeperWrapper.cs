@@ -39,7 +39,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetCurrent failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetCurrent failed: {ex.Message}");
                 return null;
             }
         }
@@ -57,14 +57,15 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (NativeObject == null) return null;
                 
-                var keeperMap = SafeInvoke<object>("get_map");
+                // Keeper has a public field "map" of type KeeperMap
+                var keeperMap = GetNativeField<object>("map");
                 if (keeperMap == null) return null;
                 
                 return new KeeperMapWrapper(keeperMap);
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetKeeperMap failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetKeeperMap failed: {ex.Message}");
                 return null;
             }
         }
@@ -126,7 +127,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetHandleManager failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetHandleManager failed: {ex.Message}");
                 return null;
             }
         }
@@ -146,7 +147,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetECSWorld failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetECSWorld failed: {ex.Message}");
                 return null;
             }
         }
@@ -166,7 +167,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetEntityManager failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetEntityManager failed: {ex.Message}");
                 return null;
             }
         }
@@ -189,7 +190,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} Unregister failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} Unregister failed: {ex.Message}");
                 return false;
             }
         }

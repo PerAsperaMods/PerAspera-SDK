@@ -14,7 +14,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to faction properties and operations
     /// DOC: Faction.md - Player and AI faction management
     /// </summary>
-    public class Faction : NativeWrapper<object>
+    public class Faction : WrapperBase
     {
         /// <summary>
         /// Initialize Faction wrapper with native faction object
@@ -22,14 +22,90 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="nativeFaction">Native faction instance from game</param>
         public Faction(object nativeFaction) : base(nativeFaction)
         {
+            NativeObject = nativeFaction;
+        }
+        public InteractionManagerWrapper GetInteractionManage()
+        {
+
+
+            return new InteractionManagerWrapper( NativeObject.GetMemberValue<InteractionManager>("interactionManager"));                
         }
         /// <summary>
         /// Get the Handle for this Faction instance
         /// </summary>
-        /// <returns>Handle for Keeper system access</returns>
-        public GameAPI.Native.Handle GetHandle()
+        /// <returns>HandleWrapper for safe access to handle properties</returns>
+        /// 
+        public IHandleable? GetAsIHandleable()
         {
-            return CallNative<GameAPI.Native.Handle>("GetHandle") ?? default;
+            try
+            {
+                // Try to cast the native object to IHandleable
+                // This may fail in IL2CPP if the interface isn't properly exposed
+                return (IHandleable)GetNativeObject();
+            }
+            catch (InvalidCastException)
+            {
+                Log.LogWarning("Cannot cast Faction native object to IHandleable - interface not available in IL2CPP context");
+                return null;
+            }
+        }
+        public HandleWrapper? GetHandle()
+        {
+            try
+            {
+                // Since Faction implements IHandleable, try to get the Handle property directly
+                var handleObj = SafeInvoke<Handle>("get_handle");
+
+                // Fallback: Try multiple possible field names for the handle using same pattern
+                string[] possibleNames = {
+                    "<Handle>k__BackingField", // Auto-property backing field (confirmed from debugger)
+                    "handle",                  // Direct property name
+                    "_handle",                 // Private field with underscore
+                    "m_handle"                 // Unity-style private field
+                };
+
+                foreach (var fieldName in possibleNames)
+                {
+                    try
+                    {
+                        var handleObj2 = GetNativeField<Handle>(fieldName,BindingFlags.Instance | BindingFlags.NonPublic);
+                        if (handleObj2 != null)
+                        {
+                            Log.LogInfo($"[GetHandle] Found handle using field '{fieldName}': {handleObj2}");
+                            return HandleWrapper.FromNative(handleObj2);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogDebug($"[GetHandle] Field '{fieldName}' not found: {ex.Message}");
+                    }
+                }
+
+                Log.LogWarning($"[GetHandle] No handle field found on {GetNativeObject()?.GetType().Name}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[GetHandle] Error accessing handle: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get the raw Handle object for InteractionManager compatibility
+        /// </summary>
+        /// <returns>Raw handle object for InteractionManager calls</returns>
+        public object? GetRawHandle()
+        { 
+            try
+            {
+                return GetNativeField<object>("handle");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[GetRawHandle] Error accessing handle: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>
@@ -38,6 +114,35 @@ namespace PerAspera.GameAPI.Wrappers
         public static Faction? FromNative(object? nativeFaction)
         {
             return nativeFaction != null ? new Faction(nativeFaction) : null;
+        }
+
+        /// <summary>
+        /// Helper method to get native property with multiple naming conventions
+        /// </summary>
+        private T? GetNativePropertySafe<T>(string propertyName)
+        {
+            // Try multiple possible field names
+            string[] possibleNames = { 
+                $"_{propertyName}_k__BackingField", // Auto-property backing field
+                propertyName,                        // Direct property name
+                $"_{propertyName}",                 // Private field with underscore
+                $"m_{propertyName}"                 // Unity-style private field
+            };
+            
+            foreach (var fieldName in possibleNames)
+            {
+                try
+                {
+                    return GetNativeProperty<T>(fieldName);
+                }
+                catch
+                {
+                    // Try next name variant
+                }
+            }
+            
+            Log.LogDebug($"[GetNativePropertySafe] No field found for property '{propertyName}' on {GetNativeObject()?.GetType().Name}");
+            return default(T);
         }
         
         // ==================== CORE IDENTIFICATION ====================
@@ -48,7 +153,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public string Name
         {
-            get => SafeInvoke<string>("get_name") ?? "Unknown";
+            get => GetNativePropertySafe<string>("name") ?? "Unknown";
         }
         
         /// <summary>
@@ -57,7 +162,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public string DisplayName
         {
-            get => SafeInvoke<string>("get_displayName") ?? Name;
+            get => GetNativePropertySafe<string>("displayName") ?? Name;
         }
         
         /// <summary>
@@ -66,26 +171,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? FactionType
         {
-            get => SafeInvoke<object>("get_factionType");
-        }
-        
-        /// <summary>
-        /// Get the GameEventBus for this faction
-        /// Maps to: _gameEventBus protected field
-        /// Used for InteractionManager.DispatchAction calls
-        /// </summary>
-        public object? GetGameEventBus()
-        {
-            try
-            {
-                // Access protected _gameEventBus field via reflection
-                return this.GetFieldValue<object>("_gameEventBus");
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"[Faction] GetGameEventBus failed: {ex.Message}");
-                return null;
-            }
+            get => GetNativePropertySafe<object>("factionType");
         }
         
         /// <summary>
@@ -94,7 +180,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public bool IsPlayerFaction
         {
-            get => SafeInvoke<bool?>("get_isPlayerFaction") ?? false;
+            get => GetNativePropertySafe<bool?>("isPlayerFaction") ?? false;
         }
         
         // ==================== RESOURCES ====================
@@ -105,7 +191,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? MainStockpile
         {
-            get => SafeInvoke<object>("get_mainStockpile");
+            get => GetNativePropertySafe<object>("mainStockpile");
         }
         
         /// <summary>
@@ -122,15 +208,15 @@ namespace PerAspera.GameAPI.Wrappers
                 if (stockpile == null) return 0f;
                 
                 // Try various methods to get resource stock
-                var stockAmount = SafeInvoke<float?>("GetResourceStock", resourceKey) ??
-                                SafeInvoke<float?>("GetStock", resourceKey) ??
-                                SafeInvoke<float?>("GetResourceAmount", resourceKey);
+                var stockAmount = CallNative<float?>("GetResourceStock", resourceKey) ??
+                                CallNative<float?>("GetStock", resourceKey) ??
+                                CallNative<float?>("GetResourceAmount", resourceKey);
                 
                 return stockAmount ?? 0f;
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get resource stock for {resourceKey}: {ex.Message}");
+                Log.LogWarning($"Failed to get resource stock for {resourceKey}: {ex.Message}");
                 return 0f;
             }
         }
@@ -147,23 +233,23 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 // Try direct faction AddResource first
-                var result = SafeInvoke<bool?>("AddResource", resourceKey, amount);
+                var result = CallNative<bool?>("AddResource", resourceKey, amount);
                 if (result.HasValue) return result.Value;
                 
                 // Try via stockpile
                 var stockpile = MainStockpile;
                 if (stockpile != null)
                 {
-                    var stockpileResult = SafeInvoke<bool?>("AddResource", stockpile, resourceKey, amount);
+                    var stockpileResult = CallNative<bool?>("AddResource", stockpile, resourceKey, amount);
                     if (stockpileResult.HasValue) return stockpileResult.Value;
                 }
                 
-                Log.Warning($"Could not add resource {resourceKey} to faction {Name}");
+                Log.LogWarning($"Could not add resource {resourceKey} to faction {Name}");
                 return false;
             }
             catch (Exception ex)
             {
-                Log.Error($"Error adding resource {resourceKey} to faction {Name}: {ex.Message}");
+                Log.LogError($"Error adding resource {resourceKey} to faction {Name}: {ex.Message}");
                 return false;
             }
         }
@@ -178,17 +264,17 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>Relationship value (-100 to 100, or null if unknown)</returns>
         public float? GetRelationshipWith(Faction otherFaction)
         {
-            if (!otherFaction.IsValid) return null;
+            if (!otherFaction.IsValidWrapper) return null;
             
             try
             {
-                return SafeInvoke<float?>("GetRelationship", otherFaction.NativeObject) ??
-                       SafeInvoke<float?>("GetDiplomacyStatus", otherFaction.NativeObject) ??
-                       SafeInvoke<float?>("GetStanding", otherFaction.NativeObject);
+                return CallNative<float?>("GetRelationship", otherFaction.GetNativeObject()) ??
+                       CallNative<float?>("GetDiplomacyStatus", otherFaction.GetNativeObject()) ??
+                       CallNative<float?>("GetStanding", otherFaction.GetNativeObject());
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get relationship between {Name} and {otherFaction.Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get relationship between {Name} and {otherFaction.Name}: {ex.Message}");
                 return null;
             }
         }
@@ -204,7 +290,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var buildings = SafeInvoke<object>("get_buildings");
+                var buildings = CallNative<object>("get_buildings");
                 if (buildings == null)
                 {
                     // Use BaseGame architecture (corrected approach)
@@ -214,7 +300,7 @@ namespace PerAspera.GameAPI.Wrappers
                         var planet = Planet.GetCurrent();
                         if (planet != null)
                         {
-                            var planetBuildings = SafeInvoke<object>("get_buildings", planet.GetNativeObject());
+                            var planetBuildings = CallNative<object>("get_buildings", planet.GetNativeObject());
                             if (planetBuildings is System.Collections.IEnumerable planetEnumerable)
                             {
                                 var planetBuildingWrappers = new List<Building>();
@@ -236,7 +322,7 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        Log.Debug($"Failed to access buildings via BaseGame: {ex.Message}");
+                        Log.LogDebug($"Failed to access buildings via BaseGame: {ex.Message}");
                     }
                     
                     return new List<Building>();
@@ -260,7 +346,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get buildings for faction {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get buildings for faction {Name}: {ex.Message}");
                 return new List<Building>();
             }
         }
@@ -273,8 +359,8 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public int AIDifficulty
         {
-            get => SafeInvoke<int?>("get_aiDifficulty") ?? 
-                   SafeInvoke<int?>("get_difficultyLevel") ?? 0;
+            get => GetNativeProperty<int?>("aiDifficulty") ?? 
+                   GetNativeProperty<int?>("difficultyLevel") ?? 0;
         }
         
         /// <summary>
@@ -283,7 +369,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public bool IsAI
         {
-            get => SafeInvoke<bool?>("get_isAI") ?? !IsPlayerFaction;
+            get => GetNativeProperty<bool?>("isAI") ?? !IsPlayerFaction;
         }
         
         /// <summary>
@@ -292,8 +378,8 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public string AIPersonality
         {
-            get => SafeInvoke<string>("get_aiPersonality") ?? 
-                   SafeInvoke<string>("get_behaviorType") ?? "default";
+            get => GetNativeProperty<string>("aiPersonality") ?? 
+                   GetNativeProperty<string>("behaviorType") ?? "default";
         }
         
         // ==================== TECHNOLOGY ====================
@@ -308,13 +394,13 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                return SafeInvoke<bool?>("HasTechnology", technologyKey) ??
-                       SafeInvoke<bool?>("IsTechResearched", technologyKey) ??
-                       SafeInvoke<bool?>("HasResearched", technologyKey) ?? false;
+                return CallNative<bool?>("HasTechnology", technologyKey) ??
+                       CallNative<bool?>("IsTechResearched", technologyKey) ??
+                       CallNative<bool?>("HasResearched", technologyKey) ?? false;
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to check technology {technologyKey} for faction {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to check technology {technologyKey} for faction {Name}: {ex.Message}");
                 return false;
             }
         }
@@ -329,15 +415,15 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var result = SafeInvoke<bool?>("ResearchTechnology", technologyKey);
+                var result = CallNative<bool?>("ResearchTechnology", technologyKey);
                 if (result.HasValue) return result.Value;
                 
-                Log.Warning($"Could not research technology {technologyKey} for faction {Name}");
+                Log.LogWarning($"Could not research technology {technologyKey} for faction {Name}");
                 return false;
             }
             catch (Exception ex)
             {
-                Log.Error($"Error researching technology {technologyKey} for faction {Name}: {ex.Message}");
+                Log.LogError($"Error researching technology {technologyKey} for faction {Name}: {ex.Message}");
                 return false;
             }
         }
@@ -352,7 +438,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var color = SafeInvoke<object>("get_color") ?? SafeInvoke<object>("get_factionColor");
+                var color = GetNativeProperty<object>("color") ?? GetNativeProperty<object>("factionColor");
                 if (color != null)
                 {
                     // Convert Unity Color to System.Drawing.Color if needed
@@ -362,7 +448,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get color for faction {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get color for faction {Name}: {ex.Message}");
                 return System.Drawing.Color.Gray;
             }
         }
@@ -371,10 +457,11 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var r = SafeInvoke<float?>("get_r", unityColor) ?? 0.5f;
-                var g = SafeInvoke<float?>("get_g", unityColor) ?? 0.5f;
-                var b = SafeInvoke<float?>("get_b", unityColor) ?? 0.5f;
-                var a = SafeInvoke<float?>("get_a", unityColor) ?? 1.0f;
+                // Access Unity Color properties directly via reflection
+                var r = unityColor.GetFieldValue<float?>("r") ?? 0.5f;
+                var g = unityColor.GetFieldValue<float?>("g") ?? 0.5f;
+                var b = unityColor.GetFieldValue<float?>("b") ?? 0.5f;
+                var a = unityColor.GetFieldValue<float?>("a") ?? 1.0f;
                 
                 return System.Drawing.Color.FromArgb(
                     (int)(a * 255), (int)(r * 255), (int)(g * 255), (int)(b * 255));
@@ -392,23 +479,129 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>GameEventBus instance or null if not accessible</returns>
         public object? GetGameEventBus()
         {
-            return GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance);
+            Log.LogInfo($"[GetGameEventBus] Searching for _gameEventBus field on type: {GetNativeObject()?.GetType().Name}");
+
+            // Use new debugging tools
+            DebugGameEventBus();
+
+            // Try property access first (get__gameEventBus)
+            var gameEventBus = SafeInvoke<object>("get__gameEventBus");
+            Log.LogInfo($"[GetGameEventBus] Property access result: {gameEventBus?.GetType().Name ?? "null"}");
+
+            if (gameEventBus == null)
+            {
+                // Try direct field access with different names
+                gameEventBus = GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance) ??
+                              GetNativeField<object>("gameEventBus", BindingFlags.Public | BindingFlags.Instance) ??
+                              GetNativeField<object>("m_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance);
+                Log.LogInfo($"[GetGameEventBus] Field access result: {gameEventBus?.GetType().Name ?? "null"}");
+
+                if (gameEventBus == null)
+                {
+                    // Try with FlattenHierarchy
+                    gameEventBus = GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy) ??
+                                  GetNativeField<object>("gameEventBus", BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                    Log.LogInfo($"[GetGameEventBus] Hierarchy field access result: {gameEventBus?.GetType().Name ?? "null"}");
+                }
+            }
+
+            return gameEventBus;
         }
-        
+
+        #region Command Execution Methods
+
         /// <summary>
-        /// Get the native game object (for Harmony patches)
+        /// Execute a resource import command for this faction
         /// </summary>
-        public object? GetNativeObject()
+        /// <param name="resourceType">Type of resource to import (e.g., "WATER", "ICE", "CHG")</param>
+        /// <param name="amount">Amount of resource to import</param>
+        /// <returns>True if command executed successfully</returns>
+        public bool ExecuteResourceImportCommand(string resourceType, float amount = 1000f)
         {
-            return NativeObject;
+            InteractionManagerWrapper a = GetInteractionManage();
+
+            var importAction = PerAspera.GameAPI.Wrappers.ResourceCommandHelper.CreateNativeTextAction(resourceType, amount);
+
+
+
+           return  a.DispatchAction(NativeObject,GetGameEventBus(), importAction,"hello" );
+
+
         }
-        
+
+        /// <summary>
+        /// Execute a custom command for this faction
+        /// </summary>
+        /// <param name="commandType">Type of command to execute</param>
+        /// <param name="parameters">Command parameters as key-value pairs</param>
+        /// <returns>True if command executed successfully</returns>
+        public bool ExecuteCustomCommand(string commandType, Dictionary<string, object>? parameters = null)
+        {
+            try
+            {
+                Log.LogInfo($"🎯 Executing custom command: {commandType} for faction {Name}");
+
+                var handle = GetHandle();
+                if (handle == null)
+                {
+                    Log.LogError($"❌ Cannot get handle for faction {Name} - custom command execution failed");
+                    return false;
+                }
+                Type fType = NativeObject.GetIl2CppType();
+                // Use the SDK command helper
+                bool success = PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(
+                    (GameAPI.Native.Faction) NativeObject , commandType, parameters?.ContainsKey("amount") == true ? Convert.ToSingle(parameters["amount"]) : 1000f);
+
+                if (success)
+                {
+                    Log.LogInfo($"✅ Custom command executed successfully: {commandType}");
+                }
+                else
+                {
+                    Log.LogError($"❌ Custom command failed: {commandType}");
+                }
+
+                return success;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"❌ Custom command execution failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get debug information about command execution capabilities
+        /// </summary>
+        /// <returns>Debug string with command execution status</returns>
+        public string GetCommandDebugInfo()
+        {
+            try
+            {
+                var handle = GetHandle();
+                var handleStatus = handle != null ? "Available" : "Not Available";
+
+                return $"Faction Command Debug Info:\n" +
+                       $"- Name: {Name}\n" +
+                       $"- Handle Status: {handleStatus}\n" +
+                       $"- Is Player Faction: {IsPlayerFaction}\n" +
+                       $"- Is Valid: {IsValidWrapper}\n" +
+                       $"- Command Execution: {(handle != null ? "Ready" : "Not Ready")}";
+            }
+            catch (Exception ex)
+            {
+                return $"Faction Command Debug Info: Error - {ex.Message}";
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// String representation for debugging
         /// </summary>
         public override string ToString()
         {
-            return $"Faction[{Name}] (Valid: {IsValid}, Player: {IsPlayerFaction}, AI: {IsAI})";
+            return $"Faction[{Name}] (Valid: {IsValidWrapper}, Player: {IsPlayerFaction}, AI: {IsAI})";
         }
     }
 }

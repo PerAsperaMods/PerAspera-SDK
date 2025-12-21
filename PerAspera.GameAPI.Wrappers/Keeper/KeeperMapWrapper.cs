@@ -40,14 +40,14 @@ namespace PerAspera.GameAPI.Wrappers
                 var keeper = baseGame.GetKeeper();
                 if (keeper == null) return null;
                 
-                var keeperMap = keeper.GetFieldValue<object>("map");
+                var keeperMap = keeper.GetKeeperMap();
                 if (keeperMap == null) return null;
                 
-                return new KeeperMapWrapper(keeperMap);
+                return keeperMap;
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetCurrent failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetCurrent failed: {ex.Message}");
                 return null;
             }
         }
@@ -72,7 +72,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} Find<{typeof(T).Name}> failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} Find<{typeof(T).Name}> failed: {ex.Message}");
                 return null;
             }
         }
@@ -94,7 +94,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Info($"{LogPrefix} Contains failed: {ex.Message}");
+                Log.LogInfo($"{LogPrefix} Contains failed: {ex.Message}");
                 return false;
             }
         }
@@ -111,18 +111,18 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (handle == null || NativeObject == null) return null;
                 
-                Log.Info($"{LogPrefix} FindBase called with handle type: {handle.GetType().FullName}");
+                Log.LogInfo($"{LogPrefix} FindBase called with handle type: {handle.GetType().FullName}");
                 
                 // Use specific parameter type to avoid ambiguous method resolution
                 var handleType = handle.GetType();
                 var allFindMethods = NativeObject.GetType().GetMethods()
                     .Where(m => m.Name == "Find").ToArray();
                     
-                Log.Info($"{LogPrefix} Found {allFindMethods.Length} Find methods");
+                Log.LogInfo($"{LogPrefix} Found {allFindMethods.Length} Find methods");
                 foreach (var method in allFindMethods)
                 {
                     var paramTypes = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
-                    Log.Info($"{LogPrefix}   - Find({paramTypes}) → {method.ReturnType.Name} (Generic: {method.IsGenericMethodDefinition})");
+                    Log.LogInfo($"{LogPrefix}   - Find({paramTypes}) → {method.ReturnType.Name} (Generic: {method.IsGenericMethodDefinition})");
                 }
                 
                 // Try to find exact match first
@@ -133,7 +133,7 @@ namespace PerAspera.GameAPI.Wrappers
                 
                 if (exactMatch != null)
                 {
-                    Log.Info($"{LogPrefix} Using exact match method");
+                    Log.LogInfo($"{LogPrefix} Using exact match method");
                     return exactMatch.Invoke(NativeObject, new object[] { handle });
                 }
                 
@@ -144,17 +144,17 @@ namespace PerAspera.GameAPI.Wrappers
                     
                 if (genericMethod != null)
                 {
-                    Log.Info($"{LogPrefix} Using generic method");
+                    Log.LogInfo($"{LogPrefix} Using generic method");
                     var specificMethod = genericMethod.MakeGenericMethod(typeof(object));
                     return specificMethod.Invoke(NativeObject, new object[] { handle });
                 }
                 
-                Log.Warning($"{LogPrefix} No suitable Find method found for {handleType.Name}");
+                Log.LogWarning($"{LogPrefix} No suitable Find method found for {handleType.Name}");
                 return null;
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} FindBase failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} FindBase failed: {ex.Message}");
                 return null;
             }
         }
@@ -176,7 +176,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"{LogPrefix} GetObjectsDict failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetObjectsDict failed: {ex.Message}");
                 return null;
             }
         }

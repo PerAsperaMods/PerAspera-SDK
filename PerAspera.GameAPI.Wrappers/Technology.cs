@@ -145,7 +145,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get prerequisites for technology {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get prerequisites for technology {Name}: {ex.Message}");
                 return new List<Technology>();
             }
         }
@@ -194,7 +194,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get unlocked buildings for technology {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get unlocked buildings for technology {Name}: {ex.Message}");
                 return new List<object>();
             }
         }
@@ -227,7 +227,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get unlocked resources for technology {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get unlocked resources for technology {Name}: {ex.Message}");
                 return new List<ResourceType>();
             }
         }

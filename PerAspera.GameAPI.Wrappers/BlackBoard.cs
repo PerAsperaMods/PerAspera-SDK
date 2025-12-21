@@ -60,7 +60,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to TryGetValue for {variableName} on BlackBoard: {ex.Message}");
+                Log.LogError($"Failed to TryGetValue for {variableName} on BlackBoard: {ex.Message}");
                 return false;
             }
         }
@@ -152,7 +152,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to convert GetKeys result: {ex.Message}");
+                Log.LogError($"Failed to convert GetKeys result: {ex.Message}");
                 return null;
             }
         }
@@ -174,7 +174,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to convert GetDynamicKeys result: {ex.Message}");
+                Log.LogError($"Failed to convert GetDynamicKeys result: {ex.Message}");
                 return null;
             }
         }
@@ -213,7 +213,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to DefaultSetString for {variableName}: {ex.Message}");
+                Log.LogError($"Failed to DefaultSetString for {variableName}: {ex.Message}");
             }
         }
         
@@ -230,7 +230,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to DefaultSetFloat for {variableName}: {ex.Message}");
+                Log.LogError($"Failed to DefaultSetFloat for {variableName}: {ex.Message}");
             }
         }
         
@@ -247,7 +247,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to DefaultSetBool for {variableName}: {ex.Message}");
+                Log.LogError($"Failed to DefaultSetBool for {variableName}: {ex.Message}");
             }
         }
         

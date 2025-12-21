@@ -17,8 +17,11 @@ namespace PerAspera.GameAPI.Wrappers
     {
         public BaseGame(object nativeBaseGame) : base(nativeBaseGame)
         {
+
         }
+
         
+
         /// <summary>
         /// Get current BaseGame singleton instance
         /// </summary>

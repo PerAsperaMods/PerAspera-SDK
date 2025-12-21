@@ -147,7 +147,7 @@ namespace PerAspera.GameAPI.Wrappers
                 var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey);
                 if (resourceType == null) 
                 {
-                    Log.Warning($"Resource type not found: {resourceKey}");
+                    Log.LogWarning($"Resource type not found: {resourceKey}");
                     return 0f;
                 }
                 
@@ -155,7 +155,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (System.Exception ex)
             {
-                Log.Warning($"Failed to get resource stock for {resourceKey}: {ex.Message}");
+                Log.LogWarning($"Failed to get resource stock for {resourceKey}: {ex.Message}");
                 return 0f;
             }
         }
@@ -174,17 +174,17 @@ namespace PerAspera.GameAPI.Wrappers
                 var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey);
                 if (resourceType == null)
                 {
-                    Log.Warning($"Cannot add resource - type not found: {resourceKey}");
+                    Log.LogWarning($"Cannot add resource - type not found: {resourceKey}");
                     return false;
                 }
                 
                 SafeInvokeVoid("AddResource", resourceType, amount);
-                Log.Debug($"Added {amount} of {resourceKey} to planet");
+                Log.LogDebug($"Added {amount} of {resourceKey} to planet");
                 return true;
             }
             catch (System.Exception ex)
             {
-                Log.Error($"Failed to add resource {resourceKey}: {ex.Message}");
+                Log.LogError($"Failed to add resource {resourceKey}: {ex.Message}");
                 return false;
             }
         }
@@ -224,7 +224,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get buildings for planet: {ex.Message}");
+                Log.LogError($"Failed to get buildings for planet: {ex.Message}");
                 return new List<Building>();
             }
         }
@@ -265,7 +265,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get buildings for faction {faction.Name}: {ex.Message}");
+                Log.LogError($"Failed to get buildings for faction {faction.Name}: {ex.Message}");
                 return new List<Building>();
             }
         }

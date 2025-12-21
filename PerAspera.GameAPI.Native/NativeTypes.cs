@@ -27,6 +27,17 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+    public class InteractionManagerWrapper
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public InteractionManagerWrapper(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    
     public class Handle
     {
         /// <summary>Native IL2CPP BaseGame instance</summary>
@@ -175,7 +186,7 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
-    public class Faction
+    public class Faction 
     {
         /// <summary>Native IL2CPP Planet instance</summary>
         public object NativeInstance { get; }
@@ -184,5 +195,6 @@ namespace PerAspera.GameAPI.Native
         {
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
+
     }
 }

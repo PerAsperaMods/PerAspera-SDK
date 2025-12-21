@@ -150,7 +150,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to get content table for knowledge {Name}: {ex.Message}");
+                Log.LogWarning($"Failed to get content table for knowledge {Name}: {ex.Message}");
                 return new List<KnowledgeTableEntry>();
             }
         }
@@ -240,7 +240,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to check unlock status of knowledge {Name} for faction {faction.Name}: {ex.Message}");
+                Log.LogWarning($"Failed to check unlock status of knowledge {Name} for faction {faction.Name}: {ex.Message}");
                 return false;
             }
         }
@@ -262,12 +262,12 @@ namespace PerAspera.GameAPI.Wrappers
                 
                 if (result.HasValue) return result.Value;
                 
-                Log.Warning($"Could not unlock knowledge {Name} for faction {faction.Name}");
+                Log.LogWarning($"Could not unlock knowledge {Name} for faction {faction.Name}");
                 return false;
             }
             catch (Exception ex)
             {
-                Log.Error($"Error unlocking knowledge {Name} for faction {faction.Name}: {ex.Message}");
+                Log.LogError($"Error unlocking knowledge {Name} for faction {faction.Name}: {ex.Message}");
                 return false;
             }
         }

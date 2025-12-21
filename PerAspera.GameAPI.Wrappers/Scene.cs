@@ -127,7 +127,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Warning($"Scene.IsValid() failed: {ex.Message}");
+                Log.LogWarning($"Scene.IsValid() failed: {ex.Message}");
                 return false;
             }
         }
@@ -145,7 +145,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (!IsLoaded)
                 {
-                    Log.Warning($"Scene '{Name}' is not loaded, cannot get root GameObjects");
+                    Log.LogWarning($"Scene '{Name}' is not loaded, cannot get root GameObjects");
                     return new GameObject[0];
                 }
                 
@@ -154,7 +154,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get root GameObjects for scene '{Name}': {ex.Message}");
+                Log.LogError($"Failed to get root GameObjects for scene '{Name}': {ex.Message}");
                 return new GameObject[0];
             }
         }
@@ -169,7 +169,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (!IsLoaded)
                 {
-                    Log.Warning($"Scene '{Name}' is not loaded, cannot get root GameObjects");
+                    Log.LogWarning($"Scene '{Name}' is not loaded, cannot get root GameObjects");
                     return;
                 }
                 
@@ -177,7 +177,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to fill root GameObjects list for scene '{Name}': {ex.Message}");
+                Log.LogError($"Failed to fill root GameObjects list for scene '{Name}': {ex.Message}");
             }
         }
         

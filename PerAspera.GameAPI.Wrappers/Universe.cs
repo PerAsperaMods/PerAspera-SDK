@@ -127,7 +127,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get factions: {ex.Message}");
+                Log.LogError($"Failed to get factions: {ex.Message}");
                 return new List<Faction>();
             }
         }
@@ -178,14 +178,14 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(name))
             {
-                Log.Warning("GetBlackBoard called with null or empty name");
+                Log.LogWarning("GetBlackBoard called with null or empty name");
                 return null;
             }
             
             var blackboardsDict = SafeGetField<object>("blackboards");
             if (blackboardsDict == null)
             {
-                Log.Warning("blackboards dictionary is null in Universe");
+                Log.LogWarning("blackboards dictionary is null in Universe");
                 return null;
             }
             
@@ -197,7 +197,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get blackboard '{name}': {ex.Message}");
+                Log.LogError($"Failed to get blackboard '{name}': {ex.Message}");
                 return null;
             }
         }
@@ -218,7 +218,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get blackboard names: {ex.Message}");
+                Log.LogError($"Failed to get blackboard names: {ex.Message}");
                 return null;
             }
         }
@@ -240,7 +240,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to check if blackboard '{name}' exists: {ex.Message}");
+                Log.LogError($"Failed to check if blackboard '{name}' exists: {ex.Message}");
                 return false;
             }
         }
@@ -254,7 +254,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (blackboard?.GetNativeObject() == null)
             {
-                Log.Warning("Cannot add null blackboard to Universe");
+                Log.LogWarning("Cannot add null blackboard to Universe");
                 return;
             }
             
@@ -276,7 +276,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to get blackboard count: {ex.Message}");
+                Log.LogError($"Failed to get blackboard count: {ex.Message}");
                 return 0;
             }
         }
