@@ -5,7 +5,7 @@ namespace PerAspera.GameAPI.Native
     /// <summary>
     /// Native BaseGame type alias for Enhanced Events
     /// Represents the actual IL2CPP native BaseGame object
-    /// Use PerAspera.GameAPI.Wrappers.BaseGame for SDK wrapper access
+    /// Use PerAspera.GameAPI.Wrappers.BaseGameWrapper for SDK wrapper access
     /// </summary>
     public class BaseGame
     {

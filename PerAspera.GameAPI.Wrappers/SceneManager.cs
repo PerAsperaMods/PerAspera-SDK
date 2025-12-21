@@ -22,12 +22,12 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get currently active scene
         /// Static Method: SceneManager.GetActiveScene() -> Scene
         /// </summary>
-        public static Scene GetActiveScene()
+        public static SceneWrapper GetActiveScene()
         {
             try
             {
                 var nativeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                return new Scene(nativeScene);
+                return new SceneWrapper(nativeScene);
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get scene by name
         /// Static Method: SceneManager.GetSceneByName(string) -> Scene
         /// </summary>
-        public static Scene GetSceneByName(string name)
+        public static SceneWrapper GetSceneByName(string name)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 var nativeScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(name);
-                return nativeScene.IsValid() ? new Scene(nativeScene) : null;
+                return nativeScene.IsValid() ? new SceneWrapper(nativeScene) : null;
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get scene by build index
         /// Static Method: SceneManager.GetSceneAt(int) -> Scene
         /// </summary>
-        public static Scene GetSceneAt(int index)
+        public static SceneWrapper GetSceneAt(int index)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 var nativeScene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(index);
-                return new Scene(nativeScene);
+                return new SceneWrapper(nativeScene);
             }
             catch (Exception ex)
             {
@@ -88,7 +88,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get scene by build index in build settings
         /// Unity 2020.3 compatibility: Use GetSceneAt with validation
         /// </summary>
-        public static Scene GetSceneByBuildIndex(int buildIndex)
+        public static SceneWrapper GetSceneByBuildIndex(int buildIndex)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace PerAspera.GameAPI.Wrappers
                 if (buildIndex >= 0 && buildIndex < sceneCount)
                 {
                     var nativeScene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(buildIndex);
-                    return nativeScene.IsValid() ? new Scene(nativeScene) : null;
+                    return nativeScene.IsValid() ? new SceneWrapper(nativeScene) : null;
                 }
                 
                 Log.Warning($"Build index {buildIndex} is out of range (0-{sceneCount - 1})");
@@ -116,12 +116,12 @@ namespace PerAspera.GameAPI.Wrappers
         /// NOTE: Unity GetAllScenes() throws NotSupportedException in IL2CPP,
         ///       so we enumerate manually via GetSceneAt()
         /// </summary>
-        public static Scene[] GetAllScenes()
+        public static SceneWrapper[] GetAllScenes()
         {
             try
             {
                 var sceneCount = SceneCount;
-                var scenes = new Scene[sceneCount];
+                var scenes = new SceneWrapper[sceneCount];
                 
                 for (int i = 0; i < sceneCount; i++)
                 {
@@ -133,7 +133,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.Error($"Failed to get all scenes: {ex.Message}");
-                return new Scene[0];
+                return new SceneWrapper[0];
             }
         }
         
@@ -185,7 +185,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Set active scene
         /// Static Method: SceneManager.SetActiveScene(Scene) -> bool
         /// </summary>
-        public static bool SetActiveScene(Scene scene)
+        public static bool SetActiveScene(SceneWrapper scene)
         {
             try
             {
@@ -214,7 +214,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Create new empty scene
         /// Static Method: SceneManager.CreateScene(string) -> Scene
         /// </summary>
-        public static Scene CreateScene(string sceneName)
+        public static SceneWrapper CreateScene(string sceneName)
         {
             try
             {
@@ -225,7 +225,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 var nativeScene = UnityEngine.SceneManagement.SceneManager.CreateScene(sceneName);
-                return new Scene(nativeScene);
+                return new SceneWrapper(nativeScene);
             }
             catch (Exception ex)
             {
@@ -238,7 +238,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Move GameObject to scene
         /// Unity 2020.3 compatibility: Alternative approach using Transform
         /// </summary>
-        public static void MoveGameObjectToScene(GameObject go, Scene scene)
+        public static void MoveGameObjectToScene(GameObject go, SceneWrapper scene)
         {
             if (go == null || scene == null)
             {
@@ -340,7 +340,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Unload scene asynchronously
         /// Static Method: SceneManager.UnloadSceneAsync(Scene) -> AsyncOperation
         /// </summary>
-        public static AsyncOperation UnloadSceneAsync(Scene scene)
+        public static AsyncOperation UnloadSceneAsync(SceneWrapper scene)
         {
             try
             {

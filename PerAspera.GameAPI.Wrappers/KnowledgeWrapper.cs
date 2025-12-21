@@ -228,7 +228,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to check unlock status for</param>
         /// <returns>True if knowledge is unlocked</returns>
-        public bool IsUnlockedFor(Faction faction)
+        public bool IsUnlockedFor(FactionWrapper faction)
         {
             if (!faction.IsValidWrapper) return false;
             
@@ -250,7 +250,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to unlock knowledge for</param>
         /// <returns>True if knowledge was unlocked successfully</returns>
-        public bool UnlockFor(Faction faction)
+        public bool UnlockFor(FactionWrapper faction)
         {
             if (!faction.IsValidWrapper) return false;
             

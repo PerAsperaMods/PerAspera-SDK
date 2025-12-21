@@ -328,7 +328,7 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 // Use existing BaseGame wrapper
-                var baseGame = BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame == null)
                 {
                     LogDebug("GameApi.wrapper.basegame returned null");

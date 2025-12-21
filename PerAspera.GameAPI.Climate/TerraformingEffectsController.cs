@@ -16,7 +16,7 @@ namespace PerAspera.GameAPI.Climate
         private readonly object _nativePlanet;
         private bool _isActive = false;
         
-        public TerraformingEffectsController(GameAPI.Wrappers.Planet planet)
+        public TerraformingEffectsController(GameAPI.Wrappers.PlanetWrapper planet)
         {
             _nativePlanet = planet.GetNativeObject() ?? throw new ArgumentNullException(nameof(planet));
         }

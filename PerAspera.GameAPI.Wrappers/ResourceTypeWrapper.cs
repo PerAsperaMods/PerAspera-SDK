@@ -12,22 +12,22 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to resource type definitions and properties
     /// DOC: Resource.md - Resource definitions and properties
     /// </summary>
-    public class ResourceType : WrapperBase
+    public class ResourceTypeWrapper : WrapperBase
     {
         /// <summary>
         /// Initialize ResourceType wrapper with native resource type object
         /// </summary>
         /// <param name="nativeResourceType">Native resource type instance from game</param>
-        public ResourceType(object nativeResourceType) : base(nativeResourceType)
+        public ResourceTypeWrapper(object nativeResourceType) : base(nativeResourceType)
         {
         }
         
         /// <summary>
         /// Create wrapper from native resource type object
         /// </summary>
-        public static ResourceType? FromNative(object? nativeResourceType)
+        public static ResourceTypeWrapper? FromNative(object? nativeResourceType)
         {
-            return nativeResourceType != null ? new ResourceType(nativeResourceType) : null;
+            return nativeResourceType != null ? new ResourceTypeWrapper(nativeResourceType) : null;
         }
         
         /// <summary>
@@ -43,7 +43,7 @@ namespace PerAspera.GameAPI.Wrappers
         ///     Console.WriteLine($"Water: {water.DisplayName}");
         /// }
         /// </example>
-        public static ResourceType? GetByKey(string resourceKey)
+        public static ResourceTypeWrapper? GetByKey(string resourceKey)
         {
             if (string.IsNullOrEmpty(resourceKey))
             {
@@ -368,7 +368,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="resourceWrapper">ResourceType wrapper instance</param>
         /// <returns>Localized display name from game data</returns>
-        public static string GetDynamicDisplayName(ResourceType resourceWrapper)
+        public static string GetDynamicDisplayName(ResourceTypeWrapper resourceWrapper)
         {
             if (resourceWrapper?.IsValid == true)
             {

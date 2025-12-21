@@ -2,7 +2,7 @@ using System;
 using UnityEngine.SceneManagement;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Wrappers;
-using Scene = PerAspera.GameAPI.Wrappers.Scene;
+using SceneWrapper = PerAspera.GameAPI.Wrappers.SceneWrapper;
 
 namespace PerAspera.GameAPI.Events.SDK
 {
@@ -17,14 +17,14 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The scene that was loaded
         /// </summary>
-        public Scene Scene { get; }
+        public SceneWrapper Scene { get; }
         
         /// <summary>
         /// The mode used to load the scene (Single or Additive)
         /// </summary>
         public LoadSceneMode Mode { get; }
 
-        public SceneLoadedEvent(Scene scene, LoadSceneMode mode)
+        public SceneLoadedEvent(SceneWrapper scene, LoadSceneMode mode)
         {
             Scene = scene ?? throw new ArgumentNullException(nameof(scene));
             Mode = mode;
@@ -47,9 +47,9 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The scene that was unloaded
         /// </summary>
-        public Scene Scene { get; }
+        public SceneWrapper Scene { get; }
 
-        public SceneUnloadedEvent(Scene scene)
+        public SceneUnloadedEvent(SceneWrapper scene)
         {
             Scene = scene ?? throw new ArgumentNullException(nameof(scene));
         }
@@ -71,14 +71,14 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The previously active scene (null if this is the first scene)
         /// </summary>
-        public Scene PreviousScene { get; }
+        public SceneWrapper PreviousScene { get; }
         
         /// <summary>
         /// The newly active scene
         /// </summary>
-        public Scene NewScene { get; }
+        public SceneWrapper NewScene { get; }
 
-        public ActiveSceneChangedEvent(Scene previousScene, Scene newScene)
+        public ActiveSceneChangedEvent(SceneWrapper previousScene, SceneWrapper newScene)
         {
             // PreviousScene can be null for first scene load
             PreviousScene = previousScene;

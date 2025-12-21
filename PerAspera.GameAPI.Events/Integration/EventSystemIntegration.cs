@@ -183,7 +183,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 if (nativeBuildingInstance != null)
                 {
                     // Use WrapperFactory for safe conversion
-                    evt.Building = new Wrappers.Building(nativeBuildingInstance);
+                    evt.Building = new BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -211,7 +211,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building =new GameAPI.Wrappers.Building(nativeBuildingInstance);
+                    evt.Building =new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -235,7 +235,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = new GameAPI.Wrappers.Building(nativeBuildingInstance);
+                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.NewTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -260,7 +260,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = new GameAPI.Wrappers.Building(nativeBuildingInstance);
+                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";

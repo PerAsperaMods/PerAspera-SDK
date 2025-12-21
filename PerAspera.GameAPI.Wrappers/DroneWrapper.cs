@@ -10,13 +10,13 @@ namespace PerAspera.GameAPI.Wrappers
     /// Transforms technical decompiled field names into beautiful, intuitive properties
     /// DOC REFERENCES: Drone.md - Decompiled drone class analysis
     /// </summary>
-    public class Drone : WrapperBase
+    public class DroneWrapper : WrapperBase
     {
         /// <summary>
         /// Initialize Drone wrapper with native drone object
         /// </summary>
         /// <param name="nativeDrone">Native drone instance from game</param>
-        public Drone(object nativeDrone) : base(nativeDrone)
+        public DroneWrapper(object nativeDrone) : base(nativeDrone)
         {
         }
         
@@ -25,13 +25,13 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="handle">Native drone handle</param>
         /// <returns>Drone wrapper or null if not found</returns>
-        public static Drone? GetByHandle(object handle)
+        public static DroneWrapper? GetByHandle(object handle)
         {
             // TODO: Implement via KeeperTypeRegistry when GetDrone method is available
             try
             {
                 // Temporary implementation - will be replaced with proper registry lookup
-                return handle != null ? new Drone(handle) : null;
+                return handle != null ? new DroneWrapper(handle) : null;
             }
             catch
             {

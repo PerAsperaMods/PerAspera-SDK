@@ -637,7 +637,7 @@
         </member>
         <member name="T:PerAspera.GameAPI.Events.Detector.GameHubDetector">
             <summary>
-            MonoBehaviour that polls BaseGame.GetCurrent() until available
+            MonoBehaviour that polls BaseGameWrapper.GetCurrent() until available
             Integrated into EventsAutoStartPlugin to avoid multiple plugins per DLL
             </summary>
         </member>
@@ -1645,7 +1645,7 @@
             Try to get BaseGame using existing SDK wrapper system
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TriggerGameHubInitialized(PerAspera.GameAPI.Wrappers.BaseGame)">
+        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TriggerGameHubInitialized(PerAspera.GameAPI.Wrappers.BaseGameWrapper)">
             <summary>
             Trigger GameHubInitialized event using SDK wrapper
             </summary>

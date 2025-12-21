@@ -29,7 +29,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var baseGame = BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame == null) return null;
                 
                 var keeper = baseGame.GetKeeper();

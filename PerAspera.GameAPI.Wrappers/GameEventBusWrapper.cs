@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace PerAspera.GameAPI.Wrappers
 {
-    public class GameEventBus : WrapperBase
+    public class GameEventBusWrapper : WrapperBase
     {
-        public GameEventBus(object nativeBaseGame) : base(nativeBaseGame)
+        public GameEventBusWrapper(object nativeBaseGame) : base(nativeBaseGame)
         {
         }
 

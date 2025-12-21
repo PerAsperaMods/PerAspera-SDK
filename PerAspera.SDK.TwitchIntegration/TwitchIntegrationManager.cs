@@ -493,7 +493,7 @@ namespace PerAspera.SDK.TwitchIntegration
             
             try
             {
-                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame?.GetUniverse()?.GetPlanet() == null)
                     return "🎮 Game Status: Planet data not available";
                 
@@ -583,7 +583,7 @@ namespace PerAspera.SDK.TwitchIntegration
         {
             try
             {
-                var baseGame =  GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame =  BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
                 if (planet?.Atmosphere == null)
                     return "🌍 Atmosphere: Data not available";
@@ -618,7 +618,7 @@ namespace PerAspera.SDK.TwitchIntegration
         {
             try
             {
-                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
                 if (planet?.Atmosphere == null)
                     return "🌡️ Temperature: Data not available";

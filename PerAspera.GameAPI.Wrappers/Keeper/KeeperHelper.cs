@@ -48,7 +48,7 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 // Check BaseGame availability
-                var baseGame = BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 status.BaseGameAvailable = baseGame != null;
                 
                 if (!status.BaseGameAvailable) return status;

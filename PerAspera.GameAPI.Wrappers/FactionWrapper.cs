@@ -24,7 +24,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             NativeObject = nativeFaction;
         }
-        public InteractionManagerWrapper GetInteractionManage()
+        public InteractionManagerWrapper GetInteractionManager()
         {
 
 
@@ -262,7 +262,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="otherFaction">Other faction to check relationship with</param>
         /// <returns>Relationship value (-100 to 100, or null if unknown)</returns>
-        public float? GetRelationshipWith(Faction otherFaction)
+        public float? GetRelationshipWith(FactionWrapper otherFaction)
         {
             if (!otherFaction.IsValidWrapper) return null;
             
@@ -286,7 +286,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Maps to: buildings collection or planet filtering
         /// </summary>
         /// <returns>List of buildings owned by this faction</returns>
-        public List<Building> GetBuildings()
+        public List<BuildingWrapper> GetBuildings()
         {
             try
             {
@@ -297,7 +297,7 @@ namespace PerAspera.GameAPI.Wrappers
                     // DOC: BaseGame-Architecture-Corrections.md - Direct planet access
                     try
                     {
-                        var planet = Planet.GetCurrent();
+                        var planet = PlanetWrapper.GetCurrent();
                         if (planet != null)
                         {
                             var planetBuildings = CallNative<object>("get_buildings", planet.GetNativeObject());
@@ -347,7 +347,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogWarning($"Failed to get buildings for faction {Name}: {ex.Message}");
-                return new List<Building>();
+                return new List<BuildingWrapper>();
             }
         }
         
@@ -518,7 +518,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>True if command executed successfully</returns>
         public bool ExecuteResourceImportCommand(string resourceType, float amount = 1000f)
         {
-            InteractionManagerWrapper a = GetInteractionManage();
+            InteractionManagerWrapper a = GetInteractionManager();
 
             var importAction = PerAspera.GameAPI.Wrappers.ResourceCommandHelper.CreateNativeTextAction(resourceType, amount);
 
@@ -550,7 +550,7 @@ namespace PerAspera.GameAPI.Wrappers
                 Type fType = NativeObject.GetIl2CppType();
                 // Use the SDK command helper
                 bool success = PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(
-                    (GameAPI.Native.Faction) NativeObject , commandType, parameters?.ContainsKey("amount") == true ? Convert.ToSingle(parameters["amount"]) : 1000f);
+                    (Faction) NativeObject , commandType, parameters?.ContainsKey("amount") == true ? Convert.ToSingle(parameters["amount"]) : 1000f);
 
                 if (success)
                 {

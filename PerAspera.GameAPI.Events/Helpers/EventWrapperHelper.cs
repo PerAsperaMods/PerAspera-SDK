@@ -27,13 +27,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeBuilding">Native building instance from game</param>
         /// <returns>Building wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.Building? CreateBuildingWrapper(object? nativeBuilding)
+        public static GameAPI.Wrappers.BuildingWrapper? CreateBuildingWrapper(object? nativeBuilding)
         {
             if (nativeBuilding == null) return null;
             
             try
             {
-                return GameAPI.Wrappers.Building.FromNative(nativeBuilding);
+                return GameAPI.Wrappers.BuildingWrapper.FromNative(nativeBuilding);
             }
             catch (Exception ex)
             {
@@ -47,13 +47,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeBuildingType">Native building type instance</param>
         /// <returns>BuildingType wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.BuildingType? CreateBuildingTypeWrapper(object? nativeBuildingType)
+        public static GameAPI.Wrappers.BuildingTypeWrapper? CreateBuildingTypeWrapper(object? nativeBuildingType)
         {
             if (nativeBuildingType == null) return null;
             
             try
             {
-                return GameAPI.Wrappers.BuildingType.FromNative(nativeBuildingType);
+                return GameAPI.Wrappers.BuildingTypeWrapper.FromNative(nativeBuildingType);
             }
             catch (Exception ex)
             {
@@ -69,13 +69,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeFaction">Native faction instance from game</param>
         /// <returns>Faction wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.Faction? CreateFactionWrapper(object? nativeFaction)
+        public static GameAPI.Wrappers.FactionWrapper? CreateFactionWrapper(object? nativeFaction)
         {
             if (nativeFaction == null) return null;
             
             try
             {
-                return GameAPI.Wrappers.Faction.FromNative(nativeFaction);
+                return GameAPI.Wrappers.FactionWrapper.FromNative(nativeFaction);
             }
             catch (Exception ex)
             {
@@ -91,13 +91,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeResourceType">Native resource type instance</param>
         /// <returns>ResourceType wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.ResourceType? CreateResourceTypeWrapper(object? nativeResourceType)
+        public static GameAPI.Wrappers.ResourceTypeWrapper? CreateResourceTypeWrapper(object? nativeResourceType)
         {
             if (nativeResourceType == null) return null;
             
             try
             {
-                return GameAPI.Wrappers.ResourceType.FromNative(nativeResourceType);
+                return GameAPI.Wrappers.ResourceTypeWrapper.FromNative(nativeResourceType);
             }
             catch (Exception ex)
             {
@@ -113,13 +113,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeTechnology">Native technology instance</param>
         /// <returns>Technology wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.Technology? CreateTechnologyWrapper(object? nativeTechnology)
+        public static GameAPI.Wrappers.TechnologyWrapper? CreateTechnologyWrapper(object? nativeTechnology)
         {
             if (nativeTechnology == null) return null;
             
             try
             {
-                return GameAPI.Wrappers.Technology.FromNative(nativeTechnology);
+                return GameAPI.Wrappers.TechnologyWrapper.FromNative(nativeTechnology);
             }
             catch (Exception ex)
             {
@@ -135,13 +135,13 @@ namespace PerAspera.GameAPI.Events.Helpers
         /// </summary>
         /// <param name="nativeDrone">Native drone instance</param>
         /// <returns>Drone wrapper or null if conversion fails</returns>
-        public static GameAPI.Wrappers.Drone? CreateDroneWrapper(object? nativeDrone)
+        public static GameAPI.Wrappers.DroneWrapper? CreateDroneWrapper(object? nativeDrone)
         {
             if (nativeDrone == null) return null;
             
             try
             {
-                return new GameAPI.Wrappers.Drone(nativeDrone);
+                return new GameAPI.Wrappers.DroneWrapper(nativeDrone);
             }
             catch (Exception ex)
             {

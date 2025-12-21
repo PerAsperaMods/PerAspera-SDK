@@ -16,7 +16,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// 🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
     /// 🎯 Examples: F:\ModPeraspera\Individual-Mods\MasterGui2\PlanetWrapper usage
     /// </summary>
-    public class Planet : WrapperBase
+    public class PlanetWrapper : WrapperBase
     {
         private Atmosphere? _atmosphere;
         
@@ -24,17 +24,17 @@ namespace PerAspera.GameAPI.Wrappers
         /// Initialize Planet wrapper with native planet object
         /// </summary>
         /// <param name="nativePlanet">Native planet instance from game</param>
-        public Planet(object nativePlanet) : base(nativePlanet)
+        public PlanetWrapper(object nativePlanet) : base(nativePlanet)
         {
         }
         
         /// <summary>
         /// Get the current planet instance
         /// </summary>
-        public static Planet? GetCurrent()
+        public static PlanetWrapper? GetCurrent()
         {
             var planet = KeeperTypeRegistry.GetPlanet();
-            return planet != null ? new Planet(planet) : null;
+            return planet != null ? new PlanetWrapper(planet) : null;
         }
         
         // ==================== PLANET IDENTITY ====================
@@ -198,16 +198,16 @@ namespace PerAspera.GameAPI.Wrappers
         /// Maps to: buildings field or GetBuildings() method
         /// </summary>
         /// <returns>List of all buildings on the planet</returns>
-        public List<Building> GetBuildings()
+        public List<BuildingWrapper> GetBuildings()
         {
             try
             {
                 var nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
                                     SafeInvoke<object>("GetBuildings");
                 
-                if (nativeBuildings == null) return new List<Building>();
+                if (nativeBuildings == null) return new List<BuildingWrapper>();
                 
-                var buildingWrappers = new List<Building>();
+                var buildingWrappers = new List<BuildingWrapper>();
                 var enumerable = nativeBuildings as System.Collections.IEnumerable;
                 if (enumerable != null)
                 {
@@ -215,7 +215,7 @@ namespace PerAspera.GameAPI.Wrappers
                     {
                         if (building != null)
                         {
-                            buildingWrappers.Add(new Building(building));
+                            buildingWrappers.Add(new BuildingWrapper(building));
                         }
                     }
                 }
@@ -225,7 +225,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogError($"Failed to get buildings for planet: {ex.Message}");
-                return new List<Building>();
+                return new List<BuildingWrapper>();
             }
         }
         
@@ -234,15 +234,15 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to filter by</param>
         /// <returns>List of buildings owned by the faction</returns>
-        public List<Building> GetBuildingsByFaction(Faction faction)
+        public List<BuildingWrapper> GetBuildingsByFaction(FactionWrapper faction)
         {
-            if (!faction.IsValidWrapper) return new List<Building>();
+            if (!faction.IsValidWrapper) return new List<BuildingWrapper>();
             
             try
             {
                 // Get all buildings and filter by faction
                 var allBuildings = GetBuildings();
-                var factionBuildings = new List<Building>();
+                var factionBuildings = new List<BuildingWrapper>();
                 
                 foreach (var building in allBuildings)
                 {
@@ -266,7 +266,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogError($"Failed to get buildings for faction {faction.Name}: {ex.Message}");
-                return new List<Building>();
+                return new List<BuildingWrapper>();
             }
         }
         

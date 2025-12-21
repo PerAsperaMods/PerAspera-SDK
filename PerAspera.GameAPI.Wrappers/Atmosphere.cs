@@ -23,7 +23,7 @@ namespace PerAspera.GameAPI.Wrappers
         public string Name { get; }
         public string Symbol { get; }
 
-        ResourceType resourceType = null;
+        ResourceTypeWrapper resourceType = null;
 
         internal AtmosphericGas(object nativePlanet, string name, string symbol, string getterMethod, string? setterMethod = null)
         {

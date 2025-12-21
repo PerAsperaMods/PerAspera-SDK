@@ -12,22 +12,22 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to technology type definitions and properties
     /// DOC: TechnologyType.md - Technology definitions loaded from YAML
     /// </summary>
-    public class Technology : WrapperBase
+    public class TechnologyWrapper : WrapperBase
     {
         /// <summary>
         /// Initialize Technology wrapper with native TechnologyType object
         /// </summary>
         /// <param name="nativeTechnology">Native TechnologyType instance from game</param>
-        public Technology(object nativeTechnology) : base(nativeTechnology)
+        public TechnologyWrapper(object nativeTechnology) : base(nativeTechnology)
         {
         }
         
         /// <summary>
         /// Create wrapper from native TechnologyType object
         /// </summary>
-        public static Technology? FromNative(object? nativeTechnology)
+        public static TechnologyWrapper? FromNative(object? nativeTechnology)
         {
-            return nativeTechnology != null ? new Technology(nativeTechnology) : null;
+            return nativeTechnology != null ? new TechnologyWrapper(nativeTechnology) : null;
         }
         
         // ==================== CORE IDENTIFICATION ====================
@@ -120,7 +120,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Prerequisites needed to unlock this technology
         /// Maps to: prerequisites or requiredTechs array
         /// </summary>
-        public List<Technology> GetPrerequisites()
+        public List<TechnologyWrapper> GetPrerequisites()
         {
             try
             {
@@ -128,7 +128,7 @@ namespace PerAspera.GameAPI.Wrappers
                                   SafeInvoke<object>("get_requiredTechs") ??
                                   SafeInvoke<object>("get_dependencies");
                 
-                var prereqList = new List<Technology>();
+                var prereqList = new List<TechnologyWrapper>();
                 
                 if (prerequisites is System.Collections.IEnumerable enumerable)
                 {
@@ -136,7 +136,7 @@ namespace PerAspera.GameAPI.Wrappers
                     {
                         if (prereq != null)
                         {
-                            prereqList.Add(new Technology(prereq));
+                            prereqList.Add(new TechnologyWrapper(prereq));
                         }
                     }
                 }
@@ -146,7 +146,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogWarning($"Failed to get prerequisites for technology {Name}: {ex.Message}");
-                return new List<Technology>();
+                return new List<TechnologyWrapper>();
             }
         }
         
@@ -155,7 +155,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to check prerequisites for</param>
         /// <returns>True if all prerequisites are researched</returns>
-        public bool ArePrerequisitesMet(Faction faction)
+        public bool ArePrerequisitesMet(FactionWrapper faction)
         {
             if (!faction.IsValidWrapper) return false;
             
@@ -203,14 +203,14 @@ namespace PerAspera.GameAPI.Wrappers
         /// Resources unlocked by this technology
         /// Maps to: unlockedResources array
         /// </summary>
-        public List<ResourceType> GetUnlockedResources()
+        public List<ResourceTypeWrapper> GetUnlockedResources()
         {
             try
             {
                 var resources = SafeInvoke<object>("get_unlockedResources") ?? 
                               SafeInvoke<object>("get_resources");
                 
-                var resourceList = new List<ResourceType>();
+                var resourceList = new List<ResourceTypeWrapper>();
                 
                 if (resources is System.Collections.IEnumerable enumerable)
                 {
@@ -218,7 +218,7 @@ namespace PerAspera.GameAPI.Wrappers
                     {
                         if (resource != null)
                         {
-                            resourceList.Add(new ResourceType(resource));
+                            resourceList.Add(new ResourceTypeWrapper(resource));
                         }
                     }
                 }
@@ -228,7 +228,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogWarning($"Failed to get unlocked resources for technology {Name}: {ex.Message}");
-                return new List<ResourceType>();
+                return new List<ResourceTypeWrapper>();
             }
         }
         
@@ -239,7 +239,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to check research status for</param>
         /// <returns>True if technology is researched</returns>
-        public bool IsResearchedBy(Faction faction)
+        public bool IsResearchedBy(FactionWrapper faction)
         {
             return faction.IsValidWrapper && faction.HasTechnology(Name);
         }
@@ -250,7 +250,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to check availability for</param>
         /// <returns>True if technology can be researched</returns>
-        public bool IsAvailableFor(Faction faction)
+        public bool IsAvailableFor(FactionWrapper faction)
         {
             return faction.IsValidWrapper && 
                    !IsResearchedBy(faction) && 
@@ -262,7 +262,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to research technology for</param>
         /// <returns>True if research was initiated successfully</returns>
-        public bool StartResearch(Faction faction)
+        public bool StartResearch(FactionWrapper faction)
         {
             if (!faction.IsValidWrapper) return false;
             

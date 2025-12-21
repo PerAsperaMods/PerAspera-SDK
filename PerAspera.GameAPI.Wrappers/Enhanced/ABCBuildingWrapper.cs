@@ -71,12 +71,12 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
         /// Get building type definition
         /// Maps to: buildingType property
         /// </summary>
-        public BuildingType? GetBuildingType()
+        public BuildingTypeWrapper? GetBuildingType()
         {
             try
             {
                 var nativeBuildingType = SafeInvoke<object>("get_buildingType");
-                return nativeBuildingType != null ? new BuildingType(nativeBuildingType) : null;
+                return nativeBuildingType != null ? new BuildingTypeWrapper(nativeBuildingType) : null;
             }
             catch (Exception ex)
             {
@@ -233,7 +233,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
         /// Get the faction/owner of this building
         /// Maps to: faction or owner property
         /// </summary>
-        public Faction? GetOwner()
+        public FactionWrapper? GetOwner()
         {
             try
             {
@@ -241,7 +241,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
                 if (nativeFaction == null)
                     nativeFaction = SafeInvoke<object>("get_owner");
                     
-                return nativeFaction != null ? new Faction(nativeFaction) : null;
+                return nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
             }
             catch (Exception ex)
             {

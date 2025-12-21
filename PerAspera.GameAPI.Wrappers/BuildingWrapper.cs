@@ -14,22 +14,22 @@ namespace PerAspera.GameAPI.Wrappers
     /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Buildings.md
     /// 🔧 Override System: F:\ModPeraspera\SDK\PerAspera.GameAPI.Overrides\ProductionOverrides.cs
     /// </summary>
-    public class Building : WrapperBase
+    public class BuildingWrapper : WrapperBase
     {
         /// <summary>
         /// Initialize Building wrapper with native building object
         /// </summary>
         /// <param name="nativeBuilding">Native building instance from game</param>
-        public Building(object nativeBuilding) : base(nativeBuilding)
+        public BuildingWrapper(object nativeBuilding) : base(nativeBuilding)
         {
         }
         
         /// <summary>
         /// Create wrapper from native building object
         /// </summary>
-        public static Building? FromNative(object? nativeBuilding)
+        public static BuildingWrapper? FromNative(object? nativeBuilding)
         {
-            return nativeBuilding != null ? new Building(nativeBuilding) : null;
+            return nativeBuilding != null ? new BuildingWrapper(nativeBuilding) : null;
         }
         
         // ==================== CORE IDENTIFICATION ====================
@@ -47,10 +47,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Building type definition (factory, hab, etc.)
         /// Maps to: _buildingType field
         /// </summary>
-        public BuildingType GetBuildingType()
+        public BuildingTypeWrapper GetBuildingType()
         {
             
-            return  new BuildingType(SafeInvoke<GameAPI.Native.BuildingType>("get_buildingType"));
+            return  new BuildingTypeWrapper(SafeInvoke<GameAPI.Native.BuildingType>("get_buildingType"));
         }
         
         /// <summary>
@@ -149,7 +149,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? GetFaction()
         {
-            return new GameAPI.Wrappers.Faction(SafeInvoke<object>("get_faction"));
+            return new GameAPI.Wrappers.FactionWrapper(SafeInvoke<object>("get_faction"));
         }
         
         // ==================== STOCKPILE ====================

@@ -401,7 +401,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
             try
             {
                 // Wait for BaseGame to be available before patching
-                var baseGameInstance = BaseGame.GetCurrent();
+                var baseGameInstance = BaseGameWrapper.GetCurrent();
                 if (baseGameInstance == null) 
                 {
                     _log.Info("⏳ BaseGame not yet available - deferring patch application");

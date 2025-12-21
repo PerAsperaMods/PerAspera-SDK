@@ -44,7 +44,7 @@ namespace PerAspera.GameAPI.Commands
             try
             {
                 // Get GameEventBus from player faction via SDK wrappers
-                var baseGame = PerAspera.GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent();
                 if (baseGame == null)
                 {
                     _logger.LogError("ResourceCommandHelper: Cannot get BaseGame instance");
@@ -73,15 +73,14 @@ namespace PerAspera.GameAPI.Commands
                 }
 
                 // Create TextAction using wrapper
-                var textAction = PerAspera.GameAPI.Wrappers.TextAction.CreateAddResource(resourceType, (int)amount);
+                var textAction = PerAspera.GameAPI.Wrappers.TextActionWrapper.CreateAddResource(resourceType, (int)amount);
                 if (textAction == null)
                 {
                     _logger.LogError($"ResourceCommandHelper: Failed to create TextAction for resource {resourceType}");
                     return false;
                 }
-
                 // Execute the command using InteractionManagerWrapper
-                return PerAspera.GameAPI.Wrappers.InteractionManagerWrapper.DispatchAction(
+                return playerFaction.GetInteractionManager().DispatchAction(
                     factionHandle.GetNativeObject(), // Handle is IHandleable
                     gameEventBus,
                     textAction.GetNativeTextActionObject(),

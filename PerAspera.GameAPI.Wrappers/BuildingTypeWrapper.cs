@@ -12,22 +12,22 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to building type definitions and properties
     /// DOC: BuildingType.md - Building definitions and construction properties
     /// </summary>
-    public class BuildingType : WrapperBase
+    public class BuildingTypeWrapper : WrapperBase
     {
         /// <summary>
         /// Initialize BuildingType wrapper with native building type object
         /// </summary>
         /// <param name="nativeBuildingType">Native building type instance from game</param>
-        public BuildingType(object nativeBuildingType) : base(nativeBuildingType)
+        public BuildingTypeWrapper(object nativeBuildingType) : base(nativeBuildingType)
         {
         }
         
         /// <summary>
         /// Create wrapper from native building type object
         /// </summary>
-        public static BuildingType? FromNative(object? nativeBuildingType)
+        public static BuildingTypeWrapper? FromNative(object? nativeBuildingType)
         {
-            return nativeBuildingType != null ? new BuildingType(nativeBuildingType) : null;
+            return nativeBuildingType != null ? new BuildingTypeWrapper(nativeBuildingType) : null;
         }
         
         // ==================== CORE IDENTIFICATION ====================
@@ -421,7 +421,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="faction">Faction to check unlock status for</param>
         /// <returns>True if building is unlocked</returns>
-        public bool IsUnlockedFor(Faction faction)
+        public bool IsUnlockedFor(FactionWrapper faction)
         {
             if (!faction.IsValidWrapper) return false;
             

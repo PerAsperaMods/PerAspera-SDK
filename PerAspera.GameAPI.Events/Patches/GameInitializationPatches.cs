@@ -52,12 +52,12 @@ namespace PerAspera.GameAPI.Events.Patches
         /// <summary>
         /// Try to get BaseGame using existing SDK wrapper system
         /// </summary>
-        private static GameAPI.Wrappers.BaseGame? TryGetBaseGameWrapper()
+        private static BaseGameWrapper? TryGetBaseGameWrapper()
         {
             try
             {
-                // Get BaseGame using BaseGame.GetCurrent()
-                var baseGameInstance = GameAPI.Wrappers.BaseGame.GetCurrent();
+                // Get BaseGame using BaseGameWrapper.GetCurrent()
+                var baseGameInstance = BaseGameWrapper.GetCurrent();
                 if (baseGameInstance != null)
                 {
                     // Optionally verify Keeper is initialized within BaseGame
@@ -79,7 +79,7 @@ namespace PerAspera.GameAPI.Events.Patches
         /// <summary>
         /// Trigger GameHubInitialized event using SDK wrapper
         /// </summary>
-        private static void TriggerGameHubInitialized(GameAPI.Wrappers.BaseGame baseGameWrapper)
+        private static void TriggerGameHubInitialized(GameAPI.Wrappers.BaseGameWrapper baseGameWrapper)
         {
             if (_gameHubInitialized) return;
 

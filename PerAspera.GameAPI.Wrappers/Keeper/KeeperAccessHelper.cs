@@ -38,7 +38,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var universe = Universe.GetCurrent();
+                var universe = UniverseWrapper.GetCurrent();
                 return universe?.GetKeeper();
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var baseGame = BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 return baseGame?.GetKeeper();
             }
             catch (Exception ex)

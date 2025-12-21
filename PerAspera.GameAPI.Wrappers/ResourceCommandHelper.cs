@@ -97,37 +97,13 @@ namespace PerAspera.GameAPI.Wrappers
                 // il faut rechercehr le REsoruceTYPE dans le  KeeperMap/keerper
 
                 // Get native objects directly from IL2CPP
-                HandleWrapper _h =((Faction)handleable).GetHandle();
+                HandleWrapper _h =((FactionWrapper)handleable).GetHandle();
                 
+                TextAction? textAction = CreateNativeTextAction(resourceType, amount) as TextAction;
 
-
-
-
-
-                var nativeFaction = GetNativeFactionFromHandle(factionHandle);
-                if (nativeFaction == null)
-                {
-                    _logger.LogError("ResourceCommandHelper: Cannot get native faction from handle");
-                    return false;
-                }
-
-                var gameEventBus = GetGameEventBusFromFaction(nativeFaction);
-                if (gameEventBus == null)
-                {
-                    _logger.LogError("ResourceCommandHelper: Cannot get GameEventBus from faction");
-                    return false;
-                }
-
-                // Create native TextAction
-                var textAction = CreateNativeTextAction(resourceType, amount);
-                if (textAction == null)
-                {
-                    _logger.LogError($"ResourceCommandHelper: Failed to create TextAction for resource {resourceType}");
-                    return false;
-                }
 
                 // Execute the command using cached method
-                return DispatchActionInternal(nativeFaction, gameEventBus, textAction, $"ResourceImport_{resourceType}");
+                return DispatchActionInternal(handleable, handleable.GetMemberValue<GameEventBus>("_gameEventBus"), textAction, $"ResourceImport_{resourceType}");
             }
             catch (Exception ex)
             {

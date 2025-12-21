@@ -7,7 +7,7 @@ using PerAspera.GameAPI.Wrappers;
 
 // Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
 using Atmo = PerAspera.GameAPI.Wrappers.Atmosphere;
-using PlanetWrapped = PerAspera.GameAPI.Wrappers.Planet;
+using PlanetWrapped = PerAspera.GameAPI.Wrappers.PlanetWrapper;
 
 namespace PerAspera.GameAPI.Climate
 {

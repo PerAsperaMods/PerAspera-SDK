@@ -12,14 +12,14 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to Unity scene data via IL2CPP
     /// DOC: Scene wrapper for Unity SceneManagement system
     /// </summary>
-    public class Scene : WrapperBase
+    public class SceneWrapper : WrapperBase
     {
         private UnityEngine.SceneManagement.Scene _nativeScene;
         
         /// <summary>
         /// Create wrapper from native Unity Scene
         /// </summary>
-        public Scene(UnityEngine.SceneManagement.Scene nativeScene) : base(null)
+        public SceneWrapper(UnityEngine.SceneManagement.Scene nativeScene) : base(null)
         {
             _nativeScene = nativeScene;
             // Scene is struct, so no object validation needed
@@ -186,7 +186,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Check if this scene equals another
         /// </summary>
-        public bool Equals(Scene other)
+        public bool Equals(SceneWrapper other)
         {
             if (other == null) return false;
             return _nativeScene.handle == other._nativeScene.handle;
@@ -194,7 +194,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         public override bool Equals(object obj)
         {
-            return obj is Scene other && Equals(other);
+            return obj is SceneWrapper other && Equals(other);
         }
         
         public override int GetHashCode()
@@ -202,13 +202,13 @@ namespace PerAspera.GameAPI.Wrappers
             return _nativeScene.handle.GetHashCode();
         }
         
-        public static bool operator ==(Scene left, Scene right)
+        public static bool operator ==(SceneWrapper left, SceneWrapper right)
         {
             if (ReferenceEquals(left, null)) return ReferenceEquals(right, null);
             return left.Equals(right);
         }
         
-        public static bool operator !=(Scene left, Scene right)
+        public static bool operator !=(SceneWrapper left, SceneWrapper right)
         {
             return !(left == right);
         }

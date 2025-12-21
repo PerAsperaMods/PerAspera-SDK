@@ -4,6 +4,7 @@ using System.Linq;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI;
+using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.SDK.TwitchIntegration
 {
@@ -36,14 +37,14 @@ namespace PerAspera.SDK.TwitchIntegration
         /// <summary>
         /// Get the player faction using proper Keeper/Handle system
         /// </summary>
-        public static GameAPI.Wrappers.Faction? GetPlayerFaction()
+        public static GameAPI.Wrappers.FactionWrapper? GetPlayerFaction()
         {
             try
             {
                 Log.Debug("Getting player faction via Universe wrapper");
                 
                 // 1. Get Universe via BaseGame wrapper
-                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame == null)
                 {
                     Log.Warning("BaseGame not available");
@@ -156,7 +157,7 @@ namespace PerAspera.SDK.TwitchIntegration
         /// <summary>
         /// Get native faction object from wrapper using KeeperMapWrapper
         /// </summary>
-        private static object? GetNativeFactionFromWrapper(GameAPI.Wrappers.Faction factionWrapper)
+        private static object? GetNativeFactionFromWrapper(GameAPI.Wrappers.FactionWrapper factionWrapper)
         {
             try
             {

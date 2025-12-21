@@ -12,14 +12,15 @@ namespace PerAspera.GameAPI.Wrappers
     /// Provides safe access to Blackboard variables used for quest/dialog state management
     /// DOC: Blackboard.md - Variable storage with string/float/bool values
     /// </summary>
-    public class BlackBoard : WrapperBase
+    public class BlackBoardWrapper : WrapperBase
     {
         /// <summary>
         /// Creates a new BlackBoard wrapper around a native blackboard instance
         /// </summary>
         /// <param name="nativeBlackBoard">Native blackboard object to wrap</param>
-        public BlackBoard(object nativeBlackBoard) : base(nativeBlackBoard)
+        public BlackBoardWrapper(object nativeBlackBoard) : base(nativeBlackBoard)
         {
+            NativeObject= nativeBlackBoard;
         }
         
         /// <summary>

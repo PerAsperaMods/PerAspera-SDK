@@ -16,12 +16,12 @@ namespace PerAspera.GameAPI.Wrappers
     /// - arguments: List<string> - Command parameters
     /// - showInFrontend: bool - Display in UI
     /// </summary>
-    public class TextAction : WrapperBase
+    public class TextActionWrapper : WrapperBase
     {
         /// <summary>
         /// Create TextAction wrapper from native TextAction instance
         /// </summary>
-        public TextAction(object nativeTextAction) : base(nativeTextAction)
+        public TextActionWrapper(object nativeTextAction) : base(nativeTextAction)
         {
         }
         
@@ -69,7 +69,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="command">Command name</param>
         /// <param name="arguments">Command arguments</param>
         /// <returns>TextAction wrapper instance</returns>
-        public static TextAction? Create(string command, params string[] arguments)
+        public static TextActionWrapper? Create(string command, params string[] arguments)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 Log.LogInfo($"[TextAction] Successfully created native TextAction instance");
-                return new TextAction(nativeInstance);
+                return new TextActionWrapper(nativeInstance);
             }
             catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Format: "Command\tArg1\tArg2\tArg3"
         /// Example: "FactionAddResourceDistributed\tIce\t1000"
         /// </summary>
-        public static TextAction? FromTabbedString(string tabbedString)
+        public static TextActionWrapper? FromTabbedString(string tabbedString)
         {
             try
             {
@@ -143,7 +143,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Create TextAction for adding resources to faction
         /// </summary>
-        public static TextAction? CreateAddResource(string resourceName, int amount, float delay = 0f)
+        public static TextActionWrapper? CreateAddResource(string resourceName, int amount, float delay = 0f)
         {
             var textAction = Create("FactionAddResourceDistributed", resourceName, amount.ToString());
             if (textAction != null)

@@ -16,19 +16,19 @@ namespace PerAspera.GameAPI.Wrappers
     /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
     /// 🕰️ Time System: Game state, pause, time management functionality
     /// </summary>
-    public class Universe : WrapperBase
+    public class UniverseWrapper : WrapperBase
     {
-        public Universe(object nativeUniverse) : base(nativeUniverse)
+        public UniverseWrapper(object nativeUniverse) : base(nativeUniverse)
         {
         }
 
         /// <summary>
         /// Get the current universe instance
         /// </summary>
-        public static Universe? GetCurrent()
+        public static UniverseWrapper? GetCurrent()
         {
             var universe = KeeperTypeRegistry.GetUniverse();
-            return universe != null ? new Universe(universe) : null;
+            return universe != null ? new UniverseWrapper(universe) : null;
         }
         
         /// <summary>
@@ -41,10 +41,10 @@ namespace PerAspera.GameAPI.Wrappers
             return nativeKeeper != null ? new KeeperWrapper(nativeKeeper) : null;
         }
         
-        public PerAspera.GameAPI.Wrappers.Faction? GetPlayerFaction()
+        public FactionWrapper GetPlayerFaction()
         {
             return NativeObject.InvokeMethod<object>("GetPlayerFaction") is { } nativeFaction
-                ? new PerAspera.GameAPI.Wrappers.Faction(nativeFaction)
+                ? new FactionWrapper(nativeFaction)
                 : null;
         }
 
@@ -75,24 +75,24 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Get the planet wrapper instance
         /// </summary>
-        public Planet? GetPlanet()
+        public PlanetWrapper? GetPlanet()
         {
             var nativePlanet = SafeInvoke<object>("GetPlanet");
-            return nativePlanet != null ? new Planet(nativePlanet) : null;
+            return nativePlanet != null ? new PlanetWrapper(nativePlanet) : null;
         }
         
         /// <summary>
         /// Get the current planet instance (alias for GetPlanet for convenience)
         /// </summary>
-        public Planet? CurrentPlanet => GetPlanet();
+        public PlanetWrapper? CurrentPlanet => GetPlanet();
         
         /// <summary>
         /// Get the base game wrapper instance
         /// </summary>
-        public BaseGame? GetBaseGame()
+        public BaseGameWrapper? GetBaseGame()
         {
             var nativeBaseGame = SafeInvoke<object>("GetBaseGame");
-            return nativeBaseGame != null ? new BaseGame(nativeBaseGame) : null;
+            return nativeBaseGame != null ? new BaseGameWrapper(nativeBaseGame) : null;
         }
         
 
@@ -101,16 +101,16 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get all factions in the universe
         /// Maps to: factions field or GetFactions() method
         /// </summary>
-        public List<Faction> GetFactions()
+        public List<FactionWrapper> GetFactions()
         {
             try
             {
                 var nativeFactions = SafeInvoke<object>("get_factions") ?? 
                                    SafeInvoke<object>("GetFactions");
                 
-                if (nativeFactions == null) return new List<Faction>();
+                if (nativeFactions == null) return new List<FactionWrapper>();
                 
-                var factionWrappers = new List<Faction>();
+                var factionWrappers = new List<FactionWrapper>();
                 var enumerable = nativeFactions as System.Collections.IEnumerable;
                 if (enumerable != null)
                 {
@@ -118,7 +118,7 @@ namespace PerAspera.GameAPI.Wrappers
                     {
                         if (faction != null)
                         {
-                            factionWrappers.Add(new Faction(faction));
+                            factionWrappers.Add(new FactionWrapper(faction));
                         }
                     }
                 }
@@ -128,7 +128,7 @@ namespace PerAspera.GameAPI.Wrappers
             catch (Exception ex)
             {
                 Log.LogError($"Failed to get factions: {ex.Message}");
-                return new List<Faction>();
+                return new List<FactionWrapper>();
             }
         }
         
@@ -164,17 +164,17 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get the main blackboard instance
         /// Field: blackboardMain (public Blackboard)
         /// </summary>
-        public BlackBoard? GetMainBlackBoard()
+        public BlackBoardWrapper? GetMainBlackBoard()
         {
             var nativeBlackboard = SafeGetField<object>("blackboardMain");
-            return nativeBlackboard != null ? new BlackBoard(nativeBlackboard) : null;
+            return nativeBlackboard != null ? new BlackBoardWrapper(nativeBlackboard) : null;
         }
         
         /// <summary>
         /// Get a specific blackboard by name from the blackboards dictionary
         /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
         /// </summary>
-        public BlackBoard? GetBlackBoard(string name)
+        public BlackBoardWrapper? GetBlackBoard(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -193,7 +193,7 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 // Access Dictionary<string, Blackboard> using IL2CPP interop
                 var nativeBlackboard = blackboardsDict.InvokeMethod<object>("get_Item", name);
-                return nativeBlackboard != null ? new BlackBoard(nativeBlackboard) : null;
+                return nativeBlackboard != null ? new BlackBoardWrapper(nativeBlackboard) : null;
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Method: AddBlackboard(Blackboard blackboard)
         /// Note: Based on decompiled Universe.md method
         /// </summary>
-        public void AddBlackBoard(BlackBoard blackboard)
+        public void AddBlackBoard(BlackBoardWrapper blackboard)
         {
             if (blackboard?.GetNativeObject() == null)
             {

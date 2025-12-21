@@ -12,7 +12,7 @@ using BepInEx.Logging;
 namespace PerAspera.GameAPI.Events.Detector
 {
     /// <summary>
-    /// MonoBehaviour that polls BaseGame.GetCurrent() until available
+    /// MonoBehaviour that polls BaseGameWrapper.GetCurrent() until available
     /// Integrated into EventsAutoStartPlugin to avoid multiple plugins per DLL
     /// </summary>
     public class GameHubDetector : MonoBehaviour
@@ -38,7 +38,7 @@ namespace PerAspera.GameAPI.Events.Detector
                 Destroy(this.gameObject);
                 return;
             }
-            _logger.LogInfo("🔍 GameHubDetector.Start() called - monitoring BaseGame.GetCurrent()");
+            _logger.LogInfo("🔍 GameHubDetector.Start() called - monitoring BaseGameWrapper.GetCurrent()");
             _logger.LogInfo($"🎮 GameObject: {gameObject.name}, Active: {gameObject.activeInHierarchy}");
         }
 
@@ -73,7 +73,7 @@ namespace PerAspera.GameAPI.Events.Detector
 
             try
             {
-                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame != null)
                 {
                     _logger.LogInfo($"🎯 BaseGame detected at frame {_frameCount}! Publishing GameHubInitializedEvent...");

@@ -13,9 +13,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
     /// 📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
     /// </summary>
-    public class BaseGame : WrapperBase
+    public class BaseGameWrapper : WrapperBase
     {
-        public BaseGame(object nativeBaseGame) : base(nativeBaseGame)
+        public BaseGameWrapper(object nativeBaseGame) : base(nativeBaseGame)
         {
 
         }
@@ -25,11 +25,11 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Get current BaseGame singleton instance
         /// </summary>
-        public static BaseGame? GetCurrent()
+        public static BaseGameWrapper? GetCurrent()
         {
             var instance = GameTypeInitializer.GetBaseGameInstance();
             
-            return instance != null ? new BaseGame(instance) : null;
+            return instance != null ? new BaseGameWrapper(instance) : null;
         }
         
         // ==================== CORE SYSTEMS ====================
@@ -49,10 +49,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Property: universe { get; }
         /// Backing field: _universe_k__BackingField
         /// </summary>
-        public Universe? GetUniverse()
+        public UniverseWrapper? GetUniverse()
         {
             var nativeUniverse = SafeInvoke<object>("get_universe");
-            return nativeUniverse != null ? new Universe(nativeUniverse) : null;
+            return nativeUniverse != null ? new UniverseWrapper(nativeUniverse) : null;
         }
         
         /// <summary>
@@ -196,17 +196,17 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get the main blackboard via Universe
         /// Convenience method: BaseGame -> Universe -> BlackBoard
         /// </summary>
-        public BlackBoard? GetMainBlackBoard()
+        public BlackBoardWrapper? GetMainBlackBoard()
         {
             var universe = GetUniverse();
-            return universe?.GetMainBlackBoard();
+            return  new BlackBoardWrapper( universe?.GetMainBlackBoard());
         }
         
         /// <summary>
         /// Get a specific blackboard by name via Universe
         /// Convenience method: BaseGame -> Universe -> BlackBoard
         /// </summary>
-        public BlackBoard? GetBlackBoard(string name)
+        public BlackBoardWrapper? GetBlackBoard(string name)
         {
             var universe = GetUniverse();
             return universe?.GetBlackBoard(name);

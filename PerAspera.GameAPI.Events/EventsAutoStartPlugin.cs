@@ -8,8 +8,10 @@ using HarmonyLib;
 using UnityEngine;
 using Il2CppInterop.Runtime.Injection;
 using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
-using BepInEx.Logging;using PerAspera.GameAPI.Events.SDK;
+using BepInEx.Logging;
+using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Constants;
+using PerAspera.GameAPI.Wrappers;
 namespace PerAspera.GameAPI.Events
 {
     /// <summary>
@@ -228,7 +230,7 @@ namespace PerAspera.GameAPI.Events
                 _staticLogger?.LogInfo($"🎯 {triggerSource} triggered - checking BaseGame accessibility...");
 
                 // Access BaseGame through SDK wrapper
-                var baseGame = GameAPI.Wrappers.BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame != null)
                 {
                     _staticLogger?.LogInfo("🎮 BaseGame confirmed accessible - emitting all SDK events");

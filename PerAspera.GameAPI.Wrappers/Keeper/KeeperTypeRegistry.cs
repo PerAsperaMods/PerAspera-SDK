@@ -22,7 +22,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static bool IsInitialized()
         {
-            var baseGame = BaseGame.GetCurrent();
+            var baseGame = BaseGameWrapper.GetCurrent();
             if (baseGame == null) return false;
             
             var keeper = baseGame.GetKeeper();
@@ -50,7 +50,7 @@ namespace PerAspera.GameAPI.Wrappers
         public static KeeperWrapper? GetKeeper()
         {
             
-            return (KeeperWrapper)BaseGame.GetCurrent()?.GetKeeper();
+            return (KeeperWrapper)BaseGameWrapper.GetCurrent()?.GetKeeper();
         }
         
         /// <summary>
@@ -59,7 +59,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static object? GetUniverse()
         {
-            var baseGameWrapper = BaseGame.GetCurrent();
+            var baseGameWrapper = BaseGameWrapper.GetCurrent();
             if (!baseGameWrapper.IsValidWrapper) return null;
             return baseGameWrapper.GetUniverse()?.GetNativeObject(); // Get native object directly
         }
@@ -147,10 +147,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         /// <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
         /// <returns>ResourceType wrapper or null if not found</returns>
-        public static ResourceType? GetResourceTypeWrapper(string resourceKey)
+        public static ResourceTypeWrapper? GetResourceTypeWrapper(string resourceKey)
         {
             var nativeResourceType = GetResourceType(resourceKey);
-            return nativeResourceType != null ? new ResourceType(nativeResourceType) : null;
+            return nativeResourceType != null ? new ResourceTypeWrapper(nativeResourceType) : null;
         }
         
         /// <summary>
@@ -337,7 +337,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static string GetStatus()
         {
-            var baseGame = BaseGame.GetCurrent();
+            var baseGame = BaseGameWrapper.GetCurrent();
             if (baseGame == null) return "BaseGame: NOT FOUND";
             
             var keeper = baseGame.GetKeeper();
