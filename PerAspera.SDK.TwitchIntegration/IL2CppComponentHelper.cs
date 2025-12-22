@@ -95,7 +95,7 @@ namespace PerAspera.SDK.TwitchIntegration
                 }
 
                 // Add component
-                var component = AddComponentSafe<T>(gameObject, registerType: true);
+                var component = AddComponentSafe<T>(gameObject);
                 
                 if (component == null)
                 {

@@ -94,9 +94,9 @@ Make sure the type is properly registered with `ClassInjector.RegisterTypeInIl2C
 
 ### Additional Resources
 
-- [BepInEx IL2CPP Documentation](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/4_IL2CPP.html)
+- [BepInEx IL2CPP Documentation](https://docs.bepinex.dev/articles/dev_guide/plugin_tutorial/4_IL2CPP.html)
 - [Il2CppInterop Documentation](https://github.com/BepInEx/Il2CppInterop)
-- [Unity IL2CPP Limitations](https://docs.unity3d.com/Manual/IL2CPP.html)
+- [Unity IL2CPP Documentation](https://docs.unity3d.com/Manual/IL2CPP.html)
 
 ## For Library Authors
 
