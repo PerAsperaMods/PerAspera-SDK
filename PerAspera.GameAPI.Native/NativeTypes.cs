@@ -17,6 +17,19 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+
+    
+
+        public class HazardsManager
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public HazardsManager(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
     public class IHandleable
     {
         /// <summary>Native IL2CPP BaseGame instance</summary>

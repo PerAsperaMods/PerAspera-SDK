@@ -10,5 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../PerAspera.Core/PerAspera.Core.csproj" />
+    <!-- Removed circular dependency to PerAspera.GameAPI -->
   </ItemGroup>
 </Project>

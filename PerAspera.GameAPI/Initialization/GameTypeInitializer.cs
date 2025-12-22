@@ -48,6 +48,10 @@ namespace PerAspera.GameAPI
                 // PERFORMANCE OPTIMIZATION: Warm up type discovery cache
                 PerAspera.GameAPI.Caching.TypeDiscoveryCache.WarmupCache();
 
+                // 🔄 CRITICAL GAP RESOLUTION: Initialize Native Instance Manager
+                PerAspera.GameAPI.Native.InstanceManager.Initialize();
+                _log.Info("🔗 Native InstanceManager initialized");
+
                 // Wait for game assemblies to be loaded
                 WaitForGameAssemblies();
 
@@ -57,12 +61,17 @@ namespace PerAspera.GameAPI
                 // Try to get singleton instances
                 DiscoverSingletonInstances();
 
+                // 🔄 CRITICAL GAP RESOLUTION: Register discovered instances in InstanceManager
+                RegisterInstancesInManager();
+
                 _isInitialized = true;
                 
                 var stats = GetDiscoveryStats();
                 var cacheStats = PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics();
+                var instanceStats = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
                 _log.Info($"✅ Type discovery initialized: {stats}");
                 _log.Info($"📊 Cache statistics: {cacheStats}");
+                _log.Info($"🔗 Instance registry: {instanceStats}");
             }
             catch (Exception ex)
             {
@@ -119,6 +128,101 @@ namespace PerAspera.GameAPI
             catch (Exception ex)
             {
                 _log.Warning($"Error discovering singleton instances: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Register discovered instances in the Native InstanceManager
+        /// 🔄 CRITICAL GAP RESOLUTION: Makes instances accessible to mods
+        /// </summary>
+        private static void RegisterInstancesInManager()
+        {
+            try
+            {
+                _log.Info("🔗 Registering discovered instances in InstanceManager...");
+
+                // Register BaseGame instance
+                if (_baseGameInstance != null)
+                {
+                    PerAspera.GameAPI.Native.InstanceManager.RegisterBaseGame(_baseGameInstance);
+                    _log.Info("✅ Registered BaseGame instance in InstanceManager");
+                }
+                else
+                {
+                    _log.Warning("⚠️ No BaseGame instance to register");
+                }
+
+                // Register Universe instance
+                if (_universeInstance != null)
+                {
+                    PerAspera.GameAPI.Native.InstanceManager.RegisterUniverse(_universeInstance);
+                    _log.Info("✅ Registered Universe instance in InstanceManager");
+
+                    // Try to get and register current planet from Universe
+                    var currentPlanet = TryGetCurrentPlanetFromUniverse(_universeInstance);
+                    if (currentPlanet != null)
+                    {
+                        PerAspera.GameAPI.Native.InstanceManager.RegisterCurrentPlanet(currentPlanet);
+                        _log.Info("✅ Registered CurrentPlanet instance in InstanceManager");
+                    }
+                }
+                else
+                {
+                    _log.Warning("⚠️ No Universe instance to register");
+                }
+
+                // Try to register factions if available
+                TryRegisterFactions();
+
+                var instanceStatus = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
+                _log.Info($"🔗 Instance registration complete: {instanceStatus}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"❌ Failed to register instances in InstanceManager: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Try to get current planet from Universe instance
+        /// </summary>
+        private static object? TryGetCurrentPlanetFromUniverse(object universeInstance)
+        {
+            try
+            {
+                var currentPlanetProperty = universeInstance.GetType().GetProperty("currentPlanet");
+                if (currentPlanetProperty != null)
+                {
+                    var planet = currentPlanetProperty.GetValue(universeInstance);
+                    if (planet != null)
+                    {
+                        _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
+                        return planet;
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.Warning($"Could not get currentPlanet from Universe: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Try to register active factions
+        /// </summary>
+        private static void TryRegisterFactions()
+        {
+            try
+            {
+                // For now, we'll need to hook into game events to register factions
+                // as they become active. This is a placeholder for future implementation.
+                _log.Debug("Faction registration deferred to game event hooks");
+            }
+            catch (Exception ex)
+            {
+                _log.Warning($"Could not register factions: {ex.Message}");
             }
         }
 
@@ -587,6 +691,69 @@ namespace PerAspera.GameAPI
             
             // Fallback to Building type
             return GetBuildingType();
+        }
+
+        // ========== INSTANCE MANAGER ACCESS METHODS ==========
+        // 🔄 CRITICAL GAP RESOLUTION: Easy access to live game instances
+
+        /// <summary>
+        /// Get BaseGame instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live BaseGame singleton
+        /// </summary>
+        public static object? GetBaseGameInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetBaseGame();
+        }
+
+        /// <summary>
+        /// Get Universe instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live Universe singleton
+        /// </summary>
+        public static object? GetUniverseInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetUniverse();
+        }
+
+        /// <summary>
+        /// Get current Planet instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live current Planet
+        /// </summary>
+        public static object? GetCurrentPlanetInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetCurrentPlanet();
+        }
+
+        /// <summary>
+        /// Get faction instance by ID from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live faction instances
+        /// </summary>
+        public static object? GetFactionInstanceFromManager(string factionId)
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetFaction(factionId);
+        }
+
+        /// <summary>
+        /// Get all registered faction instances from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to all live factions
+        /// </summary>
+        public static System.Collections.Generic.IEnumerable<object> GetAllFactionInstancesFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetAllFactions();
+        }
+
+        /// <summary>
+        /// Get InstanceManager status for debugging
+        /// 🔄 CRITICAL GAP: Debugging access to instance registry
+        /// </summary>
+        public static string GetInstanceManagerStatus()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetStatus();
         }
     }
 

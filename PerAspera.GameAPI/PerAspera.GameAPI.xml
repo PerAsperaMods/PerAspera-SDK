@@ -303,6 +303,22 @@
             Discover singleton instances
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.RegisterInstancesInManager">
+            <summary>
+            Register discovered instances in the Native InstanceManager
+            🔄 CRITICAL GAP RESOLUTION: Makes instances accessible to mods
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.TryGetCurrentPlanetFromUniverse(System.Object)">
+            <summary>
+            Try to get current planet from Universe instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.TryRegisterFactions">
+            <summary>
+            Try to register active factions
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameInstance">
             <summary>
             Get BaseGame singleton instance
@@ -451,6 +467,42 @@
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetConstructionType">
             <summary>
             Get Construction type (fallback to Building if not found)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBaseGameInstanceFromManager">
+            <summary>
+            Get BaseGame instance from InstanceManager
+            🔄 CRITICAL GAP: Provides access to live BaseGame singleton
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetUniverseInstanceFromManager">
+            <summary>
+            Get Universe instance from InstanceManager
+            🔄 CRITICAL GAP: Provides access to live Universe singleton
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetCurrentPlanetInstanceFromManager">
+            <summary>
+            Get current Planet instance from InstanceManager
+            🔄 CRITICAL GAP: Provides access to live current Planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetFactionInstanceFromManager(System.String)">
+            <summary>
+            Get faction instance by ID from InstanceManager
+            🔄 CRITICAL GAP: Provides access to live faction instances
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetAllFactionInstancesFromManager">
+            <summary>
+            Get all registered faction instances from InstanceManager
+            🔄 CRITICAL GAP: Provides access to all live factions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetInstanceManagerStatus">
+            <summary>
+            Get InstanceManager status for debugging
+            🔄 CRITICAL GAP: Debugging access to instance registry
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.TypeDiscoveryStats">

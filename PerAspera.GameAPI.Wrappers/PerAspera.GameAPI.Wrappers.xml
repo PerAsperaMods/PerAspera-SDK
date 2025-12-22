@@ -2997,6 +2997,7 @@
             Initialize Planet wrapper with native planet object
             </summary>
             <param name="nativePlanet">Native planet instance from game</param>
+            
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetCurrent">
             <summary>

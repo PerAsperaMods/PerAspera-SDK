@@ -19,15 +19,23 @@ namespace PerAspera.GameAPI.Wrappers
     public class PlanetWrapper : WrapperBase
     {
         private Atmosphere? _atmosphere;
-        
+
         /// <summary>
         /// Initialize Planet wrapper with native planet object
         /// </summary>
         /// <param name="nativePlanet">Native planet instance from game</param>
+        /// 
+
         public PlanetWrapper(object nativePlanet) : base(nativePlanet)
         {
+            
         }
-        
+
+        public HazardsManagerWrapper GetHazardsManager()
+        {
+            return  new  HazardsManagerWrapper(GetNativeObject().GetMemberValue<HazardsManager>("hazardsManager)"));
+        }
+
         /// <summary>
         /// Get the current planet instance
         /// </summary>

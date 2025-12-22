@@ -40,6 +40,9 @@ namespace PerAspera.SDK.TwitchIntegration
         // IRC Client
         private static SimpleTwitchIRCClient? _ircClient;
         
+        // PubSub Client for channel points
+        private static SimpleTwitchPubSubClient? _pubSubClient;
+        
         // Status
         private static bool _isInitialized = false;
         private static bool _isEarlyPhase = true;
@@ -131,6 +134,13 @@ namespace PerAspera.SDK.TwitchIntegration
                     Log.Info("✅ Building event notifications enabled");
                 }
                 
+                // Initialize PubSub for channel points
+                if (_config?.EnableChannelPoints == true)
+                {
+                    InitializePubSub();
+                    Log.Info("✅ Channel points PubSub enabled");
+                }
+                
                 // Send ready message
                 QueueMessage("🌍 Per Aspera fully loaded! All Twitch features now available. Use !status to see Mars data");
                 
@@ -177,6 +187,49 @@ namespace PerAspera.SDK.TwitchIntegration
             catch (Exception ex)
             {
                 Log.Error($"❌ Failed to subscribe to building events: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Initialize PubSub client for channel points redemptions.
+        /// Uses HTTP polling to check for channel point redemptions and applies game effects.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// // Automatically called when channel points are enabled
+        /// InitializePubSub();
+        /// // Now channel point redemptions will trigger game effects
+        /// </code>
+        /// </example>
+        /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/TwitchIntegration.md">Twitch Integration Documentation</seealso>
+        private static void InitializePubSub()
+        {
+            try
+            {
+                if (_config == null || string.IsNullOrEmpty(_config.ClientId) || string.IsNullOrEmpty(_config.BroadcasterId))
+                {
+                    Log.Warning("⚠️ Client ID or Broadcaster ID not configured for PubSub");
+                    return;
+                }
+                
+                // Create PubSub client as a GameObject component
+                var pubSubGameObject = new GameObject("TwitchPubSubClient");
+                GameObject.DontDestroyOnLoad(pubSubGameObject);
+                
+                _pubSubClient = pubSubGameObject.AddComponent<SimpleTwitchPubSubClient>();
+                _pubSubClient.Initialize(_config.ClientId, _config.OAuthToken, _config.BroadcasterId);
+                
+                // Subscribe to channel points events
+                _pubSubClient.OnChannelPointsRedeemed += OnChannelPointsRedeemed;
+                
+                // Start polling
+                _pubSubClient.StartPolling();
+                
+                Log.Info("✅ PubSub client initialized for channel points");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"❌ Failed to initialize PubSub: {ex.Message}");
             }
         }
         
