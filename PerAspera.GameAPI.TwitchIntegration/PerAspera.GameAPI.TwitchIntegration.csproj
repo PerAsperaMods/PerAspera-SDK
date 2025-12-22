@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Target Framework -->
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Assembly Information -->
+    <AssemblyTitle>Per Aspera GameAPI Twitch Integration</AssemblyTitle>
+    <AssemblyDescription>Twitch integration components for Per Aspera GameAPI</AssemblyDescription>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+
+    <!-- Build Configuration -->
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Output Configuration -->
+    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
+    <DocumentationFile>..\..\bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    
+    <!-- Enable all Unity references for SDK -->
+    <IncludeAllUnityReferences>true</IncludeAllUnityReferences>
+  </PropertyGroup>
+
+  <!-- SDK Project References -->
+  <ItemGroup>
+    <ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+    <ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
+  </ItemGroup>
+
+  <!-- Source Files -->
+  <ItemGroup>
+    <!-- Files are automatically included by the SDK -->
+  </ItemGroup>
+
+	<Target Name="SDK_DLL" AfterTargets="Build">
+		<PropertyGroup>
+			<SDKDeployPath>..\..\SDK_DLL</SDKDeployPath>
+		</PropertyGroup>
+		<MakeDir Directories="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.TwitchIntegration.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Message Text="📦 GameAPI.TwitchIntegration deployed to: $(SDKDeployPath)" Importance="high" />
+	</Target>
+</Project>

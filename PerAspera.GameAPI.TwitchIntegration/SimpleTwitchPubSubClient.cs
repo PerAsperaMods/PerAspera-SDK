@@ -2,18 +2,24 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using PerAspera.Core;
 
-/// <summary>
-/// Simple Twitch PubSub client using HTTP polling for channel points.
-/// Since Unity IL2CPP doesn't support WebSockets reliably, this uses
-/// the Twitch Helix API to poll for channel point redemptions.
-/// </summary>
-public class SimpleTwitchPubSubClient : MonoBehaviour
+namespace PerAspera.GameAPI.TwitchIntegration
+{
+    /// <summary>
+    /// Simple Twitch PubSub client using HTTP polling for channel points.
+    /// Since Unity IL2CPP doesn't support WebSockets reliably, this uses
+    /// the Twitch Helix API to poll for channel point redemptions.
+    /// </summary>
+    public class SimpleTwitchPubSubClient : MonoBehaviour
 {
     private const string HELIX_BASE_URL = "https://api.twitch.tv/helix";
     private const float POLL_INTERVAL = 2.0f; // Poll every 2 seconds
+
+    private readonly LogAspera _log = new LogAspera("TwitchPubSub");
 
     private string _clientId;
     private string _accessToken;
@@ -33,7 +39,7 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
         _accessToken = accessToken;
         _broadcasterId = broadcasterId;
 
-        LogAspera.Info($"SimpleTwitchPubSubClient initialized for broadcaster {_broadcasterId}");
+        _log.Info($"SimpleTwitchPubSubClient initialized for broadcaster {_broadcasterId}");
     }
 
     /// <summary>
@@ -43,13 +49,13 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
     {
         if (_isPolling)
         {
-            LogAspera.Warning("PubSub polling already started");
+            _log.Warning("PubSub polling already started");
             return;
         }
 
         _isPolling = true;
         _pollCoroutine = StartCoroutine(PollChannelPoints());
-        LogAspera.Info("Started PubSub polling for channel points");
+        _log.Info("Started PubSub polling for channel points");
     }
 
     /// <summary>
@@ -66,7 +72,7 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
             StopCoroutine(_pollCoroutine);
             _pollCoroutine = null;
         }
-        LogAspera.Info("Stopped PubSub polling");
+        _log.Info("Stopped PubSub polling");
     }
 
     private IEnumerator PollChannelPoints()
@@ -88,9 +94,9 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
             ["first"] = "20" // Get up to 20 recent redemptions
         };
 
-        url += "?" + string.Join("&", parameters.Select(kvp => $"{kvp.Key}={UnityWebRequest.EscapeURL(kvp.Value)}"));
+        url += "?" + string.Join("&", parameters.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"));
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using (UnityWebRequest request = new UnityWebRequest(url, "GET", new DownloadHandlerBuffer(), null))
         {
             request.SetRequestHeader("Client-ID", _clientId);
             request.SetRequestHeader("Authorization", $"Bearer {_accessToken}");
@@ -103,7 +109,7 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
             }
             else
             {
-                LogAspera.Error($"Failed to fetch channel point redemptions: {request.error}");
+                _log.Error($"Failed to fetch channel point redemptions: {request.error}");
             }
         }
     }
@@ -113,7 +119,7 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
         try
         {
             // Parse the JSON response
-            var response = JsonUtility.FromJson<ChannelPointsResponse>(jsonResponse);
+            var response = JsonSerializer.Deserialize<ChannelPointsResponse>(jsonResponse);
 
             if (response?.data != null)
             {
@@ -122,14 +128,11 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
                     // Create channel points event
                     var channelPointsEvent = new TwitchChannelPointsEvent
                     {
-                        RedemptionId = redemption.id,
-                        UserId = redemption.user_id,
-                        UserName = redemption.user_login,
-                        UserDisplayName = redemption.user_name,
                         RewardId = redemption.reward.id,
                         RewardTitle = redemption.reward.title,
-                        RewardCost = redemption.reward.cost,
-                        RewardPrompt = redemption.reward.prompt,
+                        Cost = redemption.reward.cost,
+                        UserId = redemption.user_id,
+                        UserName = redemption.user_login,
                         UserInput = redemption.user_input,
                         RedeemedAt = DateTime.Parse(redemption.redeemed_at)
                     };
@@ -144,7 +147,7 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
         }
         catch (Exception ex)
         {
-            LogAspera.Error($"Failed to process channel points response: {ex.Message}");
+            _log.Error($"Failed to process channel points response: {ex.Message}");
         }
     }
 
@@ -157,24 +160,19 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
             ["broadcaster_id"] = _broadcasterId
         };
 
-        url += "?" + string.Join("&", parameters.Select(kvp => $"{kvp.Key}={UnityWebRequest.EscapeURL(kvp.Value)}"));
+        url += "?" + string.Join("&", parameters.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"));
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "PATCH"))
+        using (UnityWebRequest request = new UnityWebRequest(url, "PATCH", new DownloadHandlerBuffer(), new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes("{\"status\": \"FULFILLED\"}"))))
         {
             request.SetRequestHeader("Client-ID", _clientId);
             request.SetRequestHeader("Authorization", $"Bearer {_accessToken}");
             request.SetRequestHeader("Content-Type", "application/json");
 
-            string jsonBody = "{\"status\": \"FULFILLED\"}";
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-
             yield return request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                LogAspera.Warning($"Failed to fulfill redemption {redemptionId}: {request.error}");
+                _log.Warning($"Failed to fulfill redemption {redemptionId}: {request.error}");
             }
         }
     }
@@ -182,6 +180,18 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
     private void OnDestroy()
     {
         StopPolling();
+    }
+
+    // Event data class
+    public class TwitchChannelPointsEvent
+    {
+        public string RewardId { get; set; }
+        public string RewardTitle { get; set; }
+        public int Cost { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string UserInput { get; set; }
+        public DateTime RedeemedAt { get; set; }
     }
 
     // JSON response classes
@@ -211,4 +221,5 @@ public class SimpleTwitchPubSubClient : MonoBehaviour
         public string prompt;
         public int cost;
     }
+}
 }

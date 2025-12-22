@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 using PerAspera.Core;
 using PerAspera.GameAPI;
 using PerAspera.GameAPI.Events;
@@ -10,6 +11,7 @@ using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate;
+using PerAspera.GameAPI.TwitchIntegration;
 using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.SDK.TwitchIntegration
@@ -117,32 +119,35 @@ namespace PerAspera.SDK.TwitchIntegration
         {
             try
             {
-                if (!_isInitialized || _ircClient == null)
-                {
-                    Log.Warning("⚠️ Twitch IRC not initialized, skipping full integration");
-                    return;
-                }
-                
                 Log.Info("🎮 Starting Twitch Integration - Full Game Phase");
                 
                 _isEarlyPhase = false;
                 
-                // Subscribe to building events for Twitch notifications
-                if (_config?.EnableBuildingNotifications == true)
+                // Load config if not already loaded
+                _config ??= TwitchConfiguration.Load();
+                
+                // Subscribe to building events for Twitch notifications (requires IRC)
+                if (_config?.EnableBuildingNotifications == true && _ircClient != null)
                 {
                     SubscribeToBuildingEvents();
                     Log.Info("✅ Building event notifications enabled");
                 }
                 
-                // Initialize PubSub for channel points
+                // Initialize PubSub for channel points (independent of IRC)
                 if (_config?.EnableChannelPoints == true)
                 {
                     InitializePubSub();
                     Log.Info("✅ Channel points PubSub enabled");
                 }
                 
-                // Send ready message
-                QueueMessage("🌍 Per Aspera fully loaded! All Twitch features now available. Use !status to see Mars data");
+                // Send ready message if IRC is available
+                if (_ircClient != null)
+                {
+                    QueueMessage("🌍 Per Aspera fully loaded! All Twitch features now available. Use !status to see Mars data");
+                }
+                
+                // Mark as initialized even if IRC failed (for PubSub)
+                _isInitialized = true;
                 
                 Log.Info("✅ Twitch Integration fully initialized");
             }
@@ -216,8 +221,9 @@ namespace PerAspera.SDK.TwitchIntegration
                 var pubSubGameObject = new GameObject("TwitchPubSubClient");
                 GameObject.DontDestroyOnLoad(pubSubGameObject);
                 
-                _pubSubClient = pubSubGameObject.AddComponent<SimpleTwitchPubSubClient>();
-                _pubSubClient.Initialize(_config.ClientId, _config.OAuthToken, _config.BroadcasterId);
+                // Use non-generic AddComponent for IL2CPP compatibility
+                _pubSubClient = (SimpleTwitchPubSubClient)pubSubGameObject.AddComponent(typeof(SimpleTwitchPubSubClient));
+                _pubSubClient.Initialize(_config.ClientId, _config.PubSubToken, _config.BroadcasterId);
                 
                 // Subscribe to channel points events
                 _pubSubClient.OnChannelPointsRedeemed += OnChannelPointsRedeemed;
@@ -858,6 +864,68 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 Log.Warning($"Error getting resource categories: {ex.Message}");
                 return "❌ Error getting categories";
+            }
+        }
+
+        /// <summary>
+        /// Handle channel points redemption events from Twitch PubSub.
+        /// Processes redemption rewards and applies game effects through the SDK.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// // Viewer redeems "Spawn Water" channel points reward
+        /// // Event fired with redemption details
+        /// OnChannelPointsRedeemed(new TwitchChannelPointsEvent {
+        ///     RewardTitle = "Spawn Water",
+        ///     UserName = "viewer123",
+        ///     Cost = 500
+        /// });
+        /// // Chat receives: "🎁 viewer123 redeemed 'Spawn Water' for 500 points!"
+        /// // Game applies water resource effect
+        /// </code>
+        /// </example>
+        /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/TwitchEvents.md">Twitch Events Documentation</seealso>
+        private static void OnChannelPointsRedeemed(SimpleTwitchPubSubClient.TwitchChannelPointsEvent channelPointsEvent)
+        {
+            try
+            {
+                if (channelPointsEvent == null)
+                {
+                    Log.Warning("Received null channel points event");
+                    return;
+                }
+
+                Log.Info($"🎁 Channel points redeemed: {channelPointsEvent.RewardTitle} by {channelPointsEvent.UserName} for {channelPointsEvent.Cost} points");
+
+                // Send notification to Twitch chat
+                QueueMessage($"🎁 {channelPointsEvent.UserName} redeemed '{channelPointsEvent.RewardTitle}' for {channelPointsEvent.Cost} points!");
+
+                // Create SDK event and apply effect
+                var sdkEvent = new TwitchChannelPointsSDKEvent(
+                    channelId: _config?.BroadcasterId ?? "unknown",
+                    username: channelPointsEvent.UserName,
+                    displayName: channelPointsEvent.UserName,
+                    rewardTitle: channelPointsEvent.RewardTitle,
+                    rewardCost: channelPointsEvent.Cost,
+                    userInput: channelPointsEvent.UserInput
+                );
+
+                var effectApplied = sdkEvent.TryApplyChannelPointsEffect();
+
+                if (effectApplied)
+                {
+                    Log.Info($"✅ Channel points effect applied successfully: {channelPointsEvent.RewardTitle}");
+                }
+                else
+                {
+                    Log.Warning($"⚠️ Channel points effect could not be applied: {channelPointsEvent.RewardTitle}");
+                    QueueMessage($"⚠️ Sorry {channelPointsEvent.UserName}, '{channelPointsEvent.RewardTitle}' effect couldn't be applied right now.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"❌ Error processing channel points redemption: {ex.Message}");
+                QueueMessage($"❌ Error processing redemption by {channelPointsEvent?.UserName ?? "unknown user"}");
             }
         }
 

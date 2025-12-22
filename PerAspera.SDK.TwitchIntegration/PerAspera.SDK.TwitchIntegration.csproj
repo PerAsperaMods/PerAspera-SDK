@@ -19,6 +19,9 @@
     <!-- Output Configuration -->
     <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <DocumentationFile>..\..\bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    
+    <!-- Enable all Unity references for SDK -->
+    <IncludeAllUnityReferences>true</IncludeAllUnityReferences>
   </PropertyGroup>
 
   <!-- SDK Project References -->
@@ -27,6 +30,7 @@
     <ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+    <ProjectReference Include="..\PerAspera.GameAPI.TwitchIntegration\PerAspera.GameAPI.TwitchIntegration.csproj" />
   </ItemGroup>
 
   <!-- External Dependencies - MINIMAL SET -->

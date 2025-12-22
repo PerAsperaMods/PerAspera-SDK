@@ -42,6 +42,24 @@ namespace PerAspera.SDK.TwitchIntegration
         public string ChannelName { get; set; } = "your_channel_name";
         
         /// <summary>
+        /// Twitch App Client ID for PubSub API
+        /// Get from https://dev.twitch.tv/console/apps
+        /// </summary>
+        public string ClientId { get; set; } = "your_client_id";
+        
+        /// <summary>
+        /// Broadcaster (streamer) user ID for PubSub
+        /// Can be found at https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/
+        /// </summary>
+        public string BroadcasterId { get; set; } = "your_broadcaster_id";
+        
+        /// <summary>
+        /// OAuth token with channel:read:redemptions scope for PubSub
+        /// Generate at https://twitchapps.com/tokengen/ with required scopes
+        /// </summary>
+        public string PubSubToken { get; set; } = "oauth:your_pubsub_token";
+        
+        /// <summary>
         /// Enable climate effects from Twitch events
         /// </summary>
         public bool EnableClimateEffects { get; set; } = true;
@@ -50,6 +68,11 @@ namespace PerAspera.SDK.TwitchIntegration
         /// Enable building event notifications to Twitch
         /// </summary>
         public bool EnableBuildingNotifications { get; set; } = true;
+        
+        /// <summary>
+        /// Enable channel points PubSub integration
+        /// </summary>
+        public bool EnableChannelPoints { get; set; } = true;
         
         /// <summary>
         /// Command prefix for chat commands
