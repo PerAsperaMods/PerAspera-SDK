@@ -206,11 +206,8 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
                 // Handle chat messages and other IRC events
                 if (message.Contains("PRIVMSG"))
                 {
-                    var chatMessage = ParseChatMessage(message);
-                    if (!string.IsNullOrEmpty(chatMessage))
-                    {
-                        OnMessageReceived?.Invoke(chatMessage);
-                    }
+                    // Send the raw IRC message to allow custom parsing
+                    OnMessageReceived?.Invoke(message);
                 }
                 
                 // Handle other IRC messages (JOIN, PART, etc.)

@@ -130,6 +130,7 @@ namespace PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat
             try
             {
                 _isConnected = false;
+                StopThreads();
                 _tcpClient?.Close();
                 OnDisconnected?.Invoke();
                 _logger.Info("Disconnected from Twitch IRC");
