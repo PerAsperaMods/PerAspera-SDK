@@ -1,4 +1,5 @@
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using PerAspera.Commands;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 using System;
@@ -22,6 +23,12 @@ namespace PerAspera.GameAPI.Wrappers
         {
         }
 
+
+        public CommandBus GetCommandBus()
+        {
+            return SafeInvoke<CommandBus>("get_commandBus");
+        }
+
         /// <summary>
         /// Get the current universe instance
         /// </summary>
@@ -43,9 +50,8 @@ namespace PerAspera.GameAPI.Wrappers
         
         public FactionWrapper GetPlayerFaction()
         {
-            return NativeObject.InvokeMethod<object>("GetPlayerFaction") is { } nativeFaction
-                ? new FactionWrapper(nativeFaction)
-                : null;
+            var nativeFaction = SafeInvoke<object>("GetPlayerFaction");
+            return nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
         }
 
 

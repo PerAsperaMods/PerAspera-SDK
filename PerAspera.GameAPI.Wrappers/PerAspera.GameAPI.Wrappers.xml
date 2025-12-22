@@ -853,6 +853,48 @@
             </summary>
             <returns>Building status with core properties</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ConsoleWrapper">
+            <summary>
+            Wrapper for the native Console class providing safe access to console functionality
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.#ctor(System.Object)">
+            <summary>
+            Initialize Console wrapper with native console object
+            </summary>
+            <param name="nativeConsole">Native console instance from game</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.ExecuteCommandString(System.String)">
+            <summary>
+            Execute a command string through the console system
+            </summary>
+            <param name="command">Command string to execute (e.g., "import WATER 1000")</param>
+            <returns>True if command executed successfully</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.GetAvailableCommands">
+            <summary>
+            Get list of all available console commands
+            </summary>
+            <returns>Array of command names, or null if unable to access</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.ListCommands">
+            <summary>
+            Log all available console commands to the console
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.GetInstance">
+            <summary>
+            Get the singleton Console instance
+            </summary>
+            <returns>ConsoleWrapper instance or null if not available</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ConsoleWrapper.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native console object
+            </summary>
+            <param name="nativeConsole">Native console instance</param>
+            <returns>ConsoleWrapper instance</returns>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1">
             <summary>
             Base class for all native object wrappers, providing unified method call patterns.
@@ -1562,6 +1604,18 @@
             </summary>
             <param name="nativeFaction">Native faction instance from game</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ListAvailableConsoleCommands">
+            <summary>
+            List all available console commands (for debugging)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.testCMD">
+            <summary>
+            Test method for native command execution using both TextAction dispatch and CommandBus
+            Tests CmdFactionResourceAllocation command creation and dispatching
+            </summary>
+            <returns>True if command executed successfully</returns>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetAsIHandleable">
             <summary>
             Get the Handle for this Faction instance
@@ -1715,6 +1769,15 @@
             Get debug information about command execution capabilities
             </summary>
             <returns>Debug string with command execution status</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.DispatchCommand(System.String,System.Object[])">
+            <summary>
+            Méthode utilitaire générique pour dispatcher des commandes via CommandBus
+            Évite de créer un wrapper pour chaque type de commande
+            </summary>
+            <param name="commandTypeName">Nom complet du type de commande (ex: "PerAspera.Commands.CmdFactionResourceAllocation")</param>
+            <param name="constructorArgs">Arguments pour le constructeur de la commande</param>
+            <returns>True si la commande a été dispatchée avec succès</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ToString">
             <summary>

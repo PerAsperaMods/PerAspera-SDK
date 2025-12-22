@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Cpp2IL.Core;
+using PerAspera.Commands;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 using PerAspera.GameAPI.Wrappers.Core;
@@ -24,7 +26,375 @@ namespace PerAspera.GameAPI.Wrappers
         {
             NativeObject = nativeFaction;
         }
-        public InteractionManagerWrapper GetInteractionManager()
+
+        /* Test import resource Faction Native command */
+
+        public bool FactionAddResourceDistributed(string resourceString, string amountString)
+        {
+            // Get the Console wrapper
+            var consoleWrapper = ConsoleWrapper.GetInstance();
+            if (consoleWrapper == null)
+            {
+                Log.LogWarning("Console wrapper not available for FactionAddResourceDistributed");
+                return false;
+            }
+
+            try
+            {
+
+
+                // Use the console command format with spaces (not tabs)
+                // Format: "factionaddresourcedistributed {resource} {amount}" (lowercase, spaces)
+                var commandString = $"factionaddresourcedistributed {resourceString} {amountString}";
+
+                return consoleWrapper.ExecuteCommandString(commandString);
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"❌ Failed to execute FactionAddResourceDistributed: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// List all available console commands (for debugging)
+        /// </summary>
+        public static void ListAvailableConsoleCommands()
+        {
+            var consoleWrapper = ConsoleWrapper.GetInstance();
+            if (consoleWrapper != null)
+            {
+                consoleWrapper.ListCommands();
+            }
+            else
+            {
+                Log.LogWarning("Console wrapper not available for listing commands");
+            }
+        }
+
+
+
+
+
+/// <summary>
+        /// Test method for native command execution using both TextAction dispatch and CommandBus
+        /// Tests CmdFactionResourceAllocation command creation and dispatching
+        /// </summary>
+        /// <returns>True if command executed successfully</returns>
+        public bool testCMD()
+        {
+            try
+            {
+                // =====================================================================================
+                // ÉTAPE 1: OBTENIR LES COMPOSANTS NÉCESSAIRES
+                // =====================================================================================
+
+                // Vérifier que la faction native existe
+                if (NativeObject == null)
+                {
+                    Log.LogError("❌ testCMD: NativeObject (Faction) is null");
+                    return false;
+                }
+
+                Log.LogInfo("🔍 testCMD: Starting native command execution test...");
+
+                // Obtenir l'instance BaseGame
+                BaseGameWrapper baseGameWrapper = BaseGameWrapper.GetCurrent();
+                if (baseGameWrapper == null)
+                {
+                    Log.LogError("❌ Cannot get BaseGame instance");
+                    return false;
+                }
+
+                // Obtenir l'Univers
+                UniverseWrapper universeWrapper = baseGameWrapper.GetUniverse();
+                if (universeWrapper == null)
+                {
+                    Log.LogError("❌ Cannot get Universe instance");
+                    return false;
+                }
+
+                // =====================================================================================
+                // ÉTAPE 2: TEST AVEC TEXTACTION (MÉTHODE CLASSIQUE)
+                // =====================================================================================
+
+                Log.LogInfo("📤 Testing TextAction dispatch method...");
+
+                // Obtenir InteractionManager pour dispatcher les actions
+                var interactionManager = GetInteractionManager();
+                if (interactionManager == null)
+                {
+                    Log.LogError("❌ Cannot get InteractionManager for command dispatch");
+                    return false;
+                }
+
+                // Obtenir GameEventBus
+                var gameEventBus = GetGameEventBus();
+                if (gameEventBus == null)
+                {
+                    Log.LogError("❌ Cannot get GameEventBus for command dispatch");
+                    return false;
+                }
+
+                // Créer une commande TextAction pour l'allocation de ressources
+                // Format: "FactionResourceAllocation\t{resourceType}\t{category}\t{value}"
+                var commandString = $"FactionResourceAllocation\tIRON\t0\t1.0";
+                var arguments = new string[0];
+
+                // Obtenir le type TextAction depuis ScriptsAssembly
+                var textActionType = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == "ScriptsAssembly")?
+                    .GetType("TextAction");
+
+                if (textActionType == null)
+                {
+                    Log.LogError("❌ TextAction type not found in ScriptsAssembly");
+                    return false;
+                }
+
+                // Obtenir le constructeur TextAction(string command, string[] arguments)
+                var textActionConstructor = textActionType.GetConstructor(new[] { typeof(string), typeof(string[]) });
+                if (textActionConstructor == null)
+                {
+                    Log.LogError("❌ TextAction constructor not found");
+                    return false;
+                }
+
+                // Créer l'instance TextAction
+                var textAction = textActionConstructor.Invoke(new object[] { commandString, arguments });
+                Log.LogInfo($"✅ Created TextAction with command: {commandString}");
+
+                // Dispatcher l'action via InteractionManager
+                var dispatchResult = interactionManager.DispatchAction(NativeObject, gameEventBus, textAction, "testCMD_TextAction");
+                Log.LogInfo($"✅ TextAction dispatched: {dispatchResult}");
+
+                // =====================================================================================
+                // ÉTAPE 3: TEST AVEC COMMANDBUS (MÉTHODE DIRECTE)
+                // =====================================================================================
+
+                Log.LogInfo("🎯 Testing CommandBus direct dispatch method...");
+
+                // Obtenir le CommandBus depuis Universe
+                var commandBus = universeWrapper.GetCommandBus();
+                if (commandBus == null)
+                {
+                    Log.LogWarning("⚠️ CommandBus not available, skipping CommandBus test");
+                }
+                else
+                {
+                    // Obtenir le type CmdFactionResourceAllocation
+                    var scriptsAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(a => a.GetName().Name == "ScriptsAssembly");
+
+                    if (scriptsAssembly != null)
+                    {
+                        var cmdType = scriptsAssembly.GetType("PerAspera.Commands.CmdFactionResourceAllocation");
+                        if (cmdType != null)
+                        {
+                            Log.LogInfo($"✅ Found CmdFactionResourceAllocation type: {cmdType.FullName}");
+
+                            // Lister tous les constructeurs disponibles pour debug
+                            var allConstructors = cmdType.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                            Log.LogInfo($"🔍 Available constructors: {allConstructors.Length}");
+                            foreach (var ctor in allConstructors)
+                            {
+                                var parameters = ctor.GetParameters();
+                                var paramTypes = string.Join(", ", parameters.Select(p => p.ParameterType.Name));
+                                Log.LogInfo($"  - {ctor.Name}({paramTypes})");
+                            }
+
+                            // Chercher le constructeur avec 4 paramètres (Faction, string, int, float)
+                            System.Reflection.ConstructorInfo? constructor = null;
+
+                            // Essayer d'abord avec les types exacts
+                            constructor = cmdType.GetConstructor(new System.Type[] {
+                                typeof(object), // Faction (IL2CPP object)
+                                typeof(string), // resourceType
+                                typeof(int),    // category
+                                typeof(float)   // value
+                            });
+
+                            // Si ça ne marche pas, chercher manuellement parmi tous les constructeurs
+                            if (constructor == null)
+                            {
+                                Log.LogInfo("⚠️ Exact constructor match failed, trying flexible search...");
+
+                                foreach (var ctor in allConstructors)
+                                {
+                                    var parameters = ctor.GetParameters();
+                                    if (parameters.Length == 4)
+                                    {
+                                        // Vérifier si les types correspondent à nos attentes
+                                        bool matches = true;
+                                        if (!parameters[1].ParameterType.Name.Contains("String")) matches = false;
+                                        if (!parameters[2].ParameterType.Name.Contains("Int32")) matches = false;
+                                        if (!parameters[3].ParameterType.Name.Contains("Single")) matches = false;
+
+                                        if (matches)
+                                        {
+                                            constructor = ctor;
+                                            Log.LogInfo($"✅ Found matching constructor with {parameters.Length} parameters");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (constructor == null)
+                            {
+                                Log.LogError("❌ No suitable constructor found for CmdFactionResourceAllocation");
+                                Log.LogInfo("💡 Try using the parameterless constructor and setting properties manually");
+                                return false;
+                            }
+
+                            if (constructor != null)
+                            {
+                                try
+                                {
+                                    // Préparer les paramètres de la commande
+                                    string resourceType = "IRON";
+                                    int category = 0;
+                                    float value = 1.0f;
+
+                                    // Créer l'instance de commande
+                                    var cmdInstance = constructor.Invoke(new object[] {
+                                        NativeObject,    // La faction actuelle
+                                        resourceType,    // Type de ressource
+                                        category,        // Catégorie
+                                        value           // Valeur
+                                    });
+
+                                    Log.LogInfo($"✅ Created CmdFactionResourceAllocation instance: {resourceType}, {category}, {value}");
+
+                                    // Utiliser la méthode générique Dispatch<TCommand> de CommandBus
+                                    var commandBusType = commandBus.GetType();
+
+                                    // Chercher la méthode Dispatch générique (non spécialisée)
+                                    var dispatchMethod = commandBusType.GetMethod("Dispatch",
+                                        BindingFlags.Instance | BindingFlags.Public);
+
+                                    if (dispatchMethod != null && dispatchMethod.IsGenericMethod)
+                                    {
+                                        try
+                                        {
+                                            // Créer la version spécialisée Dispatch<CmdFactionResourceAllocation>
+                                            var genericDispatch = dispatchMethod.MakeGenericMethod(cmdType);
+
+                                            // Dispatcher la commande via CommandBus
+                                            genericDispatch.Invoke(commandBus, new object[] { cmdInstance });
+                                            Log.LogInfo($"✅ Command dispatched successfully via CommandBus.Dispatch<{cmdType.Name}>");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.LogError($"❌ Failed to dispatch command via CommandBus: {ex.Message}");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Log.LogWarning("⚠️ Generic Dispatch method not found on CommandBus");
+                                        // Fallback: lister toutes les méthodes disponibles
+                                        var allMethods = commandBusType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+                                        Log.LogInfo("🔍 Available CommandBus methods: " + string.Join(", ",
+                                            allMethods.Select(m => $"{m.Name}({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})")));
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.LogError($"❌ Failed to create CmdFactionResourceAllocation: {ex.Message}");
+                                }
+                            }
+                            else
+                            {
+                                Log.LogWarning("⚠️ CmdFactionResourceAllocation constructor not found");
+                            }
+                        }
+                        else
+                        {
+                            Log.LogWarning("⚠️ CmdFactionResourceAllocation type not found");
+                        }
+                    }
+                }
+
+                // =====================================================================================
+                // ÉTAPE 4: RÉSULTAT FINAL
+                // =====================================================================================
+
+                Log.LogInfo("✅ testCMD completed successfully - both TextAction and CommandBus methods tested");
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"❌ testCMD failed: {ex.Message}");
+                Log.LogError($"StackTrace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+        public bool AddResearchPoints(float amount)
+        {
+            try
+            {
+                // Get the Faction type directly from the assembly
+                var factionType = NativeObject.GetType().Assembly.GetType("Faction");
+
+                ((Faction)NativeObject).AddResearchPoints(1000); //testing other method
+
+
+                var method = factionType.GetMethod("AddResearchPoints",
+                    BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+
+
+
+                if (method == null)
+                {
+                    Log.LogWarning("AddResearchPoints method not found on Faction type");
+                    return false;
+                }
+
+                    // Invoke the static method
+                method.Invoke(null, new object[] { amount });
+
+                Log.LogInfo($"✅ Successfully executed FactionAddResourceDistributed for {amount}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"❌ Failed to execute FactionAddResourceDistributed: {ex.Message}");
+                return false;
+            }
+        }
+        // Test method for direct native calls
+        public bool TestAddResource(string resourceType, float amount)
+        {
+            return NativeObject.InvokeMethod("FactionAddResourceDistributed", resourceType, amount.ToString());
+        }
+
+        /*
+        public void GetResourceQuantity(ResourceType resource, out CargoQuantity quantity)
+        {
+        }
+
+
+        public CargoQuantity GetResourceCargoQuantity(ResourceType resource)
+        {
+            return default(CargoQuantity);
+        }
+
+        public float GetResourceQuantity(ResourceType resource)
+        {
+            return default(float);
+        }*/
+
+
+
+
+
+
+
+
+
+    public InteractionManagerWrapper GetInteractionManager()
         {
 
 
@@ -595,6 +965,85 @@ namespace PerAspera.GameAPI.Wrappers
         }
 
         #endregion
+
+        /// <summary>
+        /// Méthode utilitaire générique pour dispatcher des commandes via CommandBus
+        /// Évite de créer un wrapper pour chaque type de commande
+        /// </summary>
+        /// <param name="commandTypeName">Nom complet du type de commande (ex: "PerAspera.Commands.CmdFactionResourceAllocation")</param>
+        /// <param name="constructorArgs">Arguments pour le constructeur de la commande</param>
+        /// <returns>True si la commande a été dispatchée avec succès</returns>
+        public bool DispatchCommand(string commandTypeName, params object[] constructorArgs)
+        {
+            try
+            {
+                Log.LogInfo($"🎯 Dispatching command: {commandTypeName}");
+
+                // 1. Obtenir le type de commande
+                System.Type? cmdType = null;
+                var scriptsAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == "ScriptsAssembly");
+
+                if (scriptsAssembly != null)
+                {
+                    cmdType = scriptsAssembly.GetType(commandTypeName);
+                }
+
+                if (cmdType == null)
+                {
+                    Log.LogError($"❌ Command type not found: {commandTypeName}");
+                    return false;
+                }
+
+                // 2. Créer l'instance de commande
+                var constructor = cmdType.GetConstructor(constructorArgs.Select(arg => arg.GetType()).ToArray());
+                if (constructor == null)
+                {
+                    Log.LogError($"❌ Constructor not found for command: {commandTypeName}");
+                    return false;
+                }
+
+                var cmdInstance = constructor.Invoke(constructorArgs);
+                Log.LogInfo($"✅ Command instance created: {cmdType.Name}");
+
+                // 3. Obtenir CommandBus et dispatcher
+                var universeWrapper = UniverseWrapper.GetCurrent();
+                if (universeWrapper == null)
+                {
+                    Log.LogError("❌ Universe not available for command dispatch");
+                    return false;
+                }
+
+                var commandBus = universeWrapper.GetCommandBus();
+                if (commandBus == null)
+                {
+                    Log.LogError("❌ CommandBus not available for command dispatch");
+                    return false;
+                }
+
+                // 4. Utiliser la méthode générique Dispatch<TCommand>
+                var commandBusType = commandBus.GetType();
+                var dispatchMethod = commandBusType.GetMethod("Dispatch", BindingFlags.Instance | BindingFlags.Public);
+
+                if (dispatchMethod != null && dispatchMethod.IsGenericMethod)
+                {
+                    var genericDispatch = dispatchMethod.MakeGenericMethod(cmdType);
+                    genericDispatch.Invoke(commandBus, new object[] { cmdInstance });
+                    Log.LogInfo($"✅ Command dispatched successfully: {commandTypeName}");
+                    return true;
+                }
+                else
+                {
+                    Log.LogError("❌ Generic Dispatch method not available on CommandBus");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"❌ Failed to dispatch command {commandTypeName}: {ex.Message}");
+                return false;
+            }
+        }
 
         /// <summary>
         /// String representation for debugging

@@ -167,10 +167,34 @@ namespace PerAspera.GameAPI.Events
                 // ALSO apply GameHub Harmony patches for immediate detection (works in menu)
                 Log.LogInfo("🔧 Applying GameHub Harmony patches for immediate detection...");
                 ApplyGameHubPatches();
+                
+                // Apply BaseGame patches for OnLoadFinished event
+                Log.LogInfo("🔧 Applying BaseGame Harmony patches for OnLoadFinished event...");
+                ApplyBaseGamePatches();
             }
             catch (System.Exception ex)
             {
                 Log.LogError($"❌ Failed to setup GameHub native event detection: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Apply BaseGame Harmony patches for OnLoadFinished event
+        /// </summary>
+        private void ApplyBaseGamePatches()
+        {
+            try
+            {
+                var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.BaseGame");
+                
+                // Apply BaseGame patches for OnLoadFinished event
+                harmony.PatchAll(typeof(Patches.BaseGamePatches));
+                
+                Log.LogInfo("✅ BaseGame Harmony patches applied successfully");
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"❌ Failed to apply BaseGame patches: {ex.Message}");
             }
         }
 

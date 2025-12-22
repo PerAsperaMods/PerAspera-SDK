@@ -197,4 +197,20 @@ namespace PerAspera.GameAPI.Native
         }
 
     }
+
+    /// <summary>
+    /// Native Console type alias for Enhanced Events
+    /// Represents the actual IL2CPP native Console object
+    /// Use PerAspera.GameAPI.Wrappers.ConsoleWrapper for SDK wrapper access
+    /// </summary>
+    public class Console
+    {
+        /// <summary>Native IL2CPP Console instance</summary>
+        public object NativeInstance { get; }
+        
+        public Console(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
 }

@@ -390,4 +390,47 @@ namespace PerAspera.GameAPI.Events.SDK
             }
         }
     }
+
+    /// <summary>
+    /// Event triggered when BaseGame.OnFinishLoading() completes
+    /// Fires at the exact moment the game's loading process finishes
+    /// ✅ Use this for mods that need to run immediately after game loading
+    /// </summary>
+    public class OnLoadFinishedEvent : SDKEventBase
+    {
+        public override string EventType => "OnLoadFinished";
+        
+        /// <summary>SDK wrapper for BaseGame (full access available)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper? BaseGameWrapper { get; }
+        
+        /// <summary>SDK wrapper for Universe (full access available)</summary>
+        public PerAspera.GameAPI.Wrappers.UniverseWrapper? UniverseWrapper { get; }
+        
+        /// <summary>Whether BaseGame is available</summary>
+        public bool BaseGameAvailable { get; }
+        
+        /// <summary>Whether Universe is available</summary>
+        public bool UniverseAvailable { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime EventTime { get; }
+
+        public OnLoadFinishedEvent(object? nativeBaseGame = null, object? nativeUniverse = null)
+        {
+            BaseGameAvailable = nativeBaseGame != null;
+            UniverseAvailable = nativeUniverse != null;
+            EventTime = DateTime.Now;
+            
+            // Create wrappers if available
+            if (BaseGameAvailable && nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            }
+            
+            if (UniverseAvailable && nativeUniverse != null)
+            {
+                UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            }
+        }
+    }
 }

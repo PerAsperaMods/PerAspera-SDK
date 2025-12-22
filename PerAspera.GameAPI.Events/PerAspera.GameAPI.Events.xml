@@ -211,6 +211,9 @@
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameFullyLoaded">
             <summary>Event: Game fully loaded with all systems ready</summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.OnLoadFinished">
+            <summary>Event: BaseGame.OnFinishLoading() completed (exact loading finish moment)</summary>
+        </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BlackboardInitialized">
             <summary>Event: Blackboard system initialized (variable storage ready)</summary>
         </member>
@@ -557,6 +560,11 @@
             Much more reliable than patches - listens to actual game events
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyBaseGamePatches">
+            <summary>
+            Apply BaseGame Harmony patches for OnLoadFinished event
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameHubPatches">
             <summary>
             Apply GameHub Harmony patches for immediate detection (works in menu)
@@ -878,6 +886,13 @@
             Subscribe to Planet creation event  
             Fires when Planet instance is first created
             ✅ Use this for planet-level initialization hooks
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToOnLoadFinished(System.Action{PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent})">
+            <summary>
+            Subscribe to OnLoadFinished event
+            Fires when BaseGame.OnFinishLoading() completes
+            ✅ Use this for mods that need to run immediately after game loading finishes
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToTwitchFollow(System.Action{PerAspera.GameAPI.Events.SDK.TwitchFollowSDKEvent})">
@@ -1606,6 +1621,16 @@
             DOC: BaseGame.md - OnEvent_WayOperativeChanged (Way sender, ref GameEvent evt)
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Events.Patches.BaseGamePatches">
+            <summary>
+            Harmony patches for BaseGame to trigger custom SDK events
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Patches.BaseGamePatches.OnFinishLoading_Postfix(BaseGame)">
+            <summary>
+            Patch for BaseGame.OnFinishLoading() to trigger OnLoadFinished event
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Patches.GameHubManagerPatch">
             <summary>
             Harmony patches for GameHubManager methods to detect game initialization
@@ -1907,6 +1932,28 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.NativePlanet">
             <summary>Native IL2CPP Planet instance</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent">
+            <summary>
+            Event triggered when BaseGame.OnFinishLoading() completes
+            Fires at the exact moment the game's loading process finishes
+            ✅ Use this for mods that need to run immediately after game loading
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent.BaseGameWrapper">
+            <summary>SDK wrapper for BaseGame (full access available)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent.UniverseWrapper">
+            <summary>SDK wrapper for Universe (full access available)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent.BaseGameAvailable">
+            <summary>Whether BaseGame is available</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent.UniverseAvailable">
+            <summary>Whether Universe is available</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent.EventTime">
+            <summary>Event timestamp</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.TwitchSDKEventBase">
             <summary>

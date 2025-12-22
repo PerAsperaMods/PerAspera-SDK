@@ -117,6 +117,20 @@ namespace PerAspera.GameAPI.Events.Integration
             RegisterHandler(typeof(PlanetCreatedEvent), onPlanetCreated);
         }
 
+        /// <summary>
+        /// Subscribe to OnLoadFinished event
+        /// Fires when BaseGame.OnFinishLoading() completes
+        /// ✅ Use this for mods that need to run immediately after game loading finishes
+        /// </summary>
+        public static void SubscribeToOnLoadFinished(Action<OnLoadFinishedEvent> onLoadFinished)
+        {
+            if (onLoadFinished == null)
+                throw new ArgumentNullException(nameof(onLoadFinished));
+
+            _logger.Info("Subscribed to OnLoadFinished event");
+            RegisterHandler(typeof(OnLoadFinishedEvent), onLoadFinished);
+        }
+
         // ==================== TWITCH INTEGRATION SUBSCRIPTIONS ====================
 
         /// <summary>

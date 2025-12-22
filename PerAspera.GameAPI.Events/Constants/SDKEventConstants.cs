@@ -23,6 +23,9 @@ namespace PerAspera.GameAPI.Events.Constants
         /// <summary>Event: Game fully loaded with all systems ready</summary>
         public const string GameFullyLoaded = "GameFullyLoaded";
         
+        /// <summary>Event: BaseGame.OnFinishLoading() completed (exact loading finish moment)</summary>
+        public const string OnLoadFinished = "OnLoadFinished";
+        
         /// <summary>Event: Blackboard system initialized (variable storage ready)</summary>
         public const string BlackboardInitialized = "BlackboardInitialized";
         
