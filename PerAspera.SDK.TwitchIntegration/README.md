@@ -1,17 +1,27 @@
 # PerAspera.SDK.TwitchIntegration
 
-Real-time Twitch chat integration for Per Aspera modding framework.
+Real-time Twitch chat integration for Per Aspera modding framework with **Viewer Faction System**.
 
 ## 🎯 Overview
 
 The **PerAspera.SDK.TwitchIntegration** project provides a robust, performant, and extensible Twitch integration system as the 10th component in the Per Aspera SDK ecosystem. This component enables real-time interaction between Twitch viewers and Per Aspera gameplay through chat commands, events, and monitoring.
 
+### ⭐ NEW: Viewer Faction System
+
+Twitch viewers can now participate as faction leaders in Per Aspera! The new **Viewer Faction System** allows:
+- **Individual Factions**: Each viewer creates their own faction with resources and points
+- **Team Formation**: Viewers can form alliances and teams with other viewers
+- **Deals & Trading**: Propose and negotiate resource deals between factions
+- **Competition**: Compete for points and rankings on the leaderboard
+- **Real-time Commands**: All interactions via simple Twitch chat commands
+
 ## ✨ Features
 
 - **Real-time IRC Integration**: Seamless connection to Twitch chat using Unity-Twitch-Chat
-- **Command System**: Extensible command registry with built-in climate, building, and information commands
+- **🆕 Viewer Faction System**: Complete faction management for Twitch viewers
+- **Command System**: Extensible command registry with built-in climate, building, and faction commands
 - **Thread-safe Operations**: Background processing with main thread synchronization
-- **Rate Limiting**: Sophisticated per-user and global rate limiting with permission levels
+- **Rate Limiting**: Sophisticated per-user and global rate limiting with permission levels (planned)
 - **Analytics & Monitoring**: Comprehensive metrics collection and performance monitoring
 - **SDK Integration**: Full integration with existing Per Aspera SDK components (Events, Climate, Wrappers)
 - **Error Recovery**: Automatic reconnection and graceful error handling
@@ -28,6 +38,7 @@ The **PerAspera.SDK.TwitchIntegration** project provides a robust, performant, a
 
 ### Built-in Commands
 
+#### Climate Commands
 - `!temperature ±X` - Modify planet temperature
 - `!pressure ±X` - Modify atmospheric pressure  
 - `!oxygen ±X` - Modify oxygen levels
@@ -38,9 +49,76 @@ The **PerAspera.SDK.TwitchIntegration** project provides a robust, performant, a
 - `!event <type>` - Trigger game events (moderator only)
 - `!challenge <type>` - Start viewer challenges (moderator only)
 
+#### 🆕 Viewer Faction Commands
+- `!join` - Join as a faction leader
+- `!team <username>` - Invite someone to your team
+- `!deal <username> <terms>` - Propose a deal to another viewer
+- `!accept <username>` - Accept a team invitation or deal
+- `!decline <username>` - Decline a team invitation or deal
+- `!status` - Show your faction status (resources, team, deals)
+- `!alliances` or `!teams` - List all active teams
+- `!factions` or `!viewers` - List all active viewer factions
+- `!leaderboard` or `!top` - Show top factions by points
+- `!leave` - Leave your current team
+
 ## 🚀 Quick Start
 
-### Basic Usage
+### Viewer Faction System (NEW!)
+
+```csharp
+using PerAspera.SDK.TwitchIntegration;
+using PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat;
+
+// Configure Twitch integration
+var config = new TwitchConnectionConfig
+{
+    OAuth = "oauth:your_oauth_token", 
+    Username = "your_bot_username",
+    Channel = "your_channel"
+};
+
+// Initialize and start the service
+var service = new ViewerFactionIntegrationService(config);
+await service.StartAsync();
+
+// Now viewers can use commands in Twitch chat:
+// !join - Join as a faction
+// !team alice - Invite alice to your team
+// !deal bob Trade 100 metal for 50 water
+// !status - Show your faction status
+// !leaderboard - Show top factions
+
+Console.WriteLine(service.GetStatistics());
+```
+
+### Offline Mode (Testing without Twitch)
+
+```csharp
+// Create service without Twitch connection
+var service = new ViewerFactionIntegrationService(null);
+var manager = service.FactionManager;
+
+// Manually create and interact with factions
+var alice = manager.GetOrCreateViewer("alice", "Alice");
+var bob = manager.GetOrCreateViewer("bob", "Bob");
+
+// Send team invitation
+var invitation = manager.SendTeamInvitation(alice, bob);
+manager.AcceptTeamInvitation(bob, alice);
+
+// Create a deal
+var deal = manager.ProposeDeal(
+    alice, bob, 
+    "Trade resources",
+    "resource_metal", 100f,
+    "resource_water", 50f
+);
+
+Console.WriteLine($"Teams: {manager.TotalTeams}");
+Console.WriteLine($"Active Deals: {manager.TotalActiveDeals}");
+```
+
+### Basic Usage (Original)
 
 ```csharp
 using PerAspera.SDK.TwitchIntegration;
@@ -199,7 +277,11 @@ Key points:
 
 ## 📖 Documentation
 
-- **[IL2CPP Compatibility Guide](./IL2CPP_COMPATIBILITY.md)** - Important information about IL2CPP limitations
+### Viewer Faction System
+- **[VIEWER_FACTION_GUIDE.md](./VIEWER_FACTION_GUIDE.md)** - Complete guide to the Viewer Faction System
+- **[Examples/ViewerFactionExample.cs](./Examples/ViewerFactionExample.cs)** - Code examples and usage patterns
+
+### General Documentation
 - [Architecture Documentation](../../Internal_doc/ARCHITECTURE/Twitch-Integration-Architecture.md)
 - [API Reference](./docs/api-reference.md)
 - [Command Development Guide](./docs/command-development.md)
@@ -223,15 +305,23 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Project structure and dependencies
 - ✅ Core interfaces and architecture
 - ✅ Basic IRC client integration
+- ✅ **Viewer Faction System**
+  - ✅ ViewerFaction, ViewerTeam, ViewerDeal classes
+  - ✅ ViewerFactionManager for management
+  - ✅ Complete command system (!join, !team, !deal, etc.)
+  - ✅ ViewerFactionIntegrationService
 
 ### Phase 2 (In Progress) 
-- 🔄 Command system implementation
-- 🔄 Game context and SDK integration
-- 🔄 Built-in command suite
+- 🔄 Game integration for viewer factions
+- 🔄 Resource synchronization with game systems
+- 🔄 Point system and achievements
+- 🔄 Persistence (save/load faction state)
 
 ### Phase 3 (Planned)
-- ⏳ Analytics and monitoring
-- ⏳ Advanced features and optimizations
+- ⏳ Analytics and monitoring dashboard
+- ⏳ Advanced faction features (buildings, technology)
+- ⏳ Space project collaboration system
+- ⏳ Tournament and challenge modes
 - ⏳ Documentation and examples
 
 ---
