@@ -37,6 +37,7 @@ namespace PerAspera.ModSDK
             
             try
             {
+                
                 // Mark as initialized first
                 _isInitialized = true;
                 

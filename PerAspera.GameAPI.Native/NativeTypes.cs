@@ -5,7 +5,7 @@ namespace PerAspera.GameAPI.Native
     /// <summary>
     /// Native BaseGame type alias for Enhanced Events
     /// Represents the actual IL2CPP native BaseGame object
-    /// Use PerAspera.GameAPI.Wrappers.BaseGame for SDK wrapper access
+    /// Use PerAspera.GameAPI.Wrappers.BaseGameWrapper for SDK wrapper access
     /// </summary>
     public class BaseGame
     {
@@ -17,7 +17,135 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+
     
+
+        public class HazardsManager
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public HazardsManager(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class IHandleable
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public IHandleable(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class InteractionManagerWrapper
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public InteractionManagerWrapper(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    
+    public class Handle
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public Handle(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+
+
+    public class ResourceType
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public ResourceType(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class Way
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public Way(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class Swarm
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public Swarm(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    
+
+        public class TextAction
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public TextAction(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class FinishInjectionContext
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public FinishInjectionContext(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class KeeperMap
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public KeeperMap(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class GameEventBus
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public GameEventBus(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+
+    public class BuildingType
+    {
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public object NativeInstance { get; }
+
+        public BuildingType(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
     /// <summary>
     /// Native Universe type alias for Enhanced Events
     /// Represents the actual IL2CPP native Universe object
@@ -67,6 +195,33 @@ namespace PerAspera.GameAPI.Native
         public object NativeInstance { get; }
         
         public Planet(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+    public class Faction 
+    {
+        /// <summary>Native IL2CPP Planet instance</summary>
+        public object NativeInstance { get; }
+
+        public Faction(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+
+    }
+
+    /// <summary>
+    /// Native Console type alias for Enhanced Events
+    /// Represents the actual IL2CPP native Console object
+    /// Use PerAspera.GameAPI.Wrappers.ConsoleWrapper for SDK wrapper access
+    /// </summary>
+    public class Console
+    {
+        /// <summary>Native IL2CPP Console instance</summary>
+        public object NativeInstance { get; }
+        
+        public Console(object nativeInstance)
         {
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }

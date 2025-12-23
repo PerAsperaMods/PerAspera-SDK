@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Target Framework -->
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>Per Aspera SDK Twitch Integration</AssemblyTitle>
+    <AssemblyDescription>Simple IRC-based Twitch integration for Per Aspera</AssemblyDescription>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    
+    <!-- Build Configuration -->
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <!-- Output Configuration -->
+    <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
+    <DocumentationFile>..\..\bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+  <!-- SDK Project References -->
+  <ItemGroup>
+    <ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+    <ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+    <ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
+    <ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+  </ItemGroup>
+
+  <!-- External Dependencies - MINIMAL SET -->
+  <ItemGroup>
+    <!-- JSON for configuration -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    
+    <!-- Future TwitchLib integration (commented out for now) -->
+    <!--
+    <PackageReference Include="TwitchLib.Client" Version="4.0.1" />
+    <PackageReference Include="TwitchLib.Api" Version="3.11.0" />
+    <PackageReference Include="TwitchLib.PubSub" Version="4.0.1" />
+    -->
+  </ItemGroup>
+
+</Project>

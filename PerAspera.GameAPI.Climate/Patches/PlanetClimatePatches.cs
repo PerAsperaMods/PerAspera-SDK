@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using PerAspera.GameAPI.Wrappers;
 
+// Alias pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
+using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
+
 namespace PerAspera.GameAPI.Climate.Patches
 {
     /// <summary>
@@ -15,20 +18,21 @@ namespace PerAspera.GameAPI.Climate.Patches
     {
         private static readonly LogAspera Log = new LogAspera("Climate.Patches");
         
-        // Stockage des valeurs overridées par notre simulation
-        private static readonly Dictionary<object, ClimateOverrides> _overrides = new();
+        // Stockage des instances Atmosphere SDK par planet native
+        private static readonly Dictionary<object, AtmosphereSDK> _atmosphereOverrides = new();
+        private static readonly Dictionary<object, ClimateControlState> _controlStates = new();
         
         /// <summary>
-        /// Valeurs climatiques overridées pour un planet donné
+        /// État du contrôle climatique pour une planet donnée
         /// </summary>
-        public class ClimateOverrides
+        public class ClimateControlState
         {
-            public float? Temperature { get; set; }
-            public float? CO2Pressure { get; set; }
-            public float? O2Pressure { get; set; }
-            public float? N2Pressure { get; set; }
-            public float? WaterVaporPressure { get; set; }
             public bool IsActive { get; set; } = false;
+            public float? TemperatureOverride { get; set; }
+            public float? CO2PressureOverride { get; set; }
+            public float? O2PressureOverride { get; set; }
+            public float? N2PressureOverride { get; set; }
+            public float? WaterVaporPressureOverride { get; set; }
         }
         
         /// <summary>
@@ -36,11 +40,14 @@ namespace PerAspera.GameAPI.Climate.Patches
         /// </summary>
         public static void EnableClimateControl(object nativePlanet)
         {
-            if (!_overrides.ContainsKey(nativePlanet))
-                _overrides[nativePlanet] = new ClimateOverrides();
+            if (!_controlStates.ContainsKey(nativePlanet))
+                _controlStates[nativePlanet] = new ClimateControlState();
+            
+            if (!_atmosphereOverrides.ContainsKey(nativePlanet))
+                _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
                 
-            _overrides[nativePlanet].IsActive = true;
-            Log.Info("Climate control enabled for planet (Harmony patches active)");
+            _controlStates[nativePlanet].IsActive = true;
+            Log.Info("Climate control enabled for planet (Harmony patches active, using SDK Atmosphere)");
         }
         
         /// <summary>
@@ -48,9 +55,9 @@ namespace PerAspera.GameAPI.Climate.Patches
         /// </summary>
         public static void DisableClimateControl(object nativePlanet)
         {
-            if (_overrides.ContainsKey(nativePlanet))
+            if (_controlStates.ContainsKey(nativePlanet))
             {
-                _overrides[nativePlanet].IsActive = false;
+                _controlStates[nativePlanet].IsActive = false;
                 Log.Info("Climate control disabled - game takes over");
             }
         }
@@ -60,22 +67,25 @@ namespace PerAspera.GameAPI.Climate.Patches
         /// </summary>
         public static void SetClimateValue(object nativePlanet, string property, float value)
         {
-            if (!_overrides.ContainsKey(nativePlanet))
-                _overrides[nativePlanet] = new ClimateOverrides { IsActive = true };
+            if (!_controlStates.ContainsKey(nativePlanet))
+                _controlStates[nativePlanet] = new ClimateControlState { IsActive = true };
+            
+            if (!_atmosphereOverrides.ContainsKey(nativePlanet))
+                _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
                 
-            var overrides = _overrides[nativePlanet];
-            if (!overrides.IsActive) return;
+            var state = _controlStates[nativePlanet];
+            if (!state.IsActive) return;
             
             switch (property)
             {
-                case "temperature": overrides.Temperature = value; break;
-                case "CO2Pressure": overrides.CO2Pressure = value; break;
-                case "O2Pressure": overrides.O2Pressure = value; break;
-                case "N2Pressure": overrides.N2Pressure = value; break;
-                case "waterVaporPressure": overrides.WaterVaporPressure = value; break;
+                case "temperature": state.TemperatureOverride = value; break;
+                case "CO2Pressure": state.CO2PressureOverride = value; break;
+                case "O2Pressure": state.O2PressureOverride = value; break;
+                case "N2Pressure": state.N2PressureOverride = value; break;
+                case "waterVaporPressure": state.WaterVaporPressureOverride = value; break;
             }
             
-            Log.Debug($"Climate override: {property} = {value}");
+            Log.Debug($"Climate override via SDK Atmosphere: {property} = {value}");
         }
         
         // ========== PATCHES HARMONY SUR LES GETTERS PLANET ==========
@@ -90,11 +100,11 @@ namespace PerAspera.GameAPI.Climate.Patches
         {
             try
             {
-                if (_overrides.TryGetValue(__instance, out var overrides) && 
-                    overrides.IsActive && overrides.Temperature.HasValue)
+                if (_controlStates.TryGetValue(__instance, out var state) && 
+                    state.IsActive && state.TemperatureOverride.HasValue)
                 {
-                    __result = overrides.Temperature.Value;
-                    return false; // Skip original method
+                    __result = state.TemperatureOverride.Value;
+                    return false; // Skip original method - use SDK override
                 }
             }
             catch (Exception ex)
@@ -114,11 +124,11 @@ namespace PerAspera.GameAPI.Climate.Patches
         {
             try
             {
-                if (_overrides.TryGetValue(__instance, out var overrides) && 
-                    overrides.IsActive && overrides.CO2Pressure.HasValue)
+                if (_controlStates.TryGetValue(__instance, out var state) && 
+                    state.IsActive && state.CO2PressureOverride.HasValue)
                 {
-                    __result = overrides.CO2Pressure.Value;
-                    return false;
+                    __result = state.CO2PressureOverride.Value;
+                    return false; // Skip original method - use SDK override
                 }
             }
             catch (Exception ex)
@@ -138,11 +148,11 @@ namespace PerAspera.GameAPI.Climate.Patches
         {
             try
             {
-                if (_overrides.TryGetValue(__instance, out var overrides) && 
-                    overrides.IsActive && overrides.O2Pressure.HasValue)
+                if (_controlStates.TryGetValue(__instance, out var state) && 
+                    state.IsActive && state.O2PressureOverride.HasValue)
                 {
-                    __result = overrides.O2Pressure.Value;
-                    return false;
+                    __result = state.O2PressureOverride.Value;
+                    return false; // Skip original method - use SDK override
                 }
             }
             catch (Exception ex)
@@ -162,11 +172,11 @@ namespace PerAspera.GameAPI.Climate.Patches
         {
             try
             {
-                if (_overrides.TryGetValue(__instance, out var overrides) && 
-                    overrides.IsActive && overrides.N2Pressure.HasValue)
+                if (_controlStates.TryGetValue(__instance, out var state) && 
+                    state.IsActive && state.N2PressureOverride.HasValue)
                 {
-                    __result = overrides.N2Pressure.Value;
-                    return false;
+                    __result = state.N2PressureOverride.Value;
+                    return false; // Skip original method - use SDK override
                 }
             }
             catch (Exception ex)
@@ -186,11 +196,11 @@ namespace PerAspera.GameAPI.Climate.Patches
         {
             try
             {
-                if (_overrides.TryGetValue(__instance, out var overrides) && 
-                    overrides.IsActive && overrides.WaterVaporPressure.HasValue)
+                if (_controlStates.TryGetValue(__instance, out var state) && 
+                    state.IsActive && state.WaterVaporPressureOverride.HasValue)
                 {
-                    __result = overrides.WaterVaporPressure.Value;
-                    return false;
+                    __result = state.WaterVaporPressureOverride.Value;
+                    return false; // Skip original method - use SDK override
                 }
             }
             catch (Exception ex)
@@ -199,6 +209,15 @@ namespace PerAspera.GameAPI.Climate.Patches
             }
             
             return true;
+        }
+        
+        /// <summary>
+        /// Récupère l'instance Atmosphere SDK pour une planète donnée
+        /// Permet au ClimateController d'accéder directement à l'Atmosphere encapsulée
+        /// </summary>
+        public static AtmosphereSDK? GetSDKAtmosphere(object nativePlanet)
+        {
+            return _atmosphereOverrides.TryGetValue(nativePlanet, out var atmosphere) ? atmosphere : null;
         }
     }
 }

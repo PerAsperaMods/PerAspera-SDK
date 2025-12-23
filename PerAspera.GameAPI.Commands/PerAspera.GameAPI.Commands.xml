@@ -3160,5 +3160,21 @@
             </summary>
             <returns>String with diagnostic information</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.ResourceCommandHelper">
+            <summary>
+            Resource command execution utilities that handle IHandleable casting internally
+            to avoid exposing native types to mods.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ResourceCommandHelper.ExecuteResourceImportCommand(PerAspera.GameAPI.Wrappers.HandleWrapper,System.String,System.Single)">
+            <summary>
+            Executes a resource import command for the specified faction using the given resource type.
+            Handles IHandleable casting internally to avoid exposing native types to mods.
+            </summary>
+            <param name="factionHandle">The faction handle wrapper to execute the command for</param>
+            <param name="resourceType">The resource type (e.g., "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN")</param>
+            <param name="amount">The amount of resource to add (default: 1000)</param>
+            <returns>True if the command executed successfully, false otherwise</returns>
+        </member>
     </members>
 </doc>

@@ -22,7 +22,10 @@ namespace PerAspera.GameAPI.Wrappers
         public KeeperMapWrapper(object nativeKeeperMap) : base(nativeKeeperMap)
         {
         }
-        
+        public KeeperWrapper? GetKeeper()
+        {
+            return new KeeperWrapper(SafeInvoke<Keeper>("_keeper")); // private readonly Keeper _keeper;
+        }
         /// <summary>
         /// Get current KeeperMap from BaseGame.keeper.map
         /// Factory method for wrapper creation
@@ -31,20 +34,20 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var baseGame = BaseGame.GetCurrent();
+                var baseGame = BaseGameWrapper.GetCurrent();
                 if (baseGame == null) return null;
                 
                 var keeper = baseGame.GetKeeper();
                 if (keeper == null) return null;
                 
-                var keeperMap = keeper.GetFieldValue<object>("map");
+                var keeperMap = keeper.GetKeeperMap();
                 if (keeperMap == null) return null;
                 
-                return new KeeperMapWrapper(keeperMap);
+                return keeperMap;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetCurrent failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetCurrent failed: {ex.Message}");
                 return null;
             }
         }
@@ -69,7 +72,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} Find<{typeof(T).Name}> failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} Find<{typeof(T).Name}> failed: {ex.Message}");
                 return null;
             }
         }
@@ -91,7 +94,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.Log($"{LogPrefix} Contains failed: {ex.Message}");
+                Log.LogInfo($"{LogPrefix} Contains failed: {ex.Message}");
                 return false;
             }
         }
@@ -108,11 +111,50 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (handle == null || NativeObject == null) return null;
                 
-                return SafeInvoke<object>("Find", handle);
+                Log.LogInfo($"{LogPrefix} FindBase called with handle type: {handle.GetType().FullName}");
+                
+                // Use specific parameter type to avoid ambiguous method resolution
+                var handleType = handle.GetType();
+                var allFindMethods = NativeObject.GetType().GetMethods()
+                    .Where(m => m.Name == "Find").ToArray();
+                    
+                Log.LogInfo($"{LogPrefix} Found {allFindMethods.Length} Find methods");
+                foreach (var method in allFindMethods)
+                {
+                    var paramTypes = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+                    Log.LogInfo($"{LogPrefix}   - Find({paramTypes}) → {method.ReturnType.Name} (Generic: {method.IsGenericMethodDefinition})");
+                }
+                
+                // Try to find exact match first
+                var exactMatch = allFindMethods.FirstOrDefault(m => 
+                    !m.IsGenericMethodDefinition &&
+                    m.GetParameters().Length == 1 &&
+                    m.GetParameters()[0].ParameterType == handleType);
+                
+                if (exactMatch != null)
+                {
+                    Log.LogInfo($"{LogPrefix} Using exact match method");
+                    return exactMatch.Invoke(NativeObject, new object[] { handle });
+                }
+                
+                // Try generic method with specific type
+                var genericMethod = allFindMethods.FirstOrDefault(m => 
+                    m.IsGenericMethodDefinition &&
+                    m.GetParameters().Length == 1);
+                    
+                if (genericMethod != null)
+                {
+                    Log.LogInfo($"{LogPrefix} Using generic method");
+                    var specificMethod = genericMethod.MakeGenericMethod(typeof(object));
+                    return specificMethod.Invoke(NativeObject, new object[] { handle });
+                }
+                
+                Log.LogWarning($"{LogPrefix} No suitable Find method found for {handleType.Name}");
+                return null;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} FindBase failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} FindBase failed: {ex.Message}");
                 return null;
             }
         }
@@ -134,29 +176,11 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetObjectsDict failed: {ex.Message}");
+                Log.LogWarning($"{LogPrefix} GetObjectsDict failed: {ex.Message}");
                 return null;
             }
         }
         
-        /// <summary>
-        /// Get Keeper instance that owns this KeeperMap
-        /// Back-reference to parent Keeper
-        /// </summary>
-        public object? GetKeeper()
-        {
-            try
-            {
-                if (NativeObject == null) return null;
-                
-                return NativeObject.GetFieldValue<object>("_objects");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetKeeper failed: {ex.Message}");
-                return null;
-            }
-        }
         
         /// <summary>
         /// Get total entity count in KeeperMap

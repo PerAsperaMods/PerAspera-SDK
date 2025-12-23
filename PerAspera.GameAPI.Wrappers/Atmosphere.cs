@@ -7,6 +7,12 @@ namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
     /// Represents a single atmospheric gas component
+    /// 
+    /// 🚨 SDK EXCLUSIVE - NOT IN VANILLA GAME CLASS
+    /// 💫 Enhanced Feature: Complete atmospheric composition access
+    /// 📋 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md#atmosphere-api
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
+    /// 📊 Climate Module: F:\ModPeraspera\SDK\PerAspera.GameAPI.Climate\ClimateSnapshot.cs
     /// </summary>
     public class AtmosphericGas
     {
@@ -16,7 +22,9 @@ namespace PerAspera.GameAPI.Wrappers
         
         public string Name { get; }
         public string Symbol { get; }
-        
+
+        ResourceTypeWrapper resourceType = null;
+
         internal AtmosphericGas(object nativePlanet, string name, string symbol, string getterMethod, string? setterMethod = null)
         {
             _nativePlanet = nativePlanet;
@@ -124,7 +132,7 @@ namespace PerAspera.GameAPI.Wrappers
             return string.Join(", ", _gases.Values.Select(g => $"{g.Symbol}:{g.Percentage:F1}%"));
         }
     }
-    
+
     /// <summary>
     /// Wrapper for Planet atmosphere properties
     /// Provides type-safe access to atmospheric composition and climate data
@@ -134,26 +142,26 @@ namespace PerAspera.GameAPI.Wrappers
         private readonly object _nativePlanet;
         private readonly AtmosphericComposition _composition;
         private readonly Dictionary<string, TerraformingEffect> _effects;
-        
-        internal Atmosphere(object nativePlanet)
+
+        public Atmosphere(object nativePlanet)
         {
             _nativePlanet = nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet));
-            
+
             // 🔄 DYNAMIC: Initialize gas composition from ResourceType system
             var gases = new Dictionary<string, AtmosphericGas>();
-            
+
             // Core atmospheric gases (always present)
             InitializeCoreGases(gases);
-            
+
             // 🎯 MODABLE: Discover additional atmospheric ResourceType from mods
             DiscoverModdedAtmosphericResources(gases);
-            
+
             _composition = new AtmosphericComposition(gases, () => TotalPressure);
-            
+
             // Initialize terraforming effects (also potentially modable)
             _effects = InitializeTerraformingEffects();
         }
-        
+
         /// <summary>
         /// Initialize core atmospheric gases that are always present
         /// </summary>
@@ -164,8 +172,9 @@ namespace PerAspera.GameAPI.Wrappers
             gases["O2"] = new AtmosphericGas(_nativePlanet, "Oxygen", "O2", "GetO2Pressure", null);
             gases["N2"] = new AtmosphericGas(_nativePlanet, "Nitrogen", "N2", "GetN2Pressure", null);
             gases["GHG"] = new AtmosphericGas(_nativePlanet, "Greenhouse Gas", "GHG", "GetGHGPressure", null);
+            gases["H2O"] = new AtmosphericGas(_nativePlanet, "Water Vapor", "H2O", "GetH2OPressure", null);
         }
-        
+
         /// <summary>
         /// 🎯 MODABLE: Discover atmospheric resources from ResourceType system
         /// TODO: Implementation complete when ResourceType integration finished
@@ -174,7 +183,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             // TODO: Query ResourceType system for atmospheric gases
             // ResourceManager.GetResourceTypes().Where(r => r.Category == "atmospheric")
-            
+
             // PLACEHOLDER: Framework for dynamic gas discovery
             try
             {
@@ -183,7 +192,7 @@ namespace PerAspera.GameAPI.Wrappers
                 // {
                 //     gases[resourceType.Id] = CreateDynamicGas(resourceType);
                 // }
-                
+
                 // For now: Static but extensible structure
             }
             catch (Exception)
@@ -191,7 +200,7 @@ namespace PerAspera.GameAPI.Wrappers
                 // Fail silently - core gases still work
             }
         }
-        
+
         /// <summary>
         /// Initialize terraforming effects (potentially modable)
         /// </summary>
@@ -206,82 +215,82 @@ namespace PerAspera.GameAPI.Wrappers
                 // TODO: Support for mod-added terraforming effects
             };
         }
-        
+
         // ==================== COMPOSITION ====================
-        
+
         /// <summary>
         /// Atmospheric gas composition (CO2, O2, N2, H2O)
         /// Access via: Atmosphere.Composition["CO2"].PartialPressure
         /// </summary>
         public AtmosphericComposition Composition => _composition;
-        
+
         // ==================== PRESSURE ====================
-        
+
         /// <summary>
         /// Total atmospheric pressure (sum of all partial pressures, kPa)
         /// Property: GetTotalPressure (READ-ONLY - calculated by game)
         /// </summary>
         public float TotalPressure => _nativePlanet.InvokeMethod<float>("GetTotalPressure");
-        
+
         // ==================== TEMPERATURE ====================
-        
+
         /// <summary>
         /// Current average surface temperature (Kelvin)
         /// Property: GetAverageTemperature (READ-ONLY - calculated by game)
         /// </summary>
         public float Temperature => _nativePlanet.InvokeMethod<float>("GetAverageTemperature");
-        
+
         /// <summary>
         /// Minimum temperature recorded (Kelvin)
         /// </summary>
         public float MinTemperature => _nativePlanet.InvokeMethod<float>("get_minTemperature");
-        
+
         /// <summary>
         /// Maximum temperature recorded (Kelvin)
         /// </summary>
         public float MaxTemperature => _nativePlanet.InvokeMethod<float>("get_maxTemperature");
-        
+
         /// <summary>
         /// Temperature in Celsius (convenience property)
         /// </summary>
         public float TemperatureCelsius => Temperature - 273.15f;
-        
+
         // ==================== CLIMATE EFFECTS ====================
-        
+
         /// <summary>
         /// Greenhouse effect contribution (Kelvin)
         /// Property: greenhouseEffect (READ-ONLY - calculated by game)
         /// </summary>
         public float GreenhouseEffect => _nativePlanet.InvokeMethod<float>("get_greenhouseEffect");
-        
+
         /// <summary>
         /// Planetary albedo (reflectivity, 0-1)
         /// Property: albedo (READ-ONLY - calculated by game)
         /// </summary>
         public float Albedo => _nativePlanet.InvokeMethod<float>("get_albedo");
-        
+
         /// <summary>
         /// Terraforming effects on climate (polar nukes, dust, comets, Deimos)
         /// Access via: Atmosphere.Effects["PolarNuke"].TemperatureEffect
         /// </summary>
         public IReadOnlyDictionary<string, TerraformingEffect> Effects => _effects;
-        
+
         // ==================== WATER ====================
-        
+
         /// <summary>
         /// Available water stock (kilotons)
         /// Property: GetWaterStock (READ-ONLY - use IncreaseWater/DecreaseWater pour modifications)
         /// </summary>
         public float WaterStock => _nativePlanet.InvokeMethod<float>("GetWaterStock");
-        
+
         /// <summary>
         /// Permafrost deposits (kilotons)
         /// Property: permafrostDeposits (READ-ONLY)
         /// </summary>
         public float PermafrostDeposits => _nativePlanet.InvokeMethod<float>("get_permafrostDeposits");
-        
+
         // ==================== HABITABILITY ====================
-        
+
         /// <summary>
         /// Check if atmosphere is breathable (O2 > 15%, pressure > 50kPa)
         /// </summary>
@@ -294,17 +303,17 @@ namespace PerAspera.GameAPI.Wrappers
                 return o2 != null && o2.Percentage >= 15f && TotalPressure >= 50f;
             }
         }
-        
+
         /// <summary>
         /// Check if temperature is habitable (273-310K = 0-37°C)
         /// </summary>
         public bool IsTemperatureHabitable => Temperature >= 273f && Temperature <= 310f;
-        
+
         /// <summary>
         /// Check if pressure is habitable (50-150kPa)
         /// </summary>
         public bool IsPressureHabitable => TotalPressure >= 50f && TotalPressure <= 150f;
-        
+
         /// <summary>
         /// Overall habitability score (0-100%)
         /// </summary>
@@ -315,27 +324,30 @@ namespace PerAspera.GameAPI.Wrappers
                 _composition.UpdatePercentages();
                 var o2 = _composition["O2"];
                 float o2Percentage = o2?.Percentage ?? 0f;
-                
+
                 float score = 0f;
-                
+
                 // Temperature contribution (33%)
                 if (IsTemperatureHabitable) score += 33f;
                 else if (Temperature >= 250f && Temperature <= 330f) score += 16f;
-                
+
                 // Pressure contribution (33%)
                 if (IsPressureHabitable) score += 33f;
                 else if (TotalPressure >= 20f) score += 16f;
-                
+
                 // Oxygen contribution (34%)
                 if (o2Percentage >= 15f) score += 34f;
                 else if (o2Percentage >= 5f) score += 17f;
-                
+
                 return score;
             }
         }
-        
+
+        public float TemperatureCelcius => Temperature+273.15f;
+
+
         // ==================== MODABLE RESOURCE MANAGEMENT ====================
-        
+
         /// <summary>
         /// 🎯 MODABLE: Modify atmospheric gas by ResourceType ID
         /// Supports both core gases (CO2, O2) and mod-added gases
@@ -419,10 +431,26 @@ namespace PerAspera.GameAPI.Wrappers
             throw new NotImplementedException("Modded gas registration not yet implemented - planned for v2.0");
         }
         
+
         public override string ToString()
         {
             _composition.UpdatePercentages();
             return $"Atmosphere [Temp:{TemperatureCelsius:F1}°C, Pressure:{TotalPressure:F2}kPa, {_composition}, Habitable:{HabitabilityScore:F0}%]";
+        }
+
+        public void ModifyTemperature(float suggestedTemperatureBoost, float effectDuration, string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyPressure(float pressureChange, float duration, string source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ModifyGas(string v, float oxygenChange, float duration, string source)
+        {
+            throw new NotImplementedException();
         }
     }
 }

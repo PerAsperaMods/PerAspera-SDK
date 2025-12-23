@@ -1,5 +1,6 @@
 using System;
 using PerAspera.Core.IL2CPP;
+using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -11,16 +12,17 @@ namespace PerAspera.GameAPI.Wrappers
     public static class KeeperTypeRegistry
     {
         private static readonly string LogPrefix = "[KeeperTypeRegistry]";
-        
+        private static readonly LogAspera Log = new LogAspera("Keeper");
+
         // ==================== INITIALIZATION ====================
-        
+
         /// <summary>
         /// Check if Keeper systems are available
         /// Returns true after BaseGame.Awake() completes
         /// </summary>
         public static bool IsInitialized()
         {
-            var baseGame = BaseGame.GetCurrent();
+            var baseGame = BaseGameWrapper.GetCurrent();
             if (baseGame == null) return false;
             
             var keeper = baseGame.GetKeeper();
@@ -45,10 +47,10 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get Keeper instance (entity registry)
         /// Safe to call after BaseGame.Awake()
         /// </summary>
-        public static object? GetKeeper()
+        public static KeeperWrapper? GetKeeper()
         {
-            var baseGame = BaseGame.GetCurrent();
-            return baseGame?.GetKeeper();
+            
+            return (KeeperWrapper)BaseGameWrapper.GetCurrent()?.GetKeeper();
         }
         
         /// <summary>
@@ -57,8 +59,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static object? GetUniverse()
         {
-            var baseGame = BaseGame.GetCurrent();
-            return baseGame?.SafeInvoke<object>("get_universe"); // Get native object directly
+            var baseGameWrapper = BaseGameWrapper.GetCurrent();
+            if (!baseGameWrapper.IsValidWrapper) return null;
+            return baseGameWrapper.GetUniverse()?.GetNativeObject(); // Get native object directly
         }
         
         /// <summary>
@@ -100,7 +103,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(resourceKey))
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetResourceType called with null/empty key");
+                Log.Warning($"{LogPrefix} GetResourceType called with null/empty key");
                 return null;
             }
             
@@ -110,7 +113,7 @@ namespace PerAspera.GameAPI.Wrappers
                 var resourceTypeClass = GameTypeInitializer.GetResourceType();
                 if (resourceTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} ResourceType class not found");
+                    Log.Error($"{LogPrefix} ResourceType class not found");
                     return null;
                 }
                 
@@ -119,23 +122,35 @@ namespace PerAspera.GameAPI.Wrappers
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (getMethod == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} ResourceType.Get method not found");
+                    Log.Error($"{LogPrefix} ResourceType.Get method not found");
                     return null;
                 }
                 
                 var result = getMethod.Invoke(null, new object[] { resourceKey });
                 if (result == null)
                 {
-                    UnityEngine.Debug.LogWarning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
+                    Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
                 }
                 
                 return result;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get ResourceType '{resourceKey}': {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to get ResourceType '{resourceKey}': {ex.Message}");
                 return null;
             }
+        }
+        
+        /// <summary>
+        /// Get ResourceType wrapper by key (e.g., "resource_water", "resource_silicon")
+        /// Returns wrapped ResourceType for type-safe access
+        /// </summary>
+        /// <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
+        /// <returns>ResourceType wrapper or null if not found</returns>
+        public static ResourceTypeWrapper? GetResourceTypeWrapper(string resourceKey)
+        {
+            var nativeResourceType = GetResourceType(resourceKey);
+            return nativeResourceType != null ? new ResourceTypeWrapper(nativeResourceType) : null;
         }
         
         /// <summary>
@@ -322,7 +337,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static string GetStatus()
         {
-            var baseGame = BaseGame.GetCurrent();
+            var baseGame = BaseGameWrapper.GetCurrent();
             if (baseGame == null) return "BaseGame: NOT FOUND";
             
             var keeper = baseGame.GetKeeper();

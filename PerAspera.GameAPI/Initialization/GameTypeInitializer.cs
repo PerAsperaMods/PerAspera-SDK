@@ -26,6 +26,8 @@ namespace PerAspera.GameAPI
         private static System.Type? _blackboardType;
         private static System.Type? _commandBusType;
         private static System.Type? _PersonType;
+        private static System.Type? _keeperType;
+        private static System.Type? _iHandleableType;
 
         // Cached singleton instances
         private static object? _baseGameInstance;
@@ -46,6 +48,10 @@ namespace PerAspera.GameAPI
                 // PERFORMANCE OPTIMIZATION: Warm up type discovery cache
                 PerAspera.GameAPI.Caching.TypeDiscoveryCache.WarmupCache();
 
+                // 🔄 CRITICAL GAP RESOLUTION: Initialize Native Instance Manager
+                PerAspera.GameAPI.Native.InstanceManager.Initialize();
+                _log.Info("🔗 Native InstanceManager initialized");
+
                 // Wait for game assemblies to be loaded
                 WaitForGameAssemblies();
 
@@ -55,12 +61,17 @@ namespace PerAspera.GameAPI
                 // Try to get singleton instances
                 DiscoverSingletonInstances();
 
+                // 🔄 CRITICAL GAP RESOLUTION: Register discovered instances in InstanceManager
+                RegisterInstancesInManager();
+
                 _isInitialized = true;
                 
                 var stats = GetDiscoveryStats();
                 var cacheStats = PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics();
+                var instanceStats = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
                 _log.Info($"✅ Type discovery initialized: {stats}");
                 _log.Info($"📊 Cache statistics: {cacheStats}");
+                _log.Info($"🔗 Instance registry: {instanceStats}");
             }
             catch (Exception ex)
             {
@@ -121,10 +132,113 @@ namespace PerAspera.GameAPI
         }
 
         /// <summary>
+        /// Register discovered instances in the Native InstanceManager
+        /// 🔄 CRITICAL GAP RESOLUTION: Makes instances accessible to mods
+        /// </summary>
+        private static void RegisterInstancesInManager()
+        {
+            try
+            {
+                _log.Info("🔗 Registering discovered instances in InstanceManager...");
+
+                // Register BaseGame instance
+                if (_baseGameInstance != null)
+                {
+                    PerAspera.GameAPI.Native.InstanceManager.RegisterBaseGame(_baseGameInstance);
+                    _log.Info("✅ Registered BaseGame instance in InstanceManager");
+                }
+                else
+                {
+                    _log.Warning("⚠️ No BaseGame instance to register");
+                }
+
+                // Register Universe instance
+                if (_universeInstance != null)
+                {
+                    PerAspera.GameAPI.Native.InstanceManager.RegisterUniverse(_universeInstance);
+                    _log.Info("✅ Registered Universe instance in InstanceManager");
+
+                    // Try to get and register current planet from Universe
+                    var currentPlanet = TryGetCurrentPlanetFromUniverse(_universeInstance);
+                    if (currentPlanet != null)
+                    {
+                        PerAspera.GameAPI.Native.InstanceManager.RegisterCurrentPlanet(currentPlanet);
+                        _log.Info("✅ Registered CurrentPlanet instance in InstanceManager");
+                    }
+                }
+                else
+                {
+                    _log.Warning("⚠️ No Universe instance to register");
+                }
+
+                // Try to register factions if available
+                TryRegisterFactions();
+
+                var instanceStatus = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
+                _log.Info($"🔗 Instance registration complete: {instanceStatus}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"❌ Failed to register instances in InstanceManager: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Try to get current planet from Universe instance
+        /// </summary>
+        private static object? TryGetCurrentPlanetFromUniverse(object universeInstance)
+        {
+            try
+            {
+                var currentPlanetProperty = universeInstance.GetType().GetProperty("currentPlanet");
+                if (currentPlanetProperty != null)
+                {
+                    var planet = currentPlanetProperty.GetValue(universeInstance);
+                    if (planet != null)
+                    {
+                        _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
+                        return planet;
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.Warning($"Could not get currentPlanet from Universe: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Try to register active factions
+        /// </summary>
+        private static void TryRegisterFactions()
+        {
+            try
+            {
+                // For now, we'll need to hook into game events to register factions
+                // as they become active. This is a placeholder for future implementation.
+                _log.Debug("Faction registration deferred to game event hooks");
+            }
+            catch (Exception ex)
+            {
+                _log.Warning($"Could not register factions: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Get BaseGame singleton instance
         /// </summary>
         public static object? GetBaseGameInstance()
         {
+            EnsureInitialized(); // Force initialization if not done
+            
+            // Force type discovery if null
+            if (_baseGameType == null)
+            {
+                _baseGameType = GetBaseGameType();
+            }
+            
             if (_baseGameInstance == null && _baseGameType != null)
             {
                 _baseGameInstance = ReflectionHelpers.GetSingletonInstance(_baseGameType);
@@ -137,6 +251,14 @@ namespace PerAspera.GameAPI
         /// </summary>
         public static object? GetUniverseInstance()
         {
+            EnsureInitialized(); // Force initialization if not done
+            
+            // Force type discovery if null
+            if (_universeType == null)
+            {
+                _universeType = GetUniverseType();
+            }
+            
             if (_universeInstance == null && _universeType != null)
             {
                 _universeInstance = ReflectionHelpers.GetSingletonInstance(_universeType);
@@ -260,6 +382,40 @@ namespace PerAspera.GameAPI
         }
 
         /// <summary>
+        /// Get InteractionManager type for command execution
+        /// </summary>
+        public static System.Type? GetInteractionManagerType()
+        {
+            return FindGameType("InteractionManager") ?? 
+                   FindGameType("InteractionActionHandler") ??
+                   FindGameType("InteractionHandler");
+        }
+
+        /// <summary>
+        /// Get Keeper type for entity registration system
+        /// </summary>
+        public static System.Type? GetKeeper()
+        {
+            if (_keeperType == null)
+            {
+                _keeperType = FindGameType("Keeper") ?? FindGameType("EntityKeeper") ?? FindGameType("GameKeeper");
+            }
+            return _keeperType;
+        }
+
+        /// <summary>
+        /// Get IHandleable interface type for registered entities
+        /// </summary>
+        public static System.Type? GetIHandleable()
+        {
+            if (_iHandleableType == null)
+            {
+                _iHandleableType = FindGameType("IHandleable") ?? FindGameType("IHandleableEntity") ?? FindGameType("IRegistrable");
+            }
+            return _iHandleableType;
+        }
+
+        /// <summary>
         /// Get discovery statistics
         /// </summary>
         public static TypeDiscoveryStats GetDiscoveryStats()
@@ -275,6 +431,8 @@ namespace PerAspera.GameAPI
                 HasFaction = GetFactionType() != null,
                 HasResourceType = GetResourceType() != null,
                 HasCommandBus = GetCommandBusType() != null,
+                HasKeeper = GetKeeper() != null,
+                HasIHandleable = GetIHandleable() != null,
                 TotalTypesFound = CountFoundTypes(),
                 IsInitialized = _isInitialized,
                 Timestamp = DateTime.Now,
@@ -357,9 +515,11 @@ namespace PerAspera.GameAPI
                 GetFactionType();
                 GetResourceType();
                 GetCommandBusType();
+                GetKeeper();
+                GetIHandleable();
 
                 var stats = GetDiscoveryStats();
-                _log.Info($"?? Type discovery complete: {stats.TotalTypesFound}/7 types found");
+                _log.Info($"✅ Type discovery complete: {stats.TotalTypesFound}/9 types found");
             }
             catch (Exception ex)
             {
@@ -380,6 +540,8 @@ namespace PerAspera.GameAPI
             if (_factionType != null) count++;
             if (_resourceType != null) count++;
             if (_commandBusType != null) count++;
+            if (_keeperType != null) count++;
+            if (_iHandleableType != null) count++;
             return count;
         }
 
@@ -397,8 +559,8 @@ namespace PerAspera.GameAPI
             _buildingType = null;
             _technologyType = null;
             _blackboardType = null;
-            _commandBusType = null;
-            _isInitialized = false;
+            _commandBusType = null;            _keeperType = null;
+            _iHandleableType = null;            _isInitialized = false;
         }
 
         /// <summary>
@@ -530,6 +692,69 @@ namespace PerAspera.GameAPI
             // Fallback to Building type
             return GetBuildingType();
         }
+
+        // ========== INSTANCE MANAGER ACCESS METHODS ==========
+        // 🔄 CRITICAL GAP RESOLUTION: Easy access to live game instances
+
+        /// <summary>
+        /// Get BaseGame instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live BaseGame singleton
+        /// </summary>
+        public static object? GetBaseGameInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetBaseGame();
+        }
+
+        /// <summary>
+        /// Get Universe instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live Universe singleton
+        /// </summary>
+        public static object? GetUniverseInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetUniverse();
+        }
+
+        /// <summary>
+        /// Get current Planet instance from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live current Planet
+        /// </summary>
+        public static object? GetCurrentPlanetInstanceFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetCurrentPlanet();
+        }
+
+        /// <summary>
+        /// Get faction instance by ID from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to live faction instances
+        /// </summary>
+        public static object? GetFactionInstanceFromManager(string factionId)
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetFaction(factionId);
+        }
+
+        /// <summary>
+        /// Get all registered faction instances from InstanceManager
+        /// 🔄 CRITICAL GAP: Provides access to all live factions
+        /// </summary>
+        public static System.Collections.Generic.IEnumerable<object> GetAllFactionInstancesFromManager()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetAllFactions();
+        }
+
+        /// <summary>
+        /// Get InstanceManager status for debugging
+        /// 🔄 CRITICAL GAP: Debugging access to instance registry
+        /// </summary>
+        public static string GetInstanceManagerStatus()
+        {
+            EnsureInitialized();
+            return PerAspera.GameAPI.Native.InstanceManager.GetStatus();
+        }
     }
 
     /// <summary>
@@ -544,6 +769,8 @@ namespace PerAspera.GameAPI
         public bool HasFaction { get; set; }
         public bool HasResourceType { get; set; }
         public bool HasCommandBus { get; set; }
+        public bool HasKeeper { get; set; }
+        public bool HasIHandleable { get; set; }
         public int TotalTypesFound { get; set; }
         public bool IsInitialized { get; set; }
         public DateTime Timestamp { get; set; }
@@ -554,8 +781,8 @@ namespace PerAspera.GameAPI
 
         public override string ToString()
         {
-            return $"TypeDiscovery: {TotalTypesFound}/7 types found " +
-                   $"(BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet}) " +
+            return $"TypeDiscovery: {TotalTypesFound}/9 types found " +
+                   $"(BaseGame:{HasBaseGame}, Universe:{HasUniverse}, Planet:{HasPlanet}, Keeper:{HasKeeper}) " +
                    $"Cache: {CacheEntriesCount} entries, {CacheHitRate:F1}% hit rate";
         }
     }
