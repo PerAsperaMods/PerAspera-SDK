@@ -84,21 +84,35 @@ namespace PerAspera.GameAPI.Events.Core
             lock (_lock)
             {
                 // Building wrapper
-                _converters[typeof(Building)] = native => new PerAspera.GameAPI.Wrappers.Building(native);
+                _converters[typeof(Building)] = native => new PerAspera.GameAPI.Wrappers.BuildingWrapper(native);
                 
                 // Drone wrapper
-                _converters[typeof(Drone)] = native => new PerAspera.GameAPI.Wrappers.Drone(native);
+                _converters[typeof(Drone)] = native => new PerAspera.GameAPI.Wrappers.DroneWrapper(native);
                 
                 // Universe wrapper  
-                _converters[typeof(Universe)] = native => new PerAspera.GameAPI.Wrappers.Universe(native);
+                _converters[typeof(Universe)] = native => new PerAspera.GameAPI.Wrappers.UniverseWrapper(native);
                 
                 // Planet wrapper
-                _converters[typeof(Planet)] = native => new PerAspera.GameAPI.Wrappers.Planet(native);
+                _converters[typeof(Planet)] = native => new PerAspera.GameAPI.Wrappers.PlanetWrapper(native);
                 
                 // BaseGame wrapper
-                _converters[typeof(BaseGame)] = native => new PerAspera.GameAPI.Wrappers.BaseGame(native);
+                _converters[typeof(BaseGame)] = native => new PerAspera.GameAPI.Wrappers.BaseGameWrapper(native);
                 
-                // Add more wrappers as needed
+                // Faction wrapper
+                _converters[typeof(Faction)] = native => new PerAspera.GameAPI.Wrappers.FactionWrapper(native);
+                
+                // Technology wrapper
+                _converters[typeof(Technology)] = native => new PerAspera.GameAPI.Wrappers.TechnologyWrapper(native);
+                
+                // BuildingType wrapper
+                _converters[typeof(BuildingType)] = native => new PerAspera.GameAPI.Wrappers.BuildingTypeWrapper(native);
+                
+                // ResourceType wrapper
+                _converters[typeof(ResourceType)] = native => new PerAspera.GameAPI.Wrappers.ResourceTypeWrapper(native);
+                
+                // Knowledge wrapper
+                _converters[typeof(Knowledge)] = native => new PerAspera.GameAPI.Wrappers.Knowledge(native);
+                
                 _logger.Info($"Registered {_converters.Count} wrapper converters");
             }
         }

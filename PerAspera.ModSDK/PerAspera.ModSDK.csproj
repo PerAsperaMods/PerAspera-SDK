@@ -44,11 +44,11 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
 	<!-- Auto-deploy SDK to BepInEx plugins folder -->
-	<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">
+	<!--<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">
 		<PropertyGroup>
 			<SDKDeployPath>$(PerAsperaGamePath)\BepInEx\plugins\PerAspera-SDK</SDKDeployPath>
 		</PropertyGroup>
-		<MakeDir Directories="$(SDKDeployPath)" />
+		<MakeDir Directories="$(PerAsperaGamePath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.Core.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.Core.IL2CppExtensions.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.dll" DestinationFolder="$(SDKDeployPath)" />
@@ -59,7 +59,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
-	</Target>
+	</Target>-->
 
 	<Target Name="SDK_DLL" AfterTargets="Build">
 		<PropertyGroup>
@@ -74,6 +74,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Native.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
 	</Target>

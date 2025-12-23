@@ -21,6 +21,75 @@
             Test conversion with a managed List for reference
             </summary>
         </member>
+        <member name="T:PerAspera.Core.IL2CPP.ConsoleCommandExecutor">
+            <summary>
+            Consolidated console command execution system
+            Centralizes all console command logic for mods
+            Provides both console-based and native API execution
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteConsoleCommand(System.String)">
+            <summary>
+            Execute a console command string
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteFactionAddResource(System.String,System.Single,System.Boolean)">
+            <summary>
+            Execute a faction resource addition command
+            Supports both console and native execution modes
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteFactionAddResourceNative(System.String,System.Single)">
+            <summary>
+            Execute faction resource addition using native APIs (standard command)
+            This is the preferred method for mods
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteFactionAddResourceConsole(System.String,System.Single)">
+            <summary>
+            Execute faction resource addition using console command (fallback)
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteFactionAddResources(System.Collections.Generic.Dictionary{System.String,System.Single},System.Boolean)">
+            <summary>
+            Execute multiple resource additions in batch
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteAddResearchPoints(System.Single,System.Boolean)">
+            <summary>
+            Execute research points addition
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteAddResearchPointsNative(System.Single)">
+            <summary>
+            Add research points using native API
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteAddResearchPointsConsole(System.Single)">
+            <summary>
+            Add research points using console command
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteUnlockBuilding(System.String,System.Boolean)">
+            <summary>
+            Execute building unlock command
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteUnlockBuildingNative(System.String)">
+            <summary>
+            Unlock building using native API
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteUnlockBuildingConsole(System.String)">
+            <summary>
+            Unlock building using console command
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ConsoleCommandExecutor.ExecuteCommand(System.String,System.Object[])">
+            <summary>
+            Generic method to execute any console command with parameters
+            </summary>
+        </member>
         <member name="T:PerAspera.Core.IL2CPP.IL2CppExtensions">
             <summary>
             Extension methods for safe IL2CPP object manipulation
@@ -99,6 +168,97 @@
             <typeparam name="T">Element type</typeparam>
             <param name="il2cppArray">IL2CPP array object</param>
             <returns>Managed array or null if conversion fails</returns>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.PerAsperaExtensions">
+            <summary>
+            High-level convenience extensions for common Per Aspera operations
+            Simplifies access to game singletons, resources, and common patterns
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetBaseGame">
+            <summary>
+            Get BaseGame.Instance safely
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetCurrentUniverse">
+            <summary>
+            Get current Universe from BaseGame
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetCurrentPlanet">
+            <summary>
+            Get current Planet from Universe
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetCurrentFaction">
+            <summary>
+            Get current Faction from Universe
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetFactionStockpile(System.Object)">
+            <summary>
+            Get faction's stockpile
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.ParseResourceType(System.String)">
+            <summary>
+            Parse resource type string to enum value
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.CreateCargoQuantity(System.Single)">
+            <summary>
+            Create a CargoQuantity instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.AddResourcesToFaction(System.Object,System.String,System.Single)">
+            <summary>
+            Add resources to faction's stockpile
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetConsole">
+            <summary>
+            Get Console instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.ExecuteConsoleCommand(System.String)">
+            <summary>
+            Execute console command
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.CreatePatchTarget(System.String,System.String,System.Type[])">
+            <summary>
+            Create a Harmony patch target method resolver
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.GetInteractionManager">
+            <summary>
+            Get InteractionManager.Instance safely
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.ExecuteConsoleCommand(System.String,System.Object[])">
+            <summary>
+            Executes a console command with the given arguments
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.GameObjectExtensions">
+            <summary>
+            Extension methods for common game object operations
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.GameObjectExtensions.GetBuildings(System.Object)">
+            <summary>
+            Get all buildings from a planet
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.GameObjectExtensions.GetFaction(System.Object)">
+            <summary>
+            Get faction from a building
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.GameObjectExtensions.GetBuildingType(System.Object)">
+            <summary>
+            Get building type from a building
+            </summary>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.ReflectionHelpers">
             <summary>

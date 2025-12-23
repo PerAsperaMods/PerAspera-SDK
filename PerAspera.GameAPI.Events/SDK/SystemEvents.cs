@@ -12,6 +12,41 @@ namespace PerAspera.GameAPI.Events.SDK
     // ==================== SYSTEM EVENTS ====================
 
     /// <summary>
+    /// Event triggered when early mods can start loading
+    /// Fires immediately after GameHub initialization, before full game load
+    /// ✅ Use this for mods that need immediate initialization (UI, Twitch, logging, etc.)
+    /// </summary>
+    public class EarlyModsReadyEvent : SDKEventBase
+    {
+        public override string EventType => "EarlyModsReady";
+        
+        /// <summary>SDK wrapper for BaseGame (basic access available)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper? BaseGameWrapper { get; }
+        
+        /// <summary>Whether BaseGame is available for wrapper creation</summary>
+        public bool BaseGameAvailable { get; }
+        
+        /// <summary>Whether this is safe for early mod initialization</summary>
+        public bool SafeForEarlyInit { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime EventTime { get; }
+
+        public EarlyModsReadyEvent(object? nativeBaseGame = null)
+        {
+            BaseGameAvailable = nativeBaseGame != null;
+            SafeForEarlyInit = true;
+            EventTime = DateTime.Now;
+            
+            // Create wrapper only if BaseGame is available
+            if (BaseGameAvailable && nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            }
+        }
+    }
+
+    /// <summary>
     /// Event triggered when BaseGame and Universe are detected
     /// Uses SDK wrapper classes for type-safe access
     /// </summary>
@@ -45,13 +80,13 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "GameFullyLoaded";
         
         /// <summary>SDK wrapper for BaseGame (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
         
         /// <summary>SDK wrapper for Universe (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.Universe UniverseWrapper { get; }
+        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
         
         /// <summary>SDK wrapper for Planet (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.Planet PlanetWrapper { get; }
+        public PerAspera.GameAPI.Wrappers.PlanetWrapper PlanetWrapper { get; }
         
         /// <summary>Native IL2CPP BaseGame instance</summary>
         public NativeBaseGame NativeBaseGame { get; }
@@ -70,9 +105,9 @@ namespace PerAspera.GameAPI.Events.SDK
             NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
             
             // Create SDK wrappers from native instances
-            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
-            UniverseWrapper = new PerAspera.GameAPI.Wrappers.Universe(nativeUniverse);
-            PlanetWrapper = new PerAspera.GameAPI.Wrappers.Planet(nativePlanet);
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            PlanetWrapper = new PerAspera.GameAPI.Wrappers.PlanetWrapper(nativePlanet);
         }
     }
 
@@ -107,12 +142,12 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// Type-safe BlackBoard wrapper instance
         /// </summary>
-        public BlackBoard BlackBoard { get; }
+        public BlackBoardWrapper BlackBoard { get; }
 
         public BlackboardInitializedEvent(object blackboard)
         {
             NativeBlackboard = blackboard ?? throw new ArgumentNullException(nameof(blackboard));
-            BlackBoard = new BlackBoard(blackboard);
+            BlackBoard = new BlackBoardWrapper(blackboard);
         }
     }
 
@@ -181,11 +216,11 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "MartianDayChanged";
         
         public int Sol { get; }
-        public Wrappers.Planet? Planet { get; }
+        public Wrappers.PlanetWrapper? Planet { get; }
         public float Temperature { get; }
         public float AtmosphericPressure { get; }
 
-        public MartianDayChangedEvent(int sol, Wrappers.Planet? planet = null)
+        public MartianDayChangedEvent(int sol, Wrappers.PlanetWrapper? planet = null)
         {
             Sol = sol;
             Planet = planet;
@@ -223,7 +258,7 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "GameHubInitialized";
         
         /// <summary>SDK wrapper for BaseGame (available early in initialization)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGame BaseGameWrapper { get; }
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
         
         /// <summary>Native IL2CPP BaseGame instance</summary>
         public NativeBaseGame NativeBaseGame { get; }
@@ -240,10 +275,162 @@ namespace PerAspera.GameAPI.Events.SDK
             NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
             
             // Create SDK wrapper from native instance  
-            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGame(nativeBaseGame);
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
             
             IsReady = isReady;
             InitializedAt = DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when GameHub/GameHubManager is first loaded
+    /// ✅ This is the EARLIEST event - fires when GameHubManager.Awake() occurs
+    /// Use this for mods that need immediate initialization before any game systems
+    /// </summary>
+    public class GameHubReadyEvent : SDKEventBase
+    {
+        public override string EventType => "GameHubReady";
+        
+        /// <summary>Whether GameHub scene is fully loaded</summary>
+        public bool SceneLoaded { get; }
+        
+        /// <summary>Whether GameHubManager is available</summary>
+        public bool ManagerReady { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime ReadyAt { get; }
+
+        public GameHubReadyEvent(bool sceneLoaded = true, bool managerReady = true)
+        {
+            SceneLoaded = sceneLoaded;
+            ManagerReady = managerReady;
+            ReadyAt = DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when BaseGame instance is created
+    /// Fires when BaseGame.Awake() or initialization occurs
+    /// </summary>
+    public class BaseGameCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "BaseGameCreated";
+        
+        /// <summary>SDK wrapper for BaseGame</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
+        
+        /// <summary>Native IL2CPP BaseGame instance</summary>
+        public NativeBaseGame NativeBaseGame { get; }
+        
+        /// <summary>Whether BaseGame is fully initialized</summary>
+        public bool IsInitialized { get; }
+
+        public BaseGameCreatedEvent(object nativeBaseGame, bool isInitialized = false)
+        {
+            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
+            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            IsInitialized = isInitialized;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when Universe instance is created
+    /// Fires when Universe is instantiated and attached to BaseGame
+    /// </summary>
+    public class UniverseCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "UniverseCreated";
+        
+        /// <summary>SDK wrapper for Universe</summary>
+        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
+        
+        /// <summary>SDK wrapper for BaseGame (parent)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
+        
+        /// <summary>Native IL2CPP Universe instance</summary>
+        public NativeUniverse NativeUniverse { get; }
+
+        public UniverseCreatedEvent(object nativeUniverse, object nativeBaseGame)
+        {
+            NativeUniverse = new NativeUniverse(nativeUniverse ?? throw new ArgumentNullException(nameof(nativeUniverse)));
+            UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            
+            if (nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when Planet instance is created
+    /// Fires when Planet is instantiated and attached to Universe
+    /// </summary>
+    public class PlanetCreatedEvent : SDKEventBase
+    {
+        public override string EventType => "PlanetCreated";
+        
+        /// <summary>SDK wrapper for Planet</summary>
+        public PerAspera.GameAPI.Wrappers.PlanetWrapper PlanetWrapper { get; }
+        
+        /// <summary>SDK wrapper for Universe (parent)</summary>
+        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
+        
+        /// <summary>Native IL2CPP Planet instance</summary>
+        public NativePlanet NativePlanet { get; }
+
+        public PlanetCreatedEvent(object nativePlanet, object nativeUniverse)
+        {
+            NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
+            PlanetWrapper = new PerAspera.GameAPI.Wrappers.PlanetWrapper(nativePlanet);
+            
+            if (nativeUniverse != null)
+            {
+                UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Event triggered when BaseGame.OnFinishLoading() completes
+    /// Fires at the exact moment the game's loading process finishes
+    /// ✅ Use this for mods that need to run immediately after game loading
+    /// </summary>
+    public class OnLoadFinishedEvent : SDKEventBase
+    {
+        public override string EventType => "OnLoadFinished";
+        
+        /// <summary>SDK wrapper for BaseGame (full access available)</summary>
+        public PerAspera.GameAPI.Wrappers.BaseGameWrapper? BaseGameWrapper { get; }
+        
+        /// <summary>SDK wrapper for Universe (full access available)</summary>
+        public PerAspera.GameAPI.Wrappers.UniverseWrapper? UniverseWrapper { get; }
+        
+        /// <summary>Whether BaseGame is available</summary>
+        public bool BaseGameAvailable { get; }
+        
+        /// <summary>Whether Universe is available</summary>
+        public bool UniverseAvailable { get; }
+        
+        /// <summary>Event timestamp</summary>
+        public DateTime EventTime { get; }
+
+        public OnLoadFinishedEvent(object? nativeBaseGame = null, object? nativeUniverse = null)
+        {
+            BaseGameAvailable = nativeBaseGame != null;
+            UniverseAvailable = nativeUniverse != null;
+            EventTime = DateTime.Now;
+            
+            // Create wrappers if available
+            if (BaseGameAvailable && nativeBaseGame != null)
+            {
+                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            }
+            
+            if (UniverseAvailable && nativeUniverse != null)
+            {
+                UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            }
         }
     }
 }

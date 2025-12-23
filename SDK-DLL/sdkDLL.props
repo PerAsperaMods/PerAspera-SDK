@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PerAspera ModSDK - Complete Dependencies Package
+  
+  This file provides ALL dependencies needed for Per Aspera modding:
+  - PerAspera SDK DLLs (9 components)
+  - Unity Engine 2020.3.49 LTS 
+  - BepInEx IL2CPP framework
+  - GameLibs (via SDK inclusion)
+  
+  Usage: <Import Project="path/to/sdkDLL.props" />
+-->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- SDK DLL Directory -->
+    <PerAsperaSdkDllDir>$(MSBuildThisFileDirectory)</PerAsperaSdkDllDir>
+    
+    <!-- Enable Unity Engine support -->
+    <IncludeAllUnityReferences>true</IncludeAllUnityReferences>
+    
+    <!-- IL2CPP specific settings -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Core Dependencies: Unity + BepInEx + IL2CPP -->
+  <ItemGroup>
+    <!-- Unity Engine 2020.3.49 LTS (Per Aspera compatible) -->
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.49" />
+    
+    <!-- BepInEx IL2CPP Framework -->
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    
+    <!-- IL2CPP Interop -->
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.*" />
+  </ItemGroup>
+
+  <!-- PerAspera SDK Components (10 DLLs) -->
+  <ItemGroup>
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.Core.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.Core.IL2CppExtensions.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Native.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Climate.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Commands.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Events.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Overrides.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.GameAPI.Wrappers.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.ModSDK.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)PerAspera.SDK.TwitchIntegration.dll" />
+    <Reference Include="$(PerAsperaSdkDllDir)Newtonsoft.Json.dll" />
+  </ItemGroup>
+
+</Project>

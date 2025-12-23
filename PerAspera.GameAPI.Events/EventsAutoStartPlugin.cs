@@ -5,23 +5,39 @@ using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using PerAspera.GameAPI.Events.Native;
 using HarmonyLib;
-
+using UnityEngine;
+using Il2CppInterop.Runtime.Injection;
+using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
+using BepInEx.Logging;
+using PerAspera.GameAPI.Events.SDK;
+using PerAspera.GameAPI.Events.Constants;
+using PerAspera.GameAPI.Wrappers;
 namespace PerAspera.GameAPI.Events
 {
     /// <summary>
     /// Automatic initialization for enhanced event system
     /// Provides seamless upgrade from legacy event system to wrapper-enabled events
+    /// 
+    /// 📋 Event Documentation: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\MODDER-GUIDE.md
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator (Events expertise)
+    /// 📡 Usage Examples: F:\ModPeraspera\SDK\PerAspera.GameAPI.Events\USAGE-EXAMPLES.md
+    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Events.md
     /// </summary>
-    [BepInPlugin("peraspera.events.autostart", "PerAspera Enhanced Events", "1.0.0")]
+    [BepInPlugin("PerAspera.GameAPI.Events", "PerAspera Enhanced Events", "1.0.0")]
     public class EventsAutoStartPlugin : BasePlugin
     {
-        public static LogAspera _logger = new LogAspera("EventsAutoStart");
+        //public static LogAspera _logger = new LogAspera("EventsAutoStart");
+        private ManualLogSource? _gameHubLogger;
+        private static ManualLogSource? _staticLogger;
 
         public override void Load()
         {
             try
             {
-                _logger.Info("Initializing Enhanced Event System...");
+                Log.LogInfo("Initializing Enhanced Event System...");
+                
+                // Initialize static logger for static methods
+                _staticLogger = Log;
 
                 // Initialize wrapper factory
                 InitializeWrapperFactory();
@@ -29,42 +45,68 @@ namespace PerAspera.GameAPI.Events
                 // Initialize event system integration
                 EventSystemIntegration.Initialize();
 
-                // ✅ Apply Harmony patches for game initialization events
-                ApplyGameInitializationPatches();
+                // ✅ Initialize SDK-based game initialization detection
+                InitializeSDKBasedGameDetection();
 
-                _logger.Info("✅ Enhanced Event System initialized successfully");
-                _logger.Info("🎯 All native events now use SDK wrappers automatically");
-                _logger.Info("🎮 Game initialization events (GameHubInitialized, GameFullyLoaded) ready");
+                Log.LogInfo("✅ Enhanced Event System initialized successfully");
+                Log.LogInfo("🎯 All native events now use SDK wrappers automatically");
+                Log.LogInfo("🎮 Game initialization events (GameHubInitialized, GameFullyLoaded) ready");
                 
                 // Log system status
                 LogSystemStatus();
             }
             catch (System.Exception ex)
             {
-                _logger.Error($"❌ Failed to initialize Enhanced Event System: {ex.Message}");
+                Log.LogError($"❌ Failed to initialize Enhanced Event System: {ex.Message}");
                 throw;
             }
         }
 
         /// <summary>
-        /// Apply Harmony patches for game initialization detection
+        /// Initialize SDK-based game state detection (replacing problematic Harmony patches)
+        /// Uses existing SDK wrapper system for clean game initialization detection
+        /// </summary>
+        private void InitializeSDKBasedGameDetection()
+        {
+            try
+            {
+                Log.LogInfo("🔧 Initializing SDK-based game detection...");
+                
+                // Use existing SDK wrapper architecture instead of raw IL2CPP patches
+                Patches.GameInitializationPatches.InitializeSDKBasedEvents();
+                
+                // Initialize GameHub Detector MonoBehaviour
+                InitializeGameHubDetector();
+                
+                Log.LogInfo("✅ SDK-based game detection initialized successfully");
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"❌ Failed to initialize SDK-based game detection: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// DEPRECATED: Apply Harmony patches for game initialization detection
+        /// Replaced by SDK-based detection for better reliability
         /// </summary>
         private void ApplyGameInitializationPatches()
         {
             try
             {
-                _logger.Info("Applying game initialization patches...");
+                Log.LogInfo("Applying game initialization patches...");
                 
                 var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.GameInitialization");
                 
                 // Apply patches from GameInitializationPatches class
                 harmony.PatchAll(typeof(Patches.GameInitializationPatches));
                 
-                _logger.Info("✅ Game initialization patches applied successfully");
+                Log.LogInfo("✅ Game initialization patches applied successfully");
             }
             catch (System.Exception ex)
             {
-                _logger.Error($"❌ Failed to apply game initialization patches: {ex.Message}");
+                Log.LogError($"❌ Failed to apply game initialization patches: {ex.Message}");
                 throw;
             }
         }
@@ -74,14 +116,14 @@ namespace PerAspera.GameAPI.Events
         /// </summary>
         private void InitializeWrapperFactory()
         {
-            _logger.Info("Initializing WrapperFactory...");
+            Log.LogInfo("Initializing WrapperFactory...");
             
             var supportedWrappers = WrapperFactory.GetSupportedWrapperTypes();
-            _logger.Info($"✅ WrapperFactory initialized with {supportedWrappers.Count} wrapper types");
+            Log.LogInfo($"✅ WrapperFactory initialized with {supportedWrappers.Count} wrapper types");
             
             foreach (var wrapperType in supportedWrappers)
             {
-                _logger.Debug($"  - {wrapperType.Name}");
+                Log.LogDebug($"  - {wrapperType.Name}");
             }
         }
 
@@ -91,18 +133,170 @@ namespace PerAspera.GameAPI.Events
         private void LogSystemStatus()
         {
             var stats = EnhancedEventBus.GetStats();
-            _logger.Info($"Event Bus Status: {stats}");
+            Log.LogInfo($"Event Bus Status: {stats}");
             
             if (EventSystemIntegration.IsInitialized)
             {
-                _logger.Info("✅ Integration with legacy EventSystem: Active");
+                Log.LogInfo("✅ Integration with legacy EventSystem: Active");
             }
             else
             {
-                _logger.Warning("⚠️ Integration with legacy EventSystem: Not found - running standalone");
+                Log.LogWarning("⚠️ Integration with legacy EventSystem: Not found - running standalone");
             }
         }
 
+        /// <summary>
+        /// Initialize native event subscriptions for GameHub detection
+        /// Much more reliable than patches - listens to actual game events
+        /// </summary>
+        private void InitializeGameHubDetector()
+        {
+            try
+            {
+                Log.LogInfo("🔧 Setting up native event subscriptions for GameHub detection...");
+
+                // Subscribe to native game start events
+                EnhancedEventBus.Subscribe<PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent>(OnGameStarted);
+                
+                EnhancedEventBus.Subscribe<PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent>(OnGameLoaded);
+
+                Log.LogInfo("✅ Native event subscriptions setup successfully");
+                Log.LogInfo("🎯 Will emit GameHubInitializedEvent when game starts/loads");
+                Log.LogInfo("🎮 Game initialization events (GameHubInitialized, GameFullyLoaded) ready");
+                
+                // ALSO apply GameHub Harmony patches for immediate detection (works in menu)
+                Log.LogInfo("🔧 Applying GameHub Harmony patches for immediate detection...");
+                ApplyGameHubPatches();
+                
+                // Apply BaseGame patches for OnLoadFinished event
+                Log.LogInfo("🔧 Applying BaseGame Harmony patches for OnLoadFinished event...");
+                ApplyBaseGamePatches();
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"❌ Failed to setup GameHub native event detection: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Apply BaseGame Harmony patches for OnLoadFinished event
+        /// </summary>
+        private void ApplyBaseGamePatches()
+        {
+            try
+            {
+                var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.BaseGame");
+                
+                // Apply BaseGame patches for OnLoadFinished event
+                harmony.PatchAll(typeof(Patches.BaseGamePatches));
+                
+                Log.LogInfo("✅ BaseGame Harmony patches applied successfully");
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"❌ Failed to apply BaseGame patches: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Apply GameHub Harmony patches for immediate detection (works in menu)
+        /// </summary>
+        private void ApplyGameHubPatches()
+        {
+            try
+            {
+                var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.GameHub");
+                
+                // Apply patches from GameHubManagerPatch class
+                harmony.PatchAll(typeof(Patches.GameHubManagerPatch));
+                
+                Log.LogInfo("✅ GameHub Harmony patches applied successfully");
+            }
+            catch (System.Exception ex)
+            {
+                Log.LogError($"❌ Failed to apply GameHub patches: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handle new game started - BaseGame should be accessible now
+        /// </summary>
+        private static void OnGameStarted(PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent evt)
+        {
+            _staticLogger?.LogInfo($"🎮 New game started: {evt.GameMode} - attempting to emit GameHubInitializedEvent");
+            EmitGameHubInitializedEvent("NewGameStarted");
+        }
+
+        /// <summary>
+        /// Handle game loaded - BaseGame should be accessible now
+        /// </summary>
+        private static void OnGameLoaded(PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent evt)
+        {
+            _staticLogger?.LogInfo($"🎮 Game loaded: {evt.SaveGameName} - attempting to emit GameHubInitializedEvent");
+            EmitGameHubInitializedEvent("GameLoaded");
+        }
+
+        private static bool _gameHubInitialized = false;
+
+        /// <summary>
+        /// Emit GameHubInitializedEvent when BaseGame is confirmed accessible
+        /// </summary>
+        private static void EmitGameHubInitializedEvent(string triggerSource)
+        {
+            try
+            {
+                if (_gameHubInitialized)
+                {
+                    _staticLogger?.LogInfo($"⚠️ GameHubInitializedEvent already emitted, skipping {triggerSource}");
+                    return;
+                }
+
+                _staticLogger?.LogInfo($"🎯 {triggerSource} triggered - checking BaseGame accessibility...");
+
+                // Access BaseGame through SDK wrapper
+                var baseGame = BaseGameWrapper.GetCurrent();
+                if (baseGame != null)
+                {
+                    _staticLogger?.LogInfo("🎮 BaseGame confirmed accessible - emitting all SDK events");
+                    
+                    // Create and emit GameHubInitializedEvent 
+                    var gameHubEvent = new GameHubInitializedEvent(
+                        baseGame.GetNativeObject(),
+                        isReady: true
+                    );
+                    EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, gameHubEvent);
+                    _staticLogger?.LogInfo($"✅ GameHubInitializedEvent emitted via {triggerSource}");
+                    
+                    // Emit GameHubReadyEvent (what CommandsDemo expects)
+                    var gameHubReadyEvent = new GameHubReadyEvent(
+                        sceneLoaded: true,
+                        managerReady: true
+                    );
+                    EnhancedEventBus.Publish(SDKEventConstants.GameHubReady, gameHubReadyEvent);
+                    _staticLogger?.LogInfo($"✅ GameHubReadyEvent emitted via {triggerSource}");
+                    
+                    // Emit GameFullyLoadedEvent (backup for CommandsDemo)
+                    var gameFullyLoadedEvent = new GameFullyLoadedEvent(
+                        baseGame.GetNativeObject(),
+                        baseGame.GetNativeObject(), // universe
+                        null // planet might not be available yet
+                    );
+                    EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);
+                    _staticLogger?.LogInfo($"✅ GameFullyLoadedEvent emitted via {triggerSource}");
+                    
+                    _gameHubInitialized = true;
+                    _staticLogger?.LogInfo($"🎯 All SDK events emitted successfully via {triggerSource}");
+                }
+                else
+                {
+                    _staticLogger?.LogWarning($"⚠️ BaseGame not yet accessible via {triggerSource}, will wait for next event");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                _staticLogger?.LogError($"❌ Error emitting GameHubInitializedEvent via {triggerSource}: {ex.Message}");
+            }
+        }
         /// <summary>
         /// Plugin shutdown
         /// </summary>
@@ -110,14 +304,15 @@ namespace PerAspera.GameAPI.Events
         {
             try
             {
-                _logger.Info("Shutting down Enhanced Event System...");
+                Log.LogInfo("Shutting down Enhanced Event System...");
+                
                 EventSystemIntegration.Shutdown();
-                _logger.Info("✅ Enhanced Event System shut down successfully");
+                Log.LogInfo("✅ Enhanced Event System shut down successfully");
                 return true;
             }
             catch (System.Exception ex)
             {
-                _logger.Error($"❌ Error during shutdown: {ex.Message}");
+                Log.LogError($"❌ Error during shutdown: {ex.Message}");
                 return false;
             }
         }
@@ -196,7 +391,7 @@ namespace PerAspera.GameAPI.Events
         /// Get current event system statistics
         /// </summary>
         /// <returns>Event system statistics</returns>
-        public static EventBusStats GetStats()
+        public static EventSystemStats GetStats()
         {
             return EnhancedEventBus.GetStats();
         }

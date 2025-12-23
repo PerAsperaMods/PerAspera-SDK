@@ -8,14 +8,23 @@ namespace PerAspera.GameAPI.Events.Constants
     {
         // ==================== SYSTEM EVENTS ====================
         
+        /// <summary>Event: Early mods can start loading (GameHub ready, BaseGame available)</summary>
+        public const string EarlyModsReady = "EarlyModsReady";
+        
         /// <summary>Event: Base game finished loading (returns SDK wrappers)</summary>
         public const string BaseGameDetected = "BaseGameDetected";
         
         /// <summary>Event: GameHub/GameHubManager initialized (early game access)</summary>
         public const string GameHubInitialized = "GameHubInitialized";
         
+        /// <summary>Event: GameHub ready for mod initialization (earliest initialization point)</summary>
+        public const string GameHubReady = "GameHubReady";
+        
         /// <summary>Event: Game fully loaded with all systems ready</summary>
         public const string GameFullyLoaded = "GameFullyLoaded";
+        
+        /// <summary>Event: BaseGame.OnFinishLoading() completed (exact loading finish moment)</summary>
+        public const string OnLoadFinished = "OnLoadFinished";
         
         /// <summary>Event: Blackboard system initialized (variable storage ready)</summary>
         public const string BlackboardInitialized = "BlackboardInitialized";
@@ -47,5 +56,31 @@ namespace PerAspera.GameAPI.Events.Constants
         
         /// <summary>Event: Mod encountered an error</summary>
         public const string ModError = "ModError";
+        
+        // ==================== TWITCH INTEGRATION EVENTS ====================
+        
+        /// <summary>Event: Someone followed the Twitch channel</summary>
+        public const string TwitchFollow = "TwitchFollow";
+        
+        /// <summary>Event: Someone cheered bits in Twitch chat</summary>
+        public const string TwitchBits = "TwitchBits";
+        
+        /// <summary>Event: Someone subscribed to the Twitch channel</summary>
+        public const string TwitchSubscription = "TwitchSubscription";
+        
+        /// <summary>Event: Someone redeemed channel points on Twitch</summary>
+        public const string TwitchChannelPoints = "TwitchChannelPoints";
+        
+        /// <summary>Event: Someone raided the Twitch channel</summary>
+        public const string TwitchRaid = "TwitchRaid";
+        
+        /// <summary>Event: Someone hosted the Twitch channel</summary>
+        public const string TwitchHost = "TwitchHost";
+        
+        /// <summary>Event: Twitch chat command was processed</summary>
+        public const string TwitchChatCommand = "TwitchChatCommand";
+        
+        /// <summary>Event: Twitch integration status changed</summary>
+        public const string TwitchStatusChanged = "TwitchStatusChanged";
     }
 }

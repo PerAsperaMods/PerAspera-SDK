@@ -2,8 +2,10 @@ using System;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Events.Constants;
+using PerAspera.GameAPI.Events.Helpers;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.Core;
+using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 
 namespace PerAspera.GameAPI.Events.Integration
 {
@@ -181,11 +183,11 @@ namespace PerAspera.GameAPI.Events.Integration
                 if (nativeBuildingInstance != null)
                 {
                     // Use WrapperFactory for safe conversion
-                    evt.Building = WrapperFactory.ConvertToWrapper<Building>(nativeBuildingInstance);
+                    evt.Building = new BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 var position = ExtractPosition(nativeData);
                 evt.PositionX = position.x;
                 evt.PositionY = position.y;
@@ -209,11 +211,11 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = WrapperFactory.ConvertToWrapper<Building>(nativeBuildingInstance);
+                    evt.Building =new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 return evt;
             }
             catch (Exception ex)
@@ -233,12 +235,12 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = WrapperFactory.ConvertToWrapper<Building>(nativeBuildingInstance);
+                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.NewTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
                 evt.PreviousTypeKey = ""; // Would need to extract from payload
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 return evt;
             }
             catch (Exception ex)
@@ -258,11 +260,11 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = WrapperFactory.ConvertToWrapper<Building>(nativeBuildingInstance);
+                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 return evt;
             }
             catch (Exception ex)
@@ -286,7 +288,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 }
                 
                 evt.DroneType = ExtractDroneType(nativeData) ?? "Unknown";
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 return evt;
             }
             catch (Exception ex)
@@ -310,7 +312,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 }
                 
                 evt.DroneType = ExtractDroneType(nativeData) ?? "Unknown";
-                evt.OwnerFaction = ExtractOwnerFaction(nativeData);
+                evt.OwnerFaction = EventWrapperHelper.CreateFactionWrapper(ExtractOwnerFaction(nativeData));
                 return evt;
             }
             catch (Exception ex)
