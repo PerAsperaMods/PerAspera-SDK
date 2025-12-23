@@ -258,6 +258,23 @@ dotnet test --configuration Release --logger "console;verbosity=normal"
 - **Rate Limiting**: Protection against spam and abuse
 - **Error Isolation**: Command failures don't affect game stability
 
+## ⚠️ Known Issues & Compatibility
+
+### IL2CPP Compatibility
+
+This project is designed for IL2CPP Unity builds. If you encounter errors like:
+```
+Method not found: 'UnityEngine.Component UnityEngine.GameObject.AddComponent(System.Type)'
+```
+
+See the **[IL2CPP Compatibility Guide](./IL2CPP_COMPATIBILITY.md)** for solutions and best practices.
+
+Key points:
+- Always use `gameObject.AddComponent<T>()` (generic method)
+- Never use `gameObject.AddComponent(typeof(T))` (non-generic method)
+- Use the provided `IL2CppComponentHelper` for safe component operations
+- Ensure types are registered with `ClassInjector.RegisterTypeInIl2Cpp<T>()`
+
 ## 📖 Documentation
 
 ### Viewer Faction System
