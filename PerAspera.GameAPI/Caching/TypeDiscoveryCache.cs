@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using PerAspera.Core;
-using UnityEngine;
 
 namespace PerAspera.GameAPI.Caching
 {
@@ -18,7 +17,7 @@ namespace PerAspera.GameAPI.Caching
     public static class TypeDiscoveryCache
     {
         private static readonly LogAspera _log = new LogAspera("TypeDiscoveryCache");
-        private static readonly string CacheDirectory = Path.Combine(Application.persistentDataPath, "BepInEx", "cache");
+        private static readonly string CacheDirectory = Path.Combine(Environment.CurrentDirectory, "BepInEx", "cache");
         private static readonly string CacheFilePath = Path.Combine(CacheDirectory, "type_discovery.json");
         
         // In-memory cache for ultra-fast access
@@ -221,8 +220,18 @@ namespace PerAspera.GameAPI.Caching
             }
         }
 
+        private static readonly object _fileLock = new object();
+        private static readonly System.Threading.SemaphoreSlim _saveSemaphore = new(1, 1);
+        private static bool _saveInProgress = false;
+
         private static void SaveToDisk()
         {
+            // Prevent concurrent saves
+            if (_saveInProgress)
+                return;
+
+            _saveInProgress = true;
+
             try
             {
                 // Ensure cache directory exists
@@ -235,14 +244,28 @@ namespace PerAspera.GameAPI.Caching
                     Entries = _memoryCache.Values.ToArray()
                 };
 
-                var jsonContent = JsonUtility.ToJson(cacheData, true);
-                File.WriteAllText(CacheFilePath, jsonContent);
+                var jsonContent = SerializeCacheDataToJson(cacheData);
+
+                // Thread-safe file writing with semaphore
+                _saveSemaphore.Wait();
+                try
+                {
+                    File.WriteAllText(CacheFilePath, jsonContent);
+                }
+                finally
+                {
+                    _saveSemaphore.Release();
+                }
 
                 _log.Debug($"💾 Saved {cacheData.Entries.Length} cache entries to disk");
             }
             catch (Exception ex)
             {
                 _log.Warning($"⚠️ Failed to save cache to disk: {ex.Message}");
+            }
+            finally
+            {
+                _saveInProgress = false;
             }
         }
 
@@ -494,6 +517,45 @@ namespace PerAspera.GameAPI.Caching
             {
                 _log.Warning($"Failed to parse cache JSON: {ex.Message}");
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Serialize CacheData to JSON - IL2CPP compatible alternative to JsonUtility
+        /// </summary>
+        private static string SerializeCacheDataToJson(CacheData cacheData)
+        {
+            try
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("{");
+                sb.AppendLine($"  \"GameVersion\": \"{cacheData.GameVersion}\",");
+                sb.AppendLine($"  \"CacheTimestamp\": \"{cacheData.CacheTimestamp}\",");
+                sb.AppendLine("  \"Entries\": [");
+
+                for (int i = 0; i < cacheData.Entries.Length; i++)
+                {
+                    var entry = cacheData.Entries[i];
+                    sb.AppendLine("    {");
+                    sb.AppendLine($"      \"TypeName\": \"{entry.TypeName}\",");
+                    sb.AppendLine($"      \"FullTypeName\": \"{entry.FullTypeName}\",");
+                    sb.AppendLine($"      \"AssemblyName\": \"{entry.AssemblyName}\",");
+                    sb.AppendLine($"      \"AssemblyChecksum\": \"{entry.AssemblyChecksum}\",");
+                    sb.AppendLine($"      \"GameVersion\": \"{entry.GameVersion}\",");
+                    sb.AppendLine($"      \"Namespace\": \"{entry.Namespace}\",");
+                    sb.AppendLine($"      \"Timestamp\": \"{entry.Timestamp}\"");
+                    sb.AppendLine(i < cacheData.Entries.Length - 1 ? "    }," : "    }");
+                }
+
+                sb.AppendLine("  ]");
+                sb.AppendLine("}");
+
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                _log.Warning($"Failed to serialize cache data: {ex.Message}");
+                return "{}";
             }
         }
 

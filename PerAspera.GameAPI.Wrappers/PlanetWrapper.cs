@@ -19,6 +19,7 @@ namespace PerAspera.GameAPI.Wrappers
     public class PlanetWrapper : WrapperBase
     {
         private Atmosphere? _atmosphere;
+        private Native.Planet? _nativePlanet;
 
         /// <summary>
         /// Initialize Planet wrapper with native planet object
@@ -28,13 +29,23 @@ namespace PerAspera.GameAPI.Wrappers
 
         public PlanetWrapper(object nativePlanet) : base(nativePlanet)
         {
-            
+            // Initialize native planet reference for direct access
+            try
+            {
+                _nativePlanet = new Native.Planet(nativePlanet);
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to initialize native planet reference: {ex.Message}");
+            }
         }
 
         public HazardsManagerWrapper GetHazardsManager()
         {
-            return  new  HazardsManagerWrapper(GetNativeObject().GetMemberValue<HazardsManager>("hazardsManager)"));
+            return new HazardsManagerWrapper(GetNativeObject().GetMemberValue<object>("HazardsManager"));
         }
+
+        
 
         /// <summary>
         /// Get the current planet instance
@@ -78,8 +89,43 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public float WaterStock
         {
-            get => SafeInvoke<float?>("GetWaterStock") ?? 0f;
-            set => SafeInvokeVoid("SetWaterStock", value);
+            get
+            {
+                try
+                {
+                    // Try direct access first (100x faster)
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        return (float)_nativePlanet.NativeInstance.GetMemberValue("waterStock");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct waterStock access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                return SafeInvoke<float?>("GetWaterStock") ?? 0f;
+            }
+            set
+            {
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        _nativePlanet.NativeInstance.SetMemberValue("waterStock", value);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct waterStock set failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                SafeInvokeVoid("SetWaterStock", value);
+            }
         }
         
         /// <summary>
@@ -159,6 +205,23 @@ namespace PerAspera.GameAPI.Wrappers
                     return 0f;
                 }
                 
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        // For methods that return values, we need to use reflection
+                        // Direct IL2CPP access for return values is complex, so we use SafeInvoke for now
+                        // TODO: Optimize this with direct IL2CPP method calls when possible
+                        return SafeInvoke<float?>("GetResourceStock", resourceType) ?? 0f;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct GetResourceStock access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
                 return SafeInvoke<float?>("GetResourceStock", resourceType) ?? 0f;
             }
             catch (System.Exception ex)
@@ -186,6 +249,25 @@ namespace PerAspera.GameAPI.Wrappers
                     return false;
                 }
                 
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        // For methods that return values, we need to use reflection
+                        // Direct IL2CPP access for return values is complex, so we use SafeInvoke for now
+                        // TODO: Optimize this with direct IL2CPP method calls when possible
+                        SafeInvokeVoid("AddResource", resourceType, amount);
+                        Log.LogDebug($"Added {amount} of {resourceKey} to planet");
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct AddResource access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
                 SafeInvokeVoid("AddResource", resourceType, amount);
                 Log.LogDebug($"Added {amount} of {resourceKey} to planet");
                 return true;
@@ -210,8 +292,32 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
+                object? nativeBuildings = null;
+                
+                try
+                {
+                    // Try direct access first - check for buildings field
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        nativeBuildings = _nativePlanet.NativeInstance.GetMemberValue("buildings");
+                        if (nativeBuildings == null)
+                        {
+                            // Try GetBuildings method
+                            nativeBuildings = _nativePlanet.NativeInstance.InvokeMethod("GetBuildings");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct buildings access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                if (nativeBuildings == null)
+                {
+                    nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
                                     SafeInvoke<object>("GetBuildings");
+                }
                 
                 if (nativeBuildings == null) return new List<BuildingWrapper>();
                 

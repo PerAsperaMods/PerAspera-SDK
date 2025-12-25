@@ -75,6 +75,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Native.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Database.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
 	</Target>

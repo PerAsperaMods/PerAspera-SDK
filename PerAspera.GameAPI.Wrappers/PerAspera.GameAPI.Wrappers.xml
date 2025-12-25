@@ -42,7 +42,24 @@
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericComposition">
             <summary>
-            Collection of atmospheric gases with dynamic composition
+            Collection of atmospheric gases with dynamic composition and cargo integration
+            Provides access to atmospheric gases as Cargo objects for building interactions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.InitializeGasCargos">
+            <summary>
+            Initialize Cargo objects for each atmospheric gas to enable building interactions
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.CreateAtmosphericCargo(PerAspera.GameAPI.Wrappers.AtmosphericGas)">
+            <summary>
+            Create a conceptual Cargo object representing atmospheric gas
+            This allows atmospheric gases to interact with building mechanics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.FindAtmosphericResourceType(System.String)">
+            <summary>
+            Find ResourceType corresponding to atmospheric gas symbol
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.Item(System.String)">
@@ -50,14 +67,55 @@
             Get gas by symbol (CO2, O2, N2, H2O)
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasCargo(System.String)">
+            <summary>
+            Get cargo representation of atmospheric gas for building interactions
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.AllGases">
             <summary>
             All atmospheric gases
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.AllGasCargos">
+            <summary>
+            All atmospheric gas cargos for building interactions
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.UpdatePercentages">
             <summary>
-            Update percentages based on total pressure
+            Update percentages based on total pressure and sync cargo quantities
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.SyncCargoQuantities">
+            <summary>
+            Sync cargo quantities with current atmospheric gas pressures
+            This enables buildings to interact with atmospheric gases through cargo system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.TransferGasToBuilding(System.String,Building,System.Single)">
+            <summary>
+            Transfer gas between buildings via cargo system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.ExtractGasFromBuilding(System.String,Building,System.Single)">
+            <summary>
+            Extract gas from building back to atmosphere
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetResourceKeyForGas(System.String)">
+            <summary>
+            Get resource key for gas symbol
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasQuantity(System.String)">
+            <summary>
+            Get quantity of atmospheric gas by resource key
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasSymbolForResource(System.String)">
+            <summary>
+            Get gas symbol for resource key
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Atmosphere">
@@ -74,7 +132,12 @@
         <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.DiscoverModdedAtmosphericResources(System.Collections.Generic.Dictionary{System.String,PerAspera.GameAPI.Wrappers.AtmosphericGas})">
             <summary>
             🎯 MODABLE: Discover atmospheric resources from ResourceType system
-            TODO: Implementation complete when ResourceType integration finished
+            Dynamically adds mod-added atmospheric gases to the composition
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.MapResourceToGas(System.String)">
+            <summary>
+            Maps known atmospheric resource IDs to gas information
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.InitializeTerraformingEffects">
@@ -86,6 +149,16 @@
             <summary>
             Atmospheric gas composition (CO2, O2, N2, H2O)
             Access via: Atmosphere.Composition["CO2"].PartialPressure
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.GetGasCargo(System.String)">
+            <summary>
+            Get cargo representation of atmospheric gas for building interactions
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.GasCargos">
+            <summary>
+            All atmospheric gas cargos for building interactions
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TotalPressure">
@@ -183,25 +256,53 @@
             <param name="amount">Amount to convert</param>
             <returns>Actual amount converted</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.RegisterModdedGas(System.String,System.String,System.String)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.TransferGasToBuilding(System.String,Building,System.Single)">
             <summary>
-            🎯 MODABLE: Register new atmospheric ResourceType (for mods)
-            TODO: Implementation when ResourceType system integrated
+            Transfer atmospheric gas to a building via cargo system
             </summary>
-            <param name="resourceId">ResourceType identifier</param>
-            <param name="gasName">Human-readable name</param>
-            <param name="symbol">Chemical symbol</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ExtractGasFromBuilding(System.String,Building,System.Single)">
+            <summary>
+            Extract gas from building back to atmosphere via cargo system
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.CanAcceptCargo(Building,Cargo)">
+            <summary>
+            Check if a building can accept a specific cargo type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.AcceptCargo(Building,Cargo)">
+            <summary>
+            Make a building accept cargo (add to building's cargo storage)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.RemoveCargo(Building,Cargo,System.Single)">
+            <summary>
+            Remove cargo from a building (extract from building's storage)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.FindCargoByResource(Building,ResourceType)">
+            <summary>
+            Find cargo in a building by resource type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.GetGasQuantity(System.String)">
+            <summary>
+            Get quantity of atmospheric gas by resource key
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGameWrapper">
-            <summary>
-            Wrapper for BaseGame singleton
-            Provides type-safe access to main game systems
+             <summary>
+             Wrapper for BaseGame singleton
+             Provides type-safe access to main game systems
             
-            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-            📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
-            </summary>
+             📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+             📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
+            
+             ⚡ INTEROP UPDATE: Now uses direct IL2CPP access with reflection fallback for compatibility
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent">
             <summary>
@@ -225,11 +326,13 @@
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsQuitting">
             <summary>
             Check if game is in quitting state
+            Static property: isQuitting { get; }
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsEnding">
             <summary>
             Check if game is ending (credits/end sequence)
+            Static property: isEnding { get; }
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.MainSceneFinishedInit">
@@ -260,6 +363,12 @@
             <summary>
             Check if game has mods enabled
             Field: hasMods
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.canvasRefs">
+            <summary>
+            Get canvas references for UI components
+            Field: canvasRefs
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.Difficulty">
@@ -3141,11 +3250,74 @@
             Execute DispatchAction using cached method
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper">
+            <summary>
+            Wrapper for ResourcesPanel providing safe access to resource management UI
+            Provides access to cached resource types and resource items
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.GetCurrent">
+            <summary>
+            Get current ResourcesPanel instance from game's canvas references
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.resourceItems">
+            <summary>
+            Dictionary mapping ResourceType to ResourceItem UI components
+            Provides access to UI elements for each resource
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.resourceTypesCached">
+            <summary>
+            Cached list of all available ResourceType instances
+            Includes both vanilla and mod-added resources
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper">
             <summary>
             Wrapper for the native ResourceType class
             Provides safe access to resource type definitions and properties
             DOC: Resource.md - Resource definitions and properties
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._resourceDatabase">
+            <summary>
+            Static database of all resources parsed from YAML data
+            Key: resource name (e.g., "resource_water")
+            Value: ResourceTypeWrapper instance
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._databaseLock">
+            <summary>
+            Lock for thread-safe access to resource database
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllResources">
+            <summary>
+            Get all resources from the static database
+            Returns resources parsed from YAML data during game initialization
+            </summary>
+            <returns>List of all available ResourceTypeWrapper instances</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.LoadFromDatabase(System.String)">
+            <summary>
+            Load resources from SQLite database on startup
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.PopulateDatabase(System.Collections.Generic.Dictionary{System.String,System.Object},System.String,System.String)">
+            <summary>
+            Populate the static resource database from parsed YAML data
+            Called by YAMLDataInterceptorPlugin during game initialization
+            Now uses SQLite for persistent storage
+            </summary>
+            <param name="parsedResources">Dictionary of parsed resource data</param>
+            <param name="modId">Mod identifier</param>
+            <param name="checksum">Checksum of the source YAML</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.YamlResourceWrapper">
+            <summary>
+            Lightweight wrapper for resources parsed from YAML data
+            Used when native ResourceType objects are not available
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.#ctor(System.Object)">
@@ -3198,7 +3370,7 @@
             Maps to: color field
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.MaterialType">
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.MaterialType">
             <summary>
             Material type category (Mined, Manufactured, etc.)
             Maps to: materialType field
@@ -3319,14 +3491,7 @@
             </summary>
             <returns>List of all resource keys currently available in game</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceTypeWrapper)">
-            <summary>
-            Get display name using native DisplayName property or fallback to formatted name
-            This is dynamic and uses the actual game data loaded from YAML
-            </summary>
-            <param name="resourceWrapper">ResourceType wrapper instance</param>
-            <returns>Localized display name from game data</returns>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceTypeWrapper)" -->
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDisplayName">
             <summary>
             Get display name using instance method (preferred)
@@ -3338,6 +3503,69 @@
             <summary>
             Convert string to title case
             </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._registeredAtmosphericGases">
+            <summary>
+            Registry of mod-registered atmospheric gases
+            Allows mods to register their custom atmospheric gases
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsNativeAtmosphericGas">
+            <summary>
+            Check if this resource is a native atmospheric gas
+            Uses multiple criteria: MaterialType, key pattern, and known gases list
+            </summary>
+            <returns>True if this is a native atmospheric gas</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsAtmosphericGas">
+            <summary>
+            Check if this resource is any atmospheric gas (native or mod-registered)
+            Includes both native gases and mod-added atmospheric gases
+            </summary>
+            <returns>True if this is an atmospheric gas</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.RegisterAtmosphericGas(System.String)">
+            <summary>
+            Register a custom atmospheric gas for mod use
+            Allows mods to add their own atmospheric gases to the system
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_custom_gas_release")</param>
+            <returns>True if successfully registered</returns>
+            <example>
+            ResourceTypeWrapper.RegisterAtmosphericGas("resource_methane_release");
+            ResourceTypeWrapper.RegisterAtmosphericGas("resource_argon_release");
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllAtmosphericGasKeys">
+            <summary>
+            Get all registered atmospheric gas resource keys
+            Returns both native and mod-registered atmospheric gases
+            </summary>
+            <returns>List of all atmospheric gas resource keys</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetNativeAtmosphericGasKeys">
+            <summary>
+            Get native atmospheric gas resource keys only
+            Returns only the base game atmospheric gases
+            </summary>
+            <returns>List of native atmospheric gas resource keys</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllResourcesFromCache">
+            <summary>
+            Get all available ResourceType instances from the ResourcesPanel cache
+            Includes both vanilla resources and mod-added resources
+            This provides complete enumeration of all resources known to the game
+            </summary>
+            <returns>List of all ResourceTypeWrapper instances, or empty list if unavailable</returns>
+            <example>
+            <code>
+            var allResources = ResourceTypeWrapper.GetAllResourcesFromCache();
+            foreach (var resource in allResources)
+            {
+                Console.WriteLine($"{resource.Name}: {resource.DisplayName}");
+            }
+            </code>
+            </example>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SceneManager">
             <summary>

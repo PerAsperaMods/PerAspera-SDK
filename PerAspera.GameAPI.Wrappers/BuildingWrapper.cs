@@ -16,12 +16,22 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class BuildingWrapper : WrapperBase
     {
+        private Native.BuildingNative? _nativeBuilding;
+
         /// <summary>
         /// Initialize Building wrapper with native building object
         /// </summary>
         /// <param name="nativeBuilding">Native building instance from game</param>
         public BuildingWrapper(object nativeBuilding) : base(nativeBuilding)
         {
+            try
+            {
+                _nativeBuilding = new Native.BuildingNative(nativeBuilding);
+            }
+            catch (Exception)
+            {
+                _nativeBuilding = null;
+            }
         }
         
         /// <summary>
@@ -105,12 +115,38 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Is the building alive (not destroyed)
         /// </summary>
-        public bool IsAlive => SafeGetField<bool>("_alive");
+        public bool IsAlive
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<bool>("_alive") ?? false;
+                }
+                catch
+                {
+                    return SafeGetField<bool>("_alive");
+                }
+            }
+        }
         
         /// <summary>
         /// Is the building operational
         /// </summary>
-        public bool IsOperative => SafeGetField<bool>("_activated");
+        public bool IsOperative
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<bool>("_activated") ?? false;
+                }
+                catch
+                {
+                    return SafeGetField<bool>("_activated");
+                }
+            }
+        }
         
         /// <summary>
         /// Is the building active (alive, built, operational and not broken)
@@ -121,12 +157,38 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Is the building fully built (not under construction)
         /// </summary>
-        public bool IsBuilt => SafeGetField<bool>("_built");
+        public bool IsBuilt
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<bool>("_built") ?? false;
+                }
+                catch
+                {
+                    return SafeGetField<bool>("_built");
+                }
+            }
+        }
         
         /// <summary>
         /// Is the building powered
         /// </summary>
-        public bool IsPowered => SafeGetField<bool>("_powered");
+        public bool IsPowered
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<bool>("_powered") ?? false;
+                }
+                catch
+                {
+                    return SafeGetField<bool>("_powered");
+                }
+            }
+        }
 
 
 
@@ -135,12 +197,38 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Is the building broken
         /// </summary>
-        public bool IsBroken => SafeGetField<bool>("_broken");
+        public bool IsBroken
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<bool>("_broken") ?? false;
+                }
+                catch
+                {
+                    return SafeGetField<bool>("_broken");
+                }
+            }
+        }
         
         /// <summary>
         /// Current health (0.0 to 1.0)
         /// </summary>
-        public float Health => SafeGetField<float>("_health");
+        public float Health
+        {
+            get
+            {
+                try
+                {
+                    return _nativeBuilding?.NativeInstance.GetFieldValue<float>("_health") ?? 0f;
+                }
+                catch
+                {
+                    return SafeGetField<float>("_health");
+                }
+            }
+        }
         
         // ==================== FACTION ====================
         

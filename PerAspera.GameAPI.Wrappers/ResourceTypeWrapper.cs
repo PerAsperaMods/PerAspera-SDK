@@ -1,9 +1,9 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
+using PerAspera.GameAPI.Database;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -14,6 +14,120 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class ResourceTypeWrapper : WrapperBase
     {
+        // ==================== STATIC RESOURCE DATABASE ====================
+        
+        /// <summary>
+        /// Static database of all resources parsed from YAML data
+        /// Key: resource name (e.g., "resource_water")
+        /// Value: ResourceTypeWrapper instance
+        /// </summary>
+        private static readonly Dictionary<string, ResourceTypeWrapper> _resourceDatabase = new();
+        
+        /// <summary>
+        /// Lock for thread-safe access to resource database
+        /// </summary>
+        private static readonly object _databaseLock = new();
+        
+        /// <summary>
+        /// Get all resources from the static database
+        /// Returns resources parsed from YAML data during game initialization
+        /// </summary>
+        /// <returns>List of all available ResourceTypeWrapper instances</returns>
+        public static List<ResourceTypeWrapper> GetAllResources()
+        {
+            lock (_databaseLock)
+            {
+                return _resourceDatabase.Values.ToList();
+            }
+        }
+        
+        /// <summary>
+        /// Populate the static resource database from parsed YAML data
+        /// Called by YAMLDataInterceptorPlugin during game initialization
+        /// Now uses SQLite for persistent storage
+        /// </summary>
+        /// <param name="parsedResources">Dictionary of parsed resource data</param>
+        /// <param name="modId">Mod identifier</param>
+        /// <param name="checksum">Checksum of the source YAML</param>
+        public static void PopulateDatabase(Dictionary<string, object> parsedResources, string modId = "base", string checksum = null)
+        {
+            lock (_databaseLock)
+            {
+                try
+                {
+                    // Store in SQLite database for persistence
+                    ModDatabase.Instance.StoreYAMLData("resources", modId, parsedResources, checksum);
+
+                    // Also maintain in-memory cache for fast access
+                    _resourceDatabase.Clear();
+
+                    foreach (var kvp in parsedResources)
+                    {
+                        try
+                        {
+                            // Create a lightweight wrapper for YAML data
+                            var yamlResource = new YamlResourceWrapper(kvp.Key, kvp.Value);
+                            _resourceDatabase[kvp.Key] = yamlResource;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.LogWarning($"Failed to create ResourceTypeWrapper for {kvp.Key}: {ex.Message}");
+                        }
+                    }
+
+                    Log.LogInfo($"✅ Resource database populated with {_resourceDatabase.Count} resources (stored in SQLite for mod '{modId}')");
+                }
+                catch (Exception ex)
+                {
+                    Log.LogError($"Failed to populate resource database: {ex.Message}");
+
+                    // Fallback: populate in-memory only
+                    _resourceDatabase.Clear();
+                    foreach (var kvp in parsedResources)
+                    {
+                        try
+                        {
+                            var yamlResource = new YamlResourceWrapper(kvp.Key, kvp.Value);
+                            _resourceDatabase[kvp.Key] = yamlResource;
+                        }
+                        catch (Exception ex2)
+                        {
+                            Log.LogWarning($"Failed to create ResourceTypeWrapper for {kvp.Key}: {ex2.Message}");
+                        }
+                    }
+
+                    Log.LogWarning("⚠️ Using in-memory database only (SQLite failed)");
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Lightweight wrapper for resources parsed from YAML data
+        /// Used when native ResourceType objects are not available
+        /// </summary>
+        private class YamlResourceWrapper : ResourceTypeWrapper
+        {
+            private readonly string _name;
+            private readonly Dictionary<string, object> _yamlData;
+            
+            public YamlResourceWrapper(string name, object yamlData) : base(null)
+            {
+                _name = name;
+                _yamlData = yamlData as Dictionary<string, object> ?? new Dictionary<string, object>();
+            }
+            
+            // Override base properties to provide YAML-based data
+            public override string Name => _name;
+            
+            public override string DisplayName => 
+                _yamlData.TryGetValue("displayName", out var displayName) ? displayName?.ToString() ?? _name : _name;
+                
+            public override int Index => 
+                _yamlData.TryGetValue("index", out var index) && int.TryParse(index?.ToString(), out var i) ? i : -1;
+                
+            public override string ColorHex => 
+                _yamlData.TryGetValue("color", out var color) ? color?.ToString() ?? "FFFFFF" : "FFFFFF";
+        }
         /// <summary>
         /// Initialize ResourceType wrapper with native resource type object
         /// </summary>
@@ -69,7 +183,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Resource type name/key identifier
         /// Maps to: name field (e.g., "resource_water", "resource_iron")
         /// </summary>
-        public string Name
+        public virtual string Name
         {
             get => SafeInvoke<string>("get_name") ?? "unknown_resource";
         }
@@ -78,7 +192,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Resource display name for UI
         /// Maps to: displayName or localizedName field
         /// </summary>
-        public string DisplayName
+        public virtual string DisplayName
         {
             get => SafeInvoke<string>("get_displayName") ?? 
                    SafeInvoke<string>("get_localizedName") ?? Name;
@@ -88,7 +202,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Resource index for efficient lookups
         /// Maps to: index field
         /// </summary>
-        public int Index
+        public virtual int Index
         {
             get => SafeInvoke<int?>("get_index") ?? -1;
         }
@@ -97,7 +211,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Resource color for UI display
         /// Maps to: color field
         /// </summary>
-        public string ColorHex
+        public virtual string ColorHex
         {
             get => SafeInvoke<string>("get_color") ?? "FFFFFF";
         }
@@ -108,9 +222,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// Material type category (Mined, Manufactured, etc.)
         /// Maps to: materialType field
         /// </summary>
-        public string MaterialType
+        public string MaterialType()
         {
-            get => SafeInvoke<string>("get_materialType") ?? "Unknown";
+            return ((ResourceType)NativeObject).materialType.ToString(); 
         }
         
         /// <summary>
@@ -118,15 +232,19 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public bool IsMined
         {
-            get => MaterialType.Equals("Mined", StringComparison.OrdinalIgnoreCase);
+            get => MaterialType().Equals("Mined", StringComparison.OrdinalIgnoreCase);
         }
-        
+        public bool isGas
+        {
+            get =>  MaterialType().Equals("Released", StringComparison.OrdinalIgnoreCase);
+
+        }
         /// <summary>
         /// Is this a manufactured/processed resource?
         /// </summary>
         public bool IsManufactured
         {
-            get => MaterialType.Equals("Manufactured", StringComparison.OrdinalIgnoreCase);
+            get => MaterialType().Equals("Manufactured", StringComparison.OrdinalIgnoreCase);
         }
         
         /// <summary>
@@ -363,6 +481,7 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// <summary>
         /// Get display name using native DisplayName property or fallback to formatted name
         /// This is dynamic and uses the actual game data loaded from YAML
         /// </summary>
@@ -411,6 +530,175 @@ namespace PerAspera.GameAPI.Wrappers
                 }
             }
             return string.Join(" ", words);
+        }
+        
+        // ==================== ATMOSPHERIC GAS DETECTION ====================
+        
+        /// <summary>
+        /// Registry of mod-registered atmospheric gases
+        /// Allows mods to register their custom atmospheric gases
+        /// </summary>
+        private static readonly HashSet<string> _registeredAtmosphericGases = new HashSet<string>
+        {
+            // Native atmospheric gases (base game)
+            "resource_oxygen_release",
+            "resource_carbon_dioxide_release", 
+            "resource_nitrogen_release",
+            "resource_ghg_release"
+        };
+        
+        /// <summary>
+        /// Check if this resource is a native atmospheric gas
+        /// Uses multiple criteria: MaterialType, key pattern, and known gases list
+        /// </summary>
+        /// <returns>True if this is a native atmospheric gas</returns>
+        public bool IsNativeAtmosphericGas()
+        {
+            if (string.IsNullOrEmpty(Name)) return false;
+            
+            // Must be MaterialType.Released (atmospheric)
+            if (!isGas) return false;
+            
+            // Must follow atmospheric gas naming pattern
+            if (!Name.EndsWith("_release")) return false;
+            
+            // Must be in the known native gases list
+            return _registeredAtmosphericGases.Contains(Name);
+        }
+        
+        /// <summary>
+        /// Check if this resource is any atmospheric gas (native or mod-registered)
+        /// Includes both native gases and mod-added atmospheric gases
+        /// </summary>
+        /// <returns>True if this is an atmospheric gas</returns>
+        public bool IsAtmosphericGas()
+        {
+            if (string.IsNullOrEmpty(Name)) return false;
+            
+            // Must be MaterialType.Released (atmospheric)
+            if (!isGas) return false;
+            
+            // Must follow atmospheric gas naming pattern OR be registered
+            return Name.EndsWith("_release") || _registeredAtmosphericGases.Contains(Name);
+        }
+        
+        /// <summary>
+        /// Register a custom atmospheric gas for mod use
+        /// Allows mods to add their own atmospheric gases to the system
+        /// </summary>
+        /// <param name="resourceKey">Resource key (e.g., "resource_custom_gas_release")</param>
+        /// <returns>True if successfully registered</returns>
+        /// <example>
+        /// ResourceTypeWrapper.RegisterAtmosphericGas("resource_methane_release");
+        /// ResourceTypeWrapper.RegisterAtmosphericGas("resource_argon_release");
+        /// </example>
+        public static bool RegisterAtmosphericGas(string resourceKey)
+        {
+            if (string.IsNullOrEmpty(resourceKey))
+            {
+                Log.LogWarning("Cannot register atmospheric gas: resource key is null or empty");
+                return false;
+            }
+            
+            if (!resourceKey.EndsWith("_release"))
+            {
+                Log.LogWarning($"Cannot register atmospheric gas '{resourceKey}': must end with '_release'");
+                return false;
+            }
+            
+            if (_registeredAtmosphericGases.Contains(resourceKey))
+            {
+                Log.LogInfo($"Atmospheric gas '{resourceKey}' already registered");
+                return true; // Already registered, not an error
+            }
+            
+            _registeredAtmosphericGases.Add(resourceKey);
+            Log.LogInfo($"Registered new atmospheric gas: {resourceKey}");
+            return true;
+        }
+        
+        /// <summary>
+        /// Get all registered atmospheric gas resource keys
+        /// Returns both native and mod-registered atmospheric gases
+        /// </summary>
+        /// <returns>List of all atmospheric gas resource keys</returns>
+        public static List<string> GetAllAtmosphericGasKeys()
+        {
+            return _registeredAtmosphericGases.ToList();
+        }
+        
+        /// <summary>
+        /// Get native atmospheric gas resource keys only
+        /// Returns only the base game atmospheric gases
+        /// </summary>
+        /// <returns>List of native atmospheric gas resource keys</returns>
+        public static List<string> GetNativeAtmosphericGasKeys()
+        {
+            return new List<string>
+            {
+                "resource_oxygen_release",
+                "resource_carbon_dioxide_release",
+                "resource_nitrogen_release", 
+                "resource_ghg_release"
+            };
+        }
+        
+        // ==================== RESOURCE ENUMERATION ====================
+        
+        /// <summary>
+        /// Get all available ResourceType instances from the ResourcesPanel cache
+        /// Includes both vanilla resources and mod-added resources
+        /// This provides complete enumeration of all resources known to the game
+        /// </summary>
+        /// <returns>List of all ResourceTypeWrapper instances, or empty list if unavailable</returns>
+        /// <example>
+        /// <code>
+        /// var allResources = ResourceTypeWrapper.GetAllResourcesFromCache();
+        /// foreach (var resource in allResources)
+        /// {
+        ///     Console.WriteLine($"{resource.Name}: {resource.DisplayName}");
+        /// }
+        /// </code>
+        /// </example>
+        public static List<ResourceTypeWrapper> GetAllResourcesFromCache()
+        {
+            try
+            {
+                var resourcesPanel = ResourcesPanelWrapper.GetCurrent();
+                if (resourcesPanel == null)
+                {
+                    Log.LogWarning("ResourcesPanel not available, cannot enumerate resources");
+                    return new List<ResourceTypeWrapper>();
+                }
+                
+                var cachedTypes = resourcesPanel.resourceTypesCached;
+                if (cachedTypes == null || cachedTypes.Count == 0)
+                {
+                    Log.LogWarning("Resource types cache is empty or null");
+                    return new List<ResourceTypeWrapper>();
+                }
+                
+                var wrappers = new List<ResourceTypeWrapper>();
+                foreach (var nativeResourceType in cachedTypes)
+                {
+                    if (nativeResourceType != null)
+                    {
+                        var wrapper = FromNative(nativeResourceType);
+                        if (wrapper != null)
+                        {
+                            wrappers.Add(wrapper);
+                        }
+                    }
+                }
+                
+                Log.LogInfo($"Successfully enumerated {wrappers.Count} resources from cache");
+                return wrappers;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to get all resources: {ex.Message}");
+                return new List<ResourceTypeWrapper>();
+            }
         }
     }
 }

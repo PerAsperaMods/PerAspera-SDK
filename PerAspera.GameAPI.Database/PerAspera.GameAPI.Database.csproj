@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>PerAspera.GameAPI.Database</AssemblyName>
+    <RootNamespace>PerAspera.GameAPI.Database</RootNamespace>
+    <OutputPath>..\..\Individual-Mods\YAMLDataInterceptor\lib\</OutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+    <PackageReference Include="YamlDotNet" Version="13.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx.Core">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Per Aspera\BepInEx\core\BepInEx.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Per Aspera\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

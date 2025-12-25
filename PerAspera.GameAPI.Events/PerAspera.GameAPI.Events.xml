@@ -654,6 +654,11 @@
             Initialize the detector with a shared logger
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.Detector.GameHubDetector.StartFullGameLoadMonitoring(PerAspera.GameAPI.Wrappers.BaseGameWrapper)">
+            <summary>
+            Start monitoring for full game load (Universe + Planet) to emit GameFullyLoadedEvent
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Events.Helpers.EventHelpers">
             <summary>
             General helper utilities for working with game events

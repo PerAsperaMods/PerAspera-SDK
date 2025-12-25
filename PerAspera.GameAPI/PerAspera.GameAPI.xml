@@ -33,6 +33,11 @@
             Parse CacheData from JSON - IL2CPP compatible alternative to JsonUtility
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.SerializeCacheDataToJson(PerAspera.GameAPI.Caching.TypeDiscoveryCache.CacheData)">
+            <summary>
+            Serialize CacheData to JSON - IL2CPP compatible alternative to JsonUtility
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Helpers.CargoQuantityHelper">
             <summary>
             Helper for working with native CargoQuantity instances

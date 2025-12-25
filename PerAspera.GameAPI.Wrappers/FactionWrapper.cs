@@ -918,9 +918,15 @@ namespace PerAspera.GameAPI.Wrappers
                     return false;
                 }
                 Type fType = NativeObject.GetIl2CppType();
-                // Use the SDK command helper
+                // Use the SDK command helper - get IHandleable from the native object
+                var handleable = GetAsIHandleable();
+                if (handleable == null)
+                {
+                    Log.LogError($"❌ Cannot get IHandleable interface for faction {Name} - custom command execution failed");
+                    return false;
+                }
                 bool success = PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(
-                    (Faction) NativeObject , commandType, parameters?.ContainsKey("amount") == true ? Convert.ToSingle(parameters["amount"]) : 1000f);
+                    handleable, commandType, parameters?.ContainsKey("amount") == true ? Convert.ToSingle(parameters["amount"]) : 1000f);
 
                 if (success)
                 {

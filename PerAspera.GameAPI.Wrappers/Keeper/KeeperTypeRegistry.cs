@@ -94,7 +94,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get ResourceType by key (e.g., "resource_water", "resource_silicon")
-        /// Uses StaticDataCollectionItem<ResourceType>.Get(key) pattern
+        /// Uses StaticDataCollectionItem<ResourceType> table access
         /// Returns null if not found
         /// </summary>
         /// <param name="resourceKey">Resource key from YAML (e.g., "resource_water")</param>
@@ -106,33 +106,86 @@ namespace PerAspera.GameAPI.Wrappers
                 Log.Warning($"{LogPrefix} GetResourceType called with null/empty key");
                 return null;
             }
-            
+
             try
             {
-                // Get ResourceType Type from GameTypeInitializer
-                var resourceTypeClass = GameTypeInitializer.GetResourceType();
+                // Get ResourceType class via IL2CPP reflection
+                // ResourceType inherits from StaticDataCollectionItem<ResourceType>
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                System.Type? resourceTypeClass = null;
+
+                foreach (var assembly in assemblies)
+                {
+                    resourceTypeClass = assembly.GetType("ResourceType", false, true);
+                    if (resourceTypeClass != null) break;
+                }
+
                 if (resourceTypeClass == null)
                 {
-                    Log.Error($"{LogPrefix} ResourceType class not found");
+                    // Try with full namespace
+                    resourceTypeClass = System.Type.GetType("ResourceType", false, true);
+                }
+
+                if (resourceTypeClass == null)
+                {
+                    Log.Error($"{LogPrefix} ResourceType class not found in any assembly");
                     return null;
                 }
-                
-                // Call static method: ResourceType.Get(key)
-                var getMethod = resourceTypeClass.GetMethod("Get", 
+
+                // Try to call static Get method first (if it exists)
+                var getMethod = resourceTypeClass.GetMethod("Get",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (getMethod == null)
+                if (getMethod != null)
                 {
-                    Log.Error($"{LogPrefix} ResourceType.Get method not found");
-                    return null;
+                    try
+                    {
+                        var result = getMethod.Invoke(null, new object[] { resourceKey });
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                    }
                 }
-                
-                var result = getMethod.Invoke(null, new object[] { resourceKey });
-                if (result == null)
+
+                // Fallback: Access the static table directly
+                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
+                // Try multiple possible field names
+                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
+                System.Collections.IDictionary? table = null;
+
+                foreach (var tableName in possibleTableNames)
                 {
-                    Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
+                    var tableField = resourceTypeClass.GetField(tableName,
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                    if (tableField != null)
+                    {
+                        try
+                        {
+                            table = tableField.GetValue(null) as System.Collections.IDictionary;
+                            if (table != null)
+                            {
+                                Log.Info($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
+                        }
+                    }
                 }
-                
-                return result;
+
+                if (table != null && table.Contains(resourceKey))
+                {
+                    return table[resourceKey];
+                }
+
+                Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
+                return null;
             }
             catch (Exception ex)
             {
@@ -155,7 +208,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get BuildingType by key (e.g., "building_solar_panel")
-        /// Uses StaticDataCollectionItem<BuildingType>.Get(key) pattern
+        /// Uses StaticDataCollectionItem<BuildingType> table access
         /// Returns null if not found
         /// </summary>
         /// <param name="buildingKey">Building key from YAML</param>
@@ -167,31 +220,84 @@ namespace PerAspera.GameAPI.Wrappers
                 UnityEngine.Debug.LogWarning($"{LogPrefix} GetBuildingType called with null/empty key");
                 return null;
             }
-            
+
             try
             {
-                var buildingTypeClass = GameTypeInitializer.GetBuildingType();
+                // Get BuildingType class via IL2CPP reflection
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                System.Type? buildingTypeClass = null;
+
+                foreach (var assembly in assemblies)
+                {
+                    buildingTypeClass = assembly.GetType("BuildingType", false, true);
+                    if (buildingTypeClass != null) break;
+                }
+
                 if (buildingTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} BuildingType class not found");
+                    buildingTypeClass = System.Type.GetType("BuildingType", false, true);
+                }
+
+                if (buildingTypeClass == null)
+                {
+                    UnityEngine.Debug.LogError($"{LogPrefix} BuildingType class not found in any assembly");
                     return null;
                 }
-                
-                var getMethod = buildingTypeClass.GetMethod("Get", 
+
+                // Try to call static Get method first (if it exists)
+                var getMethod = buildingTypeClass.GetMethod("Get",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (getMethod == null)
+                if (getMethod != null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} BuildingType.Get method not found");
-                    return null;
+                    try
+                    {
+                        var result = getMethod.Invoke(null, new object[] { buildingKey });
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                    }
                 }
-                
-                var result = getMethod.Invoke(null, new object[] { buildingKey });
-                if (result == null)
+
+                // Fallback: Access the static table directly
+                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
+                // Try multiple possible field names
+                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
+                System.Collections.IDictionary? table = null;
+
+                foreach (var tableName in possibleTableNames)
                 {
-                    UnityEngine.Debug.LogWarning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
+                    var tableField = buildingTypeClass.GetField(tableName,
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                    if (tableField != null)
+                    {
+                        try
+                        {
+                            table = tableField.GetValue(null) as System.Collections.IDictionary;
+                            if (table != null)
+                            {
+                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
+                        }
+                    }
                 }
-                
-                return result;
+
+                if (table != null && table.Contains(buildingKey))
+                {
+                    return table[buildingKey];
+                }
+
+                UnityEngine.Debug.LogWarning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
+                return null;
             }
             catch (Exception ex)
             {
@@ -202,7 +308,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get Person by key (e.g., "person_ami")
-        /// Uses StaticDataCollectionItem<Person>.Get(key) pattern
+        /// Uses StaticDataCollectionItem<Person> table access
         /// Returns null if not found
         /// </summary>
         /// <param name="personKey">Person key from YAML (e.g., "person_ami")</param>
@@ -214,31 +320,84 @@ namespace PerAspera.GameAPI.Wrappers
                 UnityEngine.Debug.LogWarning($"{LogPrefix} GetPerson called with null/empty key");
                 return null;
             }
-            
+
             try
             {
-                var personTypeClass = GameTypeInitializer.GetPerson();
+                // Get Person class via IL2CPP reflection
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                System.Type? personTypeClass = null;
+
+                foreach (var assembly in assemblies)
+                {
+                    personTypeClass = assembly.GetType("Person", false, true);
+                    if (personTypeClass != null) break;
+                }
+
                 if (personTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} Person class not found");
+                    personTypeClass = System.Type.GetType("Person", false, true);
+                }
+
+                if (personTypeClass == null)
+                {
+                    UnityEngine.Debug.LogError($"{LogPrefix} Person class not found in any assembly");
                     return null;
                 }
-                
-                var getMethod = personTypeClass.GetMethod("Get", 
+
+                // Try to call static Get method first (if it exists)
+                var getMethod = personTypeClass.GetMethod("Get",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (getMethod == null)
+                if (getMethod != null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} Person.Get method not found");
-                    return null;
+                    try
+                    {
+                        var result = getMethod.Invoke(null, new object[] { personKey });
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                    }
                 }
-                
-                var result = getMethod.Invoke(null, new object[] { personKey });
-                if (result == null)
+
+                // Fallback: Access the static table directly
+                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
+                // Try multiple possible field names
+                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
+                System.Collections.IDictionary? table = null;
+
+                foreach (var tableName in possibleTableNames)
                 {
-                    UnityEngine.Debug.LogWarning($"{LogPrefix} Person not found for key: {personKey}");
+                    var tableField = personTypeClass.GetField(tableName,
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                    if (tableField != null)
+                    {
+                        try
+                        {
+                            table = tableField.GetValue(null) as System.Collections.IDictionary;
+                            if (table != null)
+                            {
+                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
+                        }
+                    }
                 }
-                
-                return result;
+
+                if (table != null && table.Contains(personKey))
+                {
+                    return table[personKey];
+                }
+
+                UnityEngine.Debug.LogWarning($"{LogPrefix} Person not found for key: {personKey}");
+                return null;
             }
             catch (Exception ex)
             {
@@ -249,7 +408,7 @@ namespace PerAspera.GameAPI.Wrappers
         
         /// <summary>
         /// Get TechnologyType by key (e.g., "tech_basic_chemistry")
-        /// Uses StaticDataCollectionItem<TechnologyType>.Get(key) pattern
+        /// Uses StaticDataCollectionItem<TechnologyType> table access
         /// Returns null if not found
         /// </summary>
         /// <param name="technologyKey">Technology key from YAML</param>
@@ -261,31 +420,84 @@ namespace PerAspera.GameAPI.Wrappers
                 UnityEngine.Debug.LogWarning($"{LogPrefix} GetTechnologyType called with null/empty key");
                 return null;
             }
-            
+
             try
             {
-                var technologyTypeClass = GameTypeInitializer.GetTechnologyType();
+                // Get TechnologyType class via IL2CPP reflection
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                System.Type? technologyTypeClass = null;
+
+                foreach (var assembly in assemblies)
+                {
+                    technologyTypeClass = assembly.GetType("TechnologyType", false, true);
+                    if (technologyTypeClass != null) break;
+                }
+
                 if (technologyTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} TechnologyType class not found");
+                    technologyTypeClass = System.Type.GetType("TechnologyType", false, true);
+                }
+
+                if (technologyTypeClass == null)
+                {
+                    UnityEngine.Debug.LogError($"{LogPrefix} TechnologyType class not found in any assembly");
                     return null;
                 }
-                
-                var getMethod = technologyTypeClass.GetMethod("Get", 
+
+                // Try to call static Get method first (if it exists)
+                var getMethod = technologyTypeClass.GetMethod("Get",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (getMethod == null)
+                if (getMethod != null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} TechnologyType.Get method not found");
-                    return null;
+                    try
+                    {
+                        var result = getMethod.Invoke(null, new object[] { technologyKey });
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                    }
                 }
-                
-                var result = getMethod.Invoke(null, new object[] { technologyKey });
-                if (result == null)
+
+                // Fallback: Access the static table directly
+                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
+                // Try multiple possible field names
+                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
+                System.Collections.IDictionary? table = null;
+
+                foreach (var tableName in possibleTableNames)
                 {
-                    UnityEngine.Debug.LogWarning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
+                    var tableField = technologyTypeClass.GetField(tableName,
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                    if (tableField != null)
+                    {
+                        try
+                        {
+                            table = tableField.GetValue(null) as System.Collections.IDictionary;
+                            if (table != null)
+                            {
+                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
+                        }
+                    }
                 }
-                
-                return result;
+
+                if (table != null && table.Contains(technologyKey))
+                {
+                    return table[technologyKey];
+                }
+
+                UnityEngine.Debug.LogWarning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
+                return null;
             }
             catch (Exception ex)
             {

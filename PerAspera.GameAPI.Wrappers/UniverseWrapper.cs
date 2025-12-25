@@ -19,13 +19,34 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class UniverseWrapper : WrapperBase
     {
+        private readonly Universe? _nativeUniverse;
+
         public UniverseWrapper(object nativeUniverse) : base(nativeUniverse)
         {
+            // ⚡ Cast to native Universe type for direct access with interop DLLs
+            _nativeUniverse = nativeUniverse as Universe;
         }
 
-
+        public bool GetGamePaused()
+        {
+            return ((Universe)NativeObject).GetGamePaused();
+        }
         public CommandBus GetCommandBus()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeUniverse != null)
+                {
+                    return _nativeUniverse.commandBus;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for commandBus, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             return SafeInvoke<CommandBus>("get_commandBus");
         }
 
@@ -44,12 +65,42 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public KeeperWrapper? GetKeeper()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeUniverse != null)
+                {
+                    var keeper = _nativeUniverse.keeper;
+                    return keeper != null ? new KeeperWrapper(keeper) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for keeper, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             var nativeKeeper = SafeInvoke<object>("get_keeper");
             return nativeKeeper != null ? new KeeperWrapper(nativeKeeper) : null;
         }
         
         public FactionWrapper GetPlayerFaction()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeUniverse != null)
+                {
+                    var faction = _nativeUniverse.GetPlayerFaction();
+                    return faction != null ? new FactionWrapper(faction) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for GetPlayerFaction, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             var nativeFaction = SafeInvoke<object>("GetPlayerFaction");
             return nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
         }
@@ -60,21 +111,96 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Get current Martian sol (days passed)
         /// </summary>
-        public int CurrentSol => SafeInvoke<int?>("GetDaysPassed") ?? 0;
+        public int CurrentSol
+        {
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeUniverse != null)
+                    {
+                        return _nativeUniverse.GetMartianSol();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for GetMartianSol, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<int?>("GetDaysPassed") ?? 0;
+            }
+        }
         
         /// <summary>
         /// Get current game speed multiplier
         /// </summary>
         public float GameSpeed
         {
-            get => SafeInvoke<float?>("GetGameSpeed") ?? 1.0f;
-            set => SafeInvokeVoid("SetGameSpeed", value);
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeUniverse != null)
+                    {
+                        return _nativeUniverse.GetGameSpeed();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for GetGameSpeed, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<float?>("GetGameSpeed") ?? 1.0f;
+            }
+            set
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeUniverse != null)
+                    {
+                        _nativeUniverse.SetGameSpeed(value);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for SetGameSpeed, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                SafeInvokeVoid("SetGameSpeed", value);
+            }
         }
         
         /// <summary>
         /// Check if game is paused
         /// </summary>
-        public bool IsPaused => SafeInvoke<bool>("IsPaused");
+        public bool IsPaused
+        {
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeUniverse != null)
+                    {
+                        return _nativeUniverse.GetGamePaused();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for GetGamePaused, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<bool>("GetGamePaused");
+            }
+        }
         
         // ==================== GAME STATE ====================
         
@@ -83,6 +209,21 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public PlanetWrapper? GetPlanet()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeUniverse != null)
+                {
+                    var planet = _nativeUniverse.GetPlanet();
+                    return planet != null ? new PlanetWrapper(planet) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for GetPlanet, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             var nativePlanet = SafeInvoke<object>("GetPlanet");
             return nativePlanet != null ? new PlanetWrapper(nativePlanet) : null;
         }

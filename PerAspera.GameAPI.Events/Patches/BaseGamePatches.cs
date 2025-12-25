@@ -28,31 +28,37 @@ namespace PerAspera.GameAPI.Events.Patches
 
                 // Get native instances for event creation
                 var nativeBaseGame = __instance;
-                object? nativeUniverse = null;
+                object? nativeUniverse = ((BaseGame)nativeBaseGame).GetUniverse();
+                object? nativePlanet = ((Universe)nativeUniverse).GetPlanet();
 
-                // Try to get Universe if available
-                try
-                {
-                    var universeProperty = typeof(BaseGame).GetProperty("universe");
-                    if (universeProperty != null)
-                    {
-                        nativeUniverse = universeProperty.GetValue(__instance);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warning($"Could not get Universe from BaseGame: {ex.Message}");
-                }
 
-                // Create and dispatch the event
+                // Create and dispatch the OnLoadFinished event
                 var loadFinishedEvent = new OnLoadFinishedEvent(nativeBaseGame, nativeUniverse);
                 EnhancedEventBus.Publish(SDKEventConstants.OnLoadFinished, loadFinishedEvent);
-
                 _logger.Info("✅ OnLoadFinished event dispatched successfully");
+
+                // EMIT EARLY MODS READY EVENT - This is what MasterGUI is waiting for!
+                _logger.Info("🎯 Emitting EarlyModsReadyEvent for early mod initialization");
+                var earlyModsReadyEvent = new EarlyModsReadyEvent(nativeBaseGame);
+                EnhancedEventBus.Publish(SDKEventConstants.EarlyModsReady, earlyModsReadyEvent);
+                _logger.Info("✅ EarlyModsReadyEvent dispatched successfully");
+
+                // EMIT GAME FULLY LOADED EVENT if we have all components
+                if (nativeUniverse != null && nativePlanet != null)
+                {
+                    _logger.Info("🎯 All game components available - emitting GameFullyLoadedEvent");
+                    var gameFullyLoadedEvent = new GameFullyLoadedEvent(nativeBaseGame, nativeUniverse, nativePlanet);
+                    EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);
+                    _logger.Info("✅ GameFullyLoadedEvent dispatched successfully");
+                }
+                else
+                {
+                    _logger.Info($"⏳ Game not fully loaded yet - Universe: {nativeUniverse != null}, Planet: {nativePlanet != null}");
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error($"❌ Failed to dispatch OnLoadFinished event: {ex.Message}");
+                _logger.Error($"❌ Failed to dispatch events: {ex.Message}");
                 _logger.Error($"StackTrace: {ex.StackTrace}");
             }
         }

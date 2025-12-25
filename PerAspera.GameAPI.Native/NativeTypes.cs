@@ -226,4 +226,52 @@ namespace PerAspera.GameAPI.Native
             NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
         }
     }
+
+    /// <summary>
+    /// Native Building type alias for Enhanced Events
+    /// Represents the actual IL2CPP native Building object
+    /// Use PerAspera.GameAPI.Wrappers.BuildingWrapper for SDK wrapper access
+    /// </summary>
+    public class BuildingNative
+    {
+        /// <summary>Native IL2CPP Building instance</summary>
+        public object NativeInstance { get; }
+
+        public BuildingNative(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+
+    /// <summary>
+    /// Native Swarm type alias for Enhanced Events
+    /// Represents the actual IL2CPP native Swarm object
+    /// Use PerAspera.GameAPI.Wrappers.Swarm for SDK wrapper access
+    /// </summary>
+    public class SwarmNative
+    {
+        /// <summary>Native IL2CPP Swarm instance</summary>
+        public object NativeInstance { get; }
+
+        public SwarmNative(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
+
+    /// <summary>
+    /// Native Way type alias for Enhanced Events
+    /// Represents the actual IL2CPP native Way object
+    /// Use PerAspera.GameAPI.Wrappers.Way for SDK wrapper access
+    /// </summary>
+    public class WayNative
+    {
+        /// <summary>Native IL2CPP Way instance</summary>
+        public object NativeInstance { get; }
+
+        public WayNative(object nativeInstance)
+        {
+            NativeInstance = nativeInstance ?? throw new ArgumentNullException(nameof(nativeInstance));
+        }
+    }
 }

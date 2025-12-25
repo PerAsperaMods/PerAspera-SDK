@@ -136,7 +136,7 @@ namespace PerAspera.SDK.TwitchIntegration
                 // Initialize PubSub for channel points (independent of IRC)
                 if (_config?.EnableChannelPoints == true)
                 {
-                    InitializePubSub();
+                    await InitializePubSub();
                     Log.Info("✅ Channel points PubSub enabled");
                 }
                 
@@ -207,7 +207,7 @@ namespace PerAspera.SDK.TwitchIntegration
         /// </code>
         /// </example>
         /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/TwitchIntegration.md">Twitch Integration Documentation</seealso>
-        private static void InitializePubSub()
+        private static async Task InitializePubSub()
         {
             try
             {
@@ -216,21 +216,19 @@ namespace PerAspera.SDK.TwitchIntegration
                     Log.Warning("⚠️ Client ID or Broadcaster ID not configured for PubSub");
                     return;
                 }
-                
-                // Create PubSub client as a GameObject component
-                var pubSubGameObject = new GameObject("TwitchPubSubClient");
-                GameObject.DontDestroyOnLoad(pubSubGameObject);
-                
-                // Use non-generic AddComponent for IL2CPP compatibility
-                _pubSubClient = (SimpleTwitchPubSubClient)pubSubGameObject.AddComponent(typeof(SimpleTwitchPubSubClient));
+
+                // Create PubSub client instance (no longer a MonoBehaviour)
+                _pubSubClient = new SimpleTwitchPubSubClient();
+
+                // Initialize with credentials
                 _pubSubClient.Initialize(_config.ClientId, _config.PubSubToken, _config.BroadcasterId);
-                
+
                 // Subscribe to channel points events
                 _pubSubClient.OnChannelPointsRedeemed += OnChannelPointsRedeemed;
-                
-                // Start polling
-                _pubSubClient.StartPolling();
-                
+
+                // Start polling asynchronously
+                await _pubSubClient.StartPollingAsync();
+
                 Log.Info("✅ PubSub client initialized for channel points");
             }
             catch (Exception ex)
@@ -953,6 +951,11 @@ namespace PerAspera.SDK.TwitchIntegration
                 {
                     await _ircClient.DisconnectAsync();
                     _ircClient.Dispose();
+                }
+
+                if (_pubSubClient != null)
+                {
+                    _pubSubClient.StopPolling();
                 }
                 
                 _isInitialized = false;

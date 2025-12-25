@@ -97,7 +97,7 @@ namespace PerAspera.GameAPI.Wrappers
                 // il faut rechercehr le REsoruceTYPE dans le  KeeperMap/keerper
 
                 // Get native objects directly from IL2CPP
-                HandleWrapper _h =((FactionWrapper)handleable).GetHandle();
+                HandleWrapper _h = new HandleWrapper(handleable.handle);
                 
                 TextAction? textAction = CreateNativeTextAction(resourceType, amount) as TextAction;
 

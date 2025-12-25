@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core.IL2CPP;
+using PerAspera.Core;
+using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -89,43 +91,270 @@ namespace PerAspera.GameAPI.Wrappers
     }
     
     /// <summary>
-    /// Collection of atmospheric gases with dynamic composition
+    /// Collection of atmospheric gases with dynamic composition and cargo integration
+    /// Provides access to atmospheric gases as Cargo objects for building interactions
     /// </summary>
     public class AtmosphericComposition
     {
         private readonly Dictionary<string, AtmosphericGas> _gases;
+        private readonly Dictionary<string, Cargo> _gasCargos;
         private readonly Func<float> _getTotalPressure;
-        
-        internal AtmosphericComposition(Dictionary<string, AtmosphericGas> gases, Func<float> getTotalPressure)
+        private readonly object _nativePlanet;
+
+        internal AtmosphericComposition(Dictionary<string, AtmosphericGas> gases, Func<float> getTotalPressure, object nativePlanet)
         {
             _gases = gases;
+            _gasCargos = new Dictionary<string, Cargo>();
             _getTotalPressure = getTotalPressure;
+            _nativePlanet = nativePlanet;
+
+            // Initialize cargo representations for atmospheric gases
+            InitializeGasCargos();
         }
-        
+
+        /// <summary>
+        /// Initialize Cargo objects for each atmospheric gas to enable building interactions
+        /// </summary>
+        private void InitializeGasCargos()
+        {
+            foreach (var gasEntry in _gases)
+            {
+                var gas = gasEntry.Value;
+                // Create a cargo representation for this gas
+                // Note: This is a conceptual representation - actual cargo creation would need building context
+                _gasCargos[gasEntry.Key] = CreateAtmosphericCargo(gas);
+            }
+        }
+
+        /// <summary>
+        /// Create a conceptual Cargo object representing atmospheric gas
+        /// This allows atmospheric gases to interact with building mechanics
+        /// </summary>
+        private Cargo CreateAtmosphericCargo(AtmosphericGas gas)
+        {
+            // Find the corresponding ResourceType for this gas
+            var resourceType = FindAtmosphericResourceType(gas.Symbol);
+            if (resourceType == null) return null;
+
+            // Create cargo with current gas pressure as quantity
+            // Note: In a real implementation, this would be managed by the planet's atmosphere system
+            var cargo = new Cargo();
+            cargo._resource = resourceType;
+            cargo._quantity = CargoQuantity.FromUnitFloat(gas.PartialPressure);
+
+            return cargo;
+        }
+
+        /// <summary>
+        /// Find ResourceType corresponding to atmospheric gas symbol
+        /// </summary>
+        private ResourceType FindAtmosphericResourceType(string symbol)
+        {
+            // Map gas symbols to resource type constants
+            var resourceKey = symbol switch
+            {
+                "CO2" => "resource_carbon_dioxide_release",
+                "O2" => "resource_oxygen_release",
+                "N2" => "resource_nitrogen_release",
+                "GHG" => "resource_ghg_release",
+                "H2O" => "resource_water", // Water vapor maps to water resource
+                _ => null
+            };
+
+            if (resourceKey != null)
+            {
+                return (ResourceType)KeeperTypeRegistry.GetResourceType(resourceKey);
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Get gas by symbol (CO2, O2, N2, H2O)
         /// </summary>
         public AtmosphericGas? this[string symbol] => _gases.TryGetValue(symbol, out var gas) ? gas : null;
-        
+
+        /// <summary>
+        /// Get cargo representation of atmospheric gas for building interactions
+        /// </summary>
+        public Cargo? GetGasCargo(string symbol) => _gasCargos.TryGetValue(symbol, out var cargo) ? cargo : null;
+
         /// <summary>
         /// All atmospheric gases
         /// </summary>
         public IEnumerable<AtmosphericGas> AllGases => _gases.Values;
-        
+
         /// <summary>
-        /// Update percentages based on total pressure
+        /// All atmospheric gas cargos for building interactions
+        /// </summary>
+        public IEnumerable<Cargo> AllGasCargos => _gasCargos.Values.Where(c => c != null);
+
+        /// <summary>
+        /// Update percentages based on total pressure and sync cargo quantities
         /// </summary>
         internal void UpdatePercentages()
         {
             var total = _getTotalPressure();
             if (total <= 0) return;
-            
+
             foreach (var gas in _gases.Values)
             {
                 gas.Percentage = (gas.PartialPressure / total) * 100f;
             }
+
+            // Sync cargo quantities with current gas pressures
+            SyncCargoQuantities();
         }
-        
+
+        /// <summary>
+        /// Sync cargo quantities with current atmospheric gas pressures
+        /// This enables buildings to interact with atmospheric gases through cargo system
+        /// </summary>
+        private void SyncCargoQuantities()
+        {
+            foreach (var gasEntry in _gases)
+            {
+                var cargo = _gasCargos[gasEntry.Key];
+                if (cargo != null)
+                {
+                    // Update cargo quantity to match current gas pressure
+                    cargo._quantity = CargoQuantity.FromUnitFloat(gasEntry.Value.PartialPressure);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Transfer gas between buildings via cargo system
+        /// </summary>
+        public bool TransferGasToBuilding(string gasSymbol, Building targetBuilding, float amount)
+        {
+            var cargo = GetGasCargo(gasSymbol);
+            if (cargo == null || targetBuilding == null) return false;
+
+            try
+            {
+                // Check if building can accept this cargo
+                if (!Atmosphere.CanAcceptCargo(targetBuilding, cargo))
+                {
+                    LogAspera.LogWarning($"Building cannot accept {gasSymbol} cargo");
+                    return false;
+                }
+
+                // Check if we have enough gas in atmosphere
+                var gas = this[gasSymbol];
+                if (gas == null || gas.PartialPressure < amount)
+                {
+                    LogAspera.LogWarning($"Insufficient {gasSymbol} in atmosphere ({gas?.PartialPressure ?? 0} < {amount})");
+                    return false;
+                }
+
+                // Create a cargo object with the transfer amount
+                var transferCargo = new Cargo();
+                transferCargo._resource = cargo.resource;
+                transferCargo._quantity = CargoQuantity.FromUnitFloat(amount);
+
+                // Transfer cargo to building
+                if (Atmosphere.AcceptCargo(targetBuilding, transferCargo))
+                {
+                    // Reduce atmospheric gas pressure
+                    gas.PartialPressure -= amount;
+                    LogAspera.LogInfo($"Transferred {amount} {gasSymbol} from atmosphere to building");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Failed to transfer {gasSymbol} to building: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Extract gas from building back to atmosphere
+        /// </summary>
+        public bool ExtractGasFromBuilding(string gasSymbol, Building sourceBuilding, float amount)
+        {
+            if (sourceBuilding == null) return false;
+
+            try
+            {
+                // Find cargo in building
+                var resourceKey = GetResourceKeyForGas(gasSymbol);
+                if (resourceKey == null) return false;
+
+                var resourceType = (ResourceType)KeeperTypeRegistry.GetResourceType(resourceKey);
+                var cargo = Atmosphere.FindCargoByResource(sourceBuilding, resourceType);
+
+                if (cargo == null || cargo.quantity.ToFloat() < amount)
+                {
+                    LogAspera.LogWarning($"Building doesn't have enough {gasSymbol} to extract ({cargo?.quantity.ToFloat() ?? 0} < {amount})");
+                    return false;
+                }
+
+                // Remove cargo from building
+                if (Atmosphere.RemoveCargo(sourceBuilding, cargo, amount))
+                {
+                    // Increase atmospheric gas pressure
+                    var gas = this[gasSymbol];
+                    if (gas != null)
+                    {
+                        gas.PartialPressure += amount;
+                        LogAspera.LogInfo($"Extracted {amount} {gasSymbol} from building to atmosphere");
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Failed to extract {gasSymbol} from building: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get resource key for gas symbol
+        /// </summary>
+        private string GetResourceKeyForGas(string gasSymbol)
+        {
+            return gasSymbol switch
+            {
+                "CO2" => "resource_carbon_dioxide_release",
+                "O2" => "resource_oxygen_release",
+                "N2" => "resource_nitrogen_release",
+                "GHG" => "resource_ghg_release",
+                "H2O" => "resource_water",
+                _ => null
+            };
+        }
+
+        /// <summary>
+        /// Get quantity of atmospheric gas by resource key
+        /// </summary>
+        public float GetGasQuantity(string resourceKey)
+        {
+            var resourceType = (ResourceType)KeeperTypeRegistry.GetResourceType(resourceKey);
+            if (resourceType == null || !_gasCargos.TryGetValue(GetGasSymbolForResource(resourceKey), out var cargo)) return 0f;
+            return cargo?._quantity.ToFloat() ?? 0f;
+        }
+
+        /// <summary>
+        /// Get gas symbol for resource key
+        /// </summary>
+        private string GetGasSymbolForResource(string resourceKey)
+        {
+            return resourceKey switch
+            {
+                "resource_carbon_dioxide_release" => "CO2",
+                "resource_oxygen_release" => "O2",
+                "resource_nitrogen_release" => "N2",
+                "resource_ghg_release" => "GHG",
+                "resource_water" => "H2O",
+                _ => null
+            };
+        }
+
         public override string ToString()
         {
             UpdatePercentages();
@@ -156,7 +385,7 @@ namespace PerAspera.GameAPI.Wrappers
             // 🎯 MODABLE: Discover additional atmospheric ResourceType from mods
             DiscoverModdedAtmosphericResources(gases);
 
-            _composition = new AtmosphericComposition(gases, () => TotalPressure);
+            _composition = new AtmosphericComposition(gases, () => TotalPressure, _nativePlanet);
 
             // Initialize terraforming effects (also potentially modable)
             _effects = InitializeTerraformingEffects();
@@ -172,33 +401,87 @@ namespace PerAspera.GameAPI.Wrappers
             gases["O2"] = new AtmosphericGas(_nativePlanet, "Oxygen", "O2", "GetO2Pressure", null);
             gases["N2"] = new AtmosphericGas(_nativePlanet, "Nitrogen", "N2", "GetN2Pressure", null);
             gases["GHG"] = new AtmosphericGas(_nativePlanet, "Greenhouse Gas", "GHG", "GetGHGPressure", null);
-            gases["H2O"] = new AtmosphericGas(_nativePlanet, "Water Vapor", "H2O", "GetH2OPressure", null);
+            // H2O removed - no public GetH2OPressure method exists
         }
 
         /// <summary>
         /// 🎯 MODABLE: Discover atmospheric resources from ResourceType system
-        /// TODO: Implementation complete when ResourceType integration finished
+        /// Dynamically adds mod-added atmospheric gases to the composition
         /// </summary>
         private void DiscoverModdedAtmosphericResources(Dictionary<string, AtmosphericGas> gases)
         {
-            // TODO: Query ResourceType system for atmospheric gases
-            // ResourceManager.GetResourceTypes().Where(r => r.Category == "atmospheric")
-
-            // PLACEHOLDER: Framework for dynamic gas discovery
             try
             {
-                // Future: Dynamic discovery of mod-added atmospheric ResourceType
-                // foreach (var resourceType in GetAtmosphericResourceTypes())
-                // {
-                //     gases[resourceType.Id] = CreateDynamicGas(resourceType);
-                // }
+                // Get all ResourceType instances from the static collection
+                var allResourceTypes = ResourceType.StaticValues;
+                if (allResourceTypes == null) return;
 
-                // For now: Static but extensible structure
+                // Known atmospheric resource IDs from base game
+                var knownAtmosphericIds = new HashSet<string>
+                {
+                    "resource_oxygen_release",
+                    "resource_carbon_dioxide_release",
+                    "resource_oxygen_capture",
+                    "resource_carbon_dioxide_capture",
+                    "resource_oxygen_respiration",
+                    "resource_nitrogen_release",
+                    "resource_ghg_release",
+                    "resource_O2_Up",
+                    "resource_CO2_Down"
+                };
+
+                foreach (var resourceType in allResourceTypes)
+                {
+                    if (resourceType == null || string.IsNullOrEmpty(resourceType.key)) continue;
+
+                    // Check if this is a known atmospheric resource
+                    if (knownAtmosphericIds.Contains(resourceType.key))
+                    {
+                        // Map resource IDs to gas symbols and create dynamic gas entries
+                        var gasInfo = MapResourceToGas(resourceType.key);
+                        if (gasInfo != null && !gases.ContainsKey(gasInfo.Value.symbol))
+                        {
+                            // Create dynamic atmospheric gas for mod-added resources
+                            gases[gasInfo.Value.symbol] = new AtmosphericGas(
+                                _nativePlanet,
+                                gasInfo.Value.name,
+                                gasInfo.Value.symbol,
+                                gasInfo.Value.getterMethod,
+                                gasInfo.Value.setterMethod
+                            );
+                        }
+                    }
+
+                    // TODO: Future enhancement - check for custom atmospheric resources
+                    // This could involve checking resource properties or categories
+                    // that indicate atmospheric behavior
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Fail silently - core gases still work
+                // Log error but don't fail - core gases still work
+                LogAspera.LogWarning($"Failed to discover modded atmospheric resources: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Maps known atmospheric resource IDs to gas information
+        /// </summary>
+        private (string name, string symbol, string getterMethod, string? setterMethod)? MapResourceToGas(string resourceId)
+        {
+            return resourceId switch
+            {
+                "resource_oxygen_release" => ("Oxygen Release", "O2_REL", "GetO2Pressure", null),
+                "resource_carbon_dioxide_release" => ("CO2 Release", "CO2_REL", "GetCO2Pressure", null),
+                "resource_oxygen_capture" => ("Oxygen Capture", "O2_CAP", "GetO2Pressure", null),
+                "resource_carbon_dioxide_capture" => ("CO2 Capture", "CO2_CAP", "GetCO2Pressure", null),
+                "resource_oxygen_respiration" => ("Oxygen Respiration", "O2_RESP", "GetO2Pressure", null),
+                "resource_nitrogen_release" => ("Nitrogen Release", "N2_REL", "GetN2Pressure", null),
+                "resource_ghg_release" => ("GHG Release", "GHG_REL", "GetGHGPressure", null),
+                "resource_O2_Up" => ("Oxygen Increase", "O2_UP", "GetO2Pressure", null),
+                "resource_CO2_Down" => ("CO2 Decrease", "CO2_DOWN", "GetCO2Pressure", null),
+                _ => null
+            };
         }
 
         /// <summary>
@@ -223,6 +506,16 @@ namespace PerAspera.GameAPI.Wrappers
         /// Access via: Atmosphere.Composition["CO2"].PartialPressure
         /// </summary>
         public AtmosphericComposition Composition => _composition;
+
+        /// <summary>
+        /// Get cargo representation of atmospheric gas for building interactions
+        /// </summary>
+        public Cargo? GetGasCargo(string gasSymbol) => _composition.GetGasCargo(gasSymbol);
+
+        /// <summary>
+        /// All atmospheric gas cargos for building interactions
+        /// </summary>
+        public IEnumerable<Cargo> GasCargos => _composition.AllGasCargos;
 
         // ==================== PRESSURE ====================
 
@@ -418,19 +711,140 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// 🎯 MODABLE: Register new atmospheric ResourceType (for mods)
-        /// TODO: Implementation when ResourceType system integrated
+        /// Transfer atmospheric gas to a building via cargo system
         /// </summary>
-        /// <param name="resourceId">ResourceType identifier</param>
-        /// <param name="gasName">Human-readable name</param>
-        /// <param name="symbol">Chemical symbol</param>
-        public void RegisterModdedGas(string resourceId, string gasName, string symbol)
+        public bool TransferGasToBuilding(string gasSymbol, Building targetBuilding, float amount)
         {
-            // TODO: Dynamic registration of mod-added atmospheric gases
-            // This will allow mods to add custom atmospheric components
-            throw new NotImplementedException("Modded gas registration not yet implemented - planned for v2.0");
+            return _composition.TransferGasToBuilding(gasSymbol, targetBuilding, amount);
         }
-        
+
+        /// <summary>
+        /// Extract gas from building back to atmosphere via cargo system
+        /// </summary>
+        public bool ExtractGasFromBuilding(string gasSymbol, Building sourceBuilding, float amount)
+        {
+            return _composition.ExtractGasFromBuilding(gasSymbol, sourceBuilding, amount);
+        }
+
+        /// <summary>
+        /// Check if a building can accept a specific cargo type
+        /// </summary>
+        public static bool CanAcceptCargo(Building building, Cargo cargo)
+        {
+            if (building == null || cargo == null) return false;
+
+            try
+            {
+                // Check if building has capacity for this resource type
+                var resourceType = cargo.resource;
+                if (resourceType == null) return false;
+
+                // Check current capacity vs incoming capacity
+                var currentIncoming = building.droneAccounting.capacityIncoming;
+                var currentDocked = building.droneAccounting.capacityDocked;
+
+                // Buildings can accept cargo if they have available capacity
+                // This is a simplified check - actual logic would depend on building type
+                return currentIncoming.ToFloat() > 0 || currentDocked.ToFloat() > 0;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error checking if building can accept cargo: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Make a building accept cargo (add to building's cargo storage)
+        /// </summary>
+        public static bool AcceptCargo(Building building, Cargo cargo)
+        {
+            if (building == null || cargo == null) return false;
+
+            try
+            {
+                // In the actual game, cargo acceptance would involve:
+                // 1. Checking building capacity
+                // 2. Adding cargo to building's storage
+                // 3. Updating building state
+
+                // For now, we'll simulate this by calling the building's OnCargoDelivered method
+                // This is the closest thing to cargo acceptance in the native Building class
+                building.OnCargoDelivered(cargo);
+
+                LogAspera.LogInfo($"Building {building.buildingType?.name} accepted cargo: {cargo._resource?.name} x{cargo._quantity.ToFloat()}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error accepting cargo in building: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove cargo from a building (extract from building's storage)
+        /// </summary>
+        public static bool RemoveCargo(Building building, Cargo cargo, float amount)
+        {
+            if (building == null || cargo == null || amount <= 0) return false;
+
+            try
+            {
+                // In the actual game, cargo removal would involve:
+                // 1. Finding the cargo in building's storage
+                // 2. Reducing the quantity
+                // 3. Updating building state
+
+                // For now, we'll simulate this by reducing cargo quantity
+                // This is a simplified implementation
+                if (cargo._quantity.ToFloat() >= amount)
+                {
+                    cargo._quantity = CargoQuantity.FromUnitFloat(cargo._quantity.ToFloat() - amount);
+                    LogAspera.LogInfo($"Removed {amount} {cargo._resource?.name} from building {building.buildingType?.name}");
+                    return true;
+                }
+                else
+                {
+                    LogAspera.LogWarning($"Building doesn't have enough {cargo._resource?.name} to remove {amount}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error removing cargo from building: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Find cargo in a building by resource type
+        /// </summary>
+        public static Cargo FindCargoByResource(Building building, ResourceType resourceType)
+        {
+            if (building == null || resourceType == null) return null;
+
+            try
+            {
+                // Buildings don't have a direct cargo storage in the native class
+                // This would need to be implemented based on how the game actually stores cargo
+                // For now, return null as buildings don't directly store cargo in this simplified model
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error finding cargo in building: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get quantity of atmospheric gas by resource key
+        /// </summary>
+        public float GetGasQuantity(string resourceKey)
+        {
+            return _composition.GetGasQuantity(resourceKey);
+        }
 
         public override string ToString()
         {

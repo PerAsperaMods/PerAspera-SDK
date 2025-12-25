@@ -20,7 +20,11 @@ namespace PerAspera.GameAPI.Events.Detector
         public static ManualLogSource _logger;
         private int _frameCount = 0;
         private bool _eventEmitted = false;
+        private bool _fullLoadMonitoringActive = false;
+        private int _fullLoadCheckCount = 0;
         private const int MaxFrames = 3000; // ~50 seconds at 60fps
+        private const int MaxFullLoadChecks = 600; // ~10 seconds at 60fps
+        private BaseGameWrapper? _baseGameForFullLoad;
         
         /// <summary>
         /// Initialize the detector with a shared logger
@@ -44,7 +48,7 @@ namespace PerAspera.GameAPI.Events.Detector
 
         private void Update()
         {
-            if (_logger == null || _eventEmitted) return;
+            if (_logger == null) return;
 
             _frameCount++;
             
@@ -65,36 +69,96 @@ namespace PerAspera.GameAPI.Events.Detector
                 return;
             }
 
-            // Log progress every 10 seconds
-            if (_frameCount % 600 == 0)
+            // If we haven't emitted the initial event yet, check for BaseGame
+            if (!_eventEmitted)
             {
-                _logger.LogInfo($"⏳ Still monitoring BaseGame... (frame {_frameCount})");
-            }
-
-            try
-            {
-                var baseGame = BaseGameWrapper.GetCurrent();
-                if (baseGame != null)
+                // Log progress every 10 seconds
+                if (_frameCount % 600 == 0)
                 {
-                    _logger.LogInfo($"🎯 BaseGame detected at frame {_frameCount}! Publishing GameHubInitializedEvent...");
-                    
-                    // Emit the event
-                    var evt = new GameHubInitializedEvent(baseGame.GetNativeObject(), isReady: true);
-                    EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, evt);
-                    
-                    _logger.LogInfo("📡 GameHubInitializedEvent published successfully!");
-                    _eventEmitted = true;
-                    
-                    // Self-destruct after successful emission
-                    SelfDestruct();
+                    _logger.LogInfo($"⏳ Still monitoring BaseGame... (frame {_frameCount})");
+                }
+
+                try
+                {
+                    var baseGame = BaseGameWrapper.GetCurrent();
+                    if (baseGame != null)
+                    {
+                        _logger.LogInfo($"🎯 BaseGame detected at frame {_frameCount}! Publishing events...");
+
+                        // Emit EarlyModsReadyEvent first (for early mod initialization)
+                        var earlyEvent = new EarlyModsReadyEvent(baseGame.GetNativeObject());
+                        EnhancedEventBus.Publish(SDKEventConstants.EarlyModsReady, earlyEvent);
+                        _logger.LogInfo("📡 EarlyModsReadyEvent published successfully!");
+
+                        // Emit GameHubInitializedEvent for compatibility
+                        var hubEvent = new GameHubInitializedEvent(baseGame.GetNativeObject(), isReady: true);
+                        EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, hubEvent);
+                        _logger.LogInfo("📡 GameHubInitializedEvent published successfully!");
+
+                        // Start monitoring for full game load (Universe + Planet)
+                        StartFullGameLoadMonitoring(baseGame);
+
+                        _eventEmitted = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Silent failure - BaseGame not ready yet
+                    if (_frameCount % 600 == 0) // Log only every 10 seconds
+                    {
+                        _logger.LogDebug($"BaseGame not ready: {ex.Message}");
+                    }
                 }
             }
-            catch (Exception ex)
+            // If initial event emitted but full load monitoring is active, check for full load
+            else if (_fullLoadMonitoringActive)
             {
-                // Silent failure - BaseGame not ready yet
-                if (_frameCount % 600 == 0) // Log only every 10 seconds
+                _fullLoadCheckCount++;
+
+                // Timeout for full load monitoring
+                if (_fullLoadCheckCount > MaxFullLoadChecks)
                 {
-                    _logger.LogDebug($"BaseGame not ready: {ex.Message}");
+                    _logger.LogWarning("⚠️ Full game load monitoring timed out - Universe/Planet not detected");
+                    SelfDestruct();
+                    return;
+                }
+
+                try
+                {
+                    // Check if Universe and Planet are available
+                    var universe = UniverseWrapper.GetCurrent();
+                    var planet = PlanetWrapper.GetCurrent();
+
+                    if (universe != null && planet != null && _baseGameForFullLoad != null)
+                    {
+                        _logger.LogInfo("🎯 Full game load detected! Publishing GameFullyLoadedEvent...");
+
+                        // Emit GameFullyLoadedEvent
+                        var fullLoadEvent = new GameFullyLoadedEvent(
+                            _baseGameForFullLoad.GetNativeObject(),
+                            universe.GetNativeObject(),
+                            planet.GetNativeObject()
+                        );
+                        EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, fullLoadEvent);
+
+                        _logger.LogInfo("📡 GameFullyLoadedEvent published successfully!");
+                        SelfDestruct();
+                        return;
+                    }
+                    else
+                    {
+                        if (_fullLoadCheckCount % 60 == 0) // Log every second
+                        {
+                            _logger.LogInfo($"⏳ Waiting for full load - Universe: {universe != null}, Planet: {planet != null}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (_fullLoadCheckCount % 60 == 0) // Log every second
+                    {
+                        _logger.LogDebug($"Full load check failed: {ex.Message}");
+                    }
                 }
             }
         }
@@ -106,6 +170,17 @@ namespace PerAspera.GameAPI.Events.Detector
                 _logger.LogInfo("💥 GameHubDetector mission complete - self-destructing");
             }
             GameObject.Destroy(this.gameObject);
+        }
+
+        /// <summary>
+        /// Start monitoring for full game load (Universe + Planet) to emit GameFullyLoadedEvent
+        /// </summary>
+        private void StartFullGameLoadMonitoring(BaseGameWrapper baseGame)
+        {
+            _logger.LogInfo("🔍 Starting full game load monitoring...");
+            _baseGameForFullLoad = baseGame;
+            _fullLoadMonitoringActive = true;
+            _fullLoadCheckCount = 0;
         }
     }
 }
