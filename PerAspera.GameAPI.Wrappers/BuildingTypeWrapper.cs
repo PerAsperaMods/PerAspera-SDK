@@ -11,8 +11,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// Wrapper for the native BuildingType class
     /// Provides safe access to building type definitions and properties
     /// DOC: BuildingType.md - Building definitions and construction properties
+    /// Implements IYamlTypeWrapper for unified game data access
     /// </summary>
-    public class BuildingTypeWrapper : WrapperBase
+    public class BuildingTypeWrapper : WrapperBase, IYamlTypeWrapper
     {
         /// <summary>
         /// Initialize BuildingType wrapper with native building type object
@@ -613,6 +614,92 @@ namespace PerAspera.GameAPI.Wrappers
             /// Maintenance facility building identifier
             /// </summary>
             public const string MaintenanceFacility = "building_maintenance_facility";
+        }
+
+        // ==================== IYamlTypeWrapper Implementation ====================
+
+        /// <summary>
+        /// Get the unique key for this building type
+        /// Implements IYamlTypeWrapper.GetKey()
+        /// </summary>
+        /// <returns>The building key (e.g., "building_solar_panel")</returns>
+        public string GetKey()
+        {
+            return Name;
+        }
+
+        /// <summary>
+        /// Get the display name for this building type
+        /// Implements IYamlTypeWrapper.GetName()
+        /// </summary>
+        /// <returns>The localized display name</returns>
+        public string GetName()
+        {
+            return DisplayName;
+        }
+
+        /// <summary>
+        /// Get the type name for this wrapper type
+        /// Implements IYamlTypeWrapper.GetTypeName()
+        /// </summary>
+        /// <returns>"buildings" for building types</returns>
+        public string GetTypeName()
+        {
+            return "buildings";
+        }
+
+        /// <summary>
+        /// Get all keys for this type from the database
+        /// Implements IYamlTypeWrapper.GetAllKeys()
+        /// Note: BuildingTypeWrapper currently doesn't have a static database
+        /// TODO: Implement static database similar to ResourceTypeWrapper
+        /// </summary>
+        /// <returns>List of all building keys (currently empty)</returns>
+        public static List<string> GetAllKeys()
+        {
+            // TODO: Implement static database for buildings
+            // For now, return empty list until database is populated
+            return new List<string>();
+        }
+
+        // ==================== IYamlTypeWrapper IMPLEMENTATION ====================
+
+        /// <summary>
+        /// Unique key identifier for this building type
+        /// Implements IYamlTypeWrapper.Key
+        /// </summary>
+        public string Key => Name;
+
+        /// <summary>
+        /// Check if this wrapper is valid and has data
+        /// Implements IYamlTypeWrapper.IsValid
+        /// </summary>
+        public bool IsValid => IsValidWrapper;
+
+        /// <summary>
+        /// Get raw property value by name
+        /// Implements IYamlTypeWrapper.GetProperty(string)
+        /// </summary>
+        /// <param name="propertyName">Name of the property to retrieve</param>
+        /// <returns>Property value or null if not found</returns>
+        public object? GetProperty(string propertyName)
+        {
+            return propertyName.ToLowerInvariant() switch
+            {
+                "name" => Name,
+                "displayname" => DisplayName,
+                "description" => Description,
+                "category" => Category,
+                "subcategory" => SubCategory,
+                "index" => Index,
+                "constructioncost" => ConstructionCost,
+                "constructiontime" => ConstructionTime,
+                "maintenancecost" => MaintenanceCost,
+                "baseenergyoutput" => BaseEnergyOutput,
+                "energyconsumption" => EnergyConsumption,
+                "isvalid" => IsValid,
+                _ => SafeInvoke<object>(propertyName)
+            };
         }
     }
 }

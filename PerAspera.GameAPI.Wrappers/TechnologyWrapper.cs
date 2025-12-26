@@ -11,8 +11,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// Wrapper for the native TechnologyType class
     /// Provides safe access to technology type definitions and properties
     /// DOC: TechnologyType.md - Technology definitions loaded from YAML
+    /// Implements IYamlTypeWrapper for unified game data access
     /// </summary>
-    public class TechnologyWrapper : WrapperBase
+    public class TechnologyWrapper : WrapperBase, IYamlTypeWrapper
     {
         /// <summary>
         /// Initialize Technology wrapper with native TechnologyType object
@@ -365,7 +366,44 @@ namespace PerAspera.GameAPI.Wrappers
         {
             return $"Technology[{Name}] (Tier {Tier}, Category: {Category}, Valid: {IsValid})";
         }
-        
+
+        // ==================== IYamlTypeWrapper IMPLEMENTATION ====================
+
+        /// <summary>
+        /// Unique key identifier for this technology type
+        /// Implements IYamlTypeWrapper.Key
+        /// </summary>
+        public string Key => Name;
+
+        /// <summary>
+        /// Check if this wrapper is valid and has data
+        /// Implements IYamlTypeWrapper.IsValid
+        /// </summary>
+        public bool IsValid => IsValidWrapper;
+
+        /// <summary>
+        /// Get raw property value by name
+        /// Implements IYamlTypeWrapper.GetProperty(string)
+        /// </summary>
+        /// <param name="propertyName">Name of the property to retrieve</param>
+        /// <returns>Property value or null if not found</returns>
+        public object? GetProperty(string propertyName)
+        {
+            return propertyName.ToLowerInvariant() switch
+            {
+                "name" => Name,
+                "displayname" => DisplayName,
+                "description" => Description,
+                "category" => Category,
+                "index" => Index,
+                "researchcost" => ResearchCost,
+                "researchtime" => ResearchTime,
+                "tier" => Tier,
+                "isvalid" => IsValid,
+                _ => SafeInvoke<object>(propertyName)
+            };
+        }
+
         // ==================== STATIC UTILITIES ====================
         
         /// <summary>

@@ -11,8 +11,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// Wrapper for the native ResourceType class
     /// Provides safe access to resource type definitions and properties
     /// DOC: Resource.md - Resource definitions and properties
+    /// Implements IYamlTypeWrapper for unified game data access
     /// </summary>
-    public class ResourceTypeWrapper : WrapperBase
+    public class ResourceTypeWrapper : WrapperBase, IYamlTypeWrapper
     {
         // ==================== STATIC RESOURCE DATABASE ====================
         
@@ -358,46 +359,6 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Check if this is a primary/base resource
-        /// </summary>
-        public bool IsPrimaryResource()
-        {
-            var primaryResources = new[] { "water", "iron", "silicon", "carbon", "aluminum", "uranium", "chemicals" };
-            return primaryResources.Any(primary => Name.Contains(primary, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        /// <summary>
-        /// Check if this is an energy-related resource
-        /// </summary>
-        public bool IsEnergyResource()
-        {
-            var energyResources = new[] { "energy", "fuel", "uranium" };
-            return energyResources.Any(energy => Name.Contains(energy, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        /// <summary>
-        /// Check if this is a construction material
-        /// </summary>
-        public bool IsConstructionMaterial()
-        {
-            var constructionMaterials = new[] { "steel", "glass", "parts", "polymers", "electronics" };
-            return constructionMaterials.Any(material => Name.Contains(material, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        /// <summary>
-        /// Get resource category for organization
-        /// </summary>
-        public string GetCategory()
-        {
-            if (IsPrimaryResource()) return "Primary";
-            if (IsEnergyResource()) return "Energy";
-            if (IsConstructionMaterial()) return "Construction";
-            if (IsManufactured) return "Manufactured";
-            if (IsMined) return "Mined";
-            return "Other";
-        }
-        
-        /// <summary>
         /// Get the native game object (for Harmony patches)
         /// </summary>
         public object? GetNativeObject()
@@ -540,12 +501,90 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         private static readonly HashSet<string> _registeredAtmosphericGases = new HashSet<string>
         {
-            // Native atmospheric gases (base game)
-            "resource_oxygen_release",
-            "resource_carbon_dioxide_release", 
-            "resource_nitrogen_release",
-            "resource_ghg_release"
+            // Only include resources that actually exist in the game
+            // Mods should register their own atmospheric gases using RegisterAtmosphericGas()
+            "resource_carbon_dioxide_release"  // This one exists based on YAML processing logs
         };
+
+        // ==================== CLIMATE CONFIGURATION ====================
+
+        /// <summary>
+        /// Configuration climatique chargée depuis climate-config.json
+        /// Contient les propriétés personnalisées des gaz atmosphériques
+        /// </summary>
+        private static Dictionary<string, AtmosphericGasProperties>? _climateConfig;
+
+        /// <summary>
+        /// Propriétés d'un gaz atmosphérique (chargées depuis JSON)
+        /// </summary>
+        public class AtmosphericGasProperties
+        {
+            public string GasSymbol { get; set; } = "";
+            public double MolecularWeight { get; set; } = 0.0;
+            public double GreenhousePotential { get; set; } = 0.0;
+            public string Description { get; set; } = "";
+            public string Category { get; set; } = "";
+            public bool IsBreathable { get; set; } = false;
+            public double ToxicityLevel { get; set; } = 0.0;
+        }
+
+        /// <summary>
+        /// Charger la configuration climatique depuis le fichier JSON
+        /// Appelé automatiquement lors de l'initialisation du mod climat
+        /// </summary>
+        /// <param name="configPath">Chemin vers climate-config.json</param>
+        /// <returns>True si le chargement a réussi</returns>
+        public static bool LoadClimateConfig(string configPath = "climate-config.json")
+        {
+            try
+            {
+                if (!System.IO.File.Exists(configPath))
+                {
+                    Log.LogWarning($"Climate config file not found: {configPath}");
+                    return false;
+                }
+
+                string jsonContent = System.IO.File.ReadAllText(configPath);
+                var config = System.Text.Json.JsonSerializer.Deserialize<ClimateConfig>(jsonContent);
+
+                if (config?.AtmosphericResources != null)
+                {
+                    _climateConfig = config.AtmosphericResources;
+                    Log.LogInfo($"✅ Loaded climate config for {_climateConfig.Count} atmospheric resources");
+                    return true;
+                }
+                else
+                {
+                    Log.LogWarning("Climate config loaded but no atmospheric resources found");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to load climate config: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Obtenir les propriétés climatiques d'une ressource gazeuse
+        /// </summary>
+        /// <param name="resourceKey">Clé de la ressource (ex: "resource_nitrogen_release")</param>
+        /// <returns>Propriétés du gaz ou null si non trouvé</returns>
+        public AtmosphericGasProperties? GetClimateProperties()
+        {
+            if (_climateConfig == null) return null;
+            return _climateConfig.TryGetValue(Name, out var properties) ? properties : null;
+        }
+
+        /// <summary>
+        /// Structure pour désérialiser climate-config.json
+        /// </summary>
+        private class ClimateConfig
+        {
+            public Dictionary<string, AtmosphericGasProperties> AtmosphericResources { get; set; } = new();
+            public object ClimateConfigData { get; set; } = new();
+        }
         
         /// <summary>
         /// Check if this resource is a native atmospheric gas
@@ -616,16 +655,61 @@ namespace PerAspera.GameAPI.Wrappers
             Log.LogInfo($"Registered new atmospheric gas: {resourceKey}");
             return true;
         }
-        
+
         /// <summary>
-        /// Get all registered atmospheric gas resource keys
-        /// Returns both native and mod-registered atmospheric gases
+        /// Resource mapping for linking related resources (e.g., stored CO2 → atmospheric CO2)
+        /// Key = source resource, Value = target atmospheric resource
         /// </summary>
-        /// <returns>List of all atmospheric gas resource keys</returns>
-        public static List<string> GetAllAtmosphericGasKeys()
+        private static readonly Dictionary<string, string> _resourceMappings = new Dictionary<string, string>
         {
-            return _registeredAtmosphericGases.ToList();
+            // Example mappings for mods like MoreResources
+            // ["resource_co2"] = "resource_carbon_dioxide_release",  // Stored CO2 → Atmospheric CO2
+            // ["resource_water"] = "resource_water_vapor_release",  // Water → Water vapor
+        };
+
+        /// <summary>
+        /// Register a resource mapping (source → target)
+        /// Useful for linking stored resources to their atmospheric equivalents
+        /// </summary>
+        /// <param name="sourceResourceKey">Source resource key (e.g., "resource_co2")</param>
+        /// <param name="targetResourceKey">Target resource key (e.g., "resource_carbon_dioxide_release")</param>
+        /// <returns>True if mapping was registered</returns>
+        public static bool RegisterResourceMapping(string sourceResourceKey, string targetResourceKey)
+        {
+            if (string.IsNullOrEmpty(sourceResourceKey) || string.IsNullOrEmpty(targetResourceKey))
+            {
+                Log.LogWarning("Cannot register resource mapping: keys cannot be null or empty");
+                return false;
+            }
+
+            _resourceMappings[sourceResourceKey] = targetResourceKey;
+            Log.LogInfo($"✅ Registered resource mapping: {sourceResourceKey} → {targetResourceKey}");
+            return true;
         }
+
+        /// <summary>
+        /// Get the mapped resource key if one exists, otherwise return the original key
+        /// </summary>
+        /// <param name="resourceKey">Original resource key</param>
+        /// <returns>Mapped resource key or original if no mapping exists</returns>
+        public static string GetMappedResourceKey(string resourceKey)
+        {
+            return _resourceMappings.TryGetValue(resourceKey, out var mappedKey) ? mappedKey : resourceKey;
+        }
+
+        /// <summary>
+        /// Get all source resources that map to a given target resource
+        /// Useful for finding all resources that contribute to an atmospheric gas
+        /// </summary>
+        /// <param name="targetResourceKey">Target resource key (e.g., "resource_carbon_dioxide_release")</param>
+        /// <returns>List of source resource keys that map to the target</returns>
+        public static List<string> GetReverseMappings(string targetResourceKey)
+        {
+            return _resourceMappings.Where(kvp => kvp.Value == targetResourceKey)
+                                   .Select(kvp => kvp.Key)
+                                   .ToList();
+        }
+
         
         /// <summary>
         /// Get native atmospheric gas resource keys only
@@ -642,63 +726,94 @@ namespace PerAspera.GameAPI.Wrappers
                 "resource_ghg_release"
             };
         }
-        
-        // ==================== RESOURCE ENUMERATION ====================
-        
+
+        // ==================== IYamlTypeWrapper Implementation ====================
+
         /// <summary>
-        /// Get all available ResourceType instances from the ResourcesPanel cache
-        /// Includes both vanilla resources and mod-added resources
-        /// This provides complete enumeration of all resources known to the game
+        /// Get the unique key for this resource type
+        /// Implements IYamlTypeWrapper.GetKey()
         /// </summary>
-        /// <returns>List of all ResourceTypeWrapper instances, or empty list if unavailable</returns>
-        /// <example>
-        /// <code>
-        /// var allResources = ResourceTypeWrapper.GetAllResourcesFromCache();
-        /// foreach (var resource in allResources)
-        /// {
-        ///     Console.WriteLine($"{resource.Name}: {resource.DisplayName}");
-        /// }
-        /// </code>
-        /// </example>
-        public static List<ResourceTypeWrapper> GetAllResourcesFromCache()
+        /// <returns>The resource key (e.g., "resource_water")</returns>
+        public string GetKey()
         {
-            try
+            return Key;
+        }
+
+        /// <summary>
+        /// Get the display name for this resource type
+        /// Implements IYamlTypeWrapper.GetName()
+        /// </summary>
+        /// <returns>The localized display name</returns>
+        public string GetName()
+        {
+            return Name;
+        }
+
+        /// <summary>
+        /// Get the type name for this wrapper type
+        /// Implements IYamlTypeWrapper.GetTypeName()
+        /// </summary>
+        /// <returns>"resources" for resource types</returns>
+        public string GetTypeName()
+        {
+            return "resources";
+        }
+
+        /// <summary>
+        /// Get all keys for this type from the database
+        /// Implements IYamlTypeWrapper.GetAllKeys()
+        /// </summary>
+        /// <returns>List of all resource keys</returns>
+        public static List<string> GetAllKeys()
+        {
+            lock (_databaseLock)
             {
-                var resourcesPanel = ResourcesPanelWrapper.GetCurrent();
-                if (resourcesPanel == null)
-                {
-                    Log.LogWarning("ResourcesPanel not available, cannot enumerate resources");
-                    return new List<ResourceTypeWrapper>();
-                }
-                
-                var cachedTypes = resourcesPanel.resourceTypesCached;
-                if (cachedTypes == null || cachedTypes.Count == 0)
-                {
-                    Log.LogWarning("Resource types cache is empty or null");
-                    return new List<ResourceTypeWrapper>();
-                }
-                
-                var wrappers = new List<ResourceTypeWrapper>();
-                foreach (var nativeResourceType in cachedTypes)
-                {
-                    if (nativeResourceType != null)
-                    {
-                        var wrapper = FromNative(nativeResourceType);
-                        if (wrapper != null)
-                        {
-                            wrappers.Add(wrapper);
-                        }
-                    }
-                }
-                
-                Log.LogInfo($"Successfully enumerated {wrappers.Count} resources from cache");
-                return wrappers;
+                return _resourceDatabase.Keys.ToList();
             }
-            catch (Exception ex)
+        }
+
+        // ==================== IYamlTypeWrapper IMPLEMENTATION ====================
+
+        /// <summary>
+        /// Unique key identifier for this resource type
+        /// Implements IYamlTypeWrapper.Key
+        /// </summary>
+        public string Key => Name;
+
+        /// <summary>
+        /// Type category for organization
+        /// Implements IYamlTypeWrapper.Category
+        /// </summary>
+        public string Category => MaterialType();
+
+        /// <summary>
+        /// Check if this wrapper is valid and has data
+        /// Implements IYamlTypeWrapper.IsValid
+        /// </summary>
+        public bool IsValid => IsValidWrapper;
+
+        /// <summary>
+        /// Get raw property value by name
+        /// Implements IYamlTypeWrapper.GetProperty(string)
+        /// </summary>
+        /// <param name="propertyName">Name of the property to retrieve</param>
+        /// <returns>Property value or null if not found</returns>
+        public object? GetProperty(string propertyName)
+        {
+            return propertyName.ToLowerInvariant() switch
             {
-                Log.LogError($"Failed to get all resources: {ex.Message}");
-                return new List<ResourceTypeWrapper>();
-            }
+                "name" => Name,
+                "displayname" => DisplayName,
+                "index" => Index,
+                "colorhex" => ColorHex,
+                "materialtype" => MaterialType(),
+                "category" => Category,
+                "ismined" => IsMined,
+                "ismanufactured" => IsManufactured,
+                "isgas" => isGas,
+                "isvalid" => IsValid,
+                _ => SafeInvoke<object>(propertyName)
+            };
         }
     }
 }

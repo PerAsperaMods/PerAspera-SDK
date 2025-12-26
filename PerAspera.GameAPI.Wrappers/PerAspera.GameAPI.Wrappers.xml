@@ -572,6 +572,7 @@
             Wrapper for the native BuildingType class
             Provides safe access to building type definitions and properties
             DOC: BuildingType.md - Building definitions and construction properties
+            Implements IYamlTypeWrapper for unified game data access
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.#ctor(System.Object)">
@@ -837,6 +838,56 @@
             <summary>
             Maintenance facility building identifier
             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetKey">
+            <summary>
+            Get the unique key for this building type
+            Implements IYamlTypeWrapper.GetKey()
+            </summary>
+            <returns>The building key (e.g., "building_solar_panel")</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetName">
+            <summary>
+            Get the display name for this building type
+            Implements IYamlTypeWrapper.GetName()
+            </summary>
+            <returns>The localized display name</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetTypeName">
+            <summary>
+            Get the type name for this wrapper type
+            Implements IYamlTypeWrapper.GetTypeName()
+            </summary>
+            <returns>"buildings" for building types</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetAllKeys">
+            <summary>
+            Get all keys for this type from the database
+            Implements IYamlTypeWrapper.GetAllKeys()
+            Note: BuildingTypeWrapper currently doesn't have a static database
+            TODO: Implement static database similar to ResourceTypeWrapper
+            </summary>
+            <returns>List of all building keys (currently empty)</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Key">
+            <summary>
+            Unique key identifier for this building type
+            Implements IYamlTypeWrapper.Key
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.IsValid">
+            <summary>
+            Check if this wrapper is valid and has data
+            Implements IYamlTypeWrapper.IsValid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetProperty(System.String)">
+            <summary>
+            Get raw property value by name
+            Implements IYamlTypeWrapper.GetProperty(string)
+            </summary>
+            <param name="propertyName">Name of the property to retrieve</param>
+            <returns>Property value or null if not found</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BuildingWrapper">
             <summary>
@@ -1891,6 +1942,168 @@
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ToString">
             <summary>
             String representation for debugging
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper">
+            <summary>
+            Unified interface for all YAML-based game data types (ResourceType, BuildingType, Technology, etc.)
+            Provides consistent access patterns and caching for game data management
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper.Key">
+            <summary>
+            Unique key identifier for this type (e.g., "resource_water", "building_solar_panel")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper.DisplayName">
+            <summary>
+            Display name for UI presentation
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper.Category">
+            <summary>
+            Type category for organization
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper.IsValid">
+            <summary>
+            Check if this wrapper is valid and has data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper.GetProperty(System.String)">
+            <summary>
+            Get raw property value by name
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.GameDataManager">
+            <summary>
+            Consolidated game data manager for all YAML types
+            Provides unified access to ResourceType, BuildingType, Technology, and other game data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.RegisterRegistry(System.String,PerAspera.GameAPI.Wrappers.IYamlTypeRegistry)">
+            <summary>
+            Register a type registry for a specific YAML data type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.GetAll(System.String)">
+            <summary>
+            Get all items of a specific type
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.GetByKey(System.String,System.String)">
+            <summary>
+            Get item by key from specific type registry
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.GetByCategory(System.String,System.String)">
+            <summary>
+            Get items by category from specific type registry
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.Search(System.String,System.StringComparison)">
+            <summary>
+            Search across all registered types
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.GetStatistics">
+            <summary>
+            Get statistics about registered data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameDataManager.InitializeFromYAML(System.String,System.String)">
+            <summary>
+            Initialize all registered registries with YAML data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry">
+            <summary>
+            Interface for type-specific registries
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.TypeName">
+            <summary>
+            Type name (e.g., "resources", "buildings", "technologies")
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.Count">
+            <summary>
+            Number of registered items
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.GetAll">
+            <summary>
+            Get all items in this registry
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.GetByKey(System.String)">
+            <summary>
+            Get item by key
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.GetByCategory(System.String)">
+            <summary>
+            Get items by category
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.IYamlTypeRegistry.InitializeFromYAML(System.String,System.String)">
+            <summary>
+            Initialize registry from YAML data
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.YamlTypeRegistry`1">
+            <summary>
+            Generic registry implementation for any YAML type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeRegistry">
+            <summary>
+            Resource type registry - consolidates ResourceTypeWrapper access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeRegistry.InitializeFromYAML(System.String,System.String)">
+            <summary>
+            Initialize from ResourceTypeWrapper's existing database
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeRegistry.GetAtmosphericGases">
+            <summary>
+            Get atmospheric gases specifically
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeRegistry.GetByMaterialType(System.String)">
+            <summary>
+            Get resources by material type
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.BuildingTypeRegistry">
+            <summary>
+            Building type registry - consolidates BuildingTypeWrapper access
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeRegistry.GetByBuildingCategory(System.String)">
+            <summary>
+            Get buildings by category
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeRegistry.GetPowerBuildings">
+            <summary>
+            Get power generation buildings
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeRegistry.GetMiningBuildings">
+            <summary>
+            Get mining buildings
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.TechnologyRegistry">
+            <summary>
+            Technology registry for future use
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyRegistry.GetByTechCategory(System.String)">
+            <summary>
+            Get technologies by category
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.HandleWrapper">
@@ -3208,6 +3421,76 @@
             </summary>
             <returns>Native planet object or null</returns>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.MapResourceKeyToGasId(System.String)">
+            <summary>
+            Map resource key to gas ID used by Atmosphere.ModifyGas
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
+            <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseN2(System.Single)">
+            <summary>
+            Increase nitrogen (N2) atmospheric pressure
+            Wrapper for atmosphere gas modification with proper resource key mapping
+            </summary>
+            <param name="pressure">Pressure increase in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseO2(System.Single)">
+            <summary>
+            Increase oxygen (O2) atmospheric pressure
+            Wrapper for atmosphere gas modification with proper resource key mapping
+            </summary>
+            <param name="pressure">Pressure increase in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseCO2(System.Single)">
+            <summary>
+            Increase carbon dioxide (CO2) atmospheric pressure
+            Wrapper for atmosphere gas modification with proper resource key mapping
+            </summary>
+            <param name="pressure">Pressure increase in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseGHG(System.Single)">
+            <summary>
+            Increase greenhouse gases (GHG) atmospheric pressure
+            Wrapper for atmosphere gas modification with proper resource key mapping
+            </summary>
+            <param name="pressure">Pressure increase in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseGasPressure(System.String,System.Single)">
+            <summary>
+            Generic method to increase atmospheric gas pressure
+            This is the core implementation called by all specific gas methods
+            </summary>
+            <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
+            <param name="pressure">Pressure increase in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.DecreaseGasPressure(System.String,System.Single)">
+            <summary>
+            Decrease atmospheric gas pressure
+            </summary>
+            <param name="resourceKey">Resource key</param>
+            <param name="pressure">Pressure decrease in kPa</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetGasPressure(System.String)">
+            <summary>
+            Get current pressure of a specific atmospheric gas
+            </summary>
+            <param name="resourceKey">Resource key</param>
+            <returns>Current pressure in kPa, or 0 if not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.CalculateGreenhouseEffect">
+            <summary>
+            Calculate greenhouse effect based on current atmospheric composition
+            Uses climate properties from loaded configuration
+            </summary>
+            <returns>Greenhouse effect multiplier (1.0 = no effect)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IsAtmosphereBreathable">
+            <summary>
+            Check if atmosphere is breathable based on climate configuration
+            </summary>
+            <returns>True if atmosphere meets breathability criteria</returns>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.ToString">
             <summary>
             Returns detailed planet status as formatted string
@@ -3278,6 +3561,7 @@
             Wrapper for the native ResourceType class
             Provides safe access to resource type definitions and properties
             DOC: Resource.md - Resource definitions and properties
+            Implements IYamlTypeWrapper for unified game data access
             </summary>
         </member>
         <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._resourceDatabase">
@@ -3298,11 +3582,6 @@
             Returns resources parsed from YAML data during game initialization
             </summary>
             <returns>List of all available ResourceTypeWrapper instances</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.LoadFromDatabase(System.String)">
-            <summary>
-            Load resources from SQLite database on startup
-            </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.PopulateDatabase(System.Collections.Generic.Dictionary{System.String,System.Object},System.String,System.String)">
             <summary>
@@ -3426,26 +3705,6 @@
             Get resource color as System.Drawing.Color
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsPrimaryResource">
-            <summary>
-            Check if this is a primary/base resource
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsEnergyResource">
-            <summary>
-            Check if this is an energy-related resource
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsConstructionMaterial">
-            <summary>
-            Check if this is a construction material
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetCategory">
-            <summary>
-            Get resource category for organization
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetNativeObject">
             <summary>
             Get the native game object (for Harmony patches)
@@ -3510,6 +3769,37 @@
             Allows mods to register their custom atmospheric gases
             </summary>
         </member>
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._climateConfig">
+            <summary>
+            Configuration climatique chargée depuis climate-config.json
+            Contient les propriétés personnalisées des gaz atmosphériques
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.AtmosphericGasProperties">
+            <summary>
+            Propriétés d'un gaz atmosphérique (chargées depuis JSON)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.LoadClimateConfig(System.String)">
+            <summary>
+            Charger la configuration climatique depuis le fichier JSON
+            Appelé automatiquement lors de l'initialisation du mod climat
+            </summary>
+            <param name="configPath">Chemin vers climate-config.json</param>
+            <returns>True si le chargement a réussi</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetClimateProperties">
+            <summary>
+            Obtenir les propriétés climatiques d'une ressource gazeuse
+            </summary>
+            <param name="resourceKey">Clé de la ressource (ex: "resource_nitrogen_release")</param>
+            <returns>Propriétés du gaz ou null si non trouvé</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.ClimateConfig">
+            <summary>
+            Structure pour désérialiser climate-config.json
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsNativeAtmosphericGas">
             <summary>
             Check if this resource is a native atmospheric gas
@@ -3536,12 +3826,35 @@
             ResourceTypeWrapper.RegisterAtmosphericGas("resource_argon_release");
             </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllAtmosphericGasKeys">
+        <member name="F:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper._resourceMappings">
             <summary>
-            Get all registered atmospheric gas resource keys
-            Returns both native and mod-registered atmospheric gases
+            Resource mapping for linking related resources (e.g., stored CO2 → atmospheric CO2)
+            Key = source resource, Value = target atmospheric resource
             </summary>
-            <returns>List of all atmospheric gas resource keys</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.RegisterResourceMapping(System.String,System.String)">
+            <summary>
+            Register a resource mapping (source → target)
+            Useful for linking stored resources to their atmospheric equivalents
+            </summary>
+            <param name="sourceResourceKey">Source resource key (e.g., "resource_co2")</param>
+            <param name="targetResourceKey">Target resource key (e.g., "resource_carbon_dioxide_release")</param>
+            <returns>True if mapping was registered</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetMappedResourceKey(System.String)">
+            <summary>
+            Get the mapped resource key if one exists, otherwise return the original key
+            </summary>
+            <param name="resourceKey">Original resource key</param>
+            <returns>Mapped resource key or original if no mapping exists</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetReverseMappings(System.String)">
+            <summary>
+            Get all source resources that map to a given target resource
+            Useful for finding all resources that contribute to an atmospheric gas
+            </summary>
+            <param name="targetResourceKey">Target resource key (e.g., "resource_carbon_dioxide_release")</param>
+            <returns>List of source resource keys that map to the target</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetNativeAtmosphericGasKeys">
             <summary>
@@ -3550,22 +3863,59 @@
             </summary>
             <returns>List of native atmospheric gas resource keys</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllResourcesFromCache">
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetKey">
             <summary>
-            Get all available ResourceType instances from the ResourcesPanel cache
-            Includes both vanilla resources and mod-added resources
-            This provides complete enumeration of all resources known to the game
+            Get the unique key for this resource type
+            Implements IYamlTypeWrapper.GetKey()
             </summary>
-            <returns>List of all ResourceTypeWrapper instances, or empty list if unavailable</returns>
-            <example>
-            <code>
-            var allResources = ResourceTypeWrapper.GetAllResourcesFromCache();
-            foreach (var resource in allResources)
-            {
-                Console.WriteLine($"{resource.Name}: {resource.DisplayName}");
-            }
-            </code>
-            </example>
+            <returns>The resource key (e.g., "resource_water")</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetName">
+            <summary>
+            Get the display name for this resource type
+            Implements IYamlTypeWrapper.GetName()
+            </summary>
+            <returns>The localized display name</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetTypeName">
+            <summary>
+            Get the type name for this wrapper type
+            Implements IYamlTypeWrapper.GetTypeName()
+            </summary>
+            <returns>"resources" for resource types</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetAllKeys">
+            <summary>
+            Get all keys for this type from the database
+            Implements IYamlTypeWrapper.GetAllKeys()
+            </summary>
+            <returns>List of all resource keys</returns>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Key">
+            <summary>
+            Unique key identifier for this resource type
+            Implements IYamlTypeWrapper.Key
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Category">
+            <summary>
+            Type category for organization
+            Implements IYamlTypeWrapper.Category
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsValid">
+            <summary>
+            Check if this wrapper is valid and has data
+            Implements IYamlTypeWrapper.IsValid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetProperty(System.String)">
+            <summary>
+            Get raw property value by name
+            Implements IYamlTypeWrapper.GetProperty(string)
+            </summary>
+            <param name="propertyName">Name of the property to retrieve</param>
+            <returns>Property value or null if not found</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SceneManager">
             <summary>
@@ -3897,6 +4247,7 @@
             Wrapper for the native TechnologyType class
             Provides safe access to technology type definitions and properties
             DOC: TechnologyType.md - Technology definitions loaded from YAML
+            Implements IYamlTypeWrapper for unified game data access
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.#ctor(System.Object)">
@@ -4047,6 +4398,26 @@
             <summary>
             String representation for debugging
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Key">
+            <summary>
+            Unique key identifier for this technology type
+            Implements IYamlTypeWrapper.Key
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.IsValid">
+            <summary>
+            Check if this wrapper is valid and has data
+            Implements IYamlTypeWrapper.IsValid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetProperty(System.String)">
+            <summary>
+            Get raw property value by name
+            Implements IYamlTypeWrapper.GetProperty(string)
+            </summary>
+            <param name="propertyName">Name of the property to retrieve</param>
+            <returns>Property value or null if not found</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.TechnologyWrapper.CommonTechnologies">
             <summary>

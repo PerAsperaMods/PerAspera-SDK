@@ -202,6 +202,62 @@ namespace PerAspera.GameAPI.Climate
         }
         
         /// <summary>
+        /// Get regional climate data for detailed analysis
+        /// Returns polar regions and equatorial region with area-specific calculations
+        /// </summary>
+        public ClimateRegionData GetRegionalClimateData()
+        {
+            return _simulator.GetRegionalData();
+        }
+        
+        /// <summary>
+        /// Get specific polar region data by hemisphere
+        /// </summary>
+        /// <param name="isNorthern">true for northern pole, false for southern pole</param>
+        public Pole GetPolarRegionData(bool isNorthern)
+        {
+            var regionalData = _simulator.GetRegionalData();
+            return isNorthern ? regionalData.NorthPole : regionalData.SouthPole;
+        }
+        
+        /// <summary>
+        /// Get equatorial region climate data
+        /// </summary>
+        public EquatorialRegion GetEquatorialRegionData()
+        {
+            var regionalData = _simulator.GetRegionalData();
+            return regionalData.EquatorialRegion;
+        }
+        
+        /// <summary>
+        /// Get global climate averages calculated from regional data
+        /// </summary>
+        public GlobalClimateAverages GetGlobalClimateAverages()
+        {
+            var regionalData = _simulator.GetRegionalData();
+            return regionalData.GlobalAverages;
+        }
+        
+        /// <summary>
+        /// Get detailed climate simulation status with regional breakdowns
+        /// </summary>
+        public string GetDetailedClimateStatus()
+        {
+            if (!_isActive || _planet == null)
+                return "Climate Control: INACTIVE";
+            
+            var regionalData = _simulator.GetRegionalData();
+            var atmosphere = _planet.Atmosphere;
+            
+            return $"Climate Control: ACTIVE (Custom Simulation)\n" +
+                   $"Global: {regionalData.GlobalAverages.SurfaceTemperature:F1}K ({regionalData.GlobalAverages.SurfaceTemperature - 273.15f:F1}°C)\n" +
+                   $"North Pole: {regionalData.NorthPole.SurfaceTemperature:F1}K (Ice: {regionalData.NorthPole.IceCapArea:F0}km²)\n" +
+                   $"South Pole: {regionalData.SouthPole.SurfaceTemperature:F1}K (Ice: {regionalData.SouthPole.IceCapArea:F0}km²)\n" +
+                   $"Equatorial: {regionalData.EquatorialRegion.SurfaceTemperature:F1}K (Humidity: {regionalData.EquatorialRegion.RelativeHumidity:P1})\n" +
+                   $"Atmosphere: {atmosphere.TotalPressure:F2}kPa (CO2: {atmosphere.Composition["CO2"]?.PartialPressure ?? 0:F2}kPa, O2: {atmosphere.Composition["O2"]?.PartialPressure ?? 0:F3}kPa)";
+        }
+        
+        /// <summary>
         /// Méthode de convenance pour ajouter rapidement un effet de terraformation
         /// Idéal pour les événements Twitch ou autres triggers externes
         /// </summary>
