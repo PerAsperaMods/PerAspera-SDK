@@ -587,24 +587,6 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Check if this resource is a native atmospheric gas
-        /// Uses multiple criteria: MaterialType, key pattern, and known gases list
-        /// </summary>
-        /// <returns>True if this is a native atmospheric gas</returns>
-        public bool IsNativeAtmosphericGas()
-        {
-            if (string.IsNullOrEmpty(Name)) return false;
-            
-            // Must be MaterialType.Released (atmospheric)
-            if (!isGas) return false;
-            
-            // Must follow atmospheric gas naming pattern
-            if (!Name.EndsWith("_release")) return false;
-            
-            // Must be in the known native gases list
-            return _registeredAtmosphericGases.Contains(Name);
-        }
-        
         /// <summary>
         /// Check if this resource is any atmospheric gas (native or mod-registered)
         /// Includes both native gases and mod-added atmospheric gases
@@ -793,6 +775,14 @@ namespace PerAspera.GameAPI.Wrappers
         public bool IsValid => IsValidWrapper;
 
         /// <summary>
+        /// Check if this is a native (base game) atmospheric gas
+        /// </summary>
+        public bool IsNativeAtmosphericGas()
+        {
+            return GetNativeAtmosphericGasKeys().Contains(Name);
+        }
+
+        /// <summary>
         /// Get raw property value by name
         /// Implements IYamlTypeWrapper.GetProperty(string)
         /// </summary>
@@ -811,6 +801,8 @@ namespace PerAspera.GameAPI.Wrappers
                 "ismined" => IsMined,
                 "ismanufactured" => IsManufactured,
                 "isgas" => isGas,
+                "isatmosphericgas" => IsAtmosphericGas(),
+                "isnativeatmosphericgas" => IsNativeAtmosphericGas(),
                 "isvalid" => IsValid,
                 _ => SafeInvoke<object>(propertyName)
             };

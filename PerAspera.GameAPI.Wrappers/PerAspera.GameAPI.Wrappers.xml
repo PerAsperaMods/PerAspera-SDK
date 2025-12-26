@@ -3800,20 +3800,7 @@
             Structure pour désérialiser climate-config.json
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsNativeAtmosphericGas">
-            <summary>
-            Check if this resource is a native atmospheric gas
-            Uses multiple criteria: MaterialType, key pattern, and known gases list
-            </summary>
-            <returns>True if this is a native atmospheric gas</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsAtmosphericGas">
-            <summary>
-            Check if this resource is any atmospheric gas (native or mod-registered)
-            Includes both native gases and mod-added atmospheric gases
-            </summary>
-            <returns>True if this is an atmospheric gas</returns>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsAtmosphericGas" -->
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.RegisterAtmosphericGas(System.String)">
             <summary>
             Register a custom atmospheric gas for mod use
@@ -3907,6 +3894,11 @@
             <summary>
             Check if this wrapper is valid and has data
             Implements IYamlTypeWrapper.IsValid
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsNativeAtmosphericGas">
+            <summary>
+            Check if this is a native (base game) atmospheric gas
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetProperty(System.String)">

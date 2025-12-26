@@ -18,7 +18,8 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class PlanetWrapper : WrapperBase
     {
-        private Atmosphere? _atmosphere;
+        //private Atmosphere? _atmosphere;
+        private GameAPI.Climate atmosphereGrid;
         private Native.Planet? _nativePlanet;
 
         /// <summary>
@@ -44,6 +45,8 @@ namespace PerAspera.GameAPI.Wrappers
                 Log.LogWarning($"Failed to initialize native planet reference: {ex.Message}");
             }
         }
+
+
 
         public HazardsManagerWrapper GetHazardsManager()
         {
@@ -74,7 +77,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Planet atmosphere (composition, temperature, pressure, effects)
         /// Access via: Planet.Atmosphere.Composition["CO2"].PartialPressure
         /// </summary>
-        public Atmosphere Atmosphere
+        /*public Atmosphere Atmosphere
         {
             get
             {
@@ -82,7 +85,7 @@ namespace PerAspera.GameAPI.Wrappers
                     _atmosphere = new Atmosphere(NativeObject);
                 return _atmosphere ?? throw new InvalidOperationException("Planet not initialized");
             }
-        }
+        }*/
         
 
 

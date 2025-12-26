@@ -4,9 +4,9 @@ using PerAspera.GameAPI.Climate.Configuration;
 using PerAspera.GameAPI.Climate.Simulation;
 using PerAspera.GameAPI.Climate.Patches;
 using PerAspera.GameAPI.Wrappers;
+using System.Linq;
 
-// Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
-using Atmo = PerAspera.GameAPI.Wrappers.Atmosphere;
+// Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Climate.Atmosphere
 using PlanetWrapped = PerAspera.GameAPI.Wrappers.PlanetWrapper;
 
 namespace PerAspera.GameAPI.Climate
@@ -27,18 +27,21 @@ namespace PerAspera.GameAPI.Climate
         
         private readonly ClimateSimulator _simulator;
         private readonly ClimateConfig _config;
+        private readonly ResourceBasedClimate _resourceClimate;
         private TerraformingEffectsController? _terraformingController;
         
         private PlanetWrapped? _planet;
         private bool _isActive = false;
+        private bool _resourceBasedMode = false;
         private DateTime _lastUpdate = DateTime.Now;
         
         public ClimateController(ClimateConfig? config = null)
         {
             _config = config ?? ClimateConfig.CreateGameBalanced();
             _simulator = new ClimateSimulator(_config);
+            _resourceClimate = new ResourceBasedClimate();
             
-            Log.Info("ClimateController initialized with bidirectional Harmony control");
+            Log.Info("ClimateController initialized with bidirectional Harmony control + resource-based support");
         }
         
         /// <summary>
@@ -274,5 +277,61 @@ namespace PerAspera.GameAPI.Climate
             
             _terraformingController.AddTempEffect(effectName, temperatureChange, source);
         }
+
+        /// <summary>
+        /// Enable resource-based climate mode
+        /// Uses resource quantities to calculate atmospheric pressures
+        /// </summary>
+        public void EnableResourceBasedMode()
+        {
+            _resourceBasedMode = true;
+            _resourceClimate.Initialize();
+            Log.Info("🔧 Resource-based climate mode enabled");
+        }
+
+        /// <summary>
+        /// Disable resource-based climate mode
+        /// Returns to simulation-only mode
+        /// </summary>
+        public void DisableResourceBasedMode()
+        {
+            _resourceBasedMode = false;
+            Log.Info("🔧 Resource-based climate mode disabled");
+        }
+
+        /// <summary>
+        /// Get atmospheric pressure for a specific gas (resource-based or simulation)
+        /// </summary>
+        /// <param name="pressureField">Pressure field name</param>
+        /// <returns>Pressure in kPa</returns>
+        public float GetAtmosphericPressure(string pressureField)
+        {
+            if (_resourceBasedMode && _resourceClimate.IsInitialized)
+            {
+                return _resourceClimate.GetAtmosphericPressure(pressureField);
+            }
+
+            // Fallback to simulation values
+            var atmosphere = _planet?.Atmosphere;
+            if (atmosphere != null)
+            {
+                var gases = atmosphere.Composition.AllGases;
+                return pressureField switch
+                {
+                    "co2Pressure" => gases.FirstOrDefault(g => g.Symbol == "CO2")?.PartialPressure ?? 0f,
+                    "o2Pressure" => gases.FirstOrDefault(g => g.Symbol == "O2")?.PartialPressure ?? 0f,
+                    "n2Pressure" => gases.FirstOrDefault(g => g.Symbol == "N2")?.PartialPressure ?? 0f,
+                    "h2oPressure" => gases.FirstOrDefault(g => g.Symbol == "H2O")?.PartialPressure ?? 0f,
+                    _ => 0f
+                };
+            }
+
+            return 0f;
+        }
+
+        /// <summary>
+        /// Access to resource-based climate system
+        /// </summary>
+        public ResourceBasedClimate ResourceClimate => _resourceClimate;
     }
 }
