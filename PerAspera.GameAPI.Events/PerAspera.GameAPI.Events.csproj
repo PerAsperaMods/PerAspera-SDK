@@ -9,6 +9,10 @@
 		<Description>Public event API for Per Aspera - Native and custom game events</Description>
 		<PackageTags>per-aspera;events;gameapi;modding;event-system</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:/ModPeraspera/nuget-packages</PackageOutputPath>
 	</PropertyGroup>
 
 	<!-- Dependencies -->
@@ -21,7 +25,12 @@
 	<!-- Project References -->
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
-		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Native\PerAspera.GameAPI.Native.csproj" />
 	</ItemGroup>
+	
+	<!-- Direct DLL References for Wrappers -->
+	<ItemGroup>
+		<Reference Include="F:\ModPeraspera\SDK\PerAspera.GameAPI.Wrappers\bin\Release\net6.0\PerAspera.GameAPI.Wrappers.dll" />
+	</ItemGroup>
 </Project>
+

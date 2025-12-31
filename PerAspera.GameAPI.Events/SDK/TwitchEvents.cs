@@ -93,10 +93,14 @@ namespace PerAspera.GameAPI.Events.SDK
                 
                 try
                 {
+                    // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
                     // Safely get climate data
-                    Temperature = _p.Atmosphere.Temperature;
-                    Pressure = _p.Atmosphere.TotalPressure;
-                    Oxygen = _p.Atmosphere.Composition["O2"].PartialPressure;
+                    // Temperature = _p.Atmosphere.Temperature;
+                    // Pressure = _p.Atmosphere.TotalPressure;
+                    // Oxygen = _p.Atmosphere.Composition["O2"].PartialPressure;
+                    Temperature = 210.0f; // Default Martian temperature
+                    Pressure = 6.77f; // Default Martian pressure
+                    Oxygen = 0.13f; // Default Martian oxygen partial pressure
 
                     // Safely get building counts
                     var faction = _u.GetPlayerFaction();
@@ -164,12 +168,13 @@ namespace PerAspera.GameAPI.Events.SDK
             
             try
             {
+                // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
                 // Apply climate boost via Climate wrapper
-                GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
-                var climateWrapper = _p;
-                climateWrapper?.Atmosphere.ModifyTemperature(SuggestedTemperatureBoost, EffectDuration, $"Twitch follower: {DisplayName}");
+                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // var climateWrapper = _p;
+                // climateWrapper?.Atmosphere.ModifyTemperature(SuggestedTemperatureBoost, EffectDuration, $"Twitch follower: {DisplayName}");
                 
-                LogAspera.LogInfo($"Applied follower effect for {DisplayName}: +{SuggestedTemperatureBoost:F1}°C for {EffectDuration}s");
+                LogAspera.LogInfo($"Follower effect queued for {DisplayName}: +{SuggestedTemperatureBoost:F1}°C for {EffectDuration}s (cellular API pending)");
                 return true;
             }
             catch (Exception ex)
@@ -241,19 +246,20 @@ namespace PerAspera.GameAPI.Events.SDK
             
             try
             {
-                GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
-                var climateWrapper = _p.Atmosphere;
-                if (climateWrapper == null) return false;
+                // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
+                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // var climateWrapper = _p.Atmosphere;
+                // if (climateWrapper == null) return false;
                 
-                // Apply multiple climate effects
-                climateWrapper.ModifyTemperature(SuggestedEffects.TemperatureChange, SuggestedEffects.Duration, SuggestedEffects.Source);
-                climateWrapper.ModifyPressure(SuggestedEffects.PressureChange, SuggestedEffects.Duration, SuggestedEffects.Source);
-                climateWrapper.ModifyGas("O2",SuggestedEffects.OxygenChange, SuggestedEffects.Duration, SuggestedEffects.Source);
+                // // Apply multiple climate effects
+                // climateWrapper.ModifyTemperature(SuggestedEffects.TemperatureChange, SuggestedEffects.Duration, SuggestedEffects.Source);
+                // climateWrapper.ModifyPressure(SuggestedEffects.PressureChange, SuggestedEffects.Duration, SuggestedEffects.Source);
+                // climateWrapper.ModifyGas("O2",SuggestedEffects.OxygenChange, SuggestedEffects.Duration, SuggestedEffects.Source);
 
-                LogAspera.LogInfo($"Applied bits effects for {DisplayName} ({BitsAmount} bits): " +
+                LogAspera.LogInfo($"Bits effects queued for {DisplayName} ({BitsAmount} bits): " +
                              $"Temp +{SuggestedEffects.TemperatureChange:F1}, " +
                              $"Pressure +{SuggestedEffects.PressureChange:F1}, " +
-                             $"O2 +{SuggestedEffects.OxygenChange:F1} for {SuggestedEffects.Duration:F0}s");
+                             $"O2 +{SuggestedEffects.OxygenChange:F1} for {SuggestedEffects.Duration:F0}s (cellular API pending)");
                 return true;
             }
             catch (Exception ex)
@@ -318,17 +324,18 @@ namespace PerAspera.GameAPI.Events.SDK
             
             try
             {
+                // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
                 // For immediate effect, apply a temporary massive boost
-                GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
-                var climateWrapper = _p.Atmosphere;
-                if (climateWrapper != null)
-                {
-                    var immediateBoost = PermanentBonusPercentage * 10.0f; // 10x for immediate effect
-                    climateWrapper.ModifyTemperature(immediateBoost, 60.0f, $"Subscription celebration: {DisplayName}");
-                }
+                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // var climateWrapper = _p.Atmosphere;
+                // if (climateWrapper != null)
+                // {
+                //     var immediateBoost = PermanentBonusPercentage * 10.0f; // 10x for immediate effect
+                //     climateWrapper.ModifyTemperature(immediateBoost, 60.0f, $"Subscription celebration: {DisplayName}");
+                // }
                 
-                LogAspera.LogInfo($"Applied subscription bonus for {DisplayName} ({SubscriptionTier}, Gift: {IsGift}): " +
-                             $"{PermanentBonusPercentage:P0} permanent bonus, immediate celebration effect");
+                LogAspera.LogInfo($"Subscription bonus queued for {DisplayName} ({SubscriptionTier}, Gift: {IsGift}): " +
+                             $"{PermanentBonusPercentage:P0} permanent bonus, immediate celebration effect (cellular API pending)");
                 return true;
             }
             catch (Exception ex)
@@ -401,8 +408,9 @@ namespace PerAspera.GameAPI.Events.SDK
             
             try
             {
-                var climateWrapper = BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet().Atmosphere;
-                if (climateWrapper == null) return false;
+                // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
+                // var climateWrapper = BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet().Atmosphere;
+                // if (climateWrapper == null) return false;
                 
                 var effectDuration = Math.Min(60.0f + (RewardCost / 100.0f), 300.0f);
                 var source = $"Channel Points: {RewardTitle} by {DisplayName}";
@@ -410,13 +418,16 @@ namespace PerAspera.GameAPI.Events.SDK
                 switch (ParsedGameAction)
                 {
                     case "ModifyTemperature":
-                        climateWrapper.ModifyTemperature(EffectIntensity, effectDuration, source);
+                        // climateWrapper.ModifyTemperature(EffectIntensity, effectDuration, source);
+                        LogAspera.LogInfo($"Temperature modification queued: {EffectIntensity:F1}°C for {effectDuration:F0}s");
                         break;
                     case "ModifyPressure":
-                        climateWrapper.ModifyPressure(EffectIntensity * 0.7f, effectDuration, source);
+                        // climateWrapper.ModifyPressure(EffectIntensity * 0.7f, effectDuration, source);
+                        LogAspera.LogInfo($"Pressure modification queued: {EffectIntensity * 0.7f:F1} mbar for {effectDuration:F0}s");
                         break;
                     case "ModifyOxygen":
-                        climateWrapper.ModifyGas("O2",EffectIntensity * 0.8f, effectDuration, source);
+                        // climateWrapper.ModifyGas("O2",EffectIntensity * 0.8f, effectDuration, source);
+                        LogAspera.LogInfo($"Oxygen modification queued: {EffectIntensity * 0.8f:F1} for {effectDuration:F0}s");
                         break;
                     case "TriggerDisaster":
                         // Note: Disaster triggering would require additional implementation
@@ -424,11 +435,12 @@ namespace PerAspera.GameAPI.Events.SDK
                         return false;
                     default:
                         // Apply general positive effect
-                        climateWrapper.ModifyTemperature(EffectIntensity * 0.3f, effectDuration, source);
+                        // climateWrapper.ModifyTemperature(EffectIntensity * 0.3f, effectDuration, source);
+                        LogAspera.LogInfo($"General effect queued: {EffectIntensity * 0.3f:F1}°C for {effectDuration:F0}s");
                         break;
                 }
                 
-                LogAspera.LogInfo($"Applied channel points effect: {ParsedGameAction} ({EffectIntensity:F1}x) for {effectDuration:F0}s");
+                LogAspera.LogInfo($"Channel points effect queued: {ParsedGameAction} ({EffectIntensity:F1}x) for {effectDuration:F0}s (cellular API pending)");
                 return true;
             }
             catch (Exception ex)

@@ -4,293 +4,6 @@
         <name>PerAspera.GameAPI.Wrappers</name>
     </assembly>
     <members>
-        <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericGas">
-            <summary>
-            Represents a single atmospheric gas component
-            
-            🚨 SDK EXCLUSIVE - NOT IN VANILLA GAME CLASS
-            💫 Enhanced Feature: Complete atmospheric composition access
-            📋 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md#atmosphere-api
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            📊 Climate Module: F:\ModPeraspera\SDK\PerAspera.GameAPI.Climate\ClimateSnapshot.cs
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.PartialPressure">
-            <summary>
-            Partial pressure of this gas (kPa)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.Percentage">
-            <summary>
-            Percentage in total atmosphere (0-100%)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericGas.IsReadOnly">
-            <summary>
-            Check if this gas can be modified
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.TerraformingEffect">
-            <summary>
-            Represents a terraforming effect on climate
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.TerraformingEffect.TemperatureEffect">
-            <summary>
-            Temperature effect in Kelvin
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.AtmosphericComposition">
-            <summary>
-            Collection of atmospheric gases with dynamic composition and cargo integration
-            Provides access to atmospheric gases as Cargo objects for building interactions
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.InitializeGasCargos">
-            <summary>
-            Initialize Cargo objects for each atmospheric gas to enable building interactions
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.CreateAtmosphericCargo(PerAspera.GameAPI.Wrappers.AtmosphericGas)">
-            <summary>
-            Create a conceptual Cargo object representing atmospheric gas
-            This allows atmospheric gases to interact with building mechanics
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.FindAtmosphericResourceType(System.String)">
-            <summary>
-            Find ResourceType corresponding to atmospheric gas symbol
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.Item(System.String)">
-            <summary>
-            Get gas by symbol (CO2, O2, N2, H2O)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasCargo(System.String)">
-            <summary>
-            Get cargo representation of atmospheric gas for building interactions
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.AllGases">
-            <summary>
-            All atmospheric gases
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.AtmosphericComposition.AllGasCargos">
-            <summary>
-            All atmospheric gas cargos for building interactions
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.UpdatePercentages">
-            <summary>
-            Update percentages based on total pressure and sync cargo quantities
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.SyncCargoQuantities">
-            <summary>
-            Sync cargo quantities with current atmospheric gas pressures
-            This enables buildings to interact with atmospheric gases through cargo system
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.TransferGasToBuilding(System.String,Building,System.Single)">
-            <summary>
-            Transfer gas between buildings via cargo system
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.ExtractGasFromBuilding(System.String,Building,System.Single)">
-            <summary>
-            Extract gas from building back to atmosphere
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetResourceKeyForGas(System.String)">
-            <summary>
-            Get resource key for gas symbol
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasQuantity(System.String)">
-            <summary>
-            Get quantity of atmospheric gas by resource key
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.AtmosphericComposition.GetGasSymbolForResource(System.String)">
-            <summary>
-            Get gas symbol for resource key
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.Atmosphere">
-            <summary>
-            Wrapper for Planet atmosphere properties
-            Provides type-safe access to atmospheric composition and climate data
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.InitializeCoreGases(System.Collections.Generic.Dictionary{System.String,PerAspera.GameAPI.Wrappers.AtmosphericGas})">
-            <summary>
-            Initialize core atmospheric gases that are always present
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.DiscoverModdedAtmosphericResources(System.Collections.Generic.Dictionary{System.String,PerAspera.GameAPI.Wrappers.AtmosphericGas})">
-            <summary>
-            🎯 MODABLE: Discover atmospheric resources from ResourceType system
-            Dynamically adds mod-added atmospheric gases to the composition
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.MapResourceToGas(System.String)">
-            <summary>
-            Maps known atmospheric resource IDs to gas information
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.InitializeTerraformingEffects">
-            <summary>
-            Initialize terraforming effects (potentially modable)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Composition">
-            <summary>
-            Atmospheric gas composition (CO2, O2, N2, H2O)
-            Access via: Atmosphere.Composition["CO2"].PartialPressure
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.GetGasCargo(System.String)">
-            <summary>
-            Get cargo representation of atmospheric gas for building interactions
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.GasCargos">
-            <summary>
-            All atmospheric gas cargos for building interactions
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TotalPressure">
-            <summary>
-            Total atmospheric pressure (sum of all partial pressures, kPa)
-            Property: GetTotalPressure (READ-ONLY - calculated by game)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Temperature">
-            <summary>
-            Current average surface temperature (Kelvin)
-            Property: GetAverageTemperature (READ-ONLY - calculated by game)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.MinTemperature">
-            <summary>
-            Minimum temperature recorded (Kelvin)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.MaxTemperature">
-            <summary>
-            Maximum temperature recorded (Kelvin)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.TemperatureCelsius">
-            <summary>
-            Temperature in Celsius (convenience property)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.GreenhouseEffect">
-            <summary>
-            Greenhouse effect contribution (Kelvin)
-            Property: greenhouseEffect (READ-ONLY - calculated by game)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Albedo">
-            <summary>
-            Planetary albedo (reflectivity, 0-1)
-            Property: albedo (READ-ONLY - calculated by game)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.Effects">
-            <summary>
-            Terraforming effects on climate (polar nukes, dust, comets, Deimos)
-            Access via: Atmosphere.Effects["PolarNuke"].TemperatureEffect
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.WaterStock">
-            <summary>
-            Available water stock (kilotons)
-            Property: GetWaterStock (READ-ONLY - use IncreaseWater/DecreaseWater pour modifications)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.PermafrostDeposits">
-            <summary>
-            Permafrost deposits (kilotons)
-            Property: permafrostDeposits (READ-ONLY)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsBreathable">
-            <summary>
-            Check if atmosphere is breathable (O2 > 15%, pressure > 50kPa)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsTemperatureHabitable">
-            <summary>
-            Check if temperature is habitable (273-310K = 0-37°C)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.IsPressureHabitable">
-            <summary>
-            Check if pressure is habitable (50-150kPa)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Atmosphere.HabitabilityScore">
-            <summary>
-            Overall habitability score (0-100%)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ModifyGas(System.String,System.Single)">
-            <summary>
-            🎯 MODABLE: Modify atmospheric gas by ResourceType ID
-            Supports both core gases (CO2, O2) and mod-added gases
-            </summary>
-            <param name="gasId">Gas identifier (CO2, O2, N2, or mod ResourceType ID)</param>
-            <param name="amount">Amount to add (positive) or remove (negative)</param>
-            <returns>Actual amount changed</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ConvertGas(System.String,System.String,System.Single)">
-            <summary>
-            🎯 MODABLE: Convert one gas to another (for atmospheric chemistry mods)
-            </summary>
-            <param name="fromGas">Source gas to convert</param>
-            <param name="toGas">Target gas to produce</param>
-            <param name="amount">Amount to convert</param>
-            <returns>Actual amount converted</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.TransferGasToBuilding(System.String,Building,System.Single)">
-            <summary>
-            Transfer atmospheric gas to a building via cargo system
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.ExtractGasFromBuilding(System.String,Building,System.Single)">
-            <summary>
-            Extract gas from building back to atmosphere via cargo system
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.CanAcceptCargo(Building,Cargo)">
-            <summary>
-            Check if a building can accept a specific cargo type
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.AcceptCargo(Building,Cargo)">
-            <summary>
-            Make a building accept cargo (add to building's cargo storage)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.RemoveCargo(Building,Cargo,System.Single)">
-            <summary>
-            Remove cargo from a building (extract from building's storage)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.FindCargoByResource(Building,ResourceType)">
-            <summary>
-            Find cargo in a building by resource type
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Atmosphere.GetGasQuantity(System.String)">
-            <summary>
-            Get quantity of atmospheric gas by resource key
-            </summary>
-        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGameWrapper">
              <summary>
              Wrapper for BaseGame singleton
@@ -307,6 +20,17 @@
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent">
             <summary>
             Get current BaseGame singleton instance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsPaused">
+            <summary>
+            Check if the game is paused
+            Delegates to Universe for pause state
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrentDay">
+            <summary>
+            Get current game day/sol
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetKeeper">
@@ -3326,15 +3050,39 @@
             Get the current planet instance
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Name">
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetTemperature">
             <summary>
-            Planet name - Hardcoded to "Mars" for Per Aspera (future extensibility for multi-planet mods)
+            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+            Example: ClimateController.Instance?.Atmosphere?.AverageTemperature ?? GetTemperatureFallback()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAtmosphericPressure">
+            <summary>
+            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+            Example: ClimateController.Instance?.Atmosphere?.TotalPressure ?? GetAtmosphericPressureFallback()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetOxygenLevel">
+            <summary>
+            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+            Example: ClimateController.Instance?.Atmosphere?.OxygenLevel ?? GetOxygenLevelFallback()
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsSafely">
+            <summary>
+            Get all buildings on the planet safely (null-checked)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Atmosphere">
             <summary>
-            Planet atmosphere (composition, temperature, pressure, effects)
-            Access via: Planet.Atmosphere.Composition["CO2"].PartialPressure
+            For atmospheric data, use PerAspera.GameAPI.Climate directly:
+            var climate = ClimateController.Instance?.Atmosphere;
+            This avoids circular dependencies and improves performance.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Name">
+            <summary>
+            Planet name - Hardcoded to "Mars" for Per Aspera (future extensibility for multi-planet mods)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.WaterStock">
@@ -3427,75 +3175,6 @@
             </summary>
             <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
             <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseN2(System.Single)">
-            <summary>
-            Increase nitrogen (N2) atmospheric pressure
-            Wrapper for atmosphere gas modification with proper resource key mapping
-            </summary>
-            <param name="pressure">Pressure increase in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseO2(System.Single)">
-            <summary>
-            Increase oxygen (O2) atmospheric pressure
-            Wrapper for atmosphere gas modification with proper resource key mapping
-            </summary>
-            <param name="pressure">Pressure increase in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseCO2(System.Single)">
-            <summary>
-            Increase carbon dioxide (CO2) atmospheric pressure
-            Wrapper for atmosphere gas modification with proper resource key mapping
-            </summary>
-            <param name="pressure">Pressure increase in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseGHG(System.Single)">
-            <summary>
-            Increase greenhouse gases (GHG) atmospheric pressure
-            Wrapper for atmosphere gas modification with proper resource key mapping
-            </summary>
-            <param name="pressure">Pressure increase in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IncreaseGasPressure(System.String,System.Single)">
-            <summary>
-            Generic method to increase atmospheric gas pressure
-            This is the core implementation called by all specific gas methods
-            </summary>
-            <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
-            <param name="pressure">Pressure increase in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.DecreaseGasPressure(System.String,System.Single)">
-            <summary>
-            Decrease atmospheric gas pressure
-            </summary>
-            <param name="resourceKey">Resource key</param>
-            <param name="pressure">Pressure decrease in kPa</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetGasPressure(System.String)">
-            <summary>
-            Get current pressure of a specific atmospheric gas
-            </summary>
-            <param name="resourceKey">Resource key</param>
-            <returns>Current pressure in kPa, or 0 if not found</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.CalculateGreenhouseEffect">
-            <summary>
-            Calculate greenhouse effect based on current atmospheric composition
-            Uses climate properties from loaded configuration
-            </summary>
-            <returns>Greenhouse effect multiplier (1.0 = no effect)</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.IsAtmosphereBreathable">
-            <summary>
-            Check if atmosphere is breathable based on climate configuration
-            </summary>
-            <returns>True if atmosphere meets breathability criteria</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.ToString">
-            <summary>
-            Returns detailed planet status as formatted string
-            </summary>
-            <returns>Planet status with atmosphere and resource information</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceCommandHelper">
             <summary>
@@ -4205,6 +3884,65 @@
             Check if this scene equals another
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.SliceMasterWrapper">
+            <summary>
+            Wrapper for the native SliceMaster class
+            Provides safe access to game timing and tick management
+            
+            📚 Based on: SliceMaster (ScriptsAssembly) with tickTime, tickTimeMultiplier, realDeltaTime properties
+            🤖 Agent Expert: @per-aspera-sdk-coordinator
+            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
+            ⏰ Timing System: Game speed, tick timing, real-time management
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.tickTimeMultiplier">
+            <summary>
+            Gets or sets the tick time multiplier for game speed control.
+            Values between 0.001 and 10.0 are typically supported.
+            </summary>
+            <example>
+            <code>
+            var sliceMaster = universe.GetSliceMaster();
+            sliceMaster.tickTimeMultiplier = 2.0f; // 2x speed
+            sliceMaster.tickTimeMultiplier = 0.5f; // Half speed
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.tickTime">
+            <summary>
+            Gets or sets the actual tick time used by the game engine.
+            This is the base timing value before multipliers are applied.
+            </summary>
+            <example>
+            <code>
+            var sliceMaster = universe.GetSliceMaster();
+            var currentTick = sliceMaster.tickTime;
+            sliceMaster.tickTime = 0.05f; // Direct tick time control
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.realDeltaTime">
+            <summary>
+            Gets or sets the real delta time used by the timing system.
+            This represents the actual frame-to-frame time progression.
+            </summary>
+            <example>
+            <code>
+            var sliceMaster = universe.GetSliceMaster();
+            var deltaTime = sliceMaster.realDeltaTime;
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.timerAcc">
+            <summary>
+            Gets or sets the timer accumulator for tick timing management.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.framesBetween">
+            <summary>
+            Gets or sets the number of frames between tick processing.
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
             <summary>
             Wrapper léger pour interagir avec le système de dialogues du jeu.
@@ -4779,6 +4517,12 @@
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.GameSpeed">
             <summary>
             Get current game speed multiplier
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.TicksPerDay">
+            <summary>
+            Controls the number of simulation ticks per in-game day
+            Higher values = faster simulation, lower values = slower simulation
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.IsPaused">

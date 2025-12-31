@@ -510,9 +510,10 @@
             Uses the Atmosphere wrapper for current atmospheric state
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.Data.ClimateEventData.AtmosphericState">
+        <member name="P:PerAspera.GameAPI.Events.Data.ClimateEventData.PreviousValue">
             <summary>
             Current atmospheric state (from Wrappers.Atmosphere)
+            COMMENTED OUT: Using cellular atmosphere architecture instead
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Data.MartianDayEventData">
@@ -1778,12 +1779,12 @@
             Uses SDK wrapper classes for type-safe access
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.BaseGame">
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.BaseGameWrapper">
             <summary>
             SDK wrapper for BaseGame (type-safe access)
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.Universe">
+        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameDetectedEvent.UniverseWrapper">
             <summary>
             SDK wrapper for Universe (type-safe access)
             </summary>
@@ -1802,15 +1803,6 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.PlanetWrapper">
             <summary>SDK wrapper for Planet (type-safe access)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativeBaseGame">
-            <summary>Native IL2CPP BaseGame instance</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativeUniverse">
-            <summary>Native IL2CPP Universe instance</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent.NativePlanet">
-            <summary>Native IL2CPP Planet instance</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.GameLoadedEvent">
             <summary>
@@ -1868,9 +1860,6 @@
         <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.BaseGameWrapper">
             <summary>SDK wrapper for BaseGame (available early in initialization)</summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.NativeBaseGame">
-            <summary>Native IL2CPP BaseGame instance</summary>
-        </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.GameHubInitializedEvent.IsReady">
             <summary>Whether the GameHub is fully ready for mod interaction</summary>
         </member>
@@ -1902,9 +1891,6 @@
         <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.BaseGameWrapper">
             <summary>SDK wrapper for BaseGame</summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.NativeBaseGame">
-            <summary>Native IL2CPP BaseGame instance</summary>
-        </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.BaseGameCreatedEvent.IsInitialized">
             <summary>Whether BaseGame is fully initialized</summary>
         </member>
@@ -1920,9 +1906,6 @@
         <member name="P:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent.BaseGameWrapper">
             <summary>SDK wrapper for BaseGame (parent)</summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.UniverseCreatedEvent.NativeUniverse">
-            <summary>Native IL2CPP Universe instance</summary>
-        </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent">
             <summary>
             Event triggered when Planet instance is created
@@ -1934,9 +1917,6 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.UniverseWrapper">
             <summary>SDK wrapper for Universe (parent)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.NativePlanet">
-            <summary>Native IL2CPP Planet instance</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent">
             <summary>

@@ -42,6 +42,46 @@ namespace PerAspera.GameAPI.Wrappers
             return instance != null ? new BaseGameWrapper(instance) : null;
         }
 
+        // ==================== GAME STATE ====================
+
+        /// <summary>
+        /// Check if the game is paused
+        /// Delegates to Universe for pause state
+        /// </summary>
+        public bool IsPaused()
+        {
+            try
+            {
+                var universe = GetUniverse();
+                return universe?.IsPaused ?? false;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to get pause state: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get current game day/sol
+        /// </summary>
+        public int? GetCurrentDay()
+        {
+            try
+            {
+                if (_nativeBaseGame != null)
+                {
+                    return (int)_nativeBaseGame.GetMemberValue("currentDay");
+                }
+                return (int)SafeInvoke<int>("get_currentDay");
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to get current day: {ex.Message}");
+                return null;
+            }
+        }
+
         // ==================== CORE SYSTEMS ====================
 
         /// <summary>

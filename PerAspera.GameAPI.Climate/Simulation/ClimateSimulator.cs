@@ -49,37 +49,36 @@ namespace PerAspera.GameAPI.Climate.Simulation
         /// <summary>
         /// Simulate one climate step with area-specific calculations
         /// </summary>
-        public void SimulateStep(PerAspera.GameAPI.Wrappers.Atmosphere atmosphere, float deltaTime)
+        // TODO: Update for cellular atmosphere architecture
+        // public void SimulateStep(PerAspera.GameAPI.Wrappers.Atmosphere atmosphere, float deltaTime)
+        public void SimulateStep(object atmosphere, float deltaTime)
         {
+            // TODO: Implement cellular atmosphere simulation
             try
             {
                 _currentTime += deltaTime;
                 UpdateOrbitalParameters(deltaTime);
 
-                // Get current atmospheric state
-                float totalPressure = atmosphere.TotalPressure;
-                float co2Pressure = atmosphere.GetGasQuantity("resource_carbon_dioxide_release");
-                float o2Pressure = atmosphere.GetGasQuantity("resource_oxygen_release");
-                float n2Pressure = atmosphere.GetGasQuantity("resource_nitrogen_release");
-                float ghgPressure = atmosphere.GetGasQuantity("resource_ghg_release");
+                // TODO: Get current atmospheric state from cellular grid
+                // float totalPressure = atmosphere.TotalPressure;
+                // float co2Pressure = atmosphere.GetGasQuantity("resource_carbon_dioxide_release");
+                // float o2Pressure = atmosphere.GetGasQuantity("resource_oxygen_release");
+                // float n2Pressure = atmosphere.GetGasQuantity("resource_nitrogen_release");
+                // float ghgPressure = atmosphere.GetGasQuantity("resource_ghg_release");
 
                 // Calculate greenhouse effect
-                float greenhouseEffect = CalculateGreenhouseEffect(co2Pressure, o2Pressure, ghgPressure);
+                // float greenhouseEffect = CalculateGreenhouseEffect(co2Pressure, o2Pressure, ghgPressure);
 
                 // Update each region
-                UpdatePolarRegion(_northPole, atmosphere, greenhouseEffect, deltaTime);
-                UpdatePolarRegion(_southPole, atmosphere, greenhouseEffect, deltaTime);
-                UpdateEquatorialRegion(_equatorialRegion, atmosphere, greenhouseEffect, deltaTime);
+                // UpdatePolarRegion(_northPole, atmosphere, greenhouseEffect, deltaTime);
+                // UpdatePolarRegion(_southPole, atmosphere, greenhouseEffect, deltaTime);
+                // UpdateEquatorialRegion(_equatorialRegion, atmosphere, greenhouseEffect, deltaTime);
 
                 // Calculate global averages from regional data
-                float globalTemperature = CalculateGlobalAverageTemperature();
-                float globalPressure = totalPressure;
+                // float globalTemperature = CalculateGlobalAverageTemperature();
+                // float globalPressure = totalPressure;
 
-                // Apply changes back to game atmosphere (if needed)
-                // This would be done through Harmony patches or direct API calls
-
-                Log.Debug($"Climate step: T_global={globalTemperature:F1}K, P={globalPressure:F2}kPa, " +
-                         $"GHG={greenhouseEffect:F1}K, Day={_dayOfYear:F0}, Time={_timeOfDay:F2}");
+                Log.Debug($"Climate step: Cellular simulation pending, Time={_timeOfDay:F2}");
             }
             catch (Exception ex)
             {
@@ -106,22 +105,29 @@ namespace PerAspera.GameAPI.Climate.Simulation
         /// <summary>
         /// Update a polar region's climate
         /// </summary>
-        private void UpdatePolarRegion(Pole pole, PerAspera.GameAPI.Wrappers.Atmosphere atmosphere,
+        // TODO: Update for cellular atmosphere architecture
+        // private void UpdatePolarRegion(Pole pole, PerAspera.GameAPI.Wrappers.Atmosphere atmosphere,
+        //                              float greenhouseEffect, float deltaTime)
+        private void UpdatePolarRegion(Pole pole, object atmosphere,
                                      float greenhouseEffect, float deltaTime)
         {
-            // Update pole temperatures using the new integrated method
-            pole.UpdateTemperatures(_config.SolarConstant, atmosphere.TotalPressure,
-                                  greenhouseEffect, _dayOfYear, _timeOfDay, deltaTime);
+            // TODO: Update pole temperatures using cellular data
+            // pole.UpdateTemperatures(_config.SolarConstant, atmosphere.TotalPressure,
+            //                       greenhouseEffect, _dayOfYear, _timeOfDay, deltaTime);
         }
 
         /// <summary>
         /// Update equatorial region's climate
         /// </summary>
-        private void UpdateEquatorialRegion(EquatorialRegion equator, PerAspera.GameAPI.Wrappers.Atmosphere atmosphere,
+        // TODO: Update for cellular atmosphere architecture
+        // private void UpdateEquatorialRegion(EquatorialRegion equator, PerAspera.GameAPI.Wrappers.Atmosphere atmosphere,
+        //                                   float greenhouseEffect, float deltaTime)
+        private void UpdateEquatorialRegion(EquatorialRegion equator, object atmosphere,
                                           float greenhouseEffect, float deltaTime)
         {
-            equator.UpdateTemperatures(_config.SolarConstant, atmosphere.TotalPressure,
-                                    greenhouseEffect, _dayOfYear, _timeOfDay, deltaTime);
+            // TODO: Update equator temperatures using cellular data
+            // equator.UpdateTemperatures(_config.SolarConstant, atmosphere.TotalPressure,
+            //                         greenhouseEffect, _dayOfYear, _timeOfDay, deltaTime);
         }
 
         /// <summary>
@@ -150,8 +156,9 @@ namespace PerAspera.GameAPI.Climate.Simulation
         /// <summary>
         /// Calculate regional humidity based on pole conditions
         /// </summary>
-        private float CalculateRegionalHumidity(Pole pole, PerAspera.GameAPI.Wrappers.Atmosphere atmosphere)
+        private float CalculateRegionalHumidity(Pole pole, object atmosphere)
         {
+            // TODO: Implement cellular atmosphere humidity calculation
             // Simplified humidity calculation based on temperature and ice coverage
             float baseHumidity = 0.1f; // Base atmospheric humidity
 
@@ -179,15 +186,17 @@ namespace PerAspera.GameAPI.Climate.Simulation
         /// <summary>
         /// Get detailed climate status with regional information
         /// </summary>
-        public string GetClimateStatus(PerAspera.GameAPI.Wrappers.Atmosphere atmosphere)
+        public string GetClimateStatus(object atmosphere)
         {
+            // TODO: Implement cellular atmosphere status reporting
             float globalTemp = CalculateGlobalAverageTemperature();
-            float greenhouse = CalculateGreenhouseEffect(
-                atmosphere.GetGasQuantity("resource_carbon_dioxide_release"),
-                atmosphere.GetGasQuantity("resource_oxygen_release"),
-                atmosphere.GetGasQuantity("resource_ghg_release"));
+            // Commented out greenhouse calculation until cellular API is implemented
+            // float greenhouse = CalculateGreenhouseEffect(
+            //     atmosphere.GetGasQuantity("resource_carbon_dioxide_release"),
+            //     atmosphere.GetGasQuantity("resource_oxygen_release"),
+            //     atmosphere.GetGasQuantity("resource_ghg_release"));
 
-            return $"Global: {globalTemp:F1}K, GHG: {greenhouse:F1}K\n" +
+            return $"Global: {globalTemp:F1}K\n" +
                    $"{_northPole}\n" +
                    $"{_southPole}\n" +
                    $"{_equatorialRegion}";

@@ -13,7 +13,7 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
         Pole,
         Equator
     }
-    internal class AtmosphereCell
+    public class AtmosphereCell
     {
         public CellCoord Coord;
         public AtmosphericComposition Composition { get; }
@@ -21,6 +21,18 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
         public bool IsActive { get; private set; }
         public float TemperatureBias;
         public float PressureBias;
+
+        public AtmosphereCell(CellCoord coord)
+        {
+            Coord = coord;
+            // TODO: Initialize with proper gas dictionary and pressure function
+            Composition = new AtmosphericComposition(new Dictionary<string, AtmosphericGas>(), () => 101.325f, null);
+        }
+
+        // TODO: Implement cellular temperature and pressure properties
+        public float Temperature => 288.15f; // Default 15°C in Kelvin
+        public float TotalPressure => 101.325f; // Default 1 atm in kPa
+
         public void Activate()
         {
             IsActive = true;

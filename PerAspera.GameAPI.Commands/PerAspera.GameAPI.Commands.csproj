@@ -9,6 +9,10 @@
 		<Description>Per Aspera Commands API - Type-safe command execution and custom command extension system</Description>
 		<PackageTags>per-aspera;commands;gameapi;commandbus;modding;fluent-api</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:/ModPeraspera/nuget-packages</PackageOutputPath>
 	</PropertyGroup>
 
 	<!-- Dependencies -->
@@ -26,3 +30,4 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
 	</ItemGroup>
 </Project>
+

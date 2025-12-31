@@ -11,13 +11,13 @@ namespace PerAspera.GameAPI.Climate.Domain.Atmosphere
     /// Wrapper for Planet atmosphere properties
     /// Provides type-safe access to atmospheric composition and climate data
     /// </summary>
-    public class Atmosphere
+    public class PlanetaryAtmosphere
     {
         private readonly object _nativePlanet;
         private readonly AtmosphericComposition _composition;
         private readonly Dictionary<string, TerraformingEffect> _effects;
 
-        public Atmosphere(object nativePlanet)
+        public PlanetaryAtmosphere(object nativePlanet)
         {
             _nativePlanet = nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet));
 
@@ -510,6 +510,114 @@ namespace PerAspera.GameAPI.Climate.Domain.Atmosphere
         public void ModifyGas(string v, float oxygenChange, float duration, string source)
         {
             throw new NotImplementedException();
+        }
+
+        //------------------------------------------------------
+        // CARGO INTERACTION METHODS (STATIC UTILITIES)
+        //------------------------------------------------------
+
+        /// <summary>
+        /// Check if a building can accept a specific cargo
+        /// </summary>
+        /// <param name="building">Target building object</param>
+        /// <param name="cargo">Cargo to check</param>
+        /// <returns>True if building can accept the cargo</returns>
+        public static bool CanAcceptCargo(object building, Cargo cargo)
+        {
+            if (building == null || cargo == null) return false;
+
+            try
+            {
+                // Use reflection to check if building has cargo acceptance methods
+                var buildingType = building.GetType();
+                var canAcceptMethod = buildingType.GetMethod("CanAcceptCargo", new[] { typeof(Cargo) });
+                if (canAcceptMethod != null)
+                {
+                    return (bool)canAcceptMethod.Invoke(building, new object[] { cargo });
+                }
+
+                // Fallback: assume building can accept cargo if it has storage
+                var storageProp = buildingType.GetProperty("cargoStorage");
+                return storageProp != null;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error checking cargo acceptance: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Make a building accept a cargo
+        /// </summary>
+        /// <param name="building">Target building object</param>
+        /// <param name="cargo">Cargo to accept</param>
+        /// <returns>True if cargo was accepted successfully</returns>
+        public static bool AcceptCargo(object building, Cargo cargo)
+        {
+            if (building == null || cargo == null) return false;
+
+            try
+            {
+                // Use reflection to call AcceptCargo method
+                var buildingType = building.GetType();
+                var acceptMethod = buildingType.GetMethod("AcceptCargo", new[] { typeof(Cargo) });
+                if (acceptMethod != null)
+                {
+                    return (bool)acceptMethod.Invoke(building, new object[] { cargo });
+                }
+
+                // Fallback: try to add to cargo storage directly
+                var storageProp = buildingType.GetProperty("cargoStorage");
+                if (storageProp != null)
+                {
+                    var storage = storageProp.GetValue(building);
+                    if (storage != null)
+                    {
+                        var addMethod = storage.GetType().GetMethod("Add");
+                        if (addMethod != null)
+                        {
+                            addMethod.Invoke(storage, new object[] { cargo });
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogAspera.LogWarning($"Error accepting cargo: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Find cargo by resource type
+        /// </summary>
+        /// <param name="resource">Resource type to search for</param>
+        /// <returns>Cargo object if found, null otherwise</returns>
+        public static Cargo? FindCargoByResource(object resource)
+        {
+            // This is a placeholder - would need to search through available cargo
+            // For now, return null as this needs more context about where to search
+            LogAspera.LogWarning("FindCargoByResource not implemented - needs cargo storage context");
+            return null;
+        }
+
+        /// <summary>
+        /// Remove a cargo from storage
+        /// </summary>
+        /// <param name="cargo">Cargo to remove</param>
+        /// <returns>True if cargo was removed successfully</returns>
+        public static bool RemoveCargo(Cargo cargo)
+        {
+            if (cargo == null) return false;
+
+            // This is a placeholder - would need to know which storage to remove from
+            // For now, return false as this needs more context
+            LogAspera.LogWarning("RemoveCargo not implemented - needs storage context");
+            return false;
         }
     }
 }

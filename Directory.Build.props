@@ -10,6 +10,7 @@
     
     <!-- Only pack PerAspera.ModSDK (main facade) and GameLibs, not sub-projects -->
     <PackageOutputPath>$(SdkRoot)..\Livrable\Nuggets</PackageOutputPath>
+    <IsPackable Condition="'$(ProjectName)' == 'PerAspera.ModSDK' OR '$(ProjectName)' == 'PerAspera.GameLibs'">true</IsPackable>
     <IsPackable Condition="'$(ProjectName)' != 'PerAspera.ModSDK' AND '$(ProjectName)' != 'PerAspera.GameLibs'">false</IsPackable>
     
     <!-- Per Aspera Game Detection -->

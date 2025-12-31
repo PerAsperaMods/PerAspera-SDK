@@ -1,4 +1,5 @@
-﻿using PerAspera.Core.IL2CPP;
+﻿using System;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Wrappers;
 
 public class AtmosphericGas

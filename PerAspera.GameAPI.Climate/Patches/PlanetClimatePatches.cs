@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using PerAspera.GameAPI.Wrappers;
 
 // Alias pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
-using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
+// TODO: Update for cellular atmosphere architecture
+// using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
 
 namespace PerAspera.GameAPI.Climate.Patches
 {
@@ -18,8 +19,9 @@ namespace PerAspera.GameAPI.Climate.Patches
     {
         private static readonly LogAspera Log = new LogAspera("Climate.Patches");
         
+        // TODO: Update for cellular atmosphere architecture
         // Stockage des instances Atmosphere SDK par planet native
-        private static readonly Dictionary<object, AtmosphereSDK> _atmosphereOverrides = new();
+        // private static readonly Dictionary<object, AtmosphereSDK> _atmosphereOverrides = new();
         private static readonly Dictionary<object, ClimateControlState> _controlStates = new();
         
         /// <summary>
@@ -43,11 +45,12 @@ namespace PerAspera.GameAPI.Climate.Patches
             if (!_controlStates.ContainsKey(nativePlanet))
                 _controlStates[nativePlanet] = new ClimateControlState();
             
-            if (!_atmosphereOverrides.ContainsKey(nativePlanet))
-                _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
+            // TODO: Update for cellular atmosphere architecture
+            // if (!_atmosphereOverrides.ContainsKey(nativePlanet))
+            //     _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
                 
             _controlStates[nativePlanet].IsActive = true;
-            Log.Info("Climate control enabled for planet (Harmony patches active, using SDK Atmosphere)");
+            Log.Info("Climate control enabled for planet (Harmony patches active, cellular atmosphere pending)");
         }
         
         /// <summary>
@@ -70,8 +73,9 @@ namespace PerAspera.GameAPI.Climate.Patches
             if (!_controlStates.ContainsKey(nativePlanet))
                 _controlStates[nativePlanet] = new ClimateControlState { IsActive = true };
             
-            if (!_atmosphereOverrides.ContainsKey(nativePlanet))
-                _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
+            // TODO: Update for cellular atmosphere architecture
+            // if (!_atmosphereOverrides.ContainsKey(nativePlanet))
+            //     _atmosphereOverrides[nativePlanet] = new AtmosphereSDK(nativePlanet);
                 
             var state = _controlStates[nativePlanet];
             if (!state.IsActive) return;
@@ -85,7 +89,7 @@ namespace PerAspera.GameAPI.Climate.Patches
                 case "waterVaporPressure": state.WaterVaporPressureOverride = value; break;
             }
             
-            Log.Debug($"Climate override via SDK Atmosphere: {property} = {value}");
+            Log.Debug($"Climate override queued for cellular atmosphere: {property} = {value}");
         }
         
         // ========== PATCHES HARMONY SUR LES GETTERS PLANET ==========
@@ -215,9 +219,10 @@ namespace PerAspera.GameAPI.Climate.Patches
         /// Récupère l'instance Atmosphere SDK pour une planète donnée
         /// Permet au ClimateController d'accéder directement à l'Atmosphere encapsulée
         /// </summary>
-        public static AtmosphereSDK? GetSDKAtmosphere(object nativePlanet)
-        {
-            return _atmosphereOverrides.TryGetValue(nativePlanet, out var atmosphere) ? atmosphere : null;
-        }
+        // TODO: Implement with cellular atmosphere API
+        // public static AtmosphereSDK? GetSDKAtmosphere(object nativePlanet)
+        // {
+        //     return _atmosphereOverrides.TryGetValue(nativePlanet, out var atmosphere) ? atmosphere : null;
+        // }
     }
 }

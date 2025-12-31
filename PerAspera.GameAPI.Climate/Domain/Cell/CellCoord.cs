@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace PerAspera.GameAPI.Climate.Domain.Cell
 {
-    struct CellCoord
+    public struct CellCoord
     {
         public int LatIndex;
         public int LonIndex;
+
+        public CellCoord(int latIndex, int lonIndex)
+        {
+            LatIndex = latIndex;
+            LonIndex = lonIndex;
+        }
     }
 
 }

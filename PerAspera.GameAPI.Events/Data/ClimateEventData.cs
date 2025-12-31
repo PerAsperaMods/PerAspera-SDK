@@ -15,8 +15,9 @@ namespace PerAspera.GameAPI.Events.Data
         // === ATMOSPHERIC STATE ===
         /// <summary>
         /// Current atmospheric state (from Wrappers.Atmosphere)
+        /// COMMENTED OUT: Using cellular atmosphere architecture instead
         /// </summary>
-        public Wrappers.Atmosphere? AtmosphericState { get; set; }
+        //public Wrappers.Atmosphere? AtmosphericState { get; set; }
 
         // === CHANGE TRACKING ===
         public float? PreviousValue { get; set; }
@@ -39,45 +40,45 @@ namespace PerAspera.GameAPI.Events.Data
         public object? Payload { get; set; }
         public object? NativeEventType { get; set; }
         
-        // === CONVENIENCE ACCESSORS (from AtmosphericState or manual override) ===
+        // === CONVENIENCE ACCESSORS (manual override only - cellular architecture) ===
         private float? _temperature;
         public float Temperature 
         { 
-            get => _temperature ?? AtmosphericState?.Temperature ?? CurrentValue;
+            get => _temperature ?? CurrentValue;
             set => _temperature = value;
         }
         
         private float? _totalPressure;
         public float TotalPressure 
         { 
-            get => _totalPressure ?? AtmosphericState?.TotalPressure ?? 0f;
+            get => _totalPressure ?? 0f;
             set => _totalPressure = value;
         }
         
         public float CO2Pressure 
         { 
-            get => _co2Pressure ?? AtmosphericState?.Composition["CO2"]?.PartialPressure ?? 0f;
+            get => _co2Pressure ?? 0f;
             set => _co2Pressure = value;
         }
         private float? _co2Pressure;
         
         public float O2Pressure 
         { 
-            get => _o2Pressure ?? AtmosphericState?.Composition["O2"]?.PartialPressure ?? 0f;
+            get => _o2Pressure ?? 0f;
             set => _o2Pressure = value;
         }
         private float? _o2Pressure;
         
         public float N2Pressure 
         { 
-            get => _n2Pressure ?? AtmosphericState?.Composition["N2"]?.PartialPressure ?? 0f;
+            get => _n2Pressure ?? 0f;
             set => _n2Pressure = value;
         }
         private float? _n2Pressure;
         
         public float GHGPressure 
         { 
-            get => _ghgPressure ?? AtmosphericState?.Composition["H2O"]?.PartialPressure ?? 0f;
+            get => _ghgPressure ?? 0f;
             set => _ghgPressure = value;
         }
         private float? _ghgPressure;

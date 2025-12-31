@@ -642,11 +642,21 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 var baseGame =  BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
-                if (planet?.Atmosphere == null)
+                if (planet == null)
                     return "🌍 Atmosphere: Data not available";
                 
-                var atmosphere = planet.Atmosphere;
-                return $"🌍 Atmosphere: {atmosphere.TemperatureCelsius:F1}°C | {atmosphere.TotalPressure:F1}kPa | Breathable: {(atmosphere.IsBreathable ? "Yes" : "No")}";
+                // Access native planet properties directly
+                var nativePlanet = planet.GetNativeObject();
+                float temperature = (float)nativePlanet.GetMemberValue("temperature");
+                float co2Pressure = (float)nativePlanet.GetMemberValue("CO2Pressure");
+                float o2Pressure = (float)nativePlanet.GetMemberValue("O2Pressure");
+                float n2Pressure = (float)nativePlanet.GetMemberValue("N2Pressure");
+                float totalPressure = co2Pressure + o2Pressure + n2Pressure;
+                
+                // Check if breathable (simplified check)
+                bool isBreathable = o2Pressure > 15.0f && totalPressure > 50.0f;
+                
+                return $"🌍 Atmosphere: {temperature - 273.15f:F1}°C | {totalPressure:F1}kPa | Breathable: {(isBreathable ? "Yes" : "No")}";
             }
             catch (Exception ex)
             {
@@ -677,11 +687,15 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 var baseGame = BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
-                if (planet?.Atmosphere == null)
+                if (planet == null)
                     return "🌡️ Temperature: Data not available";
                 
-                var temperature = planet.Atmosphere.TemperatureCelsius;
-                var emoji = temperature switch
+                // Access native planet temperature directly
+                var nativePlanet = planet.GetNativeObject();
+                float temperatureKelvin = (float)nativePlanet.GetMemberValue("temperature");
+                float temperatureCelsius = temperatureKelvin - 273.15f;
+                
+                var emoji = temperatureCelsius switch
                 {
                     < -50 => "🧊",
                     < 0 => "❄️",
@@ -690,7 +704,7 @@ namespace PerAspera.SDK.TwitchIntegration
                     _ => "🌋"
                 };
                 
-                return $"{emoji} Temperature: {temperature:F1}°C ({planet.Atmosphere.Temperature:F1}K)";
+                return $"{emoji} Temperature: {temperatureCelsius:F1}°C ({temperatureKelvin:F1}K)";
             }
             catch (Exception ex)
             {

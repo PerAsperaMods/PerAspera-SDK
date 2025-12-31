@@ -278,7 +278,7 @@ namespace PerAspera.GameAPI.Events
                     // Emit GameFullyLoadedEvent (backup for CommandsDemo)
                     var gameFullyLoadedEvent = new GameFullyLoadedEvent(
                         baseGame.GetNativeObject(),
-                        baseGame.GetNativeObject(), // universe
+                        baseGame.GetNativeObject(), // universe  baseGame.getUniverse() noramlement
                         null // planet might not be available yet
                     );
                     EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);

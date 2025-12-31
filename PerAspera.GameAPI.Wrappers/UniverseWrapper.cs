@@ -31,6 +31,14 @@ namespace PerAspera.GameAPI.Wrappers
         {
             return ((Universe)NativeObject).GetGamePaused();
         }
+        public float gameSpeed { get { return (float)NativeObject.GetMemberValue("gameSpeed"); } set { NativeObject.SetMemberValue("gameSpeed", value);  } }
+
+        public SliceMasterWrapper GetSliceMaster()
+        {
+            return new SliceMasterWrapper ( NativeObject.InvokeMethod<SliceMaster>("get_sliceMaster"));
+        }
+
+
         public CommandBus GetCommandBus()
         {
             try
@@ -175,6 +183,16 @@ namespace PerAspera.GameAPI.Wrappers
                 // 🔄 Reflection fallback
                 SafeInvokeVoid("SetGameSpeed", value);
             }
+        }
+
+        /// <summary>
+        /// Controls the number of simulation ticks per in-game day
+        /// Higher values = faster simulation, lower values = slower simulation
+        /// </summary>
+        public int TicksPerDay
+        {
+            get => NativeObject.GetMemberValue<int>("TICKS_PER_DAY");
+            set => NativeObject.SetMemberValue("TICKS_PER_DAY", value);
         }
         
         /// <summary>

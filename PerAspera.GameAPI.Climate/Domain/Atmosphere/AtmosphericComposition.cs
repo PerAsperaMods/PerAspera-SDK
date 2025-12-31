@@ -1,6 +1,12 @@
-﻿using PerAspera.Core;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using PerAspera.Core;
 using PerAspera.GameAPI.Climate;
 using PerAspera.GameAPI.Wrappers;
+
+// Alias pour éviter le conflit avec la classe Atmosphere du jeu
+using SDKAtmosphere = PerAspera.GameAPI.Climate.Domain.Atmosphere.PlanetaryAtmosphere;
 
 /// <summary>
 /// Collection of atmospheric gases with dynamic composition and cargo integration
@@ -146,7 +152,7 @@ public class AtmosphericComposition
         try
         {
             // Check if building can accept this cargo
-            if (!Atmosphere.CanAcceptCargo(targetBuilding, cargo))
+            if (!SDKAtmosphere.CanAcceptCargo(targetBuilding, cargo))
             {
                 LogAspera.LogWarning($"Building cannot accept {gasSymbol} cargo");
                 return false;
@@ -166,7 +172,7 @@ public class AtmosphericComposition
             transferCargo._quantity = CargoQuantity.FromUnitFloat(amount);
 
             // Transfer cargo to building
-            if (Atmosphere.AcceptCargo(targetBuilding, transferCargo))
+            if (SDKAtmosphere.AcceptCargo(targetBuilding, transferCargo))
             {
                 // Reduce atmospheric gas pressure
                 gas.PartialPressure -= amount;
@@ -196,7 +202,7 @@ public class AtmosphericComposition
             if (resourceKey == null) return false;
 
             var resourceType = (ResourceType)KeeperTypeRegistry.GetResourceType(resourceKey);
-            var cargo = Atmosphere.FindCargoByResource(sourceBuilding, resourceType);
+            var cargo = SDKAtmosphere.FindCargoByResource(sourceBuilding, resourceType);
 
             if (cargo == null || cargo.quantity.ToFloat() < amount)
             {
@@ -205,7 +211,7 @@ public class AtmosphericComposition
             }
 
             // Remove cargo from building
-            if (Atmosphere.RemoveCargo(sourceBuilding, cargo, amount))
+            if (SDKAtmosphere.RemoveCargo(sourceBuilding, cargo, amount))
             {
                 // Increase atmospheric gas pressure
                 var gas = this[gasSymbol];
@@ -265,6 +271,20 @@ public class AtmosphericComposition
             "resource_water" => "H2O",
             _ => null
         };
+    }
+
+    /// <summary>
+    /// Update atmospheric composition over time
+    /// </summary>
+    public void Tick(float deltaTime)
+    {
+        // TODO: Implement atmospheric composition dynamics
+        // For now, just update gas quantities from native planet
+        foreach (var gas in _gases.Values)
+        {
+            // Update gas quantity from planet getter
+            // This would be where diffusion, reactions, etc. happen
+        }
     }
 
     public override string ToString()

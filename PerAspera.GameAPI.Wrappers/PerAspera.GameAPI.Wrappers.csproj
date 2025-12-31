@@ -9,6 +9,10 @@
 		<Description>Public API wrappers for Per Aspera game classes - Safe abstraction layer for modders</Description>
 		<PackageTags>per-aspera;wrappers;api;modding;public-api</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:/ModPeraspera/nuget-packages</PackageOutputPath>
 	</PropertyGroup>
 
 	<!-- Dependencies -->
@@ -27,3 +31,4 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Database\PerAspera.GameAPI.Database.csproj" />
 	</ItemGroup>
 </Project>
+

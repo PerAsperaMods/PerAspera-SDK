@@ -27,10 +27,13 @@ namespace PerAspera.GameAPI.Climate
         private void OnLoadFinished(GameFullyLoadedEvent @event)
         {
             _planet = @event.PlanetWrapper;
-            _atmosphereGrid=new AtmosphereGrid(_planet);
+            _atmosphereGrid = new AtmosphereGrid(_planet.GetNativeObject()); // Get native planet object
             _atmosphereGrid.InitializeGrid();
-            _tickAdapter = new AtmosphereTickAdapter(_atmosphereGrid);
-            GameEvents.RegisterTick(_tickAdapter); // ou ton hook IL2CPP déjà utilisé
+            _atmosphereGrid.EnableClimateControl(); // Enable overrides directly
+
+            // TODO: Register tick handler for cellular updates
+            // _tickAdapter = new AtmosphereTickAdapter(_atmosphereGrid);
+            // GameEvents.RegisterTick(_tickAdapter);
 
             Log.Info("Planet loaded: " + _planet.Name);
 

@@ -6,9 +6,14 @@
 		<AssemblyName>PerAspera.Core</AssemblyName>
 		<RootNamespace>PerAspera.Core</RootNamespace>
 		<PackageId>PerAspera.Core</PackageId>
+		<Version>1.1.0</Version>
 		<Description>Per Aspera Core - Low-level utilities and IL2CPP extensions for mod development</Description>
 		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:\ModPeraspera\nuget-packages</PackageOutputPath>
 		<!-- Enable all Unity references for SDK -->
 		<IncludeAllUnityReferences>true</IncludeAllUnityReferences>
 	</PropertyGroup>
