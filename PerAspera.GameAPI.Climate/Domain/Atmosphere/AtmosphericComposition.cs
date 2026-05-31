@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
-using PerAspera.GameAPI.Climate;
 using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Climate;
 
-// Alias pour éviter le conflit avec la classe Atmosphere du jeu
+// Alias pour �viter le conflit avec la classe Atmosphere du jeu
 using SDKAtmosphere = PerAspera.GameAPI.Climate.Domain.Atmosphere.PlanetaryAtmosphere;
 
 /// <summary>

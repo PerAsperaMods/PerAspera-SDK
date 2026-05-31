@@ -3,8 +3,7 @@ using System;
 using BepInEx.Unity.IL2CPP;
 using UnityEngine;
 // TODO: Remove circular dependency - move this to Wrappers when HandleHelper is implemented
-// using PerAspera.GameAPI.Wrappers;
-
+// 
 namespace PerAspera.GameAPI.Helpers
 {
     /// <summary>

@@ -4,7 +4,7 @@ using Il2CppInterop.Runtime.Injection;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Constants;
-using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Integration;
 using BepInEx.Logging;
@@ -12,7 +12,7 @@ using BepInEx.Logging;
 namespace PerAspera.GameAPI.Events.Detector
 {
     /// <summary>
-    /// MonoBehaviour that polls BaseGameWrapper.GetCurrent() until available
+    /// MonoBehaviour that polls GameTypeInitializer.GetBaseGameInstance() as BaseGame until available
     /// Integrated into EventsAutoStartPlugin to avoid multiple plugins per DLL
     /// </summary>
     public class GameHubDetector : MonoBehaviour
@@ -24,7 +24,7 @@ namespace PerAspera.GameAPI.Events.Detector
         private int _fullLoadCheckCount = 0;
         private const int MaxFrames = 3000; // ~50 seconds at 60fps
         private const int MaxFullLoadChecks = 600; // ~10 seconds at 60fps
-        private BaseGameWrapper? _baseGameForFullLoad;
+        private BaseGame? _baseGameForFullLoad;
         
         /// <summary>
         /// Initialize the detector with a shared logger
@@ -42,7 +42,7 @@ namespace PerAspera.GameAPI.Events.Detector
                 Destroy(this.gameObject);
                 return;
             }
-            _logger.LogInfo("🔍 GameHubDetector.Start() called - monitoring BaseGameWrapper.GetCurrent()");
+            _logger.LogInfo("🔍 GameHubDetector.Start() called - monitoring GameTypeInitializer.GetBaseGameInstance() as BaseGame");
             _logger.LogInfo($"🎮 GameObject: {gameObject.name}, Active: {gameObject.activeInHierarchy}");
         }
 
@@ -80,18 +80,18 @@ namespace PerAspera.GameAPI.Events.Detector
 
                 try
                 {
-                    var baseGame = BaseGameWrapper.GetCurrent();
+                    var baseGame = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
                     if (baseGame != null)
                     {
                         _logger.LogInfo($"🎯 BaseGame detected at frame {_frameCount}! Publishing events...");
 
                         // Emit EarlyModsReadyEvent first (for early mod initialization)
-                        var earlyEvent = new EarlyModsReadyEvent(baseGame.GetNativeObject());
+                        var earlyEvent = new EarlyModsReadyEvent((object)baseGame);
                         EnhancedEventBus.Publish(SDKEventConstants.EarlyModsReady, earlyEvent);
                         _logger.LogInfo("📡 EarlyModsReadyEvent published successfully!");
 
                         // Emit GameHubInitializedEvent for compatibility
-                        var hubEvent = new GameHubInitializedEvent(baseGame.GetNativeObject(), isReady: true);
+                        var hubEvent = new GameHubInitializedEvent((object)baseGame, isReady: true);
                         EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, hubEvent);
                         _logger.LogInfo("📡 GameHubInitializedEvent published successfully!");
 
@@ -126,8 +126,8 @@ namespace PerAspera.GameAPI.Events.Detector
                 try
                 {
                     // Check if Universe and Planet are available
-                    var universe = UniverseWrapper.GetCurrent();
-                    var planet = PlanetWrapper.GetCurrent();
+                    var universe = GameTypeInitializer.GetUniverseInstance() as Universe;
+                    var planet = PerAspera.GameAPI.Native.InstanceManager.GetCurrentPlanet() as Planet;
 
                     if (universe != null && planet != null && _baseGameForFullLoad != null)
                     {
@@ -135,9 +135,9 @@ namespace PerAspera.GameAPI.Events.Detector
 
                         // Emit GameFullyLoadedEvent
                         var fullLoadEvent = new GameFullyLoadedEvent(
-                            _baseGameForFullLoad.GetNativeObject(),
-                            universe.GetNativeObject(),
-                            planet.GetNativeObject()
+                            (object)_baseGameForFullLoad,
+                            (object)universe,
+                            (object)planet
                         );
                         EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, fullLoadEvent);
 
@@ -175,7 +175,7 @@ namespace PerAspera.GameAPI.Events.Detector
         /// <summary>
         /// Start monitoring for full game load (Universe + Planet) to emit GameFullyLoadedEvent
         /// </summary>
-        private void StartFullGameLoadMonitoring(BaseGameWrapper baseGame)
+        private void StartFullGameLoadMonitoring(BaseGame? baseGame)
         {
             _logger.LogInfo("🔍 Starting full game load monitoring...");
             _baseGameForFullLoad = baseGame;

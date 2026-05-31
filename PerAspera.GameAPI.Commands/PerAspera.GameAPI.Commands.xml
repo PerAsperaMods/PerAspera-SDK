@@ -914,6 +914,39 @@
             Provides convenient methods for creating and executing Per Aspera commands
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.Initialize(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Initialize the Commands API with native game context from a GameCommandsReadyEvent.
+            Must be called before using ExecuteFromYaml/ExecuteFromYamlFile with native commands.
+            </summary>
+            <example>
+            <code>
+            EnhancedEventBus.SubscribeToGameCommandsReady(evt => {
+                Commands.Initialize(evt);
+                Commands.ExecuteFromYamlFile(startupYaml);
+            });
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.RegisterAction``1">
+            <summary>
+            Register a mod-defined TextAction by type.
+            The type must implement <see cref="T:PerAspera.GameAPI.Commands.ModActions.IModTextAction"/> and have a public parameterless constructor.
+            Call this in your plugin Load() before game starts.
+            </summary>
+            <typeparam name="T">Your IModTextAction implementation</typeparam>
+            <example>
+            <code>
+            Commands.RegisterAction&lt;SpawnMyUnit&gt;();
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.RegisterAction(PerAspera.GameAPI.Commands.ModActions.IModTextAction)">
+            <summary>
+            Register a mod-defined TextAction instance.
+            </summary>
+            <param name="action">The action instance to register</param>
+        </member>
         <member name="M:PerAspera.GameAPI.Commands.Commands.Create(System.String)">
             <summary>
             Create a new command builder for the specified command type
@@ -1012,6 +1045,83 @@
         <member name="M:PerAspera.GameAPI.Commands.Commands.GetStatistics">
             <summary>
             Get command execution statistics
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.ExecuteFromYaml(System.String)">
+            <summary>
+            Parse and execute all actions defined in a YAML string.
+            Supports any console debug command (~) as well as native SDK commands.
+            The YAML root must be an "actions:" key.
+            </summary>
+            <param name="yamlContent">YAML string with root "actions:" key</param>
+            <returns>Number of actions executed successfully</returns>
+            <example>
+            <code>
+            int count = Commands.ExecuteFromYaml(@"
+            actions:
+              - command: FinishConstructions
+                arguments: []
+                daysDelay: 0.0
+                showInFrontend: false
+              - command: SetEngineTimescale
+                arguments: ['2.0']
+                daysDelay: 0.0
+                showInFrontend: false
+            ");
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.ExecuteFromYamlFile(System.String)">
+            <summary>
+            Parse and execute all actions from a YAML file on disk.
+            Supports both "actions:" wrapped format and raw YAML list format.
+            Works for any console debug command (~) and all native SDK commands.
+            </summary>
+            <param name="filePath">Absolute path to the YAML actions file</param>
+            <returns>Number of actions executed successfully, -1 if file not found or parse failed</returns>
+            <example>
+            <code>
+            // startup-actions.yaml lives in your mod folder
+            string modPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            int count = Commands.ExecuteFromYamlFile(Path.Combine(modPath, "startup-actions.yaml"));
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.RegisterHandler(System.String,PerAspera.GameAPI.Commands.CustomCommandHandler)">
+             <summary>
+             Register a C# handler for a custom YAML command name.
+             The handler will be invoked (with priority) whenever a YAML action with this name is executed.
+             Case-insensitive. Replaces any previously registered handler for the same name.
+             </summary>
+             <param name="commandName">Command name as it appears in YAML (e.g. "ActivateSpaceport")</param>
+             <param name="handler">Handler delegate: (commandName, arguments[]) → bool</param>
+             <example>
+             <code>
+             // In your plugin Load():
+             Commands.RegisterHandler("ActivateSpaceport", (cmd, args) =>
+             {
+                 string faction = args.Length > 0 ? args[0] : "player";
+                 Log.LogInfo($"Spaceport activated for {faction}!");
+                 return true;
+             });
+            
+             // In your YAML:
+             actions:
+               - command: ActivateSpaceport
+                 arguments:
+                   - player
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.UnregisterHandler(System.String)">
+            <summary>
+            Unregister a previously registered custom command handler.
+            </summary>
+            <param name="commandName">Command name to unregister</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Commands.IsCommandRegistered(System.String)">
+            <summary>
+            Returns true if a custom C# handler is registered for this command name.
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes">
@@ -1400,6 +1510,76 @@
             Get human-readable description of command for debugging
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.CustomCommandHandler">
+            <summary>
+            Handler delegate for custom YAML commands registered by mods.
+            </summary>
+            <param name="commandName">The command name from YAML (e.g. "ActivateSpaceport")</param>
+            <param name="arguments">Arguments array from YAML (may be empty)</param>
+            <returns>True if the command succeeded, false if it failed</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CustomCommandRegistry">
+            <summary>
+            Registry for custom YAML command handlers registered by mods.
+            Checked first by YamlCommandsExecutor before native SDK commands and console fallback.
+            </summary>
+            <example>
+            <code>
+            // In your plugin Load():
+            Commands.RegisterHandler("ActivateSpaceport", (cmd, args) =>
+            {
+                string faction = args.Length > 0 ? args[0] : "player";
+                Log.LogInfo($"Spaceport activated for {faction}!");
+                return true;
+            });
+            
+            // In your YAML:
+            actions:
+              - command: ActivateSpaceport
+                arguments:
+                  - player
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomCommandRegistry.Register(System.String,PerAspera.GameAPI.Commands.CustomCommandHandler)">
+            <summary>
+            Register a C# handler for a custom YAML command name.
+            If a handler already exists for this name, it is replaced.
+            </summary>
+            <param name="commandName">Command name as it appears in YAML (case-insensitive)</param>
+            <param name="handler">Handler to invoke when the command is executed</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomCommandRegistry.Unregister(System.String)">
+            <summary>
+            Unregister a previously registered handler.
+            </summary>
+            <param name="commandName">Command name to unregister</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomCommandRegistry.IsRegistered(System.String)">
+            <summary>
+            Returns true if a handler is registered for this command name.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.CustomCommandRegistry.RegisteredCommands">
+            <summary>
+            All currently registered custom command names.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomCommandRegistry.GetHandler(System.String)">
+            <summary>
+            Returns the handler registered for the given command name.
+            Throws KeyNotFoundException if not registered — check IsRegistered() first.
+            Used by NativeDispatchInterceptPatch to invoke handlers from the native dispatch path.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomCommandRegistry.TryExecute(PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition,System.Boolean@)">
+            <summary>
+            Try to execute a registered handler for the given action.
+            Returns true if a handler was found (regardless of its return value).
+            </summary>
+            <param name="action">The YAML action to execute</param>
+            <param name="handlerResult">Result returned by the handler, or false if handler threw</param>
+        </member>
         <member name="T:PerAspera.GameAPI.Commands.Events.CommandStatistics">
             <summary>
             Statistics about command execution
@@ -1556,6 +1736,241 @@
             Check if the command can be executed in the current state
             </summary>
             <returns>True if command can be executed, false otherwise</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper">
+             <summary>
+             Static helpers shared by all built-in SDK actions.
+             Provides safe argument parsing and faction access so individual actions
+             stay short and focus on their own logic.
+            
+             Usage pattern for a new IModTextAction:
+             <code>
+             public bool Execute(string[] args, GameCommandsReadyEvent? ctx)
+             {
+                 if (!ActionContextHelper.TryGetFloat(args, 0, out float amount, _log, CommandName))
+                     return false;
+                 if (!ActionContextHelper.TryGetFaction(ctx, out var faction, _log, CommandName))
+                     return false;
+            
+                 faction.AddResearchPoints(amount);
+                 return true;
+             }
+             </code>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetFloat(System.String[],System.Int32,System.Single@,PerAspera.Core.LogAspera,System.String)">
+            <summary>
+            Parse a required float argument.
+            Logs a warning and sets amount=0 on failure.
+            </summary>
+            <param name="args">The full arguments array</param>
+            <param name="index">Zero-based index of the argument to parse</param>
+            <param name="amount">Parsed value, or 0 if parsing fails</param>
+            <param name="log">Logger for the calling action</param>
+            <param name="actionName">Name used in the warning message</param>
+            <returns>True if parsing succeeded</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetPositiveFloat(System.String[],System.Int32,System.Single@,PerAspera.Core.LogAspera,System.String)">
+            <summary>
+            Parse a required positive float argument (> 0).
+            Logs a warning if the value is zero or negative.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetInt(System.String[],System.Int32,System.Int32@,PerAspera.Core.LogAspera,System.String)">
+            <summary>
+            Parse a required integer argument.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.GetString(System.String[],System.Int32)">
+            <summary>
+            Returns the string argument at the given index, or null if absent.
+            Never throws — safe to call with any args array.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetFaction(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent,Faction@,PerAspera.Core.LogAspera,System.String)">
+            <summary>
+            Get the NativePlayerFaction from context.
+            Logs a warning and returns null if context or faction is unavailable.
+            </summary>
+            <example>
+            <code>
+            if (!ActionContextHelper.TryGetFaction(ctx, out var faction, _log, CommandName))
+                return false;
+            faction.AddResearchPoints(500f);
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.HasFaction(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Returns true if a valid context with a non-null faction is present.
+            Useful for optional context-dependent behaviour.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.GiveSciencePointsAction">
+             <summary>
+             Built-in SDK action: gives research points directly to the player faction.
+             Registered automatically by Commands.Initialize().
+            
+             YAML usage:
+             <code>
+             launchActions:
+               - command: GiveSciencePoints
+                 arguments: ["500"]
+                 daysDelay: 0.0
+             </code>
+            
+             Arguments:
+               [0] amount — number of research points to add (required, must be positive)
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.GiveSciencePointsAction.CommandName">
+            <summary>Gets the YAML command name for this action.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.GiveSciencePointsAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Adds the specified amount of research points to the player faction.
+            </summary>
+            <param name="args">args[0] = amount (float, required, positive)</param>
+            <param name="ctx">Game context — NativePlayerFaction must be non-null</param>
+            <returns>True on success, false if arguments are invalid or faction unavailable</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowMessageAction">
+             <summary>
+             Built-in SDK action: logs a message to the BepInEx console.
+             Registered automatically by Commands.Initialize().
+            
+             YAML usage:
+             <code>
+             actions:
+               - command: ShowMessage
+                 arguments:
+                   - "Hello from my mod!"
+             </code>
+            
+             Arguments:
+               [0] message  — the text to display (required)
+               [1] level    — optional: Info (default), Warning, Error
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowMessageAction.CommandName">
+            <summary>Gets the YAML command name for this action.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowMessageAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Logs the message at the requested level via BepInEx.
+            </summary>
+            <param name="args">args[0] = message text, args[1] = level (optional)</param>
+            <param name="ctx">Game context (not required for this action)</param>
+            <returns>True if a message was provided, false otherwise</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.IModTextAction">
+             <summary>
+             Interface for custom mod-defined TextActions executable from YAML.
+             Implement this interface to create your own game commands that can be
+             triggered from YAML action files, just like native Per Aspera commands.
+             
+             Register your action with <see cref="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.Register``1"/> 
+             before the game starts, typically in your plugin's Load() method.
+             </summary>
+             <example>
+             <code>
+             public class SpawnMyUnit : IModTextAction
+             {
+                 public string CommandName => "SpawnMyUnit";
+            
+                 public bool Execute(string[] args, GameCommandsReadyEvent ctx)
+                 {
+                     string unitId = args.Length > 0 ? args[0] : "default_unit";
+                     // use ctx.NativeUniverse, ctx.NativePlayerFaction, etc.
+                     Log.LogInfo($"Spawning unit {unitId}");
+                     return true;
+                 }
+             }
+            
+             // In plugin Load():
+             ModTextActionRegistry.Register&lt;SpawnMyUnit&gt;();
+            
+             // In YAML:
+             actions:
+               - command: SpawnMyUnit
+                 arguments:
+                   - my_unit_id
+             </code>
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ModActions.IModTextAction.CommandName">
+            <summary>
+            The command name as it appears in YAML (case-insensitive).
+            Must be unique across all registered actions.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.IModTextAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Execute the action.
+            </summary>
+            <param name="args">Arguments from the YAML definition (may be empty)</param>
+            <param name="ctx">Game context — provides access to Universe, Planet, Faction, etc.
+            Will be null if Initialize() was not called before execution.</param>
+            <returns>True if the action succeeded, false if it failed</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry">
+             <summary>
+             Registry for mod-defined <see cref="T:PerAspera.GameAPI.Commands.ModActions.IModTextAction"/> implementations.
+             Actions registered here are automatically bridged into the <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>
+             and become executable from YAML action files.
+            
+             The game context (<see cref="T:PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent"/>) is injected at dispatch time
+             so actions always receive fresh Universe/Planet/Faction references.
+             </summary>
+             <example>
+             <code>
+             // Register by type (instance created automatically):
+             ModTextActionRegistry.Register&lt;SpawnMyUnit&gt;();
+            
+             // Register an existing instance:
+             ModTextActionRegistry.Register(new SpawnMyUnit());
+            
+             // Check registration:
+             bool ok = ModTextActionRegistry.IsRegistered("SpawnMyUnit");
+            
+             // List all actions:
+             foreach (var name in ModTextActionRegistry.RegisteredActions)
+                 Log.LogInfo(name);
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.Register``1">
+            <summary>
+            Register a mod action by type. The type must have a public parameterless constructor.
+            </summary>
+            <typeparam name="T">IModTextAction implementation</typeparam>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.Register(PerAspera.GameAPI.Commands.ModActions.IModTextAction)">
+            <summary>
+            Register a mod action instance.
+            </summary>
+            <param name="action">The action instance to register</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.Unregister(System.String)">
+            <summary>
+            Unregister a mod action by command name.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.IsRegistered(System.String)">
+            <summary>
+            Returns true if an action is registered for this command name.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.RegisteredActions">
+            <summary>
+            All currently registered mod action command names.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.ModTextActionRegistry.UpdateContext(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Update the game context injected into all actions at execution time.
+            Called automatically by Commands.Initialize().
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands.AddBuildingCommand">
             <summary>
@@ -3160,21 +3575,345 @@
             </summary>
             <returns>String with diagnostic information</returns>
         </member>
-        <member name="T:PerAspera.GameAPI.Commands.ResourceCommandHelper">
+        <member name="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch">
+             <summary>
+             Harmony prefix on InteractionManager.DispatchAction that intercepts any TextAction
+             whose command name is registered in <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>.
+            
+             This means custom SDK actions (e.g. ShowMessage) registered via
+             <c>Commands.RegisterAction&lt;T&gt;()</c> or <c>Commands.RegisterHandler()</c>
+             can be used directly in ANY native YAML context:
+               - SpecialProjectType.launchActions / completeActions
+               - rule-patch.yaml actions
+               - technology unlockActions
+               - anywhere the game calls InteractionManager.DispatchAction
+             </summary>
+             <example>
+             <code>
+             # project.yaml — works after Commands.RegisterAction&lt;ShowMessageAction&gt;()
+             launchActions:
+               - command: ShowMessage
+                 arguments: ['coucou']
+                 daysDelay: 0.0
+             </code>
+             </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch.CurrentSender">
             <summary>
-            Resource command execution utilities that handle IHandleable casting internally
-            to avoid exposing native types to mods.
+            The IHandleable sender of the current dispatch call.
+            Set for the duration of handler execution so actions can access the live sender.
+            Typically the Faction for SpecialProject launch actions.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Commands.ResourceCommandHelper.ExecuteResourceImportCommand(PerAspera.GameAPI.Wrappers.HandleWrapper,System.String,System.Single)">
+        <member name="M:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch.Prefix(IHandleable,GameEventBus,TextAction,System.String)">
             <summary>
-            Executes a resource import command for the specified faction using the given resource type.
-            Handles IHandleable casting internally to avoid exposing native types to mods.
+            Prefix: if the command matches a registered custom handler, execute it and
+            return false (skip native dispatch). Otherwise return true (let native run).
             </summary>
-            <param name="factionHandle">The faction handle wrapper to execute the command for</param>
-            <param name="resourceType">The resource type (e.g., "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN")</param>
-            <param name="amount">The amount of resource to add (default: 1000)</param>
-            <returns>True if the command executed successfully, false otherwise</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Patches.ValidateConstraintsPatch">
+             <summary>
+             Harmony prefix on <c>SpecialProjectType.ValidateConstraints()</c> that validates
+             custom SDK actions registered in <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>.
+            
+             Without this patch, any <c>launchAction</c> or <c>completeAction</c> that uses a
+             registered custom command is rejected at YAML load time with
+             "Invalid action command X", because the native <c>ValidateConstraints</c> uses an
+             AOT-inlined validation path that bypasses <c>InteractionParser.VerifyAction</c>.
+            
+             This patch intercepts ONLY when the project contains custom SDK commands.
+             When custom commands are present it validates ALL actions itself:
+             <list type="bullet">
+               <item>Custom commands (in <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>) are always valid.</item>
+               <item>Native commands are validated via <see cref="M:InteractionParser.VerifyAction(TextAction,System.Boolean)"/>.</item>
+             </list>
+             When no custom commands are present the native method runs unchanged.
+             </summary>
+             <example>
+             <code>
+             # project.yaml — passes validation at load time with this patch
+             launchActions:
+               - command: GiveSciencePoints
+                 arguments: ['2000']
+                 daysDelay: 0.0
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Patches.ValidateConstraintsPatch.Prefix(SpecialProjectType,System.Boolean@)">
+            <summary>
+            Prefix: when the project has at least one custom SDK action, validate all
+            actions ourselves and skip the native method (which would reject custom commands).
+            </summary>
+            <param name="__instance">The <see cref="T:SpecialProjectType"/> being validated.</param>
+            <param name="__result">Return value injected by HarmonyX.</param>
+            <returns>
+            <c>false</c> (skip native) when custom commands are present;
+            <c>true</c> (run native) otherwise.
+            </returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Patches.ValidateConstraintsPatch.CollectActions(SpecialProjectType)">
+            <summary>
+            Collects all <see cref="T:TextAction"/> entries from <c>launchActions</c> and
+            <c>completeActions</c> on the given <see cref="T:SpecialProjectType"/> instance.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Patches.VerifyActionPatch">
+             <summary>
+             Harmony prefix on <c>InteractionParser.VerifyAction</c> that bypasses the native
+             validation for any <see cref="T:TextAction"/> whose command is registered in
+             <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>.
+            
+             Without this patch the game rejects custom commands at YAML load time
+             (SpecialProjectType.ValidateConstraints → VerifyAction → "Invalid action command")
+             even though the runtime dispatch would work correctly via
+             <see cref="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch"/>.
+            
+             With this patch, load-time validation passes for all registered custom commands,
+             allowing them to be used in launchActions, completeActions, unlockActions, etc.
+             </summary>
+             <example>
+             <code>
+             # project.yaml — now valid at load time AND dispatched at runtime
+             launchActions:
+               - command: ShowMessage
+                 arguments: ['coucou']
+                 daysDelay: 0.0
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Patches.VerifyActionPatch.Prefix(TextAction,System.Boolean@)">
+            <summary>
+            Prefix: if the TextAction's command is a registered custom handler,
+            set result to true and skip the native method (which would return false).
+            </summary>
+            <param name="action">The TextAction being validated.</param>
+            <param name="__result">Output result injected by HarmonyX.</param>
+            <returns>false = skip native (our result is used); true = let native run.</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ResourceCommandHelper">
+            <summary>
+            Resource command execution utilities using pure reflection.
+            Provides a type-safe facade over the game's resource import console commands.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ResourceCommandHelper.ExecuteResourceImportCommand(System.String,System.String,System.Single)">
+            <summary>
+            Executes a resource import command for the specified faction via the game console.
+            Internally builds the "ImportResource &lt;faction&gt; &lt;resourceType&gt; &lt;amount&gt;" command string.
+            </summary>
+            <param name="factionName">The faction identifier (e.g. "PlayerFaction").</param>
+            <param name="resourceType">The resource type key (e.g. "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN").</param>
+            <param name="amount">Amount of resource to add (default: 1000).</param>
+            <returns>True if the command was dispatched without exception, false otherwise.</returns>
+            <example>
+            <code>
+            ResourceCommandHelper.ExecuteResourceImportCommand("PlayerFaction", "WATER", 5000f);
+            </code>
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition">
+            <summary>
+            Represents a single action entry in a YAML actions block.
+            Matches the native TextAction format used by technology.yaml and rule.yaml.
+            </summary>
+            <example>
+            <code>
+            # In technology.yaml or a custom actions.yaml:
+            actions:
+              - command: UnlockBuilding
+                arguments:
+                  - PlayerFaction
+                  - building_water_mine
+                daysDelay: 0.0
+                showInFrontend: false
+              - command: FinishConstructions
+                arguments: []
+                daysDelay: 0.0
+                showInFrontend: false
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.Command">
+            <summary>
+            Console command name (e.g. "UnlockBuilding", "FinishConstructions", "SetEngineTimescale").
+            Case-insensitive match with native game console commands.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.Arguments">
+            <summary>
+            Ordered list of arguments passed to the command.
+            Matches the native TextAction.arguments field.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.DaysDelay">
+            <summary>
+            Delay in in-game days before this action executes.
+            0.0 means execute immediately.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.ShowInFrontend">
+            <summary>
+            Whether this action should be visible in the game frontend UI.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.Label">
+            <summary>
+            Optional human-readable label for debugging and logging.
+            Not used by the game engine.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition.ToString">
+            <summary>
+            Returns a short string representation for logging purposes.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Yaml.YamlActionsFile">
+            <summary>
+            Represents a standalone YAML file containing a list of actions to execute.
+            Use when you want to define actions in a dedicated file (e.g. startup-actions.yaml).
+            </summary>
+            <example>
+            <code>
+            # startup-actions.yaml
+            actions:
+              - command: FinishConstructions
+                arguments: []
+                daysDelay: 0.0
+                showInFrontend: false
+              - command: ImportResource
+                arguments:
+                  - PlayerFaction
+                  - Water
+                  - "1000"
+                daysDelay: 0.0
+                showInFrontend: false
+            </code>
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.Yaml.YamlActionsFile.Actions">
+            <summary>
+            List of actions to execute.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor">
+             <summary>
+             Executes YAML-defined actions using a hybrid strategy:
+               1. If the command is a known native SDK command → dispatches via InteractionManager (TextAction)
+               2. Otherwise → falls back to ConsoleWrapper.ExecuteCommandString (all console commands)
+            
+             This allows every debug console command (~) to be driven from YAML.
+             </summary>
+             <example>
+             <code>
+             var actions = YamlCommandsParser.ParseFile("startup-actions.yaml");
+             int executed = YamlCommandsExecutor.ExecuteActions(actions);
+             Log.Info($"Executed {executed} / {actions.Count} actions");
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.Initialize(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Initializes the native game context from a GameCommandsReadyEvent.
+            Must be called before native command dispatch (UnlockKnowledge, UnlockBuilding, etc.).
+            </summary>
+            <example>
+            <code>
+                YamlCommandsExecutor.Initialize(evt);
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.ExecuteAction(PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition)">
+            <summary>
+            Execute a single YAML action definition.
+            Uses native TextAction dispatch for known SDK commands, console fallback for all others.
+            </summary>
+            <param name="action">Action to execute</param>
+            <returns>True if the action was dispatched without error</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.ExecuteActions(System.Collections.Generic.List{PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition})">
+            <summary>
+            Execute all actions in the list, in order.
+            </summary>
+            <param name="actions">List of actions to execute</param>
+            <returns>Number of actions that executed without error</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.ExecuteFile(System.String)">
+            <summary>
+            Parse and execute all actions from a YAML file.
+            </summary>
+            <param name="filePath">Absolute path to the YAML file</param>
+            <returns>Number of actions that executed without error, -1 if parse failed</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.ExecuteViaNativeTextAction(PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition)">
+            <summary>
+            Dispatch via native TextAction through InteractionManager using pure reflection.
+            This is the same path the game uses for technology.yaml actions.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.ExecuteViaConsole(PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition)">
+            <summary>
+            Execute via the game debug console using pure reflection.
+            Works for ALL console commands including those not in the native SDK.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.BuildConsoleCommandString(PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition)">
+            <summary>
+            Build "CommandName arg1 arg2 ..." string for console execution.
+            Arguments are space-separated; arguments containing spaces are quoted.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.DispatchNativeTextAction(System.Object)">
+            <summary>
+            Dispatch a native TextAction through the game's static InteractionManager.DispatchAction.
+            Uses stored player faction + gameEventBus — set via Initialize().
+            Selects the 4-param static overload to avoid AmbiguousMatchException.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Yaml.YamlCommandsParser">
+             <summary>
+             Parses YAML action definitions from strings or files.
+             Supports two formats:
+               - Inline list: a YAML string/file whose root is a list of action objects
+               - Wrapped file: a YAML file with a root "actions:" key (YamlActionsFile format)
+             </summary>
+             <example>
+             <code>
+             // Parse from raw YAML string
+             var actions = YamlCommandsParser.ParseString(@"
+               - command: FinishConstructions
+                 arguments: []
+                 daysDelay: 0.0
+                 showInFrontend: false
+             ");
+            
+             // Parse from a dedicated actions file
+             var actions = YamlCommandsParser.ParseFile(@"C:\mods\my-mod\startup-actions.yaml");
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsParser.ParseString(System.String)">
+            <summary>
+            Parse a YAML string containing an "actions:" block (YamlActionsFile format).
+            The root key must be "actions:".
+            </summary>
+            <param name="yamlContent">YAML string with root "actions:" key</param>
+            <returns>List of action definitions, or empty list on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsParser.ParseList(System.String)">
+            <summary>
+            Parse a raw YAML list of actions (no root key wrapper).
+            The YAML root is directly a sequence of action objects.
+            </summary>
+            <param name="yamlContent">YAML string where root is a list</param>
+            <returns>List of action definitions, or empty list on failure</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsParser.ParseFile(System.String)">
+            <summary>
+            Parse a YAML file containing an "actions:" block.
+            Automatically tries YamlActionsFile format first, then raw list as fallback.
+            </summary>
+            <param name="filePath">Absolute path to the YAML file</param>
+            <returns>List of action definitions, or empty list if file not found or parse fails</returns>
         </member>
     </members>
 </doc>

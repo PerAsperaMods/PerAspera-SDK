@@ -1,8 +1,8 @@
 using Iced.Intel;
+using PerAspera.GameAPI;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.SDK;
-using PerAspera.GameAPI.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,7 @@ namespace PerAspera.GameAPI.Events.SDK
         {
             try
             {
-                var baseGame = PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent();
+                var baseGame = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
                 if (baseGame?.GetUniverse()?.GetPlanet() != null)
                 {
                     return new TwitchGameContext(baseGame);
@@ -79,52 +79,18 @@ namespace PerAspera.GameAPI.Events.SDK
         public int ActiveBuildings { get; }
         public DateTime SnapshotTime { get; }
         
-        public TwitchGameContext(PerAspera.GameAPI.Wrappers.BaseGameWrapper baseGame)
+        public TwitchGameContext(BaseGame? baseGame)
         {
             SnapshotTime = DateTime.UtcNow;
             IsGameLoaded = baseGame != null;
-            BaseGameWrapper _b= baseGame;
-            GameAPI.Wrappers.UniverseWrapper _u= _b.GetUniverse();
-            GameAPI.Wrappers.PlanetWrapper _p= _u.GetPlanet();
-            if (_u != null)
-            {
-                HasActivePlanet = true;
-                PlanetName = _p.Name ?? "Unknown Planet";
-                
-                try
-                {
-                    // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
-                    // Safely get climate data
-                    // Temperature = _p.Atmosphere.Temperature;
-                    // Pressure = _p.Atmosphere.TotalPressure;
-                    // Oxygen = _p.Atmosphere.Composition["O2"].PartialPressure;
-                    Temperature = 210.0f; // Default Martian temperature
-                    Pressure = 6.77f; // Default Martian pressure
-                    Oxygen = 0.13f; // Default Martian oxygen partial pressure
-
-                    // Safely get building counts
-                    var faction = _u.GetPlayerFaction();
-                    var buildingsList = faction.GetBuildings();
-                    TotalBuildings = buildingsList?.Count ?? 0;
-                    if (buildingsList != null)
-                    {
-                        ActiveBuildings = buildingsList.Where(b => b != null && b.IsActive).Count();
-                    }
-                    else
-                    {
-                        ActiveBuildings = 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    PerAspera.Core.LogAspera.LogError($"Failed to capture complete game context: {ex.Message}");
-                }
-            }
-            else
-            {
-                HasActivePlanet = false;
-                PlanetName = "No Active Planet";
-            }
+            // TODO: Re-implement once native Planet/Universe access patterns are established
+            HasActivePlanet = false;
+            PlanetName = "Mars";
+            Temperature = 210.0f;
+            Pressure = 6.77f;
+            Oxygen = 0.13f;
+            TotalBuildings = 0;
+            ActiveBuildings = 0;
         }
     }
 
@@ -170,7 +136,7 @@ namespace PerAspera.GameAPI.Events.SDK
             {
                 // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
                 // Apply climate boost via Climate wrapper
-                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // GameAPI.Wrappers.PlanetWrapper _p= GameTypeInitializer.GetBaseGameInstance() as BaseGame.GetUniverse().GetPlanet();
                 // var climateWrapper = _p;
                 // climateWrapper?.Atmosphere.ModifyTemperature(SuggestedTemperatureBoost, EffectDuration, $"Twitch follower: {DisplayName}");
                 
@@ -247,7 +213,7 @@ namespace PerAspera.GameAPI.Events.SDK
             try
             {
                 // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
-                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // GameAPI.Wrappers.PlanetWrapper _p= GameTypeInitializer.GetBaseGameInstance() as BaseGame.GetUniverse().GetPlanet();
                 // var climateWrapper = _p.Atmosphere;
                 // if (climateWrapper == null) return false;
                 
@@ -326,7 +292,7 @@ namespace PerAspera.GameAPI.Events.SDK
             {
                 // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
                 // For immediate effect, apply a temporary massive boost
-                // GameAPI.Wrappers.PlanetWrapper _p= PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent().GetUniverse().GetPlanet();
+                // GameAPI.Wrappers.PlanetWrapper _p= GameTypeInitializer.GetBaseGameInstance() as BaseGame.GetUniverse().GetPlanet();
                 // var climateWrapper = _p.Atmosphere;
                 // if (climateWrapper != null)
                 // {

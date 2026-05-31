@@ -1,8 +1,8 @@
 using System;
 using PerAspera.Core;
+using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate;
 using PerAspera.GameAPI.Climate.Tests;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Climate.Examples
 {

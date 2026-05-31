@@ -1,5 +1,6 @@
 using PerAspera.GameAPI.Events.Integration;
 using PerAspera.GameAPI.Events.Core;
+using PerAspera.GameAPI;
 using PerAspera.Core;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -11,7 +12,6 @@ using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Constants;
-using PerAspera.GameAPI.Wrappers;
 namespace PerAspera.GameAPI.Events
 {
     /// <summary>
@@ -187,10 +187,13 @@ namespace PerAspera.GameAPI.Events
             {
                 var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.BaseGame");
                 
-                // Apply BaseGame patches for OnLoadFinished event
+                // Apply BaseGame patches for OnLoadFinished + GameFullyLoaded events
                 harmony.PatchAll(typeof(Patches.BaseGamePatches));
                 
-                Log.LogInfo("✅ BaseGame Harmony patches applied successfully");
+                // Apply BaseGame.Update one-shot patch for GameCommandsReadyEvent
+                harmony.PatchAll(typeof(Patches.BaseGameUpdatePatches));
+                
+                Log.LogInfo("✅ BaseGame Harmony patches applied successfully (incl. GameCommandsReady)");
             }
             catch (System.Exception ex)
             {
@@ -224,6 +227,7 @@ namespace PerAspera.GameAPI.Events
         private static void OnGameStarted(PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent evt)
         {
             _staticLogger?.LogInfo($"🎮 New game started: {evt.GameMode} - attempting to emit GameHubInitializedEvent");
+            Patches.BaseGameUpdatePatches.ResetForNewSession();
             EmitGameHubInitializedEvent("NewGameStarted");
         }
 
@@ -233,6 +237,7 @@ namespace PerAspera.GameAPI.Events
         private static void OnGameLoaded(PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent evt)
         {
             _staticLogger?.LogInfo($"🎮 Game loaded: {evt.SaveGameName} - attempting to emit GameHubInitializedEvent");
+            Patches.BaseGameUpdatePatches.ResetForNewSession();
             EmitGameHubInitializedEvent("GameLoaded");
         }
 
@@ -254,14 +259,14 @@ namespace PerAspera.GameAPI.Events
                 _staticLogger?.LogInfo($"🎯 {triggerSource} triggered - checking BaseGame accessibility...");
 
                 // Access BaseGame through SDK wrapper
-                var baseGame = BaseGameWrapper.GetCurrent();
+                var baseGame = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
                 if (baseGame != null)
                 {
                     _staticLogger?.LogInfo("🎮 BaseGame confirmed accessible - emitting all SDK events");
                     
                     // Create and emit GameHubInitializedEvent 
                     var gameHubEvent = new GameHubInitializedEvent(
-                        baseGame.GetNativeObject(),
+                        (object)baseGame,
                         isReady: true
                     );
                     EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, gameHubEvent);
@@ -277,8 +282,8 @@ namespace PerAspera.GameAPI.Events
                     
                     // Emit GameFullyLoadedEvent (backup for CommandsDemo)
                     var gameFullyLoadedEvent = new GameFullyLoadedEvent(
-                        baseGame.GetNativeObject(),
-                        baseGame.GetNativeObject(), // universe  baseGame.getUniverse() noramlement
+                        (object)baseGame,
+                        (object)baseGame, // universe  baseGame.getUniverse() noramlement
                         null // planet might not be available yet
                     );
                     EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);

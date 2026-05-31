@@ -1,14 +1,17 @@
 using System;
-using PerAspera.Core;
-using PerAspera.GameAPI.Climate.Configuration;
-using PerAspera.GameAPI.Climate.Simulation;
-using PerAspera.GameAPI.Climate.Patches;
-using PerAspera.GameAPI.Climate.Integration;
 using PerAspera.GameAPI.Wrappers;
+using PerAspera.Core;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Climate.Configuration;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Climate.Simulation;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Climate.Patches;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Climate.Integration;
 using System.Linq;
 
 // Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Climate.Atmosphere
-using PlanetWrapped = PerAspera.GameAPI.Wrappers.PlanetWrapper;
 
 namespace PerAspera.GameAPI.Climate
 {
@@ -33,7 +36,7 @@ namespace PerAspera.GameAPI.Climate
         private TerraformingGraphDataProvider? _graphDataProvider;
         private AtmosphereGrid? _atmosphereGrid;
         
-        private PlanetWrapped? _planet;
+        private PlanetWrapper? _planet;
         private bool _isActive = false;
         private bool _resourceBasedMode = false;
         private DateTime _lastUpdate = DateTime.Now;
@@ -51,7 +54,7 @@ namespace PerAspera.GameAPI.Climate
         /// Enable climate control for the specified planet
         /// Activates Harmony patches for bidirectional control
         /// </summary>
-        public void EnableClimateControl(PlanetWrapped planet)
+        public void EnableClimateControl(PlanetWrapper planet)
         {
             _planet = planet ?? throw new ArgumentNullException(nameof(planet));
             _isActive = true;

@@ -1,0 +1,82 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Organization-Wiki/**'
+
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Clone wiki
+        run: |
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git _wiki
+
+      - name: Sync files
+        run: |
+          SRC="Organization-Wiki"
+          DST="_wiki"
+
+          # Root-level .md files (skip README and MIGRATION-REPORT)
+          for f in "$SRC"/*.md; do
+            name=$(basename "$f")
+            if [[ "$name" != "README.md" && "$name" != "MIGRATION-REPORT.md" ]]; then
+              cp "$f" "$DST/$name"
+              echo "Copied: $name"
+            fi
+          done
+
+          # Subdirectories → flattened with prefix
+          declare -A DIRS=(
+            [advanced]="Advanced"
+            [architecture]="Architecture"
+            [agents]="Agents"
+            [community]="Community"
+            [development]="Development"
+            [guides]="Guide"
+            [native-classes]="Native"
+            [reference]="Reference"
+            [sdk]="SDK"
+            [technical]="Technical"
+            [troubleshooting]="Troubleshooting"
+            [tutorials]="Tutorial"
+            [getting-started]="GettingStarted"
+          )
+
+          for dir in "${!DIRS[@]}"; do
+            prefix="${DIRS[$dir]}"
+            dirpath="$SRC/$dir"
+            if [ -d "$dirpath" ]; then
+              for f in "$dirpath"/*.md; do
+                [ -f "$f" ] || continue
+                name=$(basename "$f")
+                newname="${prefix}-${name}"
+                cp "$f" "$DST/$newname"
+                echo "Copied: $dir/$name → $newname"
+              done
+            fi
+          done
+
+      - name: Commit and push wiki
+        run: |
+          cd _wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+          else
+            COMMIT_SHA="${{ github.sha }}"
+            git commit -m "docs: sync from Organization-Wiki (${COMMIT_SHA:0:7})"
+            git push
+          fi

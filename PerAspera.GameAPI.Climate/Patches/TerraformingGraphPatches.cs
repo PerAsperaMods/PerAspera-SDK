@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Integration;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Climate.Patches
 {

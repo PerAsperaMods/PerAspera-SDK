@@ -1,4 +1,3 @@
-﻿using PerAspera.GameAPI.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +29,7 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
         }
 
         // TODO: Implement cellular temperature and pressure properties
-        public float Temperature => 288.15f; // Default 15°C in Kelvin
+        public float Temperature => 288.15f; // Default 15�C in Kelvin
         public float TotalPressure => 101.325f; // Default 1 atm in kPa
 
         public void Activate()

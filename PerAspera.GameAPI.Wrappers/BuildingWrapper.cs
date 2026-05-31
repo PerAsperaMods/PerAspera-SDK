@@ -60,7 +60,7 @@ namespace PerAspera.GameAPI.Wrappers
         public BuildingTypeWrapper GetBuildingType()
         {
             
-            return  new BuildingTypeWrapper(SafeInvoke<GameAPI.Native.BuildingType>("get_buildingType"));
+            return  new BuildingTypeWrapper(SafeInvoke<Native.BuildingTypeNative>("get_buildingType"));
         }
         
         /// <summary>

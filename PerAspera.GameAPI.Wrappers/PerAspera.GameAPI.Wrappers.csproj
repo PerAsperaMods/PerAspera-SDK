@@ -5,7 +5,7 @@
 	<PropertyGroup>
 		<AssemblyName>PerAspera.GameAPI.Wrappers</AssemblyName>
 		<RootNamespace>PerAspera.GameAPI.Wrappers</RootNamespace>
-		<PackageId>PerAspera.GameAPI.Wrappers</PackageId>
+		<PackageId>PerAspera.GameAPI.Wrappers</PackageId><Version>1.1.0</Version><IsPackable>true</IsPackable>
 		<Description>Public API wrappers for Per Aspera game classes - Safe abstraction layer for modders</Description>
 		<PackageTags>per-aspera;wrappers;api;modding;public-api</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
@@ -19,7 +19,6 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="PerAspera.GameLibs.Complete" Version="2.0.0-complete" />
 	</ItemGroup>
 
 	<!-- Project References -->
@@ -31,4 +30,5 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Database\PerAspera.GameAPI.Database.csproj" />
 	</ItemGroup>
 </Project>
+
 

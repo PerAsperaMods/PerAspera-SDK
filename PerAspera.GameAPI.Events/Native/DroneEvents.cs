@@ -2,7 +2,6 @@
 // - BaseGame.md: lambda handlers _SubscribeEventHandlers_b__198_1/2 (Drone sender, ref GameEvent evt)
 
 using PerAspera.GameAPI.Events.Core;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Events.Native
 {

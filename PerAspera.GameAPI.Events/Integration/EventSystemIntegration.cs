@@ -3,7 +3,6 @@ using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Events.Constants;
 using PerAspera.GameAPI.Events.Helpers;
-using PerAspera.GameAPI.Wrappers;
 using PerAspera.Core;
 using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 
@@ -183,7 +182,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 if (nativeBuildingInstance != null)
                 {
                     // Use WrapperFactory for safe conversion
-                    evt.Building = new BuildingWrapper(nativeBuildingInstance);
+                    evt.Building = (nativeBuildingInstance as Building);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -211,7 +210,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building =new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
+                    evt.Building =(nativeBuildingInstance as Building);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -235,7 +234,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
+                    evt.Building = (nativeBuildingInstance as Building);
                 }
                 
                 evt.NewTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";
@@ -260,7 +259,7 @@ namespace PerAspera.GameAPI.Events.Integration
                 var nativeBuildingInstance = ExtractBuildingFromPayload(nativeData);
                 if (nativeBuildingInstance != null)
                 {
-                    evt.Building = new GameAPI.Wrappers.BuildingWrapper(nativeBuildingInstance);
+                    evt.Building = (nativeBuildingInstance as Building);
                 }
                 
                 evt.BuildingTypeKey = ExtractBuildingType(nativeData) ?? "Unknown";

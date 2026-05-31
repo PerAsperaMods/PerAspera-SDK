@@ -21,7 +21,7 @@ namespace PerAspera.GameAPI.Wrappers
     {
         //private Atmosphere? _atmosphere;
         //private PerAspera.GameAPI.Climate.Atmosphere? atmosphereGrid;
-        private Native.Planet? _nativePlanet;
+        private Native.PlanetNative? _nativePlanet;
 
         /// <summary>
         /// Initialize Planet wrapper with native planet object
@@ -39,7 +39,7 @@ namespace PerAspera.GameAPI.Wrappers
             // Initialize native planet reference for direct access
             try
             {
-                _nativePlanet = new Native.Planet(nativePlanet);
+                _nativePlanet = new Native.PlanetNative(nativePlanet);
             }
             catch (Exception ex)
             {

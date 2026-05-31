@@ -14,6 +14,9 @@
     <Product>Per Aspera Modding SDK - Generic Overrides System</Product>
     <Description>Generic getter override system with type-safe patching, strategies, and auto-discovery for Per Aspera modding.</Description>
     <Version>2.0.0</Version>
+    <PackageId>PerAspera.GameAPI.Overrides</PackageId>
+    <IsPackable>true</IsPackable>
+    <PackageTags>per-aspera;overrides;patching;harmony;modding</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,5 +31,6 @@
   </ItemGroup>
 
 </Project>
+
 
 

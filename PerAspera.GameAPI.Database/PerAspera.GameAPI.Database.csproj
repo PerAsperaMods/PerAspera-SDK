@@ -8,6 +8,11 @@
     <RootNamespace>PerAspera.GameAPI.Database</RootNamespace>
     <OutputPath>..\..\Individual-Mods\YAMLDataInterceptor\lib\</OutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageId>PerAspera.GameAPI.Database</PackageId>
+    <Version>1.1.0</Version>
+    <IsPackable>true</IsPackable>
+    <Description>Per Aspera Game API Database - YAML and SQLite database management</Description>
+    <PackageTags>per-aspera;database;yaml;sqlite;datamodel</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,12 +22,13 @@
 
   <ItemGroup>
     <Reference Include="BepInEx.Core">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\Per Aspera\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <HintPath>$(GameDir)\BepInEx\core\BepInEx.Core.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Unity.IL2CPP">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\Per Aspera\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <HintPath>$(GameDir)\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
     </Reference>
   </ItemGroup>
 
 </Project>
+
 

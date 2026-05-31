@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Configuration;
 using PerAspera.GameAPI.Climate.Domain;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Climate.Simulation
 {

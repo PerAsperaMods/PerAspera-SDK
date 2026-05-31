@@ -6,6 +6,8 @@
 		<AssemblyName>PerAspera.GameAPI.Events</AssemblyName>
 		<RootNamespace>PerAspera.GameAPI.Events</RootNamespace>
 		<PackageId>PerAspera.GameAPI.Events</PackageId>
+		<Version>1.1.0</Version>
+		<IsPackable>true</IsPackable>
 		<Description>Public event API for Per Aspera - Native and custom game events</Description>
 		<PackageTags>per-aspera;events;gameapi;modding;event-system</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
@@ -19,18 +21,14 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="PerAspera.GameLibs.Complete" Version="2.0.0-complete" />
 	</ItemGroup>
 
 	<!-- Project References -->
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Native\PerAspera.GameAPI.Native.csproj" />
 	</ItemGroup>
-	
-	<!-- Direct DLL References for Wrappers -->
-	<ItemGroup>
-		<Reference Include="F:\ModPeraspera\SDK\PerAspera.GameAPI.Wrappers\bin\Release\net6.0\PerAspera.GameAPI.Wrappers.dll" />
-	</ItemGroup>
+
 </Project>
 

@@ -1,6 +1,5 @@
 using System;
 using PerAspera.GameAPI.Events.Core;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Events.Data
 {

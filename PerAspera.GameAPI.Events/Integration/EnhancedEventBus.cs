@@ -80,6 +80,20 @@ namespace PerAspera.GameAPI.Events.Integration
         /// Fires when BaseGame instance is first created
         /// ✅ Use this for early game initialization hooks
         /// </summary>
+        /// <summary>
+        /// Subscribe to GameCommandsReady event.
+        /// Fires on the first BaseGame.Update() tick — InteractionManager and Console are guaranteed ready.
+        /// ✅ Use this instead of SubscribeToGameFullyLoaded when you need to dispatch YAML/native game commands.
+        /// </summary>
+        public static void SubscribeToGameCommandsReady(Action<GameCommandsReadyEvent> onGameCommandsReady)
+        {
+            if (onGameCommandsReady == null)
+                throw new ArgumentNullException(nameof(onGameCommandsReady));
+
+            _logger.Info("Subscribed to GameCommandsReady event");
+            RegisterHandler(typeof(GameCommandsReadyEvent), onGameCommandsReady);
+        }
+
         public static void SubscribeToBaseGameCreated(Action<BaseGameCreatedEvent> onBaseGameCreated)
         {
             if (onBaseGameCreated == null)

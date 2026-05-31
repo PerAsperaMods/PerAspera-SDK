@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core.IL2CPP;
@@ -10,7 +10,7 @@ namespace PerAspera.GameAPI.Wrappers
     /// Wrapper for native TextAction class
     /// Handles command creation for InteractionManager.DispatchAction
     /// 
-    /// 📚 Native Structure:
+    /// ?? Native Structure:
     /// - daysDelay: float - Delay before execution
     /// - command: string - Command name (e.g., "FactionAddResourceDistributed")  
     /// - arguments: List<string> - Command parameters

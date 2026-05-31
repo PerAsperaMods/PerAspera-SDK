@@ -26,6 +26,9 @@ namespace PerAspera.GameAPI.Events.Constants
         /// <summary>Event: BaseGame.OnFinishLoading() completed (exact loading finish moment)</summary>
         public const string OnLoadFinished = "OnLoadFinished";
         
+        /// <summary>Event: Game first Update tick — InteractionManager and Console are guaranteed ready. Use this to dispatch game commands from YAML.</summary>
+        public const string GameCommandsReady = "GameCommandsReady";
+        
         /// <summary>Event: Blackboard system initialized (variable storage ready)</summary>
         public const string BlackboardInitialized = "BlackboardInitialized";
         

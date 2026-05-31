@@ -2,7 +2,6 @@ using HarmonyLib;
 using PerAspera.Core;
 using System;
 using System.Collections.Generic;
-using PerAspera.GameAPI.Wrappers;
 
 // Alias pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Wrappers.Atmosphere
 // TODO: Update for cellular atmosphere architecture

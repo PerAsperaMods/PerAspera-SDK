@@ -1,95 +1,83 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Wrappers;
-using PerAspera.GameAPI.Wrappers.Core;
-using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Commands
 {
     /// <summary>
-    /// Resource command execution utilities that handle IHandleable casting internally
-    /// to avoid exposing native types to mods.
+    /// Resource command execution utilities using pure reflection.
+    /// Provides a type-safe facade over the game's resource import console commands.
     /// </summary>
     public static class ResourceCommandHelper
     {
-        private static ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ResourceCommandHelper");
+        private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("ResourceCommandHelper");
+        private static System.Type? _consoleType;
 
         /// <summary>
-        /// Executes a resource import command for the specified faction using the given resource type.
-        /// Handles IHandleable casting internally to avoid exposing native types to mods.
+        /// Executes a resource import command for the specified faction via the game console.
+        /// Internally builds the "ImportResource &lt;faction&gt; &lt;resourceType&gt; &lt;amount&gt;" command string.
         /// </summary>
-        /// <param name="factionHandle">The faction handle wrapper to execute the command for</param>
-        /// <param name="resourceType">The resource type (e.g., "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN")</param>
-        /// <param name="amount">The amount of resource to add (default: 1000)</param>
-        /// <returns>True if the command executed successfully, false otherwise</returns>
-        public static bool ExecuteResourceImportCommand(HandleWrapper factionHandle, string resourceType, float amount = 1000f)
+        /// <param name="factionName">The faction identifier (e.g. "PlayerFaction").</param>
+        /// <param name="resourceType">The resource type key (e.g. "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN").</param>
+        /// <param name="amount">Amount of resource to add (default: 1000).</param>
+        /// <returns>True if the command was dispatched without exception, false otherwise.</returns>
+        /// <example>
+        /// <code>
+        /// ResourceCommandHelper.ExecuteResourceImportCommand("PlayerFaction", "WATER", 5000f);
+        /// </code>
+        /// </example>
+        public static bool ExecuteResourceImportCommand(string factionName, string resourceType, float amount = 1000f)
         {
-            if (factionHandle == null)
+            if (string.IsNullOrEmpty(factionName))
             {
-                _logger.LogError("ResourceCommandHelper: Faction handle cannot be null");
+                _logger.LogError("ResourceCommandHelper: factionName cannot be null or empty");
                 return false;
             }
 
             if (string.IsNullOrEmpty(resourceType))
             {
-                _logger.LogError("ResourceCommandHelper: Resource type cannot be null or empty");
+                _logger.LogError("ResourceCommandHelper: resourceType cannot be null or empty");
                 return false;
             }
 
             try
             {
-                // Get GameEventBus from player faction via SDK wrappers
-                var baseGame = PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent();
-                if (baseGame == null)
+                _consoleType ??= ReflectionHelpers.FindType("Console");
+                if (_consoleType == null)
                 {
-                    _logger.LogError("ResourceCommandHelper: Cannot get BaseGame instance");
+                    _logger.LogError("ResourceCommandHelper: Console type not found via reflection");
                     return false;
                 }
 
-                var universe = baseGame.GetUniverse();
-                if (universe == null)
+                var instanceProp = _consoleType.GetProperty(
+                    "instance",
+                    BindingFlags.Static | BindingFlags.Public);
+                var consoleInstance = instanceProp?.GetValue(null);
+                if (consoleInstance == null)
                 {
-                    _logger.LogError("ResourceCommandHelper: Cannot get Universe instance");
+                    _logger.LogError("ResourceCommandHelper: Console.instance is null (game not ready?)");
                     return false;
                 }
 
-                var playerFaction = universe.GetPlayerFaction();
-                if (playerFaction == null)
+                var execMethod = _consoleType.GetMethod(
+                    "ExecuteCommandString",
+                    BindingFlags.Public | BindingFlags.Instance);
+                if (execMethod == null)
                 {
-                    _logger.LogError("ResourceCommandHelper: Cannot get player faction");
+                    _logger.LogError("ResourceCommandHelper: Console.ExecuteCommandString method not found");
                     return false;
                 }
 
-                var gameEventBus = playerFaction.GetGameEventBus();
-                if (gameEventBus == null)
-                {
-                    _logger.LogError("ResourceCommandHelper: Cannot get GameEventBus from player faction");
-                    return false;
-                }
-
-                // Create TextAction using wrapper
-                var textAction = PerAspera.GameAPI.Wrappers.TextActionWrapper.CreateAddResource(resourceType, (int)amount);
-                if (textAction == null)
-                {
-                    _logger.LogError($"ResourceCommandHelper: Failed to create TextAction for resource {resourceType}");
-                    return false;
-                }
-                // Execute the command using InteractionManagerWrapper
-                return playerFaction.GetInteractionManager().DispatchAction(
-                    factionHandle.GetNativeObject(), // Handle is IHandleable
-                    gameEventBus,
-                    textAction.GetNativeTextActionObject(),
-                    $"ResourceImport_{resourceType}_{amount}"
-                );
+                string cmd = $"ImportResource {factionName} {resourceType} {(int)amount}";
+                _logger.LogInfo($"[ResourceCommandHelper] Executing: {cmd}");
+                execMethod.Invoke(consoleInstance, new object[] { cmd });
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"ResourceCommandHelper: Failed to execute resource import command: {ex.Message}");
+                _logger.LogError($"ResourceCommandHelper: Exception executing resource import: {ex.Message}");
                 return false;
             }
         }

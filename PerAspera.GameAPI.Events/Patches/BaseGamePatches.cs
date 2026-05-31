@@ -50,6 +50,9 @@ namespace PerAspera.GameAPI.Events.Patches
                     var gameFullyLoadedEvent = new GameFullyLoadedEvent(nativeBaseGame, nativeUniverse, nativePlanet);
                     EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);
                     _logger.Info("✅ GameFullyLoadedEvent dispatched successfully");
+
+                    // Signal Update patch: game load done — fire GameCommandsReadyEvent next frame
+                    BaseGameUpdatePatches.GameLoadComplete = true;
                 }
                 else
                 {

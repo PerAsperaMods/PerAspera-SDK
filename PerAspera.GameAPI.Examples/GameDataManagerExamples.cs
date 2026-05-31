@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Database;
 
 namespace PerAspera.Examples

@@ -7,6 +7,7 @@
 		<RootNamespace>PerAspera.Core</RootNamespace>
 		<PackageId>PerAspera.Core</PackageId>
 		<Version>1.1.0</Version>
+		<IsPackable>true</IsPackable>
 		<Description>Per Aspera Core - Low-level utilities and IL2CPP extensions for mod development</Description>
 		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>

@@ -26,9 +26,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Get the native blackboard object (safely typed)
         /// </summary>
-        public Native.Blackboard? GetNativeObject()
+        public Blackboard? GetNativeObject()
         {
-            return NativeObject as Native.Blackboard;
+            return NativeObject as Blackboard;
         }
         /// <summary>
         /// Get the name of this blackboard instance

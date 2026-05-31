@@ -1,9 +1,11 @@
-﻿using BepInEx.Unity.IL2CPP;
+using BepInEx.Unity.IL2CPP;
 using LlockhamIndustries.Decals;
-using PerAspera.Core;
-using PerAspera.GameAPI.Events.Integration;
-using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Wrappers;
+using PerAspera.Core;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Events.Integration;
+using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI.Events.SDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +28,7 @@ namespace PerAspera.GameAPI.Climate
 
         private void OnLoadFinished(GameFullyLoadedEvent @event)
         {
-            _planet = @event.PlanetWrapper;
+            _planet = @event.PlanetWrapper != null ? new PlanetWrapper(@event.PlanetWrapper) : null;
             _atmosphereGrid = new AtmosphereGrid(_planet.GetNativeObject()); // Get native planet object
             _atmosphereGrid.InitializeGrid();
             _atmosphereGrid.EnableClimateControl(); // Enable overrides directly

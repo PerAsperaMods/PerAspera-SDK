@@ -1,7 +1,6 @@
 // ViewerFaction.cs - Represents a Twitch viewer as a faction
 using System;
 using System.Collections.Generic;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.SDK.TwitchIntegration.ViewerFaction
 {

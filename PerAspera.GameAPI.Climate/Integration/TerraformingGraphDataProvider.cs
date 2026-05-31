@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
-using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate.Domain.Cell;
 
 namespace PerAspera.GameAPI.Climate.Integration
