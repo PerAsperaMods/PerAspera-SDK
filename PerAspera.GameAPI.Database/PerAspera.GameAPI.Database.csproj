@@ -21,12 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="BepInEx.Core">
-      <HintPath>$(GameDir)\BepInEx\core\BepInEx.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Unity.IL2CPP">
-      <HintPath>$(GameDir)\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
-    </Reference>
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
   </ItemGroup>
 
 </Project>
