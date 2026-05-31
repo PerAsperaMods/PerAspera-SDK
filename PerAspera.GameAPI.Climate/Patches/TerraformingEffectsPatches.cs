@@ -2,10 +2,10 @@ using HarmonyLib;
 using PerAspera.Core;
 using System;
 using System.Collections.Generic;
-using PerAspera.GameAPI.Wrappers;
 
 // Alias pour éviter le conflit
-using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
+// TODO: Update for cellular atmosphere architecture
+// using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
 
 namespace PerAspera.GameAPI.Climate.Patches
 {

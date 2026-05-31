@@ -5,10 +5,14 @@
 	<PropertyGroup>
 		<AssemblyName>PerAspera.GameAPI.Commands</AssemblyName>
 		<RootNamespace>PerAspera.GameAPI.Commands</RootNamespace>
-		<PackageId>PerAspera.GameAPI.Commands</PackageId>
+		<PackageId>PerAspera.GameAPI.Commands</PackageId><Version>1.1.0</Version><IsPackable>true</IsPackable>
 		<Description>Per Aspera Commands API - Type-safe command execution and custom command extension system</Description>
 		<PackageTags>per-aspera;commands;gameapi;commandbus;modding;fluent-api</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:/ModPeraspera/nuget-packages</PackageOutputPath>
 	</PropertyGroup>
 
 	<!-- Dependencies -->
@@ -16,13 +20,15 @@
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 		<PackageReference Include="HarmonyX" Version="2.16.0" />
+		<PackageReference Include="YamlDotNet" Version="13.7.1" />
 	</ItemGroup>
 
 	<!-- Project References -->
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
-		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
 	</ItemGroup>
 </Project>
+
+

@@ -1,8 +1,6 @@
 using System;
 using UnityEngine.SceneManagement;
 using PerAspera.GameAPI.Events.Core;
-using PerAspera.GameAPI.Wrappers;
-using SceneWrapper = PerAspera.GameAPI.Wrappers.SceneWrapper;
 
 namespace PerAspera.GameAPI.Events.SDK
 {
@@ -17,22 +15,22 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The scene that was loaded
         /// </summary>
-        public SceneWrapper Scene { get; }
+        public UnityEngine.SceneManagement.Scene Scene { get; }
         
         /// <summary>
         /// The mode used to load the scene (Single or Additive)
         /// </summary>
         public LoadSceneMode Mode { get; }
 
-        public SceneLoadedEvent(SceneWrapper scene, LoadSceneMode mode)
+        public SceneLoadedEvent(UnityEngine.SceneManagement.Scene scene, LoadSceneMode mode)
         {
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
+            Scene = scene;
             Mode = mode;
         }
 
         public override string ToString()
         {
-            return $"SceneLoadedEvent(Scene: '{Scene.Name}', Mode: {Mode}, BuildIndex: {Scene.BuildIndex})";
+            return $"SceneLoadedEvent(Scene: '{Scene.name}', Mode: {Mode}, BuildIndex: {Scene.buildIndex})";
         }
     }
 
@@ -47,16 +45,16 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The scene that was unloaded
         /// </summary>
-        public SceneWrapper Scene { get; }
+        public UnityEngine.SceneManagement.Scene Scene { get; }
 
-        public SceneUnloadedEvent(SceneWrapper scene)
+        public SceneUnloadedEvent(UnityEngine.SceneManagement.Scene scene)
         {
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
+            Scene = scene;
         }
 
         public override string ToString()
         {
-            return $"SceneUnloadedEvent(Scene: '{Scene.Name}', BuildIndex: {Scene.BuildIndex})";
+            return $"SceneUnloadedEvent(Scene: '{Scene.name}', BuildIndex: {Scene.buildIndex})";
         }
     }
 
@@ -71,24 +69,24 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// The previously active scene (null if this is the first scene)
         /// </summary>
-        public SceneWrapper PreviousScene { get; }
+        public UnityEngine.SceneManagement.Scene PreviousScene { get; }
         
         /// <summary>
         /// The newly active scene
         /// </summary>
-        public SceneWrapper NewScene { get; }
+        public UnityEngine.SceneManagement.Scene NewScene { get; }
 
-        public ActiveSceneChangedEvent(SceneWrapper previousScene, SceneWrapper newScene)
+        public ActiveSceneChangedEvent(UnityEngine.SceneManagement.Scene previousScene, UnityEngine.SceneManagement.Scene newScene)
         {
             // PreviousScene can be null for first scene load
             PreviousScene = previousScene;
-            NewScene = newScene ?? throw new ArgumentNullException(nameof(newScene));
+            NewScene = newScene;
         }
 
         public override string ToString()
         {
-            var prevName = PreviousScene?.Name ?? "None";
-            return $"ActiveSceneChangedEvent(Previous: '{prevName}', New: '{NewScene.Name}')";
+            var prevName = PreviousScene.name;
+            return $"ActiveSceneChangedEvent(Previous: '{prevName}', New: '{NewScene.name}')";
         }
     }
 }

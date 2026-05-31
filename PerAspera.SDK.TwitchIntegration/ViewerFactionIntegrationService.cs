@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using PerAspera.Core;
 using PerAspera.SDK.TwitchIntegration.ViewerFaction;
 using PerAspera.SDK.TwitchIntegration.Commands;
-using PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat;
+// using PerAspera.SDK.TwitchIntegration.Vendor.UnityTwitchChat; // REMOVED: Non-existent namespace
 
 namespace PerAspera.SDK.TwitchIntegration
 {
@@ -19,7 +19,7 @@ namespace PerAspera.SDK.TwitchIntegration
         
         private readonly ViewerFactionManager _factionManager;
         private readonly ViewerFactionCommands _commandHandler;
-        private readonly TwitchConnection? _twitchConnection;
+        private readonly SimpleTwitchIRCClient? _twitchClient; // CHANGED: Use existing SimpleTwitchIRCClient
         private readonly Timer _cleanupTimer;
         
         private bool _isRunning;
@@ -28,14 +28,14 @@ namespace PerAspera.SDK.TwitchIntegration
         /// <summary>
         /// Whether the service is currently running
         /// </summary>
-        public bool IsRunning => _isRunning && (_twitchConnection?.IsConnected ?? false);
+        public bool IsRunning => _isRunning && (_twitchClient?.IsConnected ?? false); // CHANGED: Use IsConnected property
         
         /// <summary>
         /// Viewer faction manager
         /// </summary>
         public ViewerFactionManager FactionManager => _factionManager;
         
-        public ViewerFactionIntegrationService(TwitchConnectionConfig? config = null)
+        public ViewerFactionIntegrationService(TwitchConfiguration? config = null) // CHANGED: Use existing TwitchConfiguration
         {
             _factionManager = new ViewerFactionManager();
             _commandHandler = new ViewerFactionCommands(_factionManager, SendMessage);
@@ -45,11 +45,18 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 try
                 {
-                    _twitchConnection = new TwitchConnection(config);
-                    _twitchConnection.OnMessageReceived += OnTwitchMessageReceived;
-                    _twitchConnection.OnConnected += OnTwitchConnected;
-                    _twitchConnection.OnDisconnected += OnTwitchDisconnected;
-                    _twitchConnection.OnError += OnTwitchError;
+                    // CHANGED: Use existing SimpleTwitchIRCClient instead of non-existent TwitchConnection
+                    _twitchClient = new SimpleTwitchIRCClient(
+                        config.BotUsername, 
+                        config.OAuthToken, 
+                        config.ChannelName);
+                    
+                    // CHANGED: Use existing event system
+                    _twitchClient.OnMessageReceived += OnTwitchMessageReceived;
+                    _twitchClient.OnConnected += OnTwitchConnected;
+                    // REMOVED: Events not available in SimpleTwitchIRCClient
+                    // _twitchConnection.OnDisconnected += OnTwitchDisconnected;
+                    // _twitchConnection.OnError += OnTwitchError;
                     
                     _logger.Info("Twitch connection initialized");
                 }
@@ -84,9 +91,9 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 _logger.Info("Starting ViewerFactionIntegrationService...");
                 
-                if (_twitchConnection != null)
+                if (_twitchClient != null)
                 {
-                    bool connected = await _twitchConnection.ConnectAsync();
+                    bool connected = await _twitchClient.ConnectAsync(); // CHANGED: Use ConnectAsync method
                     if (!connected)
                     {
                         _logger.Error("Failed to connect to Twitch IRC");
@@ -120,9 +127,9 @@ namespace PerAspera.SDK.TwitchIntegration
                 
                 _isRunning = false;
                 
-                if (_twitchConnection != null)
+                if (_twitchClient != null)
                 {
-                    _twitchConnection.Dispose();
+                    _twitchClient.Stop(); // CHANGED: Use Stop method instead of Dispose
                 }
                 
                 _logger.Info("ViewerFactionIntegrationService stopped");
@@ -214,13 +221,13 @@ namespace PerAspera.SDK.TwitchIntegration
         
         private void SendMessage(string username, string message)
         {
-            if (_twitchConnection != null && _twitchConnection.IsConnected)
+            if (_twitchClient != null && _twitchClient.IsConnected)
             {
                 try
                 {
                     // Send as a reply to the user
                     var formattedMessage = $"@{username} {message}";
-                    _twitchConnection.SendMessage(formattedMessage);
+                    _twitchClient.SendMessageAsync(formattedMessage); // CHANGED: Use SendMessageAsync
                 }
                 catch (Exception ex)
                 {
@@ -270,7 +277,7 @@ namespace PerAspera.SDK.TwitchIntegration
             
             Stop();
             _cleanupTimer?.Dispose();
-            _twitchConnection?.Dispose();
+            _twitchClient?.Dispose(); // CHANGED: Use _twitchClient
             
             _disposed = true;
             _logger.Info("ViewerFactionIntegrationService disposed");

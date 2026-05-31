@@ -11,7 +11,6 @@ using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
 {

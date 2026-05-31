@@ -24,6 +24,7 @@ Wrappers are **safe abstractions** that:
 | `Building` | `Building` | Buildings, factories, infrastructure |
 | `Planet` | `Planet` | Climate, resources, planetary data |
 | `Universe` | `Universe` | Time, game state, speed control |
+| `ResourceType` | `ResourceType` | Resource definitions and enumeration |
 
 *More wrappers coming soon: Drone, Faction, Technology, etc.*
 
@@ -83,6 +84,28 @@ ModEventBus.Subscribe("NativeBuildingSpawned", (data) => {
         }
     }
 });
+```
+
+### Work with Resources
+
+```csharp
+using PerAspera.GameAPI.Wrappers;
+
+// Get a specific resource by key
+var waterResource = ResourceTypeWrapper.GetByKey("resource_water");
+if (waterResource != null)
+{
+    Logger.LogInfo($"Water: {waterResource.DisplayName} (Index: {waterResource.Index})");
+}
+
+// Get ALL available resources (including mod-added ones)
+var allResources = ResourceTypeWrapper.GetAllResources();
+Logger.LogInfo($"Total resources available: {allResources.Count}");
+
+foreach (var resource in allResources)
+{
+    Logger.LogInfo($"{resource.Name}: {resource.DisplayName}");
+}
 ```
 
 ### Control Game Speed

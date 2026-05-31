@@ -3,7 +3,7 @@ using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Events.Constants;
 using PerAspera.GameAPI.Events.SDK;
-using PerAspera.GameAPI.Wrappers;
+using PerAspera.GameAPI;
 using PerAspera.Core;
 using HarmonyLib;
 
@@ -30,10 +30,10 @@ namespace PerAspera.GameAPI.Events.Patches
                 _logger.Info("🔧 Initializing SDK-based game initialization detection...");
                 
                 // Use existing SDK wrapper system to detect game state
-                var baseGameWrapper = TryGetBaseGameWrapper();
-                if (baseGameWrapper != null)
+                var baseGame = TryGetBaseGame();
+                if (baseGame != null)
                 {
-                    TriggerGameHubInitialized(baseGameWrapper);
+                    TriggerGameHubInitialized(baseGame);
                     _logger.Info("✅ Game initialization detected via SDK wrappers");
                 }
                 else
@@ -52,20 +52,15 @@ namespace PerAspera.GameAPI.Events.Patches
         /// <summary>
         /// Try to get BaseGame using existing SDK wrapper system
         /// </summary>
-        private static BaseGameWrapper? TryGetBaseGameWrapper()
+        private static BaseGame? TryGetBaseGame()
         {
             try
             {
-                // Get BaseGame using BaseGameWrapper.GetCurrent()
-                var baseGameInstance = BaseGameWrapper.GetCurrent();
+                // Get BaseGame using GameTypeInitializer.GetBaseGameInstance() as BaseGame
+                var baseGameInstance = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
                 if (baseGameInstance != null)
                 {
-                    // Optionally verify Keeper is initialized within BaseGame
-                    var keeper = baseGameInstance.GetKeeper();
-                    if (keeper != null)
-                    {
-                        return baseGameInstance;
-                    }
+                    return baseGameInstance;
                 }
             }
             catch (Exception ex)
@@ -79,7 +74,7 @@ namespace PerAspera.GameAPI.Events.Patches
         /// <summary>
         /// Trigger GameHubInitialized event using SDK wrapper
         /// </summary>
-        private static void TriggerGameHubInitialized(GameAPI.Wrappers.BaseGameWrapper baseGameWrapper)
+        private static void TriggerGameHubInitialized(BaseGame? baseGame)
         {
             if (_gameHubInitialized) return;
 
@@ -88,7 +83,7 @@ namespace PerAspera.GameAPI.Events.Patches
                 _gameHubInitialized = true;
                 _logger.Info("🎮 Game initialization detected via SDK wrapper");
 
-                var evt = new GameHubInitializedEvent(baseGameWrapper, isReady: true);
+                var evt = new GameHubInitializedEvent((object?)baseGame, isReady: true);
                 EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, evt);
                 
                 _logger.Info("📡 GameHubInitializedEvent published successfully");
@@ -445,7 +440,7 @@ namespace PerAspera.GameAPI.Events.Patches
             {
                 _logger.Error($"❌ Error in Blackboard constructor patch: {ex.Message}");
             }
+        }
         #endif // HARMONY_PATCHES_DISABLED
-
     }
 }

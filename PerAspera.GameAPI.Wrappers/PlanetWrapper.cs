@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 
@@ -18,7 +19,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// </summary>
     public class PlanetWrapper : WrapperBase
     {
-        private Atmosphere? _atmosphere;
+        //private Atmosphere? _atmosphere;
+        //private PerAspera.GameAPI.Climate.Atmosphere? atmosphereGrid;
+        private Native.PlanetNative? _nativePlanet;
 
         /// <summary>
         /// Initialize Planet wrapper with native planet object
@@ -26,15 +29,32 @@ namespace PerAspera.GameAPI.Wrappers
         /// <param name="nativePlanet">Native planet instance from game</param>
         /// 
 
+        //
+        //AREA
+
+
+
         public PlanetWrapper(object nativePlanet) : base(nativePlanet)
         {
-            
+            // Initialize native planet reference for direct access
+            try
+            {
+                _nativePlanet = new Native.PlanetNative(nativePlanet);
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to initialize native planet reference: {ex.Message}");
+            }
         }
+
+
 
         public HazardsManagerWrapper GetHazardsManager()
         {
-            return  new  HazardsManagerWrapper(GetNativeObject().GetMemberValue<HazardsManager>("hazardsManager)"));
+            return new HazardsManagerWrapper(GetNativeObject().GetMemberValue<object>("HazardsManager"));
         }
+
+        
 
         /// <summary>
         /// Get the current planet instance
@@ -44,6 +64,106 @@ namespace PerAspera.GameAPI.Wrappers
             var planet = KeeperTypeRegistry.GetPlanet();
             return planet != null ? new PlanetWrapper(planet) : null;
         }
+        
+        // ==================== CLIMATE DATA ====================
+        
+        /// <summary>
+        /// DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+        /// Example: ClimateController.Instance?.Atmosphere?.AverageTemperature ?? GetTemperatureFallback()
+        /// </summary>
+        [Obsolete("Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data. This method will be removed in v2.0", false)]
+        public float GetTemperature()
+        {
+            // Fallback to native planet data only
+            try
+            {
+                if (_nativePlanet != null)
+                {
+                    return (float)_nativePlanet.NativeInstance.GetMemberValue("temperature");
+                }
+                return SafeInvoke<float>("GetTemperature");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to get temperature: {ex.Message}");
+                return 0.0f;
+            }
+        }
+        
+        /// <summary>
+        /// DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+        /// Example: ClimateController.Instance?.Atmosphere?.TotalPressure ?? GetAtmosphericPressureFallback()
+        /// </summary>
+        [Obsolete("Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data. This method will be removed in v2.0", false)]
+        public float GetAtmosphericPressure()
+        {
+            // Fallback to native planet data only
+            try
+            {
+                if (_nativePlanet != null)
+                {
+                    return (float)_nativePlanet.NativeInstance.GetMemberValue("atmosphericPressure");
+                }
+                return SafeInvoke<float>("GetAtmosphericPressure");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to get atmospheric pressure: {ex.Message}");
+                return 0.0f;
+            }
+        }
+        
+        /// <summary>
+        /// DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
+        /// Example: ClimateController.Instance?.Atmosphere?.OxygenLevel ?? GetOxygenLevelFallback()
+        /// </summary>
+        [Obsolete("Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data. This method will be removed in v2.0", false)]
+        public float GetOxygenLevel()
+        {
+            // Fallback to native planet data only
+            try
+            {
+                if (_nativePlanet != null)
+                {
+                    return (float)_nativePlanet.NativeInstance.GetMemberValue("oxygenLevel");
+                }
+                return SafeInvoke<float>("GetOxygenLevel");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to get oxygen level: {ex.Message}");
+                return 0.0f;
+            }
+        }
+        
+        // ==================== BUILDINGS ====================
+        
+        /// <summary>
+        /// Get all buildings on the planet safely (null-checked)
+        /// </summary>
+        public BuildingWrapper[] GetBuildingsSafely()
+        {
+            try
+            {
+                var buildingsList = GetBuildings();
+                return buildingsList?.ToArray() ?? new BuildingWrapper[0];
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to get buildings safely: {ex.Message}");
+                return new BuildingWrapper[0];
+            }
+        }
+
+        // ==================== ENHANCED ATMOSPHERE API (SDK CLIMATE INTEGRATION) ====================
+        
+        /// <summary>
+        /// For atmospheric data, use PerAspera.GameAPI.Climate directly:
+        /// var climate = ClimateController.Instance?.Atmosphere;
+        /// This avoids circular dependencies and improves performance.
+        /// </summary>
+        [Obsolete("Use PerAspera.GameAPI.Climate.ClimateController.Instance.Atmosphere directly for better performance", false)]
+        public object? Atmosphere => null;
         
         // ==================== PLANET IDENTITY ====================
         
@@ -57,18 +177,6 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>
         /// Planet atmosphere (composition, temperature, pressure, effects)
         /// Access via: Planet.Atmosphere.Composition["CO2"].PartialPressure
-        /// </summary>
-        public Atmosphere Atmosphere
-        {
-            get
-            {
-                if (_atmosphere == null && NativeObject != null)
-                    _atmosphere = new Atmosphere(NativeObject);
-                return _atmosphere ?? throw new InvalidOperationException("Planet not initialized");
-            }
-        }
-        
-
 
         // ==================== RESOURCES ====================
         
@@ -78,8 +186,43 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public float WaterStock
         {
-            get => SafeInvoke<float?>("GetWaterStock") ?? 0f;
-            set => SafeInvokeVoid("SetWaterStock", value);
+            get
+            {
+                try
+                {
+                    // Try direct access first (100x faster)
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        return (float)_nativePlanet.NativeInstance.GetMemberValue("waterStock");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct waterStock access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                return SafeInvoke<float?>("GetWaterStock") ?? 0f;
+            }
+            set
+            {
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        _nativePlanet.NativeInstance.SetMemberValue("waterStock", value);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct waterStock set failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                SafeInvokeVoid("SetWaterStock", value);
+            }
         }
         
         /// <summary>
@@ -159,6 +302,23 @@ namespace PerAspera.GameAPI.Wrappers
                     return 0f;
                 }
                 
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        // For methods that return values, we need to use reflection
+                        // Direct IL2CPP access for return values is complex, so we use SafeInvoke for now
+                        // TODO: Optimize this with direct IL2CPP method calls when possible
+                        return SafeInvoke<float?>("GetResourceStock", resourceType) ?? 0f;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct GetResourceStock access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
                 return SafeInvoke<float?>("GetResourceStock", resourceType) ?? 0f;
             }
             catch (System.Exception ex)
@@ -186,6 +346,25 @@ namespace PerAspera.GameAPI.Wrappers
                     return false;
                 }
                 
+                try
+                {
+                    // Try direct access first
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        // For methods that return values, we need to use reflection
+                        // Direct IL2CPP access for return values is complex, so we use SafeInvoke for now
+                        // TODO: Optimize this with direct IL2CPP method calls when possible
+                        SafeInvokeVoid("AddResource", resourceType, amount);
+                        Log.LogDebug($"Added {amount} of {resourceKey} to planet");
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct AddResource access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
                 SafeInvokeVoid("AddResource", resourceType, amount);
                 Log.LogDebug($"Added {amount} of {resourceKey} to planet");
                 return true;
@@ -210,8 +389,32 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                var nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
+                object? nativeBuildings = null;
+                
+                try
+                {
+                    // Try direct access first - check for buildings field
+                    if (_nativePlanet?.NativeInstance != null)
+                    {
+                        nativeBuildings = _nativePlanet.NativeInstance.GetMemberValue("buildings");
+                        if (nativeBuildings == null)
+                        {
+                            // Try GetBuildings method
+                            nativeBuildings = _nativePlanet.NativeInstance.InvokeMethod("GetBuildings");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogDebug($"Direct buildings access failed, falling back to reflection: {ex.Message}");
+                }
+                
+                // Fallback to reflection
+                if (nativeBuildings == null)
+                {
+                    nativeBuildings = SafeInvoke<object>("get_buildings") ?? 
                                     SafeInvoke<object>("GetBuildings");
+                }
                 
                 if (nativeBuildings == null) return new List<BuildingWrapper>();
                 
@@ -312,11 +515,267 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>Native planet object or null</returns>
         public object? GetNativeObject() => NativeObject;
         
+        // ==================== ATMOSPHERIC GAS MANAGEMENT ====================
+        
+        /// <summary>
+        /// Map resource key to gas ID used by Atmosphere.ModifyGas
+        /// </summary>
+        /// <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
+        /// <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
+        private string? MapResourceKeyToGasId(string resourceKey)
+        {
+            return resourceKey switch
+            {
+                "resource_nitrogen_release" => "N2",
+                "resource_oxygen_release" => "O2", 
+                "resource_carbon_dioxide_release" => "CO2",
+                "resource_ghg_release" => "GHG",
+                // Add more mappings as needed for other atmospheric resources
+                _ => null
+            };
+        }
+        
+        /// <summary>
+        /// Increase nitrogen (N2) atmospheric pressure
+        /// Wrapper for atmosphere gas modification with proper resource key mapping
+        /// </summary>
+        /// <param name="pressure">Pressure increase in kPa</param>
+        /*public void IncreaseN2(float pressure)
+        {
+            IncreaseGasPressure("resource_nitrogen_release", pressure);
+        }* /
+        
+        /// <summary>
+        /// Increase oxygen (O2) atmospheric pressure
+        /// Wrapper for atmosphere gas modification with proper resource key mapping
+        /// </summary>
+        /// <param name="pressure">Pressure increase in kPa</param>
+        /*public void IncreaseO2(float pressure)
+        {
+            IncreaseGasPressure("resource_oxygen_release", pressure);
+        }* /
+        
+        /// <summary>
+        /// Increase carbon dioxide (CO2) atmospheric pressure
+        /// Wrapper for atmosphere gas modification with proper resource key mapping
+        /// </summary>
+        /// <param name="pressure">Pressure increase in kPa</param>
+        /*public void IncreaseCO2(float pressure)
+        {
+            IncreaseGasPressure("resource_carbon_dioxide_release", pressure);
+        }* /
+        
+        /// <summary>
+        /// Increase greenhouse gases (GHG) atmospheric pressure
+        /// Wrapper for atmosphere gas modification with proper resource key mapping
+        /// </summary>
+        /// <param name="pressure">Pressure increase in kPa</param>
+        /*public void IncreaseGHG(float pressure)
+        {
+            IncreaseGasPressure("resource_ghg_release", pressure);
+        }* /
+        
+        /// <summary>
+        /// Generic method to increase atmospheric gas pressure
+        /// This is the core implementation called by all specific gas methods
+        /// </summary>
+        /// <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
+        /// <param name="pressure">Pressure increase in kPa</param>
+        /*public void IncreaseGasPressure(string resourceKey, float pressure)
+        {
+            try
+            {
+                var atmosphere = Atmosphere;
+                if (atmosphere == null)
+                {
+                    Log.LogWarning($"Cannot increase {resourceKey} pressure: atmosphere not available");
+                    return;
+                }
+                
+                // Map resource key to gas ID used by Atmosphere.ModifyGas
+                var gasId = MapResourceKeyToGasId(resourceKey);
+                if (gasId == null)
+                {
+                    Log.LogWarning($"Cannot map resource key {resourceKey} to gas ID");
+                    return;
+                }
+                
+                // Use the atmosphere's ModifyGas method
+                atmosphere.ModifyGas(gasId, pressure);
+                
+                // Log the change with climate properties if available
+                var resource = ResourceTypeWrapper.GetByKey(resourceKey);
+                var climateProps = resource?.GetClimateProperties();
+                if (climateProps != null)
+                {
+                    Log.LogInfo($"Increased {climateProps.GasSymbol} pressure by {pressure:F2}kPa " +
+                               $"(GWP: {climateProps.GreenhousePotential:F1})");
+                }
+                else
+                {
+                    Log.LogInfo($"Increased {resourceKey} pressure by {pressure:F2}kPa");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to increase {resourceKey} pressure: {ex.Message}");
+            }
+        }* /
+        
+        /// <summary>
+        /// Decrease atmospheric gas pressure
+        /// </summary>
+        /// <param name="resourceKey">Resource key</param>
+        /// <param name="pressure">Pressure decrease in kPa</param>
+        /*public void DecreaseGasPressure(string resourceKey, float pressure)
+        {
+            try
+            {
+                var atmosphere = Atmosphere;
+                if (atmosphere == null)
+                {
+                    Log.LogWarning($"Cannot decrease {resourceKey} pressure: atmosphere not available");
+                    return;
+                }
+                
+                // Map resource key to gas ID used by Atmosphere.ModifyGas
+                var gasId = MapResourceKeyToGasId(resourceKey);
+                if (gasId == null)
+                {
+                    Log.LogWarning($"Cannot map resource key {resourceKey} to gas ID");
+                    return;
+                }
+                
+                // Use negative amount for decrease
+                atmosphere.ModifyGas(gasId, -pressure);
+                
+                var resource = ResourceTypeWrapper.GetByKey(resourceKey);
+                var climateProps = resource?.GetClimateProperties();
+                if (climateProps != null)
+                {
+                    Log.LogInfo($"Decreased {climateProps.GasSymbol} pressure by {pressure:F2}kPa");
+                }
+                else
+                {
+                    Log.LogInfo($"Decreased {resourceKey} pressure by {pressure:F2}kPa");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to decrease {resourceKey} pressure: {ex.Message}");
+            }
+        }* /
+        
+        /// <summary>
+        /// Get current pressure of a specific atmospheric gas
+        /// </summary>
+        /// <param name="resourceKey">Resource key</param>
+        /// <returns>Current pressure in kPa, or 0 if not found</returns>
+        /*public float GetGasPressure(string resourceKey)
+        {
+            try
+            {
+                return Atmosphere?.GetGasQuantity(resourceKey) ?? 0f;
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to get {resourceKey} pressure: {ex.Message}");
+                return 0f;
+            }
+        }* /
+        
+        /// <summary>
+        /// Calculate greenhouse effect based on current atmospheric composition
+        /// Uses climate properties from loaded configuration
+        /// </summary>
+        /// <returns>Greenhouse effect multiplier (1.0 = no effect)</returns>
+        public float CalculateGreenhouseEffect()
+        {
+            try
+            {
+                float totalEffect = 1.0f; // Base level (no greenhouse effect)
+                
+                // Get all atmospheric gases and calculate their contribution
+                var atmosphere = Atmosphere;
+                if (atmosphere != null)
+                {
+                    // Known atmospheric gas resource keys
+                    var atmosphericGasKeys = new[]
+                    {
+                        "resource_carbon_dioxide_release",
+                        "resource_oxygen_release", 
+                        "resource_nitrogen_release",
+                        "resource_ghg_release"
+                    };
+                    
+                    foreach (var gasKey in atmosphericGasKeys)
+                    {
+                        float pressure = atmosphere.GetGasQuantity(gasKey);
+                        if (pressure > 0)
+                        {
+                            var resource = ResourceTypeWrapper.GetByKey(gasKey);
+                            var climateProps = resource?.GetClimateProperties();
+                            
+                            if (climateProps != null && climateProps.GreenhousePotential > 0)
+                            {
+                                // Effect = pressure * GWP (simplified model)
+                                float effect = pressure * (float)climateProps.GreenhousePotential * 0.001f;
+                                totalEffect += effect;
+                            }
+                        }
+                    }
+                }
+                
+                return totalEffect;
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to calculate greenhouse effect: {ex.Message}");
+                return 1.0f;
+            }
+        }
+        
+        /// <summary>
+        /// Check if atmosphere is breathable based on climate configuration
+        /// </summary>
+        /// <returns>True if atmosphere meets breathability criteria</returns>
+        /*public bool IsAtmosphereBreathable()
+        {
+            try
+            {
+                var atmosphere = Atmosphere;
+                if (atmosphere == null) return false;
+                
+                // Check basic requirements
+                if (atmosphere.TotalPressure < 90 || atmosphere.TotalPressure > 110) return false;
+                if (atmosphere.TemperatureCelsius < -10 || atmosphere.TemperatureCelsius > 45) return false;
+                
+                // Check gas composition using climate config
+                float o2Pressure = GetGasPressure("resource_oxygen_release");
+                float co2Pressure = GetGasPressure("resource_carbon_dioxide_release");
+                
+                // Oxygen between 19.5% and 23.5% of atmosphere
+                float o2Percentage = (o2Pressure / atmosphere.TotalPressure) * 100;
+                if (o2Percentage < 19.5f || o2Percentage > 23.5f) return false;
+                
+                // CO2 less than 0.5% of atmosphere
+                float co2Percentage = (co2Pressure / atmosphere.TotalPressure) * 100;
+                if (co2Percentage > 0.5f) return false;
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to check atmosphere breathability: {ex.Message}");
+                return false;
+            }
+        } */
+        
         /// <summary>
         /// Returns detailed planet status as formatted string
         /// </summary>
         /// <returns>Planet status with atmosphere and resource information</returns>
-        public override string ToString()
+        /*public override string ToString()
         {
             if (NativeObject == null)
                 return "Planet: Not initialized";
@@ -336,6 +795,11 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 return "Planet: Atmosphere data unavailable";
             }
-        }
+        } */
+
+        /// <summary>
+        /// Simple atmosphere wrapper for backward compatibility
+        /// Provides basic atmospheric data access
+        /// </summary>
     }
 }

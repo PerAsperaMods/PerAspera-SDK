@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using PerAspera.Core;
 using PerAspera.GameAPI;
+using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Events;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Native;
-using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate;
 using PerAspera.GameAPI.TwitchIntegration;
 using PerAspera.Core.IL2CPP;
@@ -136,7 +136,7 @@ namespace PerAspera.SDK.TwitchIntegration
                 // Initialize PubSub for channel points (independent of IRC)
                 if (_config?.EnableChannelPoints == true)
                 {
-                    InitializePubSub();
+                    await InitializePubSub();
                     Log.Info("✅ Channel points PubSub enabled");
                 }
                 
@@ -207,7 +207,7 @@ namespace PerAspera.SDK.TwitchIntegration
         /// </code>
         /// </example>
         /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/TwitchIntegration.md">Twitch Integration Documentation</seealso>
-        private static void InitializePubSub()
+        private static async Task InitializePubSub()
         {
             try
             {
@@ -216,21 +216,19 @@ namespace PerAspera.SDK.TwitchIntegration
                     Log.Warning("⚠️ Client ID or Broadcaster ID not configured for PubSub");
                     return;
                 }
-                
-                // Create PubSub client as a GameObject component
-                var pubSubGameObject = new GameObject("TwitchPubSubClient");
-                GameObject.DontDestroyOnLoad(pubSubGameObject);
-                
-                // Use non-generic AddComponent for IL2CPP compatibility
-                _pubSubClient = (SimpleTwitchPubSubClient)pubSubGameObject.AddComponent(typeof(SimpleTwitchPubSubClient));
+
+                // Create PubSub client instance (no longer a MonoBehaviour)
+                _pubSubClient = new SimpleTwitchPubSubClient();
+
+                // Initialize with credentials
                 _pubSubClient.Initialize(_config.ClientId, _config.PubSubToken, _config.BroadcasterId);
-                
+
                 // Subscribe to channel points events
                 _pubSubClient.OnChannelPointsRedeemed += OnChannelPointsRedeemed;
-                
-                // Start polling
-                _pubSubClient.StartPolling();
-                
+
+                // Start polling asynchronously
+                await _pubSubClient.StartPollingAsync();
+
                 Log.Info("✅ PubSub client initialized for channel points");
             }
             catch (Exception ex)
@@ -644,11 +642,21 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 var baseGame =  BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
-                if (planet?.Atmosphere == null)
+                if (planet == null)
                     return "🌍 Atmosphere: Data not available";
                 
-                var atmosphere = planet.Atmosphere;
-                return $"🌍 Atmosphere: {atmosphere.TemperatureCelsius:F1}°C | {atmosphere.TotalPressure:F1}kPa | Breathable: {(atmosphere.IsBreathable ? "Yes" : "No")}";
+                // Access native planet properties directly
+                var nativePlanet = planet.GetNativeObject();
+                float temperature = (float)nativePlanet.GetMemberValue("temperature");
+                float co2Pressure = (float)nativePlanet.GetMemberValue("CO2Pressure");
+                float o2Pressure = (float)nativePlanet.GetMemberValue("O2Pressure");
+                float n2Pressure = (float)nativePlanet.GetMemberValue("N2Pressure");
+                float totalPressure = co2Pressure + o2Pressure + n2Pressure;
+                
+                // Check if breathable (simplified check)
+                bool isBreathable = o2Pressure > 15.0f && totalPressure > 50.0f;
+                
+                return $"🌍 Atmosphere: {temperature - 273.15f:F1}°C | {totalPressure:F1}kPa | Breathable: {(isBreathable ? "Yes" : "No")}";
             }
             catch (Exception ex)
             {
@@ -679,11 +687,15 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 var baseGame = BaseGameWrapper.GetCurrent();
                 var planet = baseGame?.GetUniverse()?.GetPlanet();
-                if (planet?.Atmosphere == null)
+                if (planet == null)
                     return "🌡️ Temperature: Data not available";
                 
-                var temperature = planet.Atmosphere.TemperatureCelsius;
-                var emoji = temperature switch
+                // Access native planet temperature directly
+                var nativePlanet = planet.GetNativeObject();
+                float temperatureKelvin = (float)nativePlanet.GetMemberValue("temperature");
+                float temperatureCelsius = temperatureKelvin - 273.15f;
+                
+                var emoji = temperatureCelsius switch
                 {
                     < -50 => "🧊",
                     < 0 => "❄️",
@@ -692,7 +704,7 @@ namespace PerAspera.SDK.TwitchIntegration
                     _ => "🌋"
                 };
                 
-                return $"{emoji} Temperature: {temperature:F1}°C ({planet.Atmosphere.Temperature:F1}K)";
+                return $"{emoji} Temperature: {temperatureCelsius:F1}°C ({temperatureKelvin:F1}K)";
             }
             catch (Exception ex)
             {
@@ -953,6 +965,11 @@ namespace PerAspera.SDK.TwitchIntegration
                 {
                     await _ircClient.DisconnectAsync();
                     _ircClient.Dispose();
+                }
+
+                if (_pubSubClient != null)
+                {
+                    _pubSubClient.StopPolling();
                 }
                 
                 _isInitialized = false;

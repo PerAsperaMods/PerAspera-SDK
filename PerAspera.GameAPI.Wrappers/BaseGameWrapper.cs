@@ -7,20 +7,30 @@ namespace PerAspera.GameAPI.Wrappers
     /// <summary>
     /// Wrapper for BaseGame singleton
     /// Provides type-safe access to main game systems
-    /// 
+    ///
     /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
     /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
     /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
     /// 📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
+    ///
+    /// ⚡ INTEROP UPDATE: Now uses direct IL2CPP access with reflection fallback for compatibility
     /// </summary>
     public class BaseGameWrapper : WrapperBase
     {
+        private BaseGame? _nativeBaseGame;
+
         public BaseGameWrapper(object nativeBaseGame) : base(nativeBaseGame)
         {
-
+            // Try to cast to native type for direct access
+            try
+            {
+                _nativeBaseGame = (BaseGame)nativeBaseGame;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to cast to BaseGame, using reflection fallback: {ex.Message}");
+            }
         }
-
-        
 
         /// <summary>
         /// Get current BaseGame singleton instance
@@ -28,12 +38,52 @@ namespace PerAspera.GameAPI.Wrappers
         public static BaseGameWrapper? GetCurrent()
         {
             var instance = GameTypeInitializer.GetBaseGameInstance();
-            
+
             return instance != null ? new BaseGameWrapper(instance) : null;
         }
-        
+
+        // ==================== GAME STATE ====================
+
+        /// <summary>
+        /// Check if the game is paused
+        /// Delegates to Universe for pause state
+        /// </summary>
+        public bool IsPaused()
+        {
+            try
+            {
+                var universe = GetUniverse();
+                return universe?.IsPaused ?? false;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to get pause state: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get current game day/sol
+        /// </summary>
+        public int? GetCurrentDay()
+        {
+            try
+            {
+                if (_nativeBaseGame != null)
+                {
+                    return (int)_nativeBaseGame.GetMemberValue("currentDay");
+                }
+                return (int)SafeInvoke<int>("get_currentDay");
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to get current day: {ex.Message}");
+                return null;
+            }
+        }
+
         // ==================== CORE SYSTEMS ====================
-        
+
         /// <summary>
         /// Get Keeper instance (entity registry and manager)
         /// Property: keeper { get; private set; }
@@ -41,9 +91,24 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public KeeperWrapper? GetKeeper()
         {
-            return  new KeeperWrapper( SafeInvoke<Keeper>("get_keeper"));
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeBaseGame != null)
+                {
+                    var keeper = _nativeBaseGame.keeper;
+                    return keeper != null ? new KeeperWrapper(keeper) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for keeper, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
+            return new KeeperWrapper(SafeInvoke<Keeper>("get_keeper"));
         }
-        
+
         /// <summary>
         /// Get Universe wrapper instance (time, factions, planet)
         /// Property: universe { get; }
@@ -51,24 +116,67 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public UniverseWrapper? GetUniverse()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeBaseGame != null)
+                {
+                    var universe = _nativeBaseGame.universe;
+                    return universe != null ? new UniverseWrapper(universe) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for universe, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             var nativeUniverse = SafeInvoke<object>("get_universe");
             return nativeUniverse != null ? new UniverseWrapper(nativeUniverse) : null;
         }
         
         /// <summary>
         /// Check if game is in quitting state
+        /// Static property: isQuitting { get; }
         /// </summary>
         public bool IsQuitting
         {
-            get => SafeInvoke<bool?>("get_isQuitting") ?? false;
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs (static property)
+                    return BaseGame.isQuitting;
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for isQuitting, using reflection: {ex.Message}");
+                    // 🔄 Reflection fallback
+                    return SafeInvoke<bool?>("get_isQuitting") ?? false;
+                }
+            }
         }
         
         /// <summary>
         /// Check if game is ending (credits/end sequence)
+        /// Static property: isEnding { get; }
         /// </summary>
         public bool IsEnding
         {
-            get => SafeInvoke<bool?>("get_isEnding") ?? false;
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs (static property)
+                    return BaseGame.isEnding;
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for isEnding, using reflection: {ex.Message}");
+                    // 🔄 Reflection fallback
+                    return SafeInvoke<bool?>("get_isEnding") ?? false;
+                }
+            }
         }
         
         // ==================== INITIALIZATION STATE ====================
@@ -121,6 +229,15 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
+        /// Get canvas references for UI components
+        /// Field: canvasRefs
+        /// </summary>
+        public object? canvasRefs
+        {
+            get => NativeObject?.GetFieldValue<object>("canvasRefs");
+        }
+        
+        /// <summary>
         /// Get current difficulty level
         /// Field: difficulty
         /// </summary>
@@ -137,6 +254,21 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public void OnFinishLoading()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeBaseGame != null)
+                {
+                    _nativeBaseGame.OnFinishLoading();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for OnFinishLoading, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             SafeInvokeVoid("OnFinishLoading");
         }
         
@@ -148,7 +280,24 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? CameraController
         {
-            get => SafeInvoke<object>("get_cameraController");
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeBaseGame != null)
+                    {
+                        return _nativeBaseGame.cameraController;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for cameraController, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<object>("get_cameraController");
+            }
         }
         
         /// <summary>
@@ -157,7 +306,24 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? MarsManager
         {
-            get => SafeInvoke<object>("get_marsManager");
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeBaseGame != null)
+                    {
+                        return _nativeBaseGame.marsManager;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for marsManager, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<object>("get_marsManager");
+            }
         }
         
         /// <summary>
@@ -166,7 +332,24 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public object? InputRaycaster
         {
-            get => SafeInvoke<object>("get_inputRaycaster");
+            get
+            {
+                try
+                {
+                    // ⚡ Direct access with interop DLLs
+                    if (_nativeBaseGame != null)
+                    {
+                        return _nativeBaseGame.inputRaycaster;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Direct access failed for inputRaycaster, using reflection: {ex.Message}");
+                }
+
+                // 🔄 Reflection fallback
+                return SafeInvoke<object>("get_inputRaycaster");
+            }
         }
         
         
@@ -178,6 +361,21 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public void ExitToMainMenu()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeBaseGame != null)
+                {
+                    _nativeBaseGame.ExitToMainMenu();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for ExitToMainMenu, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             SafeInvokeVoid("ExitToMainMenu");
         }
         
@@ -187,6 +385,21 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public void ForceExit()
         {
+            try
+            {
+                // ⚡ Direct access with interop DLLs
+                if (_nativeBaseGame != null)
+                {
+                    _nativeBaseGame.ForceExit();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for ForceExit, using reflection: {ex.Message}");
+            }
+
+            // 🔄 Reflection fallback
             SafeInvokeVoid("ForceExit");
         }
         

@@ -1,7 +1,6 @@
 using System;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Patches;
-using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.GameAPI.Climate
 {

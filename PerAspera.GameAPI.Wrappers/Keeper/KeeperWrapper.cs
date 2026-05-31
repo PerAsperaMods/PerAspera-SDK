@@ -12,13 +12,23 @@ namespace PerAspera.GameAPI.Wrappers
     public class KeeperWrapper : WrapperBase
     {
         private static readonly string LogPrefix = "[KeeperWrapper]";
-        
+        private Keeper? _nativeKeeper;
+
         /// <summary>
         /// Initialize KeeperWrapper with native Keeper instance
         /// </summary>
         /// <param name="nativeKeeper">Native Keeper from BaseGame.keeper</param>
         public KeeperWrapper(object nativeKeeper) : base(nativeKeeper)
         {
+            // Try to cast to native type for direct access
+            try
+            {
+                _nativeKeeper = (Keeper)nativeKeeper;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Failed to cast to Keeper, using reflection fallback: {ex.Message}");
+            }
         }
         
         /// <summary>
@@ -56,12 +66,22 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 if (NativeObject == null) return null;
+
+                // Try direct access first
+                if (_nativeKeeper != null)
+                {
+                    var keeperMap = _nativeKeeper.map;
+                    if (keeperMap != null)
+                    {
+                        return new KeeperMapWrapper(keeperMap);
+                    }
+                }
+
+                // Fallback to reflection
+                var keeperMapRef = GetNativeField<object>("map");
+                if (keeperMapRef == null) return null;
                 
-                // Keeper has a public field "map" of type KeeperMap
-                var keeperMap = GetNativeField<object>("map");
-                if (keeperMap == null) return null;
-                
-                return new KeeperMapWrapper(keeperMap);
+                return new KeeperMapWrapper(keeperMapRef);
             }
             catch (Exception ex)
             {
@@ -81,7 +101,14 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 if (NativeObject == null || handleable == null) return default;
-                
+
+                // Try direct access first
+                if (_nativeKeeper != null && handleable is IHandleable iHandleable)
+                {
+                    return _nativeKeeper.Register(iHandleable);
+                }
+
+                // Fallback to reflection
                 return SafeInvoke<Handle>("Register", handleable);
             }
             catch (Exception ex)
@@ -101,7 +128,15 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 if (NativeObject == null || handleable == null) return;
-                
+
+                // Try direct access first
+                if (_nativeKeeper != null && handleable is IHandleable iHandleable)
+                {
+                    _nativeKeeper.Unregister(iHandleable);
+                    return;
+                }
+
+                // Fallback to reflection
                 SafeInvoke<object>("Unregister", handleable);
             }
             catch (Exception ex)
@@ -122,7 +157,14 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 if (NativeObject == null) return null;
-                
+
+                // Try direct access first
+                if (_nativeKeeper != null)
+                {
+                    return _nativeKeeper.handleManager;
+                }
+
+                // Fallback to reflection
                 return SafeInvoke<object>("get_handleManager");
             }
             catch (Exception ex)
@@ -142,7 +184,14 @@ namespace PerAspera.GameAPI.Wrappers
             try
             {
                 if (NativeObject == null) return null;
-                
+
+                // Try direct access first
+                if (_nativeKeeper != null)
+                {
+                    return _nativeKeeper.ecsWorld;
+                }
+
+                // Fallback to reflection
                 return SafeInvoke<object>("get_ecsWorld");
             }
             catch (Exception ex)

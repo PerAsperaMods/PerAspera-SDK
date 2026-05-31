@@ -1,11 +1,5 @@
 using PerAspera.GameAPI.Events.Core;
-using PerAspera.GameAPI.Wrappers;
 using System;
-
-// Enhanced Events Native type aliases for IL2CPP objects
-using NativeBaseGame = PerAspera.GameAPI.Native.BaseGame;
-using NativeUniverse = PerAspera.GameAPI.Native.Universe;
-using NativePlanet = PerAspera.GameAPI.Native.Planet;
 
 namespace PerAspera.GameAPI.Events.SDK
 {
@@ -21,7 +15,7 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "EarlyModsReady";
         
         /// <summary>SDK wrapper for BaseGame (basic access available)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper? BaseGameWrapper { get; }
+        public BaseGame? BaseGameWrapper { get; }
         
         /// <summary>Whether BaseGame is available for wrapper creation</summary>
         public bool BaseGameAvailable { get; }
@@ -41,7 +35,7 @@ namespace PerAspera.GameAPI.Events.SDK
             // Create wrapper only if BaseGame is available
             if (BaseGameAvailable && nativeBaseGame != null)
             {
-                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+                BaseGameWrapper = (nativeBaseGame as BaseGame)!;
             }
         }
     }
@@ -57,17 +51,17 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// SDK wrapper for BaseGame (type-safe access)
         /// </summary>
-        public BaseGame BaseGame { get; }
+        public BaseGame BaseGameWrapper { get; }
         
         /// <summary>
         /// SDK wrapper for Universe (type-safe access)
         /// </summary>
-        public Universe Universe { get; }
+        public Universe UniverseWrapper { get; }
 
-        public BaseGameDetectedEvent(BaseGame baseGame, Universe universe)
+        public BaseGameDetectedEvent(object nativeBaseGame, object nativeUniverse)
         {
-            BaseGame = baseGame ?? throw new ArgumentNullException(nameof(baseGame));
-            Universe = universe ?? throw new ArgumentNullException(nameof(universe));
+            BaseGameWrapper = (BaseGame)nativeBaseGame;
+            UniverseWrapper = (Universe)nativeUniverse;
         }
     }
 
@@ -80,34 +74,58 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "GameFullyLoaded";
         
         /// <summary>SDK wrapper for BaseGame (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
+        public BaseGame BaseGameWrapper { get; }
         
         /// <summary>SDK wrapper for Universe (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
+        public Universe UniverseWrapper { get; }
         
         /// <summary>SDK wrapper for Planet (type-safe access)</summary>
-        public PerAspera.GameAPI.Wrappers.PlanetWrapper PlanetWrapper { get; }
-        
-        /// <summary>Native IL2CPP BaseGame instance</summary>
-        public NativeBaseGame NativeBaseGame { get; }
-        
-        /// <summary>Native IL2CPP Universe instance</summary>
-        public NativeUniverse NativeUniverse { get; }
-        
-        /// <summary>Native IL2CPP Planet instance</summary>
-        public NativePlanet NativePlanet { get; }
+        public Planet PlanetWrapper { get; }
 
         public GameFullyLoadedEvent(object nativeBaseGame, object nativeUniverse, object nativePlanet)
         {
-            // Store native instances using explicit native type aliases
-            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
-            NativeUniverse = new NativeUniverse(nativeUniverse ?? throw new ArgumentNullException(nameof(nativeUniverse)));
-            NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
-            
             // Create SDK wrappers from native instances
-            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
-            UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
-            PlanetWrapper = new PerAspera.GameAPI.Wrappers.PlanetWrapper(nativePlanet);
+            BaseGameWrapper = (BaseGame)nativeBaseGame;
+            UniverseWrapper = (Universe)nativeUniverse;
+            PlanetWrapper = (Planet)nativePlanet;
+        }
+    }
+
+    /// <summary>
+    /// Event triggered once InteractionManager is available (first Update() after player clicks Wake Up).
+    /// ✅ Use this instead of GameFullyLoaded when you need to dispatch game commands.
+    /// ✅ All SDK objects (BaseGame, Universe, Planet, PlayerFaction) are ready — no reflection needed.
+    /// </summary>
+    public class GameCommandsReadyEvent : SDKEventBase
+    {
+        public override string EventType => "GameCommandsReady";
+
+        /// <summary>Direct interop access to BaseGame — no reflection needed.</summary>
+        public BaseGame NativeBaseGame { get; }
+
+        /// <summary>Direct interop access to Universe — no reflection needed.</summary>
+        public Universe NativeUniverse { get; }
+
+        /// <summary>
+        /// Direct interop access to Planet. Available after WakeUp (always non-null when this event fires).
+        /// </summary>
+        public Planet? NativePlanet { get; }
+
+        /// <summary>Direct interop access to the player Faction — interactionManager available on it.</summary>
+        public Faction NativePlayerFaction { get; }
+
+        /// <summary>
+        /// True when InteractionManager is confirmed non-null on the player faction.
+        /// Always true when this event is received.
+        /// </summary>
+        public bool InteractionManagerReady => NativePlayerFaction?.interactionManager != null;
+
+        public GameCommandsReadyEvent(BaseGame baseGame, Universe universe, Planet? planet, Faction playerFaction)
+        {
+            NativeBaseGame    = baseGame;
+            NativeUniverse    = universe;
+            NativePlanet      = planet;
+            NativePlayerFaction = playerFaction;
         }
     }
 
@@ -142,12 +160,12 @@ namespace PerAspera.GameAPI.Events.SDK
         /// <summary>
         /// Type-safe BlackBoard wrapper instance
         /// </summary>
-        public BlackBoardWrapper BlackBoard { get; }
+        public Blackboard BlackBoard { get; }
 
         public BlackboardInitializedEvent(object blackboard)
         {
             NativeBlackboard = blackboard ?? throw new ArgumentNullException(nameof(blackboard));
-            BlackBoard = new BlackBoardWrapper(blackboard);
+            BlackBoard = (blackboard as Blackboard)!;
         }
     }
 
@@ -160,9 +178,9 @@ namespace PerAspera.GameAPI.Events.SDK
         
         public Planet Planet { get; }
 
-        public PlanetInitializedEvent(Planet planet)
+        public PlanetInitializedEvent(object nativePlanet)
         {
-            Planet = planet;
+            Planet = (Planet)nativePlanet;
         }
     }
 
@@ -216,16 +234,19 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "MartianDayChanged";
         
         public int Sol { get; }
-        public Wrappers.PlanetWrapper? Planet { get; }
+        public Planet? Planet { get; }
         public float Temperature { get; }
         public float AtmosphericPressure { get; }
 
-        public MartianDayChangedEvent(int sol, Wrappers.PlanetWrapper? planet = null)
+        public MartianDayChangedEvent(int sol, Planet? planet = null)
         {
             Sol = sol;
             Planet = planet;
-            Temperature = planet?.Atmosphere?.Temperature ?? 210.0f;
-            AtmosphericPressure = planet?.Atmosphere?.TotalPressure ?? 6.77f;
+            // TODO: Adapt to cellular atmosphere API once AtmosphereGrid is complete
+            // Temperature = planet?.Atmosphere?.Temperature ?? 210.0f;
+            // AtmosphericPressure = planet?.Atmosphere?.TotalPressure ?? 6.77f;
+            Temperature = 210.0f; // Default Martian temperature
+            AtmosphericPressure = 6.77f; // Default Martian pressure (mbar)
         }
     }
 
@@ -258,10 +279,7 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "GameHubInitialized";
         
         /// <summary>SDK wrapper for BaseGame (available early in initialization)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
-        
-        /// <summary>Native IL2CPP BaseGame instance</summary>
-        public NativeBaseGame NativeBaseGame { get; }
+        public BaseGame BaseGameWrapper { get; }
         
         /// <summary>Whether the GameHub is fully ready for mod interaction</summary>
         public bool IsReady { get; }
@@ -271,11 +289,8 @@ namespace PerAspera.GameAPI.Events.SDK
 
         public GameHubInitializedEvent(object nativeBaseGame, bool isReady = true)
         {
-            // Store native instance using explicit native type alias
-            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
-            
             // Create SDK wrapper from native instance  
-            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            BaseGameWrapper = (BaseGame)nativeBaseGame;
             
             IsReady = isReady;
             InitializedAt = DateTime.Now;
@@ -317,18 +332,14 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "BaseGameCreated";
         
         /// <summary>SDK wrapper for BaseGame</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
-        
-        /// <summary>Native IL2CPP BaseGame instance</summary>
-        public NativeBaseGame NativeBaseGame { get; }
+        public BaseGame BaseGameWrapper { get; }
         
         /// <summary>Whether BaseGame is fully initialized</summary>
         public bool IsInitialized { get; }
 
         public BaseGameCreatedEvent(object nativeBaseGame, bool isInitialized = false)
         {
-            NativeBaseGame = new NativeBaseGame(nativeBaseGame ?? throw new ArgumentNullException(nameof(nativeBaseGame)));
-            BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+            BaseGameWrapper = (BaseGame)nativeBaseGame;
             IsInitialized = isInitialized;
         }
     }
@@ -342,22 +353,18 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "UniverseCreated";
         
         /// <summary>SDK wrapper for Universe</summary>
-        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
+        public Universe UniverseWrapper { get; }
         
         /// <summary>SDK wrapper for BaseGame (parent)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper BaseGameWrapper { get; }
-        
-        /// <summary>Native IL2CPP Universe instance</summary>
-        public NativeUniverse NativeUniverse { get; }
+        public BaseGame? BaseGameWrapper { get; }
 
-        public UniverseCreatedEvent(object nativeUniverse, object nativeBaseGame)
+        public UniverseCreatedEvent(object nativeUniverse, object? nativeBaseGame)
         {
-            NativeUniverse = new NativeUniverse(nativeUniverse ?? throw new ArgumentNullException(nameof(nativeUniverse)));
-            UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+            UniverseWrapper = (Universe)nativeUniverse;
             
             if (nativeBaseGame != null)
             {
-                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+                BaseGameWrapper = (nativeBaseGame as BaseGame)!;
             }
         }
     }
@@ -371,22 +378,18 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "PlanetCreated";
         
         /// <summary>SDK wrapper for Planet</summary>
-        public PerAspera.GameAPI.Wrappers.PlanetWrapper PlanetWrapper { get; }
+        public Planet PlanetWrapper { get; }
         
         /// <summary>SDK wrapper for Universe (parent)</summary>
-        public PerAspera.GameAPI.Wrappers.UniverseWrapper UniverseWrapper { get; }
-        
-        /// <summary>Native IL2CPP Planet instance</summary>
-        public NativePlanet NativePlanet { get; }
+        public Universe? UniverseWrapper { get; }
 
-        public PlanetCreatedEvent(object nativePlanet, object nativeUniverse)
+        public PlanetCreatedEvent(object nativePlanet, object? nativeUniverse)
         {
-            NativePlanet = new NativePlanet(nativePlanet ?? throw new ArgumentNullException(nameof(nativePlanet)));
-            PlanetWrapper = new PerAspera.GameAPI.Wrappers.PlanetWrapper(nativePlanet);
+            PlanetWrapper = (Planet)nativePlanet;
             
             if (nativeUniverse != null)
             {
-                UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+                UniverseWrapper = (nativeUniverse as Universe)!;
             }
         }
     }
@@ -401,10 +404,10 @@ namespace PerAspera.GameAPI.Events.SDK
         public override string EventType => "OnLoadFinished";
         
         /// <summary>SDK wrapper for BaseGame (full access available)</summary>
-        public PerAspera.GameAPI.Wrappers.BaseGameWrapper? BaseGameWrapper { get; }
+        public BaseGame? BaseGameWrapper { get; }
         
         /// <summary>SDK wrapper for Universe (full access available)</summary>
-        public PerAspera.GameAPI.Wrappers.UniverseWrapper? UniverseWrapper { get; }
+        public Universe? UniverseWrapper { get; }
         
         /// <summary>Whether BaseGame is available</summary>
         public bool BaseGameAvailable { get; }
@@ -424,12 +427,12 @@ namespace PerAspera.GameAPI.Events.SDK
             // Create wrappers if available
             if (BaseGameAvailable && nativeBaseGame != null)
             {
-                BaseGameWrapper = new PerAspera.GameAPI.Wrappers.BaseGameWrapper(nativeBaseGame);
+                BaseGameWrapper = (nativeBaseGame as BaseGame)!;
             }
             
             if (UniverseAvailable && nativeUniverse != null)
             {
-                UniverseWrapper = new PerAspera.GameAPI.Wrappers.UniverseWrapper(nativeUniverse);
+                UniverseWrapper = (nativeUniverse as Universe)!;
             }
         }
     }

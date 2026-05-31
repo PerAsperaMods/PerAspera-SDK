@@ -42,6 +42,21 @@ namespace PerAspera.SDK.TwitchIntegration
         private int _reconnectDelaySeconds = 30;
         
         /// <summary>
+        /// Whether the client is currently connected to Twitch IRC
+        /// </summary>
+        public bool IsConnected => _isConnected;
+        
+        /// <summary>
+        /// Event fired when a chat message is received
+        /// </summary>
+        public event Action<string>? OnMessageReceived;
+        
+        /// <summary>
+        /// Event fired when successfully connected to Twitch
+        /// </summary>
+        public event Action? OnConnected;
+        
+        /// <summary>
         /// Initialize simple IRC client
         /// </summary>
         /// <param name="botUsername">Twitch bot username</param>
@@ -83,6 +98,9 @@ namespace PerAspera.SDK.TwitchIntegration
                 
                 _isConnected = true;
                 Log.Info($"✅ Connected to Twitch IRC: #{_channelName}");
+                
+                // Trigger connected event
+                OnConnected?.Invoke();
                 
                 // Start message processing loop
                 _ = Task.Run(ProcessMessagesAsync, _cancellationToken.Token);
@@ -212,6 +230,9 @@ namespace PerAspera.SDK.TwitchIntegration
                 
                 Log.Debug($"💬 {username}: {messagePart}");
                 
+                // Trigger message received event
+                OnMessageReceived?.Invoke(messagePart);
+                
                 // Process commands
                 if (messagePart.StartsWith("!"))
                 {
@@ -299,6 +320,14 @@ namespace PerAspera.SDK.TwitchIntegration
             {
                 Log.Warning($"Error in event simulation: {ex.Message}");
             }
+        }
+        
+        /// <summary>
+        /// Stop the IRC client (alias for DisconnectAsync)
+        /// </summary>
+        public void Stop()
+        {
+            DisconnectAsync().Wait(5000); // 5 second timeout
         }
         
         /// <summary>

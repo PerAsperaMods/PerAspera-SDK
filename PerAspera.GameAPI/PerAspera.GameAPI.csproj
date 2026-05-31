@@ -6,9 +6,15 @@
 		<AssemblyName>PerAspera.GameAPI</AssemblyName>
 		<RootNamespace>PerAspera.GameAPI</RootNamespace>
 		<PackageId>PerAspera.GameAPI</PackageId>
+		<Version>1.1.0</Version>
+		<IsPackable>true</IsPackable>
 		<Description>Per Aspera Game API - IL2CPP game class wrappers, mirrors and event system</Description>
 		<PackageTags>per-aspera;gameapi;wrappers;mirrors;events</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
+		<!-- Auto-generate package on build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Package output path -->
+		<PackageOutputPath>F:\ModPeraspera\nuget-packages</PackageOutputPath>
 		<!-- Enable all Unity references for SDK -->
 		<IncludeAllUnityReferences>true</IncludeAllUnityReferences>
 	</PropertyGroup>

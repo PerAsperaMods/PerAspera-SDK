@@ -1,7 +1,13 @@
 using System;
+using HarmonyLib;
 using PerAspera.GameAPI.Commands.Builders;
 using PerAspera.GameAPI.Commands.Constants;
 using PerAspera.GameAPI.Commands.Core;
+using PerAspera.GameAPI.Commands.ModActions;
+using PerAspera.GameAPI.Commands.ModActions.BuiltinActions;
+using PerAspera.GameAPI.Commands.Patches;
+using PerAspera.GameAPI.Commands.Yaml;
+using PerAspera.GameAPI.Events.SDK;
 
 namespace PerAspera.GameAPI.Commands
 {
@@ -11,6 +17,103 @@ namespace PerAspera.GameAPI.Commands
     /// </summary>
     public static class Commands
     {
+        // Static constructor: runs as soon as any plugin touches Commands (at Load() time,
+        // before YAML validation). Registers built-ins and installs validation patches
+        // so custom commands pass load-time validation even before Initialize() is called.
+        static Commands()
+        {
+            RegisterBuiltinActions();
+            ApplyVerifyActionPatch();
+            ApplyValidateConstraintsPatch();
+        }
+
+        /// <summary>
+        /// Initialize the Commands API with native game context from a GameCommandsReadyEvent.
+        /// Must be called before using ExecuteFromYaml/ExecuteFromYamlFile with native commands.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// EnhancedEventBus.SubscribeToGameCommandsReady(evt => {
+        ///     Commands.Initialize(evt);
+        ///     Commands.ExecuteFromYamlFile(startupYaml);
+        /// });
+        /// </code>
+        /// </example>
+        public static void Initialize(GameCommandsReadyEvent evt)
+        {
+            YamlCommandsExecutor.Initialize(evt);
+            ModTextActionRegistry.UpdateContext(evt);
+            ApplyNativeInterceptPatch();
+        }
+
+        // Installs the Harmony prefix that routes custom commands from native DispatchAction
+        // (idempotent — safe to call multiple times)
+        private static bool _interceptPatchApplied;
+        private static void ApplyNativeInterceptPatch()
+        {
+            if (_interceptPatchApplied) return;
+            _interceptPatchApplied = true;
+            var harmony = new Harmony("PerAspera.GameAPI.Commands.NativeIntercept");
+            harmony.PatchAll(typeof(NativeDispatchInterceptPatch));
+        }
+
+        // Installs the Harmony prefix that bypasses load-time validation for registered custom commands
+        // (idempotent — safe to call multiple times)
+        private static bool _verifyPatchApplied;
+        private static void ApplyVerifyActionPatch()
+        {
+            if (_verifyPatchApplied) return;
+            _verifyPatchApplied = true;
+            var harmony = new Harmony("PerAspera.GameAPI.Commands.VerifyAction");
+            harmony.PatchAll(typeof(VerifyActionPatch));
+        }
+
+        // Installs the Harmony prefix on SpecialProjectType.ValidateConstraints that validates
+        // custom SDK actions registered in CustomCommandRegistry (bypasses AOT-inlined VerifyAction)
+        // (idempotent — safe to call multiple times)
+        private static bool _validateConstraintsPatchApplied;
+        private static void ApplyValidateConstraintsPatch()
+        {
+            if (_validateConstraintsPatchApplied) return;
+            _validateConstraintsPatchApplied = true;
+            var harmony = new Harmony("PerAspera.GameAPI.Commands.ValidateConstraints");
+            harmony.PatchAll(typeof(ValidateConstraintsPatch));
+        }
+
+        /// <summary>
+        /// Register a mod-defined TextAction by type.
+        /// The type must implement <see cref="IModTextAction"/> and have a public parameterless constructor.
+        /// Call this in your plugin Load() before game starts.
+        /// </summary>
+        /// <typeparam name="T">Your IModTextAction implementation</typeparam>
+        /// <example>
+        /// <code>
+        /// Commands.RegisterAction&lt;SpawnMyUnit&gt;();
+        /// </code>
+        /// </example>
+        public static void RegisterAction<T>() where T : IModTextAction, new()
+        {
+            ModTextActionRegistry.Register<T>();
+        }
+
+        /// <summary>
+        /// Register a mod-defined TextAction instance.
+        /// </summary>
+        /// <param name="action">The action instance to register</param>
+        public static void RegisterAction(IModTextAction action)
+        {
+            ModTextActionRegistry.Register(action);
+        }
+
+        // Registers SDK built-in actions (idempotent — safe to call multiple times)
+        private static bool _builtinsRegistered;
+        private static void RegisterBuiltinActions()
+        {
+            if (_builtinsRegistered) return;
+            _builtinsRegistered = true;
+            ModTextActionRegistry.Register(new ShowMessageAction());
+            ModTextActionRegistry.Register(new GiveSciencePointsAction());
+        }
         /// <summary>
         /// Create a new command builder for the specified command type
         /// </summary>
@@ -204,5 +307,96 @@ namespace PerAspera.GameAPI.Commands
         {
             return CommandDispatcher.Instance.GetStatistics();
         }
+
+        // ── YAML Actions ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Parse and execute all actions defined in a YAML string.
+        /// Supports any console debug command (~) as well as native SDK commands.
+        /// The YAML root must be an "actions:" key.
+        /// </summary>
+        /// <param name="yamlContent">YAML string with root "actions:" key</param>
+        /// <returns>Number of actions executed successfully</returns>
+        /// <example>
+        /// <code>
+        /// int count = Commands.ExecuteFromYaml(@"
+        /// actions:
+        ///   - command: FinishConstructions
+        ///     arguments: []
+        ///     daysDelay: 0.0
+        ///     showInFrontend: false
+        ///   - command: SetEngineTimescale
+        ///     arguments: ['2.0']
+        ///     daysDelay: 0.0
+        ///     showInFrontend: false
+        /// ");
+        /// </code>
+        /// </example>
+        public static int ExecuteFromYaml(string yamlContent)
+        {
+            var actions = Yaml.YamlCommandsParser.ParseString(yamlContent);
+            return Yaml.YamlCommandsExecutor.ExecuteActions(actions);
+        }
+
+        /// <summary>
+        /// Parse and execute all actions from a YAML file on disk.
+        /// Supports both "actions:" wrapped format and raw YAML list format.
+        /// Works for any console debug command (~) and all native SDK commands.
+        /// </summary>
+        /// <param name="filePath">Absolute path to the YAML actions file</param>
+        /// <returns>Number of actions executed successfully, -1 if file not found or parse failed</returns>
+        /// <example>
+        /// <code>
+        /// // startup-actions.yaml lives in your mod folder
+        /// string modPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        /// int count = Commands.ExecuteFromYamlFile(Path.Combine(modPath, "startup-actions.yaml"));
+        /// </code>
+        /// </example>
+        public static int ExecuteFromYamlFile(string filePath)
+        {
+            return Yaml.YamlCommandsExecutor.ExecuteFile(filePath);
+        }
+
+        // ── Custom Command Registry ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// Register a C# handler for a custom YAML command name.
+        /// The handler will be invoked (with priority) whenever a YAML action with this name is executed.
+        /// Case-insensitive. Replaces any previously registered handler for the same name.
+        /// </summary>
+        /// <param name="commandName">Command name as it appears in YAML (e.g. "ActivateSpaceport")</param>
+        /// <param name="handler">Handler delegate: (commandName, arguments[]) → bool</param>
+        /// <example>
+        /// <code>
+        /// // In your plugin Load():
+        /// Commands.RegisterHandler("ActivateSpaceport", (cmd, args) =>
+        /// {
+        ///     string faction = args.Length > 0 ? args[0] : "player";
+        ///     Log.LogInfo($"Spaceport activated for {faction}!");
+        ///     return true;
+        /// });
+        ///
+        /// // In your YAML:
+        /// actions:
+        ///   - command: ActivateSpaceport
+        ///     arguments:
+        ///       - player
+        /// </code>
+        /// </example>
+        public static void RegisterHandler(string commandName, CustomCommandHandler handler)
+            => CustomCommandRegistry.Register(commandName, handler);
+
+        /// <summary>
+        /// Unregister a previously registered custom command handler.
+        /// </summary>
+        /// <param name="commandName">Command name to unregister</param>
+        public static void UnregisterHandler(string commandName)
+            => CustomCommandRegistry.Unregister(commandName);
+
+        /// <summary>
+        /// Returns true if a custom C# handler is registered for this command name.
+        /// </summary>
+        public static bool IsCommandRegistered(string commandName)
+            => CustomCommandRegistry.IsRegistered(commandName);
     }
 }

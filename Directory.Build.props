@@ -1,43 +1,55 @@
 <Project>
-  <!-- Per Aspera SDK - AssemblyPublicizer Test Configuration -->
+  <!-- Chain to root Directory.Build.props (imports gamelibs.props → GameDir, GameLibsDir) -->
+  <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')" />
+
+  <!-- Per Aspera SDK - Shared build configuration -->
   
   <PropertyGroup>
     <SdkRoot>$(MSBuildThisFileDirectory)</SdkRoot>
     <IsCIBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</IsCIBuild>
     <IsCIBuild Condition="'$(IsCIBuild)' == ''">false</IsCIBuild>
-    
     <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
-    
-    <!-- Only pack PerAspera.ModSDK (main facade) and GameLibs, not sub-projects -->
-    <PackageOutputPath>$(SdkRoot)..\Livrable\Nuggets</PackageOutputPath>
-    <IsPackable Condition="'$(ProjectName)' != 'PerAspera.ModSDK' AND '$(ProjectName)' != 'PerAspera.GameLibs'">false</IsPackable>
-    
-    <!-- Per Aspera Game Detection -->
-    <PerAsperaGamePath Condition="'$(PerAsperaGamePath)' == '' AND Exists('F:\SteamLibrary\steamapps\common\Per Aspera')">F:\SteamLibrary\steamapps\common\Per Aspera</PerAsperaGamePath>
   </PropertyGroup>
-  
-  <!-- Modern AssemblyPublicizer for CI/CD -->
+
+  <!--
+    Game assembly references for SDK projects.
+    
+    LOCAL dev: DLLs come from GameLibsDir (root\gamelibs\) — generated once by
+               Generate-GameLibs.ps1, auto-triggered on first build.
+    
+    CI/CD:     Publicized on-the-fly via BepInEx.AssemblyPublicizer.MSBuild +
+               game path from environment variable PERASPERAGAMEPATH.
+  -->
+
+  <!-- CI/CD: publicize the 3 game assemblies at build time, glob the rest from interop -->
   <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
   </ItemGroup>
-  
-  <!-- Reference game assemblies directly with auto-publicization -->
   <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
-    <Reference Include="$(PerAsperaGamePath)\Assembly-CSharp.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\ScriptsAssembly.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.CoreModule.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.IMGUIModule.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\UnityEngine.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\Il2Cppmscorlib.dll" Publicize="true" />
-    <Reference Include="$(PerAsperaGamePath)\BepInEx\interop\Il2CppSystem.dll" Publicize="true" />
+    <Reference Include="Assembly-CSharp" Publicize="true">
+      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ScriptsAssembly" Publicize="true">
+      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\ScriptsAssembly.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PluginsAssembly" Publicize="true">
+      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\PluginsAssembly.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- All other interop DLLs (Il2Cpp*, UnityEngine.*, Unity.*, etc.) copied as-is -->
+    <_CIInteropDll Include="$(PERASPERAGAMEPATH)\BepInEx\interop\*.dll"
+                   Exclude="$(PERASPERAGAMEPATH)\BepInEx\interop\Assembly-CSharp.dll;$(PERASPERAGAMEPATH)\BepInEx\interop\ScriptsAssembly.dll;$(PERASPERAGAMEPATH)\BepInEx\interop\PluginsAssembly.dll" />
+    <Reference Include="@(_CIInteropDll->'%(Filename)')">
+      <HintPath>%(FullPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
-  
-  <!-- Local development: use existing GameLibs -->
-  <PropertyGroup Condition="'$(IsCIBuild)' != 'true'">
-    <PerAsperaGameLibs>$(SdkRoot)GameLibs</PerAsperaGameLibs>
-  </PropertyGroup>
-  
-  <!-- Game libraries are now consumed via NuGet package -->
-  <!-- No longer need local GameLibs.props - using PerAspera.GameLibs NuGet package instead -->
-  
+
+  <!-- LOCAL dev: wildcard game DLL references are added by the shared target
+       in root Directory.Build.targets (AddGameLibReferences target).
+       No manual references needed here. -->
+
 </Project>

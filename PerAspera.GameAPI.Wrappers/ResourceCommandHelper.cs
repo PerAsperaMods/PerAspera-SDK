@@ -5,7 +5,6 @@ using System.Reflection;
 using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Wrappers.Core;
 using PerAspera.GameAPI.Native;
 
@@ -97,7 +96,7 @@ namespace PerAspera.GameAPI.Wrappers
                 // il faut rechercehr le REsoruceTYPE dans le  KeeperMap/keerper
 
                 // Get native objects directly from IL2CPP
-                HandleWrapper _h =((FactionWrapper)handleable).GetHandle();
+                HandleWrapper _h = new HandleWrapper(handleable.handle);
                 
                 TextAction? textAction = CreateNativeTextAction(resourceType, amount) as TextAction;
 

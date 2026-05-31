@@ -5,12 +5,6 @@ using PerAspera.GameAPI;
 
 #nullable enable
 
-// Aliases pour éviter les conflits de noms
-using NativeBaseGame = PerAspera.GameAPI.Native.BaseGame;
-using NativeUniverse = PerAspera.GameAPI.Native.Universe;
-using NativePlanet = PerAspera.GameAPI.Native.Planet;
-using NativeFaction = PerAspera.GameAPI.Native.Faction;
-
 namespace PerAspera.GameAPI.Native
 {
     /// <summary>

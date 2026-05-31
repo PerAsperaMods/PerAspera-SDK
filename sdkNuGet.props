@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PerAspera ModSDK - NuGet Package Dependencies
+
+  This file provides dependencies using the PerAspera.ModSDK NuGet package from BaGet:
+  - PerAspera SDK (all 9 components via NuGet package)
+  - Unity Engine 2020.3.49 LTS
+  - BepInEx IL2CPP framework
+  - GameLibs (included in SDK package)
+
+  Usage: <Import Project="path/to/sdkNuGet.props" />
+-->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- IL2CPP specific settings -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Core Dependencies: Unity + BepInEx + IL2CPP -->
+  <ItemGroup>
+    <!-- Unity Engine 2020.3.49 LTS (Per Aspera compatible) -->
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.49" />
+
+    <!-- BepInEx IL2CPP Framework -->
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+
+    <!-- IL2CPP Interop -->
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.*" />
+
+    <!-- PerAspera ModSDK from BaGet -->
+    <PackageReference Include="PerAspera.ModSDK" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>
