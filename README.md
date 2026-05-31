@@ -201,6 +201,7 @@ Target: GameDir\BepInEx\plugins\SDK\
 | SDK-ARCHITECTURE-V2.md | Internal architecture notes |
 | VERSION-GUIDE.md | Versioning and release workflow |
 | [Organization Wiki](https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki) | User-facing guides and tutorials |
+| [Copilot Agents & Skills](https://github.com/PerAsperaMods/.github/tree/main) | VS Code agents (`@per-aspera-*`) and slash-command skills (`/per-aspera-*`) |
 
 ---
 
