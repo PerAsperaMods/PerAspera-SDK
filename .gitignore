@@ -70,9 +70,10 @@ Desktop.ini
 GameLibs/
 GameLibs-Package/
 *.dll
-# Documentation (except README and doc/)
+# Documentation (except README, CLAUDE.md and doc/)
 *.md
 !README.md
+!CLAUDE.md
 !doc/**/*.md
 
 # Scripts (except those in scripts/ folder)
