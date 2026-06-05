@@ -298,6 +298,13 @@
             Initialize game type discovery system
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.RefreshInstanceRegistry">
+            <summary>
+            Re-populate InstanceManager with fresh singleton discovery
+            Called after game is fully loaded via GameFullyLoadedEvent
+            Fixes timing issue where instances weren't available during initial Initialize()
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.WaitForGameAssemblies">
             <summary>
             Wait for game assemblies to be loaded
@@ -904,6 +911,7 @@
             <summary>
             Climate event patching service for Per Aspera
             Handles all climate-related events including temperature, pressure, and atmospheric composition changes
+            Uses static individual patches for IL2CPP HarmonyX compatibility
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.#ctor(HarmonyLib.Harmony)">
@@ -920,66 +928,20 @@
         </member>
         <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.InitializeEventHooks">
             <summary>
-            Initialize all climate-related event hooks
+            Initialize all climate-related event hooks with static patches
             </summary>
             <returns>Number of successfully hooked methods</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.CreateClimateMethodHook(System.String,System.String)">
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.PatchClimateModifier(System.String)">
             <summary>
-            Create a climate-specific method hook with prefix and postfix handling
-            </summary>
-            <param name="methodName">Method name to hook</param>
-            <param name="climateType">Type of climate parameter</param>
-            <returns>True if hook was successfully created</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ClimatePrefix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase)">
-            <summary>
-            Enhanced Harmony prefix for climate methods
-            Captures the old value before method execution
+            Patch a climate modifier method (IncreaseCO2, DecreaseCO2, etc.)
+            Uses postfix to capture result after method execution
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ClimatePostfix(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object},System.Reflection.MethodBase,System.Object[])">
+        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.PublishClimateEvent(System.Object,System.String,System.Object,System.Object)">
             <summary>
-            Enhanced Harmony postfix for climate methods
-            Publishes climate change events with before/after values
+            Publish climate change event with proper data
             </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GetCurrentClimateValue(System.Object,System.String)">
-            <summary>
-            Get current climate value with enhanced detection
-            </summary>
-            <param name="instance">Planet instance</param>
-            <param name="climateType">Type of climate parameter</param>
-            <returns>Current climate value or null if not found</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GeneratePropertyNames(System.String)">
-            <summary>
-            Generate possible property names for a climate type
-            </summary>
-            <param name="climateType">Climate type identifier</param>
-            <returns>Array of possible property names</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ExtractClimateTypeFromMethodName(System.String)">
-            <summary>
-            Extract climate type from method name
-            </summary>
-            <param name="methodName">Method name</param>
-            <returns>Climate type identifier</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ExtractNewValue(System.Object[])">
-            <summary>
-            Extract new value from method arguments
-            </summary>
-            <param name="args">Method arguments</param>
-            <returns>New value or null</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.ValuesEqual(System.Object,System.Object)">
-            <summary>
-            Compare values for equality handling floating point precision
-            </summary>
-            <param name="oldValue">Old value</param>
-            <param name="newValue">New value</param>
-            <returns>True if values are considered equal</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Native.Events.ClimateEventPatchingService.GetDiagnosticInfo">
             <summary>

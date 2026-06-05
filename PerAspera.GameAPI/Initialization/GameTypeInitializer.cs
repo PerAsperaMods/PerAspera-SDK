@@ -58,14 +58,14 @@ namespace PerAspera.GameAPI
                 // Try to discover core types (now much faster with cache)
                 DiscoverGameTypes();
 
-                // Try to get singleton instances
+                // Try to get singleton instances (may be empty at this early stage)
                 DiscoverSingletonInstances();
 
                 // 🔄 CRITICAL GAP RESOLUTION: Register discovered instances in InstanceManager
                 RegisterInstancesInManager();
 
                 _isInitialized = true;
-                
+
                 var stats = GetDiscoveryStats();
                 var cacheStats = PerAspera.GameAPI.Caching.TypeDiscoveryCache.GetStatistics();
                 var instanceStats = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
@@ -76,6 +76,30 @@ namespace PerAspera.GameAPI
             catch (Exception ex)
             {
                 _log.Error($"❌ Failed to initialize type discovery: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Re-populate InstanceManager with fresh singleton discovery
+        /// Called after game is fully loaded via GameFullyLoadedEvent
+        /// Fixes timing issue where instances weren't available during initial Initialize()
+        /// </summary>
+        public static void RefreshInstanceRegistry()
+        {
+            try
+            {
+                _log.Info("🔄 Refreshing instance registry after game load...");
+
+                // Re-discover instances now that game is fully loaded
+                DiscoverSingletonInstances();
+                RegisterInstancesInManager();
+
+                var instanceStats = PerAspera.GameAPI.Native.InstanceManager.GetStatus();
+                _log.Info($"✅ Instance registry refreshed: {instanceStats}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"❌ Failed to refresh instance registry: {ex.Message}");
             }
         }
 

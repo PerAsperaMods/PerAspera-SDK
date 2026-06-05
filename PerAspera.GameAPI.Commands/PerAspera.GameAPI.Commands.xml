@@ -1580,6 +1580,79 @@
             <param name="action">The YAML action to execute</param>
             <param name="handlerResult">Result returned by the handler, or false if handler threw</param>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.CustomModifierHandler">
+            <summary>
+            Handler delegate for custom YAML modifiers registered by mods.
+            Called every time an enhancement containing this modifier key is unlocked (Enable called).
+            </summary>
+            <param name="modifierName">The modifier key from YAML (e.g. "drone_hop_capacity")</param>
+            <param name="deltaValue">The float value from this enhancement's modifier entry (e.g. 2.0)</param>
+            <example>
+            <code>
+            Commands.RegisterModifier("drone_hop_capacity", (name, delta) =>
+            {
+                RoutingPatch.HopCapacity += (int)delta;
+                Log.Info($"drone_hop_capacity increased by {delta} → total {RoutingPatch.HopCapacity}");
+            });
+            </code>
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.CustomModifierRegistry">
+             <summary>
+             Registry for custom YAML enhancement modifier handlers registered by mods.
+             Checked by <see cref="T:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch"/> after native Enable() runs.
+            
+             Usage mirrors <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>:
+              1. Register a handler in your plugin Load().
+              2. Declare the modifier key in your enhancements.yaml.
+              3. The handler is called each time an enhancement with that key is enabled.
+             </summary>
+             <example>
+             <code>
+             // enhancements.yaml
+             enhancement_routing_optimization_1:
+               name: enhancement_routing_opt_name
+               description: enhancement_routing_opt_desc
+               iconName: Sprite/ICO_routing.png
+               modifiers:
+                 - "drone_hop_capacity: 1"
+            
+             // Plugin.cs
+             Commands.RegisterModifier("drone_hop_capacity", (name, delta) => {
+                 RoutingPatch.ExtraHopCapacity += (int)delta;
+             });
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomModifierRegistry.Register(System.String,PerAspera.GameAPI.Commands.CustomModifierHandler)">
+            <summary>
+            Register a C# handler for a custom YAML modifier key.
+            If a handler already exists for this key, it is replaced.
+            </summary>
+            <param name="modifierKey">Modifier key as it appears in YAML (case-insensitive, e.g. "drone_hop_capacity")</param>
+            <param name="handler">Handler called each time an enhancement with this key is enabled</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomModifierRegistry.Unregister(System.String)">
+            <summary>
+            Unregister a previously registered handler.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomModifierRegistry.IsRegistered(System.String)">
+            <summary>
+            Returns true if a handler is registered for this modifier key.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.CustomModifierRegistry.RegisteredModifiers">
+            <summary>
+            All currently registered custom modifier keys.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.CustomModifierRegistry.TryInvoke(System.String,System.Single)">
+            <summary>
+            Try to invoke the registered handler for a given modifier key + delta value.
+            Returns false if no handler is registered or if the handler throws.
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Commands.Events.CommandStatistics">
             <summary>
             Statistics about command execution
@@ -1781,12 +1854,6 @@
             Parse a required integer argument.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.GetString(System.String[],System.Int32)">
-            <summary>
-            Returns the string argument at the given index, or null if absent.
-            Never throws — safe to call with any args array.
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetFaction(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent,Faction@,PerAspera.Core.LogAspera,System.String)">
             <summary>
             Get the NativePlayerFaction from context.
@@ -1799,6 +1866,26 @@
             faction.AddResearchPoints(500f);
             </code>
             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.GetString(System.String[],System.Int32)">
+            <summary>
+            Returns the string argument at the given index, or null if absent.
+            Never throws — safe to call with any args array.
+            </summary>
+            <param name="args">The full arguments array</param>
+            <param name="index">Zero-based index of the argument to read</param>
+            <returns>The trimmed string value, or null if out of range or empty</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.TryGetString(System.String[],System.Int32,System.String@,PerAspera.Core.LogAspera,System.String)">
+            <summary>
+            Returns a required non-empty string argument, logging a warning if missing.
+            </summary>
+            <param name="args">The full arguments array</param>
+            <param name="index">Zero-based index of the argument to read</param>
+            <param name="value">Parsed value, or null if absent or empty</param>
+            <param name="log">Logger for the calling action</param>
+            <param name="actionName">Name used in the warning message</param>
+            <returns>True if a non-empty string was found</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ActionContextHelper.HasFaction(PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
             <summary>
@@ -1833,6 +1920,48 @@
             <param name="args">args[0] = amount (float, required, positive)</param>
             <param name="ctx">Game context — NativePlayerFaction must be non-null</param>
             <returns>True on success, false if arguments are invalid or faction unavailable</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ImportResourceAction">
+             <summary>
+             Built-in SDK action: imports any resource into the player faction's storage.
+             Registered automatically by Commands.Initialize().
+            
+             This replaces the native ImportResource console command which only supports
+             a limited set of gases and uses a different argument order.
+            
+             YAML usage:
+             <code>
+             launchActions:
+               - command: ImportResource
+                 arguments:
+                   - "WATER"   # resource key (required)
+                   - "1000"    # amount (required, must be positive)
+                 daysDelay: 0.0
+             </code>
+            
+             Arguments:
+               [0]  resourceKey — the resource type key as defined in resource.yaml (e.g. WATER, ICE, CHG, NITROGEN, OXYGEN, IRON, SILICON…)
+               [1]  amount      — quantity to add (float, required, must be positive)
+            
+             Returns false (with a warning) if:
+               - resourceKey argument is missing or empty
+               - amount argument is missing, not a valid number, or not positive
+               - player faction is not available in context
+               - the game console is not accessible (game not ready)
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ImportResourceAction.CommandName">
+            <summary>
+            The name used in YAML under "command:". Case-insensitive at runtime.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ImportResourceAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <summary>
+            Executes the action: imports the specified resource into the player faction's storage.
+            </summary>
+            <param name="args">args[0] = resourceKey (string), args[1] = amount (float, positive)</param>
+            <param name="ctx">Game context — provides faction name for the console command</param>
+            <returns>true on success, false on any validation or execution failure</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowMessageAction">
              <summary>
@@ -3574,6 +3703,49 @@
             Get diagnostic information about type discovery
             </summary>
             <returns>String with diagnostic information</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch">
+             <summary>
+             Harmony Postfix on <c>Enhancements.Enable(EnhancementType, bool)</c>.
+            
+             After the native Enable() runs (which stores all modifier values in the game's
+             internal modifierValues dictionary), this postfix reads the raw modifier strings
+             from the EnhancementType and invokes any registered handler in
+             <see cref="T:PerAspera.GameAPI.Commands.CustomModifierRegistry"/> for each custom modifier key found.
+            
+             This mirrors <see cref="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch"/> for the Commands system:
+             the game's own parsing runs untouched, then we piggyback on top for our custom keys.
+             </summary>
+             <example>
+             <code>
+             # enhancements.yaml
+             enhancement_routing_optimization_1:
+               modifiers:
+                 - "drone_hop_capacity: 1"   # custom key — native ignores it, our handler fires
+                 - "extraction_time: -0.05"  # native key — native handles it, no custom handler needed
+            
+             // Plugin.cs
+             Commands.RegisterModifier("drone_hop_capacity", (name, delta) => {
+                 RoutingPatch.ExtraHopCapacity += (int)delta;
+             });
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch.Postfix(System.Object,EnhancementType)">
+            <summary>
+            Postfix: runs after native Enable(). Iterates modifier strings on the enabled
+            EnhancementType and calls registered handlers for custom modifier keys.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch.TryParseModifierString(System.String,System.String@,System.Single@)">
+            <summary>
+            Parse a YAML modifier string of the form "key: value" into its components.
+            Handles both integer and float values. Examples:
+              "worker_speed: 0.05"   → ("worker_speed", 0.05f)
+              "building_limit: 50"   → ("building_limit", 50f)
+              "has_feature: true"    → ("has_feature", 1f)
+              "has_feature: false"   → ("has_feature", 0f)
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch">
              <summary>

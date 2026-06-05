@@ -6,5 +6,6 @@ global using System;
 global using System.Collections.Generic;
 global using PerAspera.Core;
 global using GameAPINamespace = PerAspera.GameAPI;
+global using PerAspera.GameAPI.UI;
 // TODO: Restore Wrappers when reimplemented
-// global 
+// global

@@ -4286,6 +4286,30 @@
             Convert to tabbed string representation
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper">
+            <summary>
+            Wrapper for native game UI panels (BuildingScreenPanel, etc).
+            Provides safe access to game panel sprites, buttons, and properties.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.FindBuildingScreenPanel">
+            <summary>Find BuildingScreenPanel instance in the current scene.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetPanelBackgroundSprite">
+            <summary>Get the upgradeNormalBackground sprite from the panel.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetPanelByName(System.String)">
+            <summary>Get panel by name (e.g., "statusPanel", "upgradePanel").</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetTextComponentByName(System.String)">
+            <summary>Get text component by name (e.g., "nameText", "statusText").</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetFieldValue``1(System.String)">
+            <summary>Get a field value by name (generic member access).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.IsActive">
+            <summary>Check if panel is currently visible/active.</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UnityGuiWrapper">
             <summary>
             Wrapper Unity GUI basique - utilise RealUnityGuiWrapper pour accès aux vraies DLLs Unity

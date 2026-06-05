@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<!-- Import SDK versioning -->
 	<Import Project="..\Version.props" />
-	
+
 	<PropertyGroup>
-		<AssemblyName>PerAspera.GameAPI.Commands</AssemblyName>
-		<RootNamespace>PerAspera.GameAPI.Commands</RootNamespace>
-		<PackageId>PerAspera.GameAPI.Commands</PackageId><Version>1.1.0</Version><IsPackable>true</IsPackable>
-		<Description>Per Aspera Commands API - Type-safe command execution and custom command extension system</Description>
-		<PackageTags>per-aspera;commands;gameapi;commandbus;modding;fluent-api</PackageTags>
+		<AssemblyName>PerAspera.GameAPI.UI</AssemblyName>
+		<RootNamespace>PerAspera.GameAPI.UI</RootNamespace>
+		<PackageId>PerAspera.GameAPI.UI</PackageId>
+		<Version>1.0.0</Version>
+		<IsPackable>true</IsPackable>
+		<Description>Per Aspera UI SDK - IMGUI components, styles, and helpers for mod development</Description>
+		<PackageTags>per-aspera;ui;imgui;gui;modding;sdk</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
 		<!-- Auto-generate package on build -->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -20,16 +22,12 @@
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 		<PackageReference Include="HarmonyX" Version="2.16.0" />
-		<PackageReference Include="YamlDotNet" Version="13.7.1" />
 	</ItemGroup>
 
 	<!-- Project References -->
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
-		<ProjectReference Include="..\PerAspera.Core.IL2CppExtensions\PerAspera.Core.IL2CppExtensions.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
-		<ProjectReference Include="..\PerAspera.GameAPI.Events\PerAspera.GameAPI.Events.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
 	</ItemGroup>
 </Project>
-
-

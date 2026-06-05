@@ -98,12 +98,6 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
         /// Returns the string argument at the given index, or null if absent.
         /// Never throws — safe to call with any args array.
         /// </summary>
-        public static string? GetString(string[] args, int index)
-        {
-            if (args == null || args.Length <= index) return null;
-            return args[index];
-        }
-
         // ─── Faction helpers ──────────────────────────────────────────────────
 
         /// <summary>
@@ -126,6 +120,42 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
                 return false;
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Returns the string argument at the given index, or null if absent.
+        /// Never throws — safe to call with any args array.
+        /// </summary>
+        /// <param name="args">The full arguments array</param>
+        /// <param name="index">Zero-based index of the argument to read</param>
+        /// <returns>The trimmed string value, or null if out of range or empty</returns>
+        public static string? GetString(string[]? args, int index)
+        {
+            if (args == null || args.Length <= index) return null;
+            var s = args[index]?.Trim();
+            return string.IsNullOrEmpty(s) ? null : s;
+        }
+
+        /// <summary>
+        /// Returns a required non-empty string argument, logging a warning if missing.
+        /// </summary>
+        /// <param name="args">The full arguments array</param>
+        /// <param name="index">Zero-based index of the argument to read</param>
+        /// <param name="value">Parsed value, or null if absent or empty</param>
+        /// <param name="log">Logger for the calling action</param>
+        /// <param name="actionName">Name used in the warning message</param>
+        /// <returns>True if a non-empty string was found</returns>
+        public static bool TryGetString(string[]? args, int index, out string value, LogAspera log, string actionName)
+        {
+            var s = GetString(args, index);
+            if (s == null)
+            {
+                log.Warning($"{actionName}: missing string argument at index {index}");
+                value = string.Empty;
+                return false;
+            }
+            value = s;
             return true;
         }
 

@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PerAspera.GameAPI.UI</name>
+    </assembly>
+    <members>
+        <member name="T:PerAspera.GameAPI.UI.UIGamePanel">
+             <summary>
+             Game-native panel using actual game sprites (BackgroundWindow_2.png).
+             Renders panels that look 100% identical to in-game panels.
+            
+             <example>
+             var panel = new UIGamePanel("POI Browser", new Rect(50, 50, 500, 650));
+             panel.OnGUI(y => {
+                 y = UISimpleRow.DrawLabel(panel.Rect, y, "Content here");
+                 return y;
+             });
+             </example>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIGamePanel.#ctor(System.String,UnityEngine.Rect,System.String)">
+            <summary>Create a new game-style panel.</summary>
+            <param name="title">Panel title</param>
+            <param name="initialRect">Initial position and size</param>
+            <param name="spriteResourcePath">Path to sprite in Resources folder (e.g., "UI/BackgroundWindow_2")</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIGamePanel.OnGUI(System.Func{System.Single,System.Single})">
+            <summary>Render panel with game sprite background.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UIOverlaySystem">
+             <summary>
+             System to add overlay elements to native game panels.
+             Allows mods to inject UI elements into existing game panels.
+            
+             <example>
+             var overlay = new UIOverlaySystem("POI Browser", new Rect(50, 50, 500, 650));
+             overlay.OnGUI(y => {
+                 y = UISimpleRow.DrawLabel(overlay.PanelRect, y, "Custom content");
+                 return y;
+             });
+             </example>
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIOverlaySystem.PanelRect">
+            <summary>Panel rectangle (position and size).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIOverlaySystem.IsVisible">
+            <summary>Is panel visible.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.#ctor(System.String,UnityEngine.Rect,UnityEngine.Sprite)">
+            <summary>Create a new overlay panel.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.SetBackgroundSprite(UnityEngine.Sprite)">
+            <summary>Set custom background sprite from game.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.SetContentDrawer(System.Func{System.Single,System.Single})">
+            <summary>Register content drawer callback (receives Y position, returns next Y).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.OnGUI(System.Func{System.Single,System.Single})">
+            <summary>Render the overlay panel.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.Toggle">
+            <summary>Toggle panel visibility.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIOverlaySystem.ResetPosition(UnityEngine.Rect)">
+            <summary>Reset to initial position.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UIPanel">
+             <summary>
+             Simple draggable window panel with header and close button.
+             Renders using GUI.Box and manual dragging, compatible with IL2CPP.
+            
+             <example>
+             var panel = new UIPanel("My Panel", new Rect(100, 100, 300, 400));
+             panel.OnGUI(() => {
+                 GUILayout.Label("Content goes here");
+             });
+             </example>
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIPanel.IsVisible">
+            <summary>Is the panel currently visible?</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIPanel.WindowRect">
+            <summary>Current window rectangle (position and size)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIPanel.Title">
+            <summary>Panel title</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIPanel.#ctor(System.String,UnityEngine.Rect)">
+            <summary>Create a new draggable panel.</summary>
+            <param name="title">Panel title displayed in header</param>
+            <param name="initialRect">Initial window position and size</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIPanel.OnGUI(System.Action)">
+            <summary>
+            Render the panel with custom content.
+            </summary>
+            <param name="contentCallback">Callback function to render panel content via GUILayout</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIPanel.Toggle">
+            <summary>
+            Toggle panel visibility.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIPanel.CenterOnScreen(System.Single,System.Single)">
+            <summary>
+            Center panel on screen.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UIResourceRow">
+             <summary>
+             A single row displaying resource information (label + quantity + optional bar).
+             Standardized layout matching in-game resource displays.
+            
+             <example>
+             UIResourceRow.DrawRow("Oxygen", 150.5f);
+             UIResourceRow.DrawRow("Water", 75.2f, 100f);  // With max for bar
+             </example>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIResourceRow.DrawRow(System.String,System.Single,System.String)">
+            <summary>
+            Draw a simple resource row with label and quantity.
+            </summary>
+            <param name="resourceName">Name of the resource</param>
+            <param name="quantity">Current quantity</param>
+            <param name="displayFormat">Format string for quantity (e.g., "F1")</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIResourceRow.DrawRowWithBar(System.String,System.Single,System.Single,System.String)">
+            <summary>
+            Draw a resource row with a progress bar.
+            </summary>
+            <param name="resourceName">Name of the resource</param>
+            <param name="current">Current quantity</param>
+            <param name="maximum">Maximum capacity</param>
+            <param name="displayFormat">Format string for quantity</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIResourceRow.DrawRowWithStatus(System.String,System.Single,System.String,System.String)">
+            <summary>
+            Draw a resource row with status indicator.
+            </summary>
+            <param name="resourceName">Name of the resource</param>
+            <param name="quantity">Current quantity</param>
+            <param name="status">Status ("OK", "WARNING", "ERROR")</param>
+            <param name="displayFormat">Format string for quantity</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIResourceRow.DrawProgressBar(System.Single,System.Single,UnityEngine.GUILayoutOption[])">
+            <summary>
+            Draw a simple progress bar (used internally).
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UISceneHelper">
+            <summary>
+            Helper to find and cache UI panel instances in the game scene.
+            Centralizes discovery of native UI elements.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISceneHelper.FindPanelByType(System.String)">
+            <summary>Find a panel instance by type name.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISceneHelper.FindBuildingScreenPanel">
+            <summary>Find BuildingScreenPanel specifically.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISceneHelper.ScanAvailablePanels">
+            <summary>Find all panel types in the scene.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISceneHelper.ClearCache">
+            <summary>Clear the panel cache (useful after scene loads).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISceneHelper.GetCacheStats">
+            <summary>Get cache statistics.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UISimplePanel">
+             <summary>
+             Ultra-simple GUI-only panel (no GUILayout). IL2CPP compatible.
+             Draws a window-like panel with title, close button, and custom content area.
+            
+             <example>
+             var panel = new UISimplePanel("My Panel", new Rect(100, 100, 300, 400));
+            
+             void OnGUI() {
+                 panel.OnGUI(y => {
+                     GUI.Label(new Rect(10, y, 280, 20), "Content here");
+                     return y + 25;
+                 });
+             }
+             </example>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimplePanel.#ctor(System.String,UnityEngine.Rect)">
+            <summary>Create a new simple panel.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimplePanel.OnGUI(System.Func{System.Single,System.Single})">
+            <summary>
+            Render panel. ContentDrawer receives Y position and returns next Y position.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UISimpleRow">
+             <summary>
+             Simple row renderer using GUI (no GUILayout). IL2CPP compatible.
+             Returns the Y position for the next row.
+            
+             <example>
+             float y = 30;
+             y = UISimpleRow.DrawLabel(panelRect, y, "Label text");
+             y = UISimpleRow.DrawValue(panelRect, y, "Value", "123.45");
+             y = UISimpleRow.DrawButton(panelRect, y, "Click me", () => { });
+             </example>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawLabel(UnityEngine.Rect,System.Single,System.String)">
+            <summary>Draw a simple label. Returns next Y position.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawRow(UnityEngine.Rect,System.Single,System.String,System.String)">
+            <summary>Draw a label + value row (label left, value right). Returns next Y position.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawButton(UnityEngine.Rect,System.Single,System.String,System.Action)">
+            <summary>Draw a button. Returns next Y position.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawTextField(UnityEngine.Rect,System.Single,System.String,System.String@)">
+            <summary>Draw a text field. Returns next Y position.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawSeparator(UnityEngine.Rect,System.Single)">
+            <summary>Draw a separator line. Returns next Y position.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawSpacer(System.Single,System.Single)">
+            <summary>Draw a spacer. Returns next Y position.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UIColors">
+            <summary>
+            Standardized color palette for Per Aspera UI components.
+            Matches the visual style of in-game panels (POI Browser, Stock, Demand &amp; Production).
+            </summary>
+            <example>
+            var color = UIColors.Primary;  // Cyan for values
+            var warning = UIColors.Warning;  // Orange for warnings
+            </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Primary">
+            <summary>Primary value color (cyan) - used for resource quantities, main stats</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Secondary">
+            <summary>Secondary/neutral text (white) - used for labels and standard text</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Warning">
+            <summary>Warning color (orange) - used for alerts and cautionary information</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Error">
+            <summary>Error/critical color (red) - used for critical alerts and errors</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Success">
+            <summary>Success color (green) - used for completed or positive states</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.PanelBackground">
+            <summary>Panel background color (dark blue-grey) - matches game panels</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.PanelBorder">
+            <summary>Panel border color (light cream/beige)</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.UIColors.Disabled">
+            <summary>Disabled/inactive color (grey)</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIColors.GetStatusColor(System.String)">
+            <summary>
+            Get color based on status (OK, Warning, Error).
+            </summary>
+            <param name="status">Status level: "OK", "WARNING", "ERROR", or custom</param>
+            <returns>Corresponding color, defaults to Secondary if status not recognized</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIColors.GetTemperatureColor(System.Single)">
+            <summary>
+            Get color based on temperature gradient (cold → hot).
+            Value range: -150 to 150 (Mars temperature in Celsius).
+            </summary>
+            <param name="temperature">Temperature in Celsius</param>
+            <returns>Color interpolated between blue (cold) → cyan → yellow → red (hot)</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIColors.WithAlpha(UnityEngine.Color,System.Single)">
+            <summary>
+            Get a semi-transparent version of a color.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.UIStyles">
+             <summary>
+             Standardized GUI styles for Per Aspera UI components.
+             Lazy-initializes styles on first access to avoid allocations.
+            
+             <example>
+             GUI.Label(rect, "Label Text", UIStyles.Label);
+             GUI.Label(rect, "100.5", UIStyles.Value);
+             </example>
+             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Header">
+            <summary>Header style - bold white text, 14pt, for panel titles</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Label">
+            <summary>Label style - white text, 11pt, for resource names and descriptions</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Value">
+            <summary>Value style - cyan text, bold, 11pt, for numeric values</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Warning">
+            <summary>Warning style - orange text, 10pt, for warning messages</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Error">
+            <summary>Error style - red text, bold, 10pt, for error messages</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.UIStyles.Button">
+            <summary>Button style - standard button with custom colors</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.UIStyles.Reset">
+            <summary>
+            Force reinitialize all styles (useful for theme changes or testing).
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -113,6 +113,7 @@ namespace PerAspera.GameAPI.Commands
             _builtinsRegistered = true;
             ModTextActionRegistry.Register(new ShowMessageAction());
             ModTextActionRegistry.Register(new GiveSciencePointsAction());
+            ModTextActionRegistry.Register(new ImportResourceAction());
         }
         /// <summary>
         /// Create a new command builder for the specified command type

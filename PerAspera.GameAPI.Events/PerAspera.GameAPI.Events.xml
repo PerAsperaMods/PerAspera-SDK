@@ -899,8 +899,15 @@
         <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.SetupEventSystemBridge(System.Type)">
             <summary>
             Setup bridge between legacy EventSystem and enhanced event bus
+            Forwards EnhancedEventBus events → ModSDK.Systems.EventSystem for backwards compatibility
             </summary>
             <param name="eventSystemType">Legacy EventSystem type</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ForwardEventToLegacySystem(System.String,System.Object)">
+            <summary>
+            Harmony postfix: Forward events from EnhancedEventBus to legacy EventSystem
+            Called after every EnhancedEventBus.Publish(string, object) call
+            </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.RouteNativeEvent(System.String,System.Object)">
             <summary>

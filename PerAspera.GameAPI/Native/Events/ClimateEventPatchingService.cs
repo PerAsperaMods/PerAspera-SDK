@@ -10,16 +10,18 @@ namespace PerAspera.GameAPI.Native.Events
     /// <summary>
     /// Climate event patching service for Per Aspera
     /// Handles all climate-related events including temperature, pressure, and atmospheric composition changes
+    /// Uses static individual patches for IL2CPP HarmonyX compatibility
     /// </summary>
     public sealed class ClimateEventPatchingService : BaseEventPatchingService
     {
-        private System.Type _planetType;
+        private static System.Type _planetType;
+        private static readonly Dictionary<object, Dictionary<string, object>> _climateStateCache = new();
 
         /// <summary>
         /// Initialize climate event patching service
         /// </summary>
         /// <param name="harmony">Harmony instance for IL2CPP patching</param>
-        public ClimateEventPatchingService(Harmony harmony) 
+        public ClimateEventPatchingService(Harmony harmony)
             : base("Climate", harmony)
         {
         }
@@ -31,12 +33,12 @@ namespace PerAspera.GameAPI.Native.Events
         public override string GetEventType() => "Climate";
 
         /// <summary>
-        /// Initialize all climate-related event hooks
+        /// Initialize all climate-related event hooks with static patches
         /// </summary>
         /// <returns>Number of successfully hooked methods</returns>
         public override int InitializeEventHooks()
         {
-            _log.Debug("🌡️ Setting up enhanced climate event hooks...");
+            _log.Debug("🌡️ Setting up climate event hooks with IL2CPP-compatible patches...");
 
             _planetType = GameTypeInitializer.GetPlanetType();
             if (_planetType == null)
@@ -45,277 +47,165 @@ namespace PerAspera.GameAPI.Native.Events
                 return 0;
             }
 
-            // ✅ CORRECTED: Hook vraies méthodes Planet pour surcharges Climate
-            var climateHooks = new Dictionary<string, string>
-            {
-                // Getters (pour lecture climate)
-                { "GetAverageTemperature", "Temperature" },
-                { "GetTotalPressure", "TotalPressure" },
-                { "GetCO2Pressure", "CO2Pressure" },
-                { "GetO2Pressure", "O2Pressure" },
-                { "GetN2Pressure", "N2Pressure" },
-                { "GetGHGPressure", "GHGPressure" },
-                { "GetWaterStock", "WaterStock" },
-                // Modifiers (pour surcharges climate)
-                { "IncreaseCO2", "CO2Pressure" },
-                { "DecreaseCO2", "CO2Pressure" },
-                { "IncreaseO2", "O2Pressure" },
-                { "DecreaseO2", "O2Pressure" },
-                { "IncreaseN2", "N2Pressure" },
-                { "DecreaseN2", "N2Pressure" },
-                { "IncreaseGHG", "GHGPressure" },
-                { "DecreaseGHG", "GHGPressure" },
-                { "IncreaseWater", "WaterStock" },
-                { "DecreaseWater", "WaterStock" },
-                // Conversion methods (pour events climate)
-                { "ConvertCO2IntoO2", "Conversion" },
-                { "ConvertO2IntoCO2", "Conversion" }
+            int hookedCount = 0;
+
+            // Hook all climate modifier methods with postfix (capture changes)
+            var modifiers = new[] {
+                "IncreaseCO2", "DecreaseCO2",
+                "IncreaseO2", "DecreaseO2",
+                "IncreaseN2", "DecreaseN2",
+                "IncreaseGHG", "DecreaseGHG",
+                "IncreaseWater", "DecreaseWater",
+                "ConvertCO2IntoO2", "ConvertO2IntoCO2"
             };
 
-            int hookedCount = 0;
-            foreach (var (methodName, climateType) in climateHooks)
+            foreach (var methodName in modifiers)
             {
-                if (CreateClimateMethodHook(methodName, climateType))
-                {
+                if (PatchClimateModifier(methodName))
                     hookedCount++;
-                }
             }
 
-            _log.Info($"✅ Climate hooks initialized: {hookedCount}/{climateHooks.Count} methods hooked");
+            _log.Info($"✅ Climate hooks initialized: {hookedCount}/{modifiers.Length} modifier methods hooked");
             return hookedCount;
         }
 
         /// <summary>
-        /// Create a climate-specific method hook with prefix and postfix handling
+        /// Patch a climate modifier method (IncreaseCO2, DecreaseCO2, etc.)
+        /// Uses postfix to capture result after method execution
         /// </summary>
-        /// <param name="methodName">Method name to hook</param>
-        /// <param name="climateType">Type of climate parameter</param>
-        /// <returns>True if hook was successfully created</returns>
-        private bool CreateClimateMethodHook(string methodName, string climateType)
+        private bool PatchClimateModifier(string methodName)
         {
-            if (!ValidateMethodForPatching(_planetType, methodName))
-            {
-                return false;
-            }
-
             try
             {
                 var method = _planetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-                
-                // Create harmony patches
-                var prefix = new HarmonyMethod(typeof(ClimateEventPatchingService), nameof(ClimatePrefix));
-                var postfix = new HarmonyMethod(typeof(ClimateEventPatchingService), nameof(ClimatePostfix));
+                if (method == null)
+                {
+                    _log.Warning($"Method {methodName} not found on Planet");
+                    return false;
+                }
 
-                _harmony.Patch(method, prefix: prefix, postfix: postfix);
+                var postfixMethod = typeof(ClimateEventPatchingService).GetMethod(
+                    $"{methodName}_Postfix",
+                    BindingFlags.NonPublic | BindingFlags.Static);
 
+                if (postfixMethod == null)
+                {
+                    _log.Warning($"Postfix method {methodName}_Postfix not found");
+                    return false;
+                }
+
+                _harmony.Patch(method, postfix: new HarmonyMethod(postfixMethod));
                 var patchKey = $"Planet.{methodName}";
-                _patchedMethods[patchKey] = climateType;
-                
-                _log.Debug($"✓ Hooked {patchKey} for {climateType} events");
+                _patchedMethods[patchKey] = "ClimateModifier";
+
+                _log.Debug($"✓ Hooked {patchKey}");
                 return true;
             }
             catch (Exception ex)
             {
-                _log.Warning($"Failed to hook {methodName}: {ex.Message}");
+                _log.Warning($"Failed to patch {methodName}: {ex.Message}");
                 return false;
             }
         }
 
-        /// <summary>
-        /// Enhanced Harmony prefix for climate methods
-        /// Captures the old value before method execution
-        /// </summary>
-        [HarmonyPrefix]
-        public static void ClimatePrefix(object __instance, Dictionary<string, object> __state, MethodBase __originalMethod)
-        {
-            try
-            {
-                if (__state == null)
-                    __state = new Dictionary<string, object>();
+        // ===== STATIC POSTFIX PATCHES FOR CLIMATE MODIFIERS =====
+        // Each patch follows IL2CPP HarmonyX convention: __instance, method params, __result
 
-                var methodName = __originalMethod.Name;
-                var climateType = ExtractClimateTypeFromMethodName(methodName);
-                
-                // Capture current value before change
-                var currentValue = GetCurrentClimateValue(__instance, climateType);
-                __state["OldValue"] = currentValue;
-                __state["ClimateType"] = climateType;
-                __state["MethodName"] = methodName;
-            }
-            catch (Exception)
-            {
-                // Fail silently to avoid disrupting game flow
-            }
-        }
-
-        /// <summary>
-        /// Enhanced Harmony postfix for climate methods
-        /// Publishes climate change events with before/after values
-        /// </summary>
         [HarmonyPostfix]
-        public static void ClimatePostfix(object __instance, Dictionary<string, object> __state, 
-            MethodBase __originalMethod, object[] __args)
+        private static void IncreaseCO2_Postfix(object __instance, float pressure, float __result)
+        {
+            PublishClimateEvent(__instance, "CO2Pressure", pressure, __result);
+        }
+
+        [HarmonyPostfix]
+        private static void DecreaseCO2_Postfix(object __instance, float pressure, float __result)
+        {
+            PublishClimateEvent(__instance, "CO2Pressure", -pressure, __result);
+        }
+
+        [HarmonyPostfix]
+        private static void IncreaseO2_Postfix(object __instance, float pressure, float __result)
+        {
+            PublishClimateEvent(__instance, "O2Pressure", pressure, __result);
+        }
+
+        [HarmonyPostfix]
+        private static void DecreaseO2_Postfix(object __instance, float pressure, float __result)
+        {
+            PublishClimateEvent(__instance, "O2Pressure", -pressure, __result);
+        }
+
+        [HarmonyPostfix]
+        private static void IncreaseN2_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "N2Pressure", pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void DecreaseN2_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "N2Pressure", -pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void IncreaseGHG_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "GHGPressure", pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void DecreaseGHG_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "GHGPressure", -pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void IncreaseWater_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "WaterStock", pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void DecreaseWater_Postfix(object __instance, float pressure)
+        {
+            PublishClimateEvent(__instance, "WaterStock", -pressure, null);
+        }
+
+        [HarmonyPostfix]
+        private static void ConvertCO2IntoO2_Postfix(object __instance, float __result)
+        {
+            PublishClimateEvent(__instance, "Conversion", __result, null);
+        }
+
+        [HarmonyPostfix]
+        private static void ConvertO2IntoCO2_Postfix(object __instance, float __result)
+        {
+            PublishClimateEvent(__instance, "Conversion", __result, null);
+        }
+
+        /// <summary>
+        /// Publish climate change event with proper data
+        /// </summary>
+        private static void PublishClimateEvent(object instance, string climateType, object delta, object newValue)
         {
             try
             {
-                if (__state == null || !__state.ContainsKey("OldValue"))
-                    return;
-
-                var climateType = (string)__state["ClimateType"];
-                var methodName = (string)__state["MethodName"];
-                var oldValue = __state["OldValue"];
-                var newValue = ExtractNewValue(__args);
-
-                // Only publish if value actually changed
-                if (!ValuesEqual(oldValue, newValue))
+                var eventData = new
                 {
-                    var eventData = new
-                    {
-                        Planet = __instance,
-                        ClimateType = climateType,
-                        OldValue = oldValue,
-                        NewValue = newValue,
-                        MethodName = methodName,
-                        Timestamp = DateTime.UtcNow
-                    };
+                    Planet = instance,
+                    ClimateType = climateType,
+                    Delta = delta,
+                    NewValue = newValue,
+                    Timestamp = DateTime.UtcNow
+                };
 
-                    // Publish specific climate event
-                    ModEventBus.Publish($"Climate{climateType}Changed", eventData);
-                    
-                    // Publish generic climate event
-                    ModEventBus.Publish("ClimateChanged", eventData);
-                }
+                ModEventBus.Publish($"Climate{climateType}Changed", eventData);
+                ModEventBus.Publish("ClimateChanged", eventData);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Fail silently to avoid disrupting game flow
             }
-        }
-
-        /// <summary>
-        /// Get current climate value with enhanced detection
-        /// </summary>
-        /// <param name="instance">Planet instance</param>
-        /// <param name="climateType">Type of climate parameter</param>
-        /// <returns>Current climate value or null if not found</returns>
-        private static object GetCurrentClimateValue(object instance, string climateType)
-        {
-            try
-            {
-                var planetType = instance.GetType();
-
-                // Try common property naming patterns
-                var propertyNames = GeneratePropertyNames(climateType);
-                
-                foreach (var propertyName in propertyNames)
-                {
-                    var property = planetType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                    if (property != null && property.CanRead)
-                    {
-                        return property.GetValue(instance);
-                    }
-                }
-
-                // Try field access as fallback
-                foreach (var propertyName in propertyNames)
-                {
-                    var field = planetType.GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
-                    {
-                        return field.GetValue(instance);
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Generate possible property names for a climate type
-        /// </summary>
-        /// <param name="climateType">Climate type identifier</param>
-        /// <returns>Array of possible property names</returns>
-        private static string[] GeneratePropertyNames(string climateType)
-        {
-            return climateType switch
-            {
-                "Temperature" => new[] { "averageTemperature", "temperature", "temp", "AverageTemperature", "Temperature" },
-                "CO2Pressure" => new[] { "co2Pressure", "CO2Pressure", "carbonDioxidePressure" },
-                "O2Pressure" => new[] { "o2Pressure", "O2Pressure", "oxygenPressure", "oxygen" },
-                "N2Pressure" => new[] { "n2Pressure", "N2Pressure", "nitrogenPressure", "nitrogen" },
-                "GHGPressure" => new[] { "ghgPressure", "GHGPressure", "greenhouseGasPressure" },
-                "WaterStock" => new[] { "waterStock", "water", "WaterStock", "Water" },
-                "TotalPressure" => new[] { "totalPressure", "pressure", "TotalPressure", "Pressure" },
-                "ArgonPressure" => new[] { "argonPressure", "argon", "ArgonPressure", "Argon" },
-                _ => new[] { climateType.ToLowerInvariant(), climateType }
-            };
-        }
-
-        /// <summary>
-        /// Extract climate type from method name
-        /// </summary>
-        /// <param name="methodName">Method name</param>
-        /// <returns>Climate type identifier</returns>
-        private static string ExtractClimateTypeFromMethodName(string methodName)
-        {
-            return methodName switch
-            {
-                "SetAverageTemperature" or "SetTemperature" => "Temperature",
-                "SetCO2Pressure" => "CO2Pressure",
-                "SetO2Pressure" or "SetOxygenPressure" => "O2Pressure",
-                "SetN2Pressure" or "SetNitrogenPressure" => "N2Pressure",
-                "SetGHGPressure" or "SetGreenhouseGasPressure" => "GHGPressure",
-                "SetWaterStock" or "SetWater" => "WaterStock",
-                "SetTotalPressure" or "SetPressure" => "TotalPressure",
-                "SetArgonPressure" => "ArgonPressure",
-                _ => "Unknown"
-            };
-        }
-
-        /// <summary>
-        /// Extract new value from method arguments
-        /// </summary>
-        /// <param name="args">Method arguments</param>
-        /// <returns>New value or null</returns>
-        private static object ExtractNewValue(object[] args)
-        {
-            if (args == null || args.Length == 0)
-                return null;
-
-            // First argument is typically the new value in setter methods
-            return args[0];
-        }
-
-        /// <summary>
-        /// Compare values for equality handling floating point precision
-        /// </summary>
-        /// <param name="oldValue">Old value</param>
-        /// <param name="newValue">New value</param>
-        /// <returns>True if values are considered equal</returns>
-        private static bool ValuesEqual(object oldValue, object newValue)
-        {
-            if (oldValue == null && newValue == null)
-                return true;
-            
-            if (oldValue == null || newValue == null)
-                return false;
-
-            // Handle floating point comparison with tolerance
-            if (oldValue is float oldFloat && newValue is float newFloat)
-            {
-                return Math.Abs(oldFloat - newFloat) < 0.0001f;
-            }
-
-            if (oldValue is double oldDouble && newValue is double newDouble)
-            {
-                return Math.Abs(oldDouble - newDouble) < 0.0001;
-            }
-
-            return oldValue.Equals(newValue);
         }
 
         /// <summary>

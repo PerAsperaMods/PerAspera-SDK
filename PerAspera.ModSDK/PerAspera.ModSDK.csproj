@@ -41,6 +41,7 @@
 		<ProjectReference Include="..\PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Climate\PerAspera.GameAPI.Climate.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj" />
+		<ProjectReference Include="..\PerAspera.GameAPI.UI\PerAspera.GameAPI.UI.csproj" />
 	</ItemGroup>
 	<!-- Auto-deploy SDK to BepInEx plugins folder -->
 	<!--<Target Name="DeploySDK" AfterTargets="Build" Condition="'$(PerAsperaGamePath)' != ''">
@@ -56,6 +57,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.UI.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Message Text="📦 SDK deployed to: $(SDKDeployPath)" Importance="high" />
 	</Target>-->
@@ -73,6 +75,7 @@
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Overrides.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Commands.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Wrappers.dll" DestinationFolder="$(SDKDeployPath)" />
+		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.UI.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Native.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.GameAPI.Database.dll" DestinationFolder="$(SDKDeployPath)" />
 		<Copy SourceFiles="$(OutputPath)PerAspera.ModSDK.dll" DestinationFolder="$(SDKDeployPath)" />

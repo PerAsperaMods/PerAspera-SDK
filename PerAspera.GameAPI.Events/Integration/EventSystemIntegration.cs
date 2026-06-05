@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using HarmonyLib;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.Native;
 using PerAspera.GameAPI.Events.Constants;
@@ -30,10 +32,24 @@ namespace PerAspera.GameAPI.Events.Integration
             {
                 // Connect to existing EventSystem if available
                 ConnectToLegacyEventSystem();
-                
+
                 // Enable enhanced event bus
                 EnhancedEventBus.SetAutoConversion(true);
-                
+
+                // 🔄 FIX 1: Subscribe to GameFullyLoadedEvent to refresh InstanceManager
+                // (Instances aren't available during initial plugin Load(), so we re-discover post-game-load)
+                EnhancedEventBus.SubscribeToGameFullyLoaded(gameFullyLoadedEvent =>
+                {
+                    try
+                    {
+                        GameTypeInitializer.RefreshInstanceRegistry();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error($"Failed to refresh instance registry: {ex.Message}");
+                    }
+                });
+
                 _isInitialized = true;
                 _logger.Info("Enhanced event system integration initialized");
             }
@@ -97,19 +113,73 @@ namespace PerAspera.GameAPI.Events.Integration
 
         /// <summary>
         /// Setup bridge between legacy EventSystem and enhanced event bus
+        /// Forwards EnhancedEventBus events → ModSDK.Systems.EventSystem for backwards compatibility
         /// </summary>
         /// <param name="eventSystemType">Legacy EventSystem type</param>
         private static void SetupEventSystemBridge(System.Type eventSystemType)
         {
-            // Get Subscribe method from legacy EventSystem
-            var subscribeMethod = eventSystemType.GetMethod("Subscribe", 
-                new[] { typeof(string), typeof(Action<object>) });
-
-            if (subscribeMethod != null && subscribeMethod.IsStatic)
+            try
             {
-                // Bridge: Legacy EventSystem.Subscribe → EnhancedEventBus.PublishLegacyEvent
-                // This is a conceptual setup - actual implementation would use delegates
-                _logger.Info("Successfully connected to legacy EventSystem");
+                // Find Publish method on legacy EventSystem (static method: EventSystem.Publish(string, object))
+                var publishMethod = eventSystemType.GetMethod("Publish",
+                    System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
+                    null, new[] { typeof(string), typeof(object) }, null);
+
+                if (publishMethod != null)
+                {
+                    // 🔄 FIX 3: Implement real event forwarding using Harmony patch on EnhancedEventBus.Publish
+                    // This intercepts all string-based event publishes and forwards to legacy system
+                    var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.Bridge");
+                    var enhancedBusPublishMethod = typeof(EnhancedEventBus).GetMethod("Publish",
+                        System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public,
+                        null, new[] { typeof(string), typeof(object) }, null);
+
+                    if (enhancedBusPublishMethod != null)
+                    {
+                        // Create a postfix that forwards events to legacy system
+                        var legacyForwardMethod = typeof(EventSystemIntegration).GetMethod(
+                            nameof(ForwardEventToLegacySystem),
+                            BindingFlags.NonPublic | BindingFlags.Static);
+
+                        if (legacyForwardMethod != null)
+                        {
+                            // Store reference for use in postfix
+                            _legacyPublishMethod = publishMethod;
+                            harmony.Patch(enhancedBusPublishMethod, postfix: new HarmonyLib.HarmonyMethod(legacyForwardMethod));
+                            _logger.Info("✅ Event bridge connected: EnhancedEventBus → ModSDK.Systems.EventSystem");
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.Warning("Legacy EventSystem.Publish method not found, bridge skipped");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to setup event bridge: {ex.Message}");
+            }
+        }
+
+        // Static reference to legacy publish method for use in harmony postfix
+        private static System.Reflection.MethodInfo? _legacyPublishMethod;
+
+        /// <summary>
+        /// Harmony postfix: Forward events from EnhancedEventBus to legacy EventSystem
+        /// Called after every EnhancedEventBus.Publish(string, object) call
+        /// </summary>
+        private static void ForwardEventToLegacySystem(string eventType, object eventData)
+        {
+            if (_legacyPublishMethod == null || eventType == null || eventData == null)
+                return;
+
+            try
+            {
+                _legacyPublishMethod.Invoke(null, new object[] { eventType, eventData });
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to forward event '{eventType}' to legacy EventSystem: {ex.Message}");
             }
         }
 

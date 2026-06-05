@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![BepInEx](https://img.shields.io/badge/BepInEx-6.0.0--be.752-orange.svg)](https://github.com/BepInEx/BepInEx)
 [![.NET](https://img.shields.io/badge/.NET-6.0-purple.svg)](https://dotnet.microsoft.com/)
-[![Per Aspera](https://img.shields.io/badge/Per%20Aspera-1.5.x-red.svg)](https://store.steampowered.com/app/944260/Per_Aspera/)
+[![Per Aspera](https://img.shields.io/badge/Per%20Aspera-1.8.x-red.svg)](https://store.steampowered.com/app/944260/Per_Aspera/)
 
 ---
 
