@@ -18,13 +18,14 @@ namespace PerAspera.GameAPI.Commands
     public static class Commands
     {
         // Static constructor: runs as soon as any plugin touches Commands (at Load() time,
-        // before YAML validation). Registers built-ins and installs validation patches
-        // so custom commands pass load-time validation even before Initialize() is called.
+        // before YAML validation). Registers built-ins and installs all Harmony patches
+        // here — NOT from Initialize() — because PatchAll() fails inside DynamicInvoke contexts (IL2CPP).
         static Commands()
         {
             RegisterBuiltinActions();
             ApplyVerifyActionPatch();
             ApplyValidateConstraintsPatch();
+            ApplyNativeInterceptPatch();
         }
 
         /// <summary>
@@ -111,9 +112,24 @@ namespace PerAspera.GameAPI.Commands
         {
             if (_builtinsRegistered) return;
             _builtinsRegistered = true;
+
+            // Core actions
             ModTextActionRegistry.Register(new ShowMessageAction());
             ModTextActionRegistry.Register(new GiveSciencePointsAction());
             ModTextActionRegistry.Register(new ImportResourceAction());
+
+            // Proper game API — no console required
+            ModTextActionRegistry.Register(new FactionAddResourceAction());
+
+            // Debug display commands
+            ModTextActionRegistry.Register(new ShowSpaceportResourcesAction());
+
+            // Console cheat commands exposed for YAML-only mods (no C# plugin required)
+            ModTextActionRegistry.Register(new FactionAddResourceDistributedAction());
+            ModTextActionRegistry.Register(new BuildingAddResourceAction());
+            ModTextActionRegistry.Register(new BunchOfResourcesAction());
+            ModTextActionRegistry.Register(new ClearStockpilesAction());
+            ModTextActionRegistry.Register(new FinishConstructionsAction());
         }
         /// <summary>
         /// Create a new command builder for the specified command type

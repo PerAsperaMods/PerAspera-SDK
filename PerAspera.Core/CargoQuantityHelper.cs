@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.Core
 {
@@ -51,7 +50,7 @@ namespace PerAspera.Core
                     LocalLogDebug("CargoQuantityHelper", "Initializing CargoQuantity reflection bindings...");
 
                     // Find CargoQuantity type
-                    _cargoType = ReflectionHelpers.FindType("CargoQuantity");
+                    _cargoType = Utilities.FindTypeStatic("CargoQuantity");
                     if (_cargoType == null)
                     {
                         LocalLogError("CargoQuantityHelper", "CargoQuantity type not found");

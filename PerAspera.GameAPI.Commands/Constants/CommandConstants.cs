@@ -12,10 +12,16 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string ExportResource = "ExportResource";
         public const string SetResourceAmount = "SetResourceAmount";
         public const string SpawnResourceVein = "SpawnResourceVein";
+        public const string SpawnSpecialSite = "SpawnSpecialSite";
+        public const string RevealResourceVein = "RevealResourceVein";
+        public const string RevealSpecialSite = "RevealSpecialSite";
         public const string ExhaustResourceVein = "ExhaustResourceVein";
         
-        // Building Commands  
+        // Building Commands
         public const string UnlockBuilding = "UnlockBuilding";
+        public const string UnlockWayType = "UnlockWayType";
+        public const string UnlockEnhancement = "UnlockEnhancement";
+        public const string DisableEnhancement = "DisableEnhancement";
         public const string LockBuilding = "LockBuilding";
         public const string AddBuilding = "AddBuilding";
         public const string RemoveBuilding = "RemoveBuilding";
@@ -26,23 +32,42 @@ namespace PerAspera.GameAPI.Commands.Constants
         // Technology & Knowledge Commands
         public const string ResearchTechnology = "ResearchTechnology";
         public const string UnlockKnowledge = "UnlockKnowledge";
+        public const string UnlockSpecialProject = "UnlockSpecialProject";
+        public const string GrantSectorPermission = "GrantSectorPermission";
+        public const string UnlockSector = "UnlockSector";
+        public const string BeginQuest = "BeginQuest";
+        public const string AbortQuest = "AbortQuest";
         public const string LockKnowledge = "LockKnowledge";
         public const string UnlockTech = "UnlockTech";
         
         // Interaction Commands
         public const string StartDialogue = "StartDialogue";
+        public const string NotifyDialogue = "NotifyDialogue";
+        public const string NotifyMandatoryDialogue = "NotifyMandatoryDialogue";
+        public const string DialogueSetPortrait = "DialogueSetPortrait";
         public const string SkipDialogue = "SkipDialogue";
         public const string EnableKeeperMode = "EnableKeeperMode";
         public const string DisableKeeperMode = "DisableKeeperMode";
-        public const string NotifyDialogue = "NotifyDialogue";
         public const string ShowDialogue = "ShowDialogue";
         
         // Environment & Utility Commands
         public const string Sabotage = "Sabotage";
+        public const string IncomingShip = "IncomingShip";
+        public const string DepartingShip = "DepartingShip";
+        public const string SwitchSides = "SwitchSides";
+        public const string ObliterateRivalBase = "ObliterateRivalBase";
+        public const string PolarNuclearDetonation = "PolarNuclearDetonation";
+        public const string CometDown = "CometDown";
+        public const string DeimosDown = "DeimosDown";
+        public const string BlackPolarDust = "BlackPolarDust";
         public const string SetOverride = "SetOverride";
         public const string ShowMessage = "ShowMessage";
         public const string ShowTutorialMessage = "ShowTutorialMessage";
         public const string SPLoadPrefab = "SPLoadPrefab";
+        public const string SPSetActiveRoot = "SPSetActiveRoot";
+        public const string OpenPopup = "OpenPopup";
+        public const string OpenAlert = "OpenAlert";
+        public const string CloseAlert = "CloseAlert";
         
         // Game Control Commands
         public const string GameOver = "GameOver";
@@ -54,7 +79,11 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string LoadGame = "LoadGame";
         public const string RestartGame = "RestartGame";
         public const string SetGameSpeed = "SetGameSpeed";
+        public const string ChangeGameSpeed = "ChangeGameSpeed";
         public const string KillSwitchMode = "KillSwitchMode";
+        public const string EnterSpecialMoment = "EnterSpecialMoment";
+        public const string ExitSpecialMoment = "ExitSpecialMoment";
+        public const string StartTutorial = "StartTutorial";
         
         // Specialized Commands
         public const string SetClimate = "SetClimate";
@@ -65,6 +94,15 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string SetFactionRelation = "SetFactionRelation";
         public const string AddPoints = "AddPoints";
         public const string SetAIAggression = "SetAIAggression";
+        public const string AerobrakeAsteroid = "AerobrakeAsteroid";
+        public const string SpawnRivalBase = "SpawnRivalBase";
+        public const string CreateSandstormHazard = "CreateSandstormHazard";
+        public const string CreateDevilHazard = "CreateDevilHazard";
+        public const string CreateAsteroidHazard = "CreateAsteroidHazard";
+        public const string SetBlackboardVariable = "SetBlackboardVariable";
+        public const string SetBlackboardNumber = "SetBlackboardNumber";
+        public const string SetBlackboardBool = "SetBlackboardBool";
+        public const string SetBlackboardString = "SetBlackboardString";
         
         // Special Commands
         public const string CustomCommand = "CustomCommand";
@@ -72,14 +110,40 @@ namespace PerAspera.GameAPI.Commands.Constants
         
         /// <summary>
         /// Get all native command types
+        /// Discovered from InteractionParser.GetCommands() - 50 TextAction-compatible commands
         /// </summary>
         public static readonly string[] AllNativeTypes = {
-            ImportResource, SpawnResourceVein, ExhaustResourceVein,
-            UnlockBuilding, AdditionalBuilding, BuildingRebuild, FactionCreateBuilding,
-            ResearchTechnology, UnlockKnowledge, UnlockTech,
-            StartDialogue, NotifyDialogue, ShowDialogue,
-            Sabotage, GameOver, KillSwitchMode, SetOverride, SPLoadPrefab,
-            CustomCommand, BatchCommand
+            // Environment & Survival
+            Sabotage, IncomingShip, DepartingShip, SwitchSides, ObliterateRivalBase,
+            PolarNuclearDetonation, CometDown, DeimosDown, BlackPolarDust,
+
+            // Building & Infrastructure
+            UnlockBuilding, UnlockWayType, UnlockEnhancement, DisableEnhancement, AdditionalBuilding,
+            RevealResourceVein, RevealSpecialSite,
+
+            // Knowledge & Progression
+            UnlockKnowledge, UnlockSpecialProject, GrantSectorPermission, UnlockSector,
+            BeginQuest, AbortQuest, ResearchTechnology,
+
+            // Orbital Mechanics & Hazards
+            AerobrakeAsteroid, SpawnRivalBase,
+            CreateSandstormHazard, CreateDevilHazard, CreateAsteroidHazard,
+
+            // Resources & Items
+            ImportResource, SpawnResourceVein, SpawnSpecialSite,
+
+            // Dialogue & Interaction
+            StartDialogue, NotifyDialogue, NotifyMandatoryDialogue, DialogueSetPortrait,
+
+            // Data & State
+            SetBlackboardVariable, SetBlackboardNumber, SetBlackboardBool, SetBlackboardString,
+
+            // UI & Popups
+            SPLoadPrefab, SPSetActiveRoot, OpenPopup, OpenAlert, CloseAlert,
+
+            // Game State & Flow
+            EnterSpecialMoment, ExitSpecialMoment, KillSwitchMode, StartTutorial, ChangeGameSpeed,
+            GameOver
         };
         
         /// <summary>
@@ -90,7 +154,34 @@ namespace PerAspera.GameAPI.Commands.Constants
             return Array.Exists(AllNativeTypes, t => t.Equals(commandType, StringComparison.OrdinalIgnoreCase));
         }
     }
-    
+
+    /// <summary>
+    /// Console cheat commands available via Console.ExecuteCommandString
+    /// These are debug/cheat commands exposed for mod use
+    /// </summary>
+    public static class ConsoleCommandNames
+    {
+        // Resources & Economy
+        public const string FactionAddResourceDistributed = "FactionAddResourceDistributed";
+        public const string BuildingAddResource = "BuildingAddResource";
+        public const string BunchOfResources = "BunchOfResources";
+        public const string ClearStockpiles = "ClearStockpiles";
+        public const string FinishConstructions = "FinishConstructions";
+
+        // Research & Progression
+        public const string FactionAddResearchPoints = "FactionAddResearchPoints";
+
+        // Unlock & Exploration
+        public const string UnlockAllBuildings = "UnlockAllBuildings";
+        public const string UnlockAllTech = "UnlockAllTech";
+        public const string UnlockAllKnowledges = "UnlockAllKnowledges";
+        public const string UnlockAllSpecialProjects = "UnlockAllSpecialProjects";
+        public const string UnlockAllSectors = "UnlockAllSectors";
+
+        // Debug & Utility
+        public const string ActivateAll = "ActivateAll";
+    }
+
     /// <summary>
     /// Parameter names used in commands
     /// </summary>

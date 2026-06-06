@@ -161,6 +161,13 @@
             Convenience method: BaseGame -> Universe -> BlackBoard
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.VisualPOIs">
+            <summary>
+            Get wrapped list of all visual POI instances in the game
+            Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
+            Includes all POI from vanilla game + YAML mods
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BlackBoardWrapper">
             <summary>
             Wrapper for the native Blackboard class (variable storage system)
@@ -3176,6 +3183,30 @@
             <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
             <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper">
+            <summary>
+            Wrapper for accessing PointOfInterest static data collection
+            Handles IL2CPP reflection to get POI from StaticValues
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetAllPOI">
+            <summary>
+            Get all POI items from the game
+            BEST METHOD: Access by key directly using PointOfInterest.Get(key)
+            Fallback: Try table field → StaticValues property
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetPOIByKey(System.String)">
+            <summary>
+            Get POI by key from the static collection — DIRECT ACCESS
+            This is the reliable way to access YAML mod POI data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetPOIProperty``1(System.Object,System.String)">
+            <summary>
+            Get property value from POI object
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceCommandHelper">
             <summary>
             Resource command execution utilities that handle IHandleable casting internally
@@ -3943,6 +3974,22 @@
             Gets or sets the number of frames between tick processing.
             </summary>
         </member>
+        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetAllSites">
+            <summary>
+            Get all special sites from the static collection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetSiteByKey(System.String)">
+            <summary>
+            Get site by key from the static collection
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetSiteProperty``1(System.Object,System.String)">
+            <summary>
+            Get property value from site object
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
             <summary>
             Wrapper léger pour interagir avec le système de dialogues du jeu.
@@ -4625,6 +4672,42 @@
             <summary>
             Get count of blackboards in the universe
             Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper">
+             <summary>
+             Wrapper for the list of VisualPointOfInterest instances in the game.
+             VisualPointOfInterest = the in-game visual marker for POI on the map.
+            
+             Example:
+             var baseGame = BaseGameWrapper.GetCurrent();
+             var visualPois = baseGame.VisualPOIs;
+             foreach (var vPoi in visualPois)
+             {
+                 var poi = vPoi.GetPOI();
+                 var name = poi.GetProperty("name");
+             }
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetAll">
+            <summary>
+            Get all visual POI as managed list
+            Caches the conversion for performance
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetPOIFromVisualPOI(System.Object)">
+            <summary>
+            Get POI from a VisualPointOfInterest wrapper
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetNameFromVisualPOI(System.Object)">
+            <summary>
+            Get POI name from a VisualPointOfInterest
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.Count">
+            <summary>
+            Count of visual POI
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.WrapperBase" -->

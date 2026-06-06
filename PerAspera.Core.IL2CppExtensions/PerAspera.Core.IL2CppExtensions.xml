@@ -169,6 +169,87 @@
             <param name="il2cppArray">IL2CPP array object</param>
             <returns>Managed array or null if conversion fails</returns>
         </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppObjectInspector">
+            <summary>
+            Debug tool to inspect IL2CPP objects and discover their actual properties/fields
+            Useful for finding where data actually lives when reflection patterns fail
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppObjectInspector.DumpObject(System.Object,System.String)">
+            <summary>
+            Dump all properties and fields of an IL2CPP object
+            Helps debug why IL2CppPropertyReader can't find something
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppObjectInspector.FindMembersByName(System.Object,System.String)">
+            <summary>
+            Find a property/field by searching for a substring (case-insensitive)
+            Useful when you don't know the exact name
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppObjectInspector.SafeGetValue``1(System.Object,System.String)">
+            <summary>
+            Get value of any member (property or field) safely
+            Returns default if not found
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppObjectInspector.ListMethods(System.Object)">
+            <summary>
+            List all public methods (useful for finding getter methods)
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader">
+            <summary>
+            Robust IL2CPP property reader that handles multiple access strategies
+            Works around IL2CPP reflection limitations by trying multiple approaches
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppPropertyReader.ReadProperty``1(System.Object,System.String)">
+            <summary>
+            Read property from IL2CPP object using multiple strategies
+            Returns value or default if all strategies fail
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.PropertyAccessStrategy">
+            <summary>
+            Strategy pattern for different property access methods
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.PublicPropertyStrategy">
+            <summary>
+            Strategy 1: Public property with getter
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.PublicFieldStrategy">
+            <summary>
+            Strategy 2: Public field
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.NonPublicPropertyStrategy">
+            <summary>
+            Strategy 3: Non-public (protected/internal) property
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.NonPublicFieldStrategy">
+            <summary>
+            Strategy 4: Non-public (private) field
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.PrivateBackingFieldStrategy">
+            <summary>
+            Strategy 5: Private backing field (e.g., _propertyName or _property_k__BackingField)
+            </summary>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppPropertyReader.IndexerStrategy">
+            <summary>
+            Strategy 6: Indexed accessor (for collection items or indexed properties)
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppPropertyReader.ClearCache">
+            <summary>
+            Clear the strategy cache (useful for debugging or after IL2CPP changes)
+            </summary>
+        </member>
         <member name="T:PerAspera.Core.IL2CPP.PerAsperaExtensions">
             <summary>
             High-level convenience extensions for common Per Aspera operations

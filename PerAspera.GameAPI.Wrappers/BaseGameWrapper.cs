@@ -444,7 +444,47 @@ namespace PerAspera.GameAPI.Wrappers
             var universe = GetUniverse();
             return universe?.GetBlackBoardNames();
         }
-        
+
+        // ==================== VISUAL POI ACCESS ====================
+
+        /// <summary>
+        /// Get wrapped list of all visual POI instances in the game
+        /// Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
+        /// Includes all POI from vanilla game + YAML mods
+        /// </summary>
+        public VisualPointOfInterestListWrapper? VisualPOIs
+        {
+            get
+            {
+                try
+                {
+                    object? poisList = null;
+
+                    if (_nativeBaseGame != null)
+                    {
+                        poisList = _nativeBaseGame.GetMemberValue("pois");
+                    }
+                    else
+                    {
+                        poisList = GetNativeField<object>("pois");
+                    }
+
+                    if (poisList == null)
+                    {
+                        WrapperLog.Warning("BaseGame.pois not found");
+                        return null;
+                    }
+
+                    return new VisualPointOfInterestListWrapper(poisList);
+                }
+                catch (Exception ex)
+                {
+                    WrapperLog.Warning($"Failed to get visual POIs: {ex.Message}");
+                    return null;
+                }
+            }
+        }
+
         public override string ToString()
         {
             var universe = GetUniverse();

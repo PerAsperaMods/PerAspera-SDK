@@ -1132,11 +1132,18 @@
         <member name="F:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes.AllNativeTypes">
             <summary>
             Get all native command types
+            Discovered from InteractionParser.GetCommands() - 50 TextAction-compatible commands
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Constants.NativeCommandTypes.IsNativeCommandType(System.String)">
             <summary>
             Check if command type is a native Per Aspera command
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Constants.ConsoleCommandNames">
+            <summary>
+            Console cheat commands available via Console.ExecuteCommandString
+            These are debug/cheat commands exposed for mod use
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Constants.ParameterNames">
@@ -1768,6 +1775,18 @@
             Set technology for ResearchTechnology commands
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.Helpers.CommandDiscovery">
+            <summary>
+            Helper to discover native game commands from InteractionParser
+            Calls InteractionParser.GetCommands() to retrieve valid TextAction command names
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.CommandDiscovery.GetValidTextActionCommands">
+            <summary>
+            Get all valid TextAction command names by calling InteractionParser.GetCommands()
+            Returns empty array if not available
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Commands.Helpers.ImportResource">
             <summary>
             Helper class for creating ImportResource commands with fluent API
@@ -1787,6 +1806,34 @@
             <param name="resourceName">Resource name (e.g., "water", "carbon")</param>
             <param name="amount">Amount to import</param>
             <returns>Configured CommandBuilder</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper">
+            <summary>
+            Helper for executing game console cheat commands via reflection.
+            Wraps the IL2CPP Console singleton's ExecuteCommandString method.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper.ExecuteConsoleCommand(System.String)">
+            <summary>
+            Execute any game console command string via Console.instance.ExecuteCommandString.
+            </summary>
+            <param name="cmd">Full command string, e.g. "BunchOfResources" or "FactionAddResourceDistributed water 500"</param>
+            <returns>true if the command was dispatched; false if Console type/method not found</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper.ExecuteResourceImportCommand(System.String,System.String,System.Single)">
+            <summary>
+            Import a resource for a faction via console command.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper.ExecuteResourceDistributedCommand(System.String,System.Single)">
+            <summary>
+            Distribute a resource across all faction stockpiles.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper.ExecuteBuildingAddResourceCommand(System.String,System.String,System.Single)">
+            <summary>
+            Add a resource directly to a building's storage.
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.ICommand">
             <summary>
@@ -1893,6 +1940,82 @@
             Useful for optional context-dependent behaviour.
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BuildingAddResourceAction">
+            <summary>
+            Add a resource directly to a specific building's storage.
+            Wraps the game's console cheat command BuildingAddResource.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BuildingAddResourceAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <example>
+            launchActions:
+              - command: BuildingAddResource
+                arguments: ["building-12345", "water", "250"]
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BunchOfResourcesAction">
+            <summary>
+            Give a large bunch of all basic resources to the faction.
+            Wraps the game's console cheat command BunchOfResources.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BunchOfResourcesAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <example>
+            launchActions:
+              - command: BunchOfResources
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ClearStockpilesAction">
+            <summary>
+            Clear all resources from faction stockpiles.
+            Wraps the game's console cheat command ClearStockpiles.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ClearStockpilesAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <example>
+            launchActions:
+              - command: ClearStockpiles
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.FactionAddResourceAction">
+             <summary>
+             Adds a resource directly to the player faction via Faction.AddResource(ResourceType, int).
+             Uses the proper game API — no console required.
+            
+             YAML usage:
+             <code>
+             - command: AddResource
+               arguments:
+                 - "resource_iron"   # resource key (required)
+                 - "500"             # amount (int, required, must be > 0)
+             </code>
+             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.FactionAddResourceDistributedAction">
+            <summary>
+            Distribute a resource amount across all faction stockpiles.
+            Wraps the game's console cheat command FactionAddResourceDistributed.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.FactionAddResourceDistributedAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <example>
+            launchActions:
+              - command: FactionAddResourceDistributed
+                arguments: ["water", "500"]
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.FinishConstructionsAction">
+            <summary>
+            Instantly complete all pending building constructions.
+            Wraps the game's console cheat command FinishConstructions.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.FinishConstructionsAction.Execute(System.String[],PerAspera.GameAPI.Events.SDK.GameCommandsReadyEvent)">
+            <example>
+            launchActions:
+              - command: FinishConstructions
+            </example>
+        </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.GiveSciencePointsAction">
              <summary>
              Built-in SDK action: gives research points directly to the player faction.
@@ -1991,6 +2114,18 @@
             <param name="args">args[0] = message text, args[1] = level (optional)</param>
             <param name="ctx">Game context (not required for this action)</param>
             <returns>True if a message was provided, false otherwise</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowSpaceportResourcesAction">
+             <summary>
+             Debug command: logs all spaceport resource states to BepInEx log.
+             Shows developmentResources (gathered so far) and resourcesMet flag for each active spaceport.
+            
+             YAML usage:
+             <code>
+             - command: ShowSpaceportResources
+               arguments: []
+             </code>
+             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.IModTextAction">
              <summary>
@@ -3861,27 +3996,6 @@
             <param name="action">The TextAction being validated.</param>
             <param name="__result">Output result injected by HarmonyX.</param>
             <returns>false = skip native (our result is used); true = let native run.</returns>
-        </member>
-        <member name="T:PerAspera.GameAPI.Commands.ResourceCommandHelper">
-            <summary>
-            Resource command execution utilities using pure reflection.
-            Provides a type-safe facade over the game's resource import console commands.
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.ResourceCommandHelper.ExecuteResourceImportCommand(System.String,System.String,System.Single)">
-            <summary>
-            Executes a resource import command for the specified faction via the game console.
-            Internally builds the "ImportResource &lt;faction&gt; &lt;resourceType&gt; &lt;amount&gt;" command string.
-            </summary>
-            <param name="factionName">The faction identifier (e.g. "PlayerFaction").</param>
-            <param name="resourceType">The resource type key (e.g. "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN").</param>
-            <param name="amount">Amount of resource to add (default: 1000).</param>
-            <returns>True if the command was dispatched without exception, false otherwise.</returns>
-            <example>
-            <code>
-            ResourceCommandHelper.ExecuteResourceImportCommand("PlayerFaction", "WATER", 5000f);
-            </code>
-            </example>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Yaml.YamlActionDefinition">
             <summary>

@@ -132,57 +132,60 @@ namespace PerAspera.GameAPI.Wrappers
                     return null;
                 }
 
-                // Try to call static Get method first (if it exists)
+                // StaticDataCollectionItem<T>.Get(string key) — inherited static, needs FlattenHierarchy
                 var getMethod = resourceTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                    System.Reflection.BindingFlags.FlattenHierarchy);
                 if (getMethod != null)
                 {
                     try
                     {
                         var result = getMethod.Invoke(null, new object[] { resourceKey });
                         if (result != null)
-                        {
                             return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
+                    }
+                }
+
+                // Fallback: StaticDataCollectionItem<T>.table (public static Dictionary<string,T>)
+                // In IL2CPP proxies, static fields may be properties — try both GetField and GetProperty.
+                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
+                System.Collections.IDictionary? table = null;
+                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
+
+                foreach (var tableName in possibleTableNames)
+                {
+                    try
+                    {
+                        var tableField = resourceTypeClass.GetField(tableName, bindAll);
+                        if (tableField != null)
+                            table = tableField.GetValue(null) as System.Collections.IDictionary;
+
+                        if (table == null)
+                        {
+                            var tableProp = resourceTypeClass.GetProperty(tableName, bindAll);
+                            if (tableProp != null)
+                                table = tableProp.GetValue(null) as System.Collections.IDictionary;
+                        }
+
+                        if (table != null)
+                        {
+                            Log.Info($"{LogPrefix} Found table '{tableName}' with {table.Count} entries");
+                            break;
                         }
                     }
                     catch (Exception ex)
                     {
-                        Log.Warning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
-                    }
-                }
-
-                // Fallback: Access the static table directly
-                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
-                // Try multiple possible field names
-                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
-                System.Collections.IDictionary? table = null;
-
-                foreach (var tableName in possibleTableNames)
-                {
-                    var tableField = resourceTypeClass.GetField(tableName,
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                    if (tableField != null)
-                    {
-                        try
-                        {
-                            table = tableField.GetValue(null) as System.Collections.IDictionary;
-                            if (table != null)
-                            {
-                                Log.Info($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
-                                break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Warning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
-                        }
+                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
                 if (table != null && table.Contains(resourceKey))
-                {
                     return table[resourceKey];
-                }
 
                 Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
                 return null;
@@ -244,57 +247,47 @@ namespace PerAspera.GameAPI.Wrappers
                     return null;
                 }
 
-                // Try to call static Get method first (if it exists)
                 var getMethod = buildingTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                    System.Reflection.BindingFlags.FlattenHierarchy);
                 if (getMethod != null)
                 {
                     try
                     {
                         var result = getMethod.Invoke(null, new object[] { buildingKey });
-                        if (result != null)
-                        {
-                            return result;
-                        }
+                        if (result != null) return result;
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
-                // Fallback: Access the static table directly
-                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
-                // Try multiple possible field names
                 string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
                 System.Collections.IDictionary? table = null;
+                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
 
                 foreach (var tableName in possibleTableNames)
                 {
-                    var tableField = buildingTypeClass.GetField(tableName,
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                    if (tableField != null)
+                    try
                     {
-                        try
+                        var tableField = buildingTypeClass.GetField(tableName, bindAll);
+                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
+                        if (table == null)
                         {
-                            table = tableField.GetValue(null) as System.Collections.IDictionary;
-                            if (table != null)
-                            {
-                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
-                                break;
-                            }
+                            var tableProp = buildingTypeClass.GetProperty(tableName, bindAll);
+                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
                         }
-                        catch (Exception ex)
-                        {
-                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
-                        }
+                        if (table != null) break;
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
-                if (table != null && table.Contains(buildingKey))
-                {
-                    return table[buildingKey];
-                }
+                if (table != null && table.Contains(buildingKey)) return table[buildingKey];
 
                 UnityEngine.Debug.LogWarning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
                 return null;
@@ -344,57 +337,47 @@ namespace PerAspera.GameAPI.Wrappers
                     return null;
                 }
 
-                // Try to call static Get method first (if it exists)
                 var getMethod = personTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                    System.Reflection.BindingFlags.FlattenHierarchy);
                 if (getMethod != null)
                 {
                     try
                     {
                         var result = getMethod.Invoke(null, new object[] { personKey });
-                        if (result != null)
-                        {
-                            return result;
-                        }
+                        if (result != null) return result;
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
-                // Fallback: Access the static table directly
-                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
-                // Try multiple possible field names
                 string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
                 System.Collections.IDictionary? table = null;
+                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
 
                 foreach (var tableName in possibleTableNames)
                 {
-                    var tableField = personTypeClass.GetField(tableName,
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                    if (tableField != null)
+                    try
                     {
-                        try
+                        var tableField = personTypeClass.GetField(tableName, bindAll);
+                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
+                        if (table == null)
                         {
-                            table = tableField.GetValue(null) as System.Collections.IDictionary;
-                            if (table != null)
-                            {
-                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
-                                break;
-                            }
+                            var tableProp = personTypeClass.GetProperty(tableName, bindAll);
+                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
                         }
-                        catch (Exception ex)
-                        {
-                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
-                        }
+                        if (table != null) break;
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
-                if (table != null && table.Contains(personKey))
-                {
-                    return table[personKey];
-                }
+                if (table != null && table.Contains(personKey)) return table[personKey];
 
                 UnityEngine.Debug.LogWarning($"{LogPrefix} Person not found for key: {personKey}");
                 return null;
@@ -444,57 +427,47 @@ namespace PerAspera.GameAPI.Wrappers
                     return null;
                 }
 
-                // Try to call static Get method first (if it exists)
                 var getMethod = technologyTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                    System.Reflection.BindingFlags.FlattenHierarchy);
                 if (getMethod != null)
                 {
                     try
                     {
                         var result = getMethod.Invoke(null, new object[] { technologyKey });
-                        if (result != null)
-                        {
-                            return result;
-                        }
+                        if (result != null) return result;
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method exists but failed to invoke: {ex.Message}");
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
-                // Fallback: Access the static table directly
-                // StaticDataCollectionItem<T> has a static Dictionary<string, T> table field
-                // Try multiple possible field names
                 string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
                 System.Collections.IDictionary? table = null;
+                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
+                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
 
                 foreach (var tableName in possibleTableNames)
                 {
-                    var tableField = technologyTypeClass.GetField(tableName,
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                    if (tableField != null)
+                    try
                     {
-                        try
+                        var tableField = technologyTypeClass.GetField(tableName, bindAll);
+                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
+                        if (table == null)
                         {
-                            table = tableField.GetValue(null) as System.Collections.IDictionary;
-                            if (table != null)
-                            {
-                                UnityEngine.Debug.Log($"{LogPrefix} Found table field '{tableName}' with {table.Count} entries");
-                                break;
-                            }
+                            var tableProp = technologyTypeClass.GetProperty(tableName, bindAll);
+                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
                         }
-                        catch (Exception ex)
-                        {
-                            UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table field '{tableName}': {ex.Message}");
-                        }
+                        if (table != null) break;
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
-                if (table != null && table.Contains(technologyKey))
-                {
-                    return table[technologyKey];
-                }
+                if (table != null && table.Contains(technologyKey)) return table[technologyKey];
 
                 UnityEngine.Debug.LogWarning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
                 return null;

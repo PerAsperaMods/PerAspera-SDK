@@ -380,7 +380,8 @@ namespace PerAspera.GameAPI.Events.Integration
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error($"Error invoking event handler for {eventType}: {ex.Message}");
+                            var inner = ex.InnerException ?? ex;
+                            _logger.Error($"Error invoking event handler for {eventType}: [{inner.GetType().Name}] {inner.Message}");
                         }
                     }
                 }

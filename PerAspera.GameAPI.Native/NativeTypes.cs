@@ -1,4 +1,4 @@
-// NativeTypes.cs — Thin native instance holders for Wrappers compatibility.
+// NativeTypes.cs ï¿½ Thin native instance holders for Wrappers compatibility.
 // Native IL2CPP types (BaseGame, Planet, Universe, etc.) come from GameLibs.Complete.
 // These helpers are kept only for Wrapper internal usage.
 
@@ -37,5 +37,19 @@ namespace PerAspera.GameAPI.Native
     {
         public object NativeInstance { get; }
         public WayNative(object native) => NativeInstance = native;
+    }
+
+    /// <summary>Thin holder for native VisualPointOfInterest instance (visual POI marker in game).</summary>
+    public class VisualPointOfInterestNative
+    {
+        public object NativeInstance { get; }
+        public VisualPointOfInterestNative(object native) => NativeInstance = native;
+    }
+
+    /// <summary>Thin holder for native List&lt;VisualPointOfInterest&gt; (all visual POI in game).</summary>
+    public class VisualPointOfInterestListNative
+    {
+        public object NativeInstance { get; }
+        public VisualPointOfInterestListNative(object native) => NativeInstance = native;
     }
 }
