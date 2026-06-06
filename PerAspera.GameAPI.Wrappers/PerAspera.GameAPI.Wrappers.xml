@@ -4049,20 +4049,59 @@
             Gets or sets the number of frames between tick processing.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper" -->
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetAllSites">
+        <member name="T:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper">
+             <summary>
+             Wrapper for a single SpecialSite instance from the game
+             Provides safe, type-safe access to SpecialSite properties
+            
+             Properties:
+             - Name: Site display name (String)
+             - Coordinates: Latitude, Longitude
+            
+             Example:
+             var site = new SpecialSiteInstanceWrapper(nativeSite);
+             var name = site.Name;
+             var lat = site.CenterLatitude;
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.FromNative(System.Object)">
             <summary>
-            Get all special sites from the static collection
+            Create wrapper from native SpecialSite instance
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetSiteByKey(System.String)">
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.Name">
+            <summary>Site display name</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLatitude">
+            <summary>Site center latitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLongitude">
+            <summary>Site center longitude</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetNameViaMethod">
             <summary>
-            Get site by key from the static collection
+            Get site name via method call
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetSiteProperty``1(System.Object,System.String)">
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetLatitude">
             <summary>
-            Get property value from site object
+            Get site latitude via method call
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetLongitude">
+            <summary>
+            Get site longitude via method call
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper">
+            <summary>
+            Static wrapper for accessing SpecialSite collection from BaseGame
+            Handles IL2CPP reflection to get special sites data
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetAllSpecialSites">
+            <summary>
+            Get all special sites from BaseGame.visualSites collection
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
