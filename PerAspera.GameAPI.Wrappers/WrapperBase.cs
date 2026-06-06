@@ -185,13 +185,13 @@ namespace PerAspera.GameAPI.Wrappers
                 WrapperLog.Warning($"[DEBUG_GEB] {GetType().Name}: Native object is null");
                 return;
             }
-            
+
             var objType = nativeObj.GetType();
             WrapperLog.Info($"[DEBUG_GEB] Searching for GameEventBus in {objType.FullName}");
-            
-            var allFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | 
+
+            var allFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public |
                           System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
-            
+
             // Search all fields
             var fields = objType.GetFields(allFlags);
             foreach (var field in fields)
@@ -211,7 +211,7 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                 }
             }
-            
+
             // Search all methods
             var methods = objType.GetMethods(allFlags);
             foreach (var method in methods)
@@ -224,6 +224,50 @@ namespace PerAspera.GameAPI.Wrappers
                     WrapperLog.Info($"[DEBUG_GEB] *** FOUND: {visibility} {isStatic}{method.ReturnType.Name} {method.Name}({parameters}) ***");
                 }
             }
+        }
+
+        /// <summary>
+        /// Dump complete native object structure to file for debugging
+        /// Creates a persistent file in BepInEx/Debug/ with all properties, fields, and methods
+        /// Useful when IL2CppPropertyReader cannot find a property
+        ///
+        /// Example: wrapper.DumpToFile("ObjectName")
+        /// Creates: BepInEx/Debug/IL2CPP-ObjectName-timestamp.txt
+        /// </summary>
+        public string? DumpToFile(string? objectName = null)
+        {
+            var nativeObj = GetNativeObject();
+            if (nativeObj == null)
+            {
+                WrapperLog.Warning($"{GetType().Name}: Cannot dump - native object is null");
+                return null;
+            }
+
+            objectName = objectName ?? GetType().Name;
+            var filePath = IL2CppDebugDumper.DumpObjectToFile(nativeObj, objectName);
+            WrapperLog.Info($"Dumped {objectName} structure to: {filePath}");
+            return filePath;
+        }
+
+        /// <summary>
+        /// Search for members matching a pattern and save results to file
+        /// Useful for finding property names with partial matches
+        ///
+        /// Example: wrapper.SearchMembersInFile("type") → finds all members with "type" in name
+        /// Creates: BepInEx/Debug/IL2CPP-Search-type-timestamp.txt
+        /// </summary>
+        public string? SearchMembersInFile(string searchTerm)
+        {
+            var nativeObj = GetNativeObject();
+            if (nativeObj == null)
+            {
+                WrapperLog.Warning($"{GetType().Name}: Cannot search - native object is null");
+                return null;
+            }
+
+            var filePath = IL2CppDebugDumper.FindMembersToFile(nativeObj, searchTerm);
+            WrapperLog.Info($"Search results saved to: {filePath}");
+            return filePath;
         }
     }
 }
