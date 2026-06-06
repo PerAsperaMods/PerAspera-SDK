@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -22,12 +21,12 @@ namespace PerAspera.GameAPI.Wrappers
     public class VisualPointOfInterestListWrapper
     {
         private static readonly LogAspera Log = new LogAspera("VisualPointOfInterestListWrapper");
-        private readonly VisualPointOfInterestListNative _native;
+        private readonly object _nativeList;
         private IList<object>? _cachedList;
 
         public VisualPointOfInterestListWrapper(object nativeList)
         {
-            _native = new VisualPointOfInterestListNative(nativeList);
+            _nativeList = nativeList;
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace PerAspera.GameAPI.Wrappers
             if (_cachedList != null)
                 return _cachedList;
 
-            _cachedList = _native.NativeInstance.ConvertIl2CppList<object>() ?? new List<object>();
+            _cachedList = _nativeList.ConvertIl2CppList<object>() ?? new List<object>();
             Log.Info($"Loaded {_cachedList.Count} VisualPointOfInterest instances");
             return _cachedList;
         }

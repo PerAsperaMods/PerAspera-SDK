@@ -45,11 +45,4 @@ namespace PerAspera.GameAPI.Native
         public object NativeInstance { get; }
         public VisualPointOfInterestNative(object native) => NativeInstance = native;
     }
-
-    /// <summary>Thin holder for native List&lt;VisualPointOfInterest&gt; (all visual POI in game).</summary>
-    public class VisualPointOfInterestListNative
-    {
-        public object NativeInstance { get; }
-        public VisualPointOfInterestListNative(object native) => NativeInstance = native;
-    }
 }
