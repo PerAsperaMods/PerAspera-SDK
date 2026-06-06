@@ -4776,5 +4776,24 @@
             Quick debug for GameEventBus specifically - searches for GameEventBus related members
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DumpToFile(System.String)">
+             <summary>
+             Dump complete native object structure to file for debugging
+             Creates a persistent file in BepInEx/Debug/ with all properties, fields, and methods
+             Useful when IL2CppPropertyReader cannot find a property
+            
+             Example: wrapper.DumpToFile("ObjectName")
+             Creates: BepInEx/Debug/IL2CPP-ObjectName-timestamp.txt
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SearchMembersInFile(System.String)">
+             <summary>
+             Search for members matching a pattern and save results to file
+             Useful for finding property names with partial matches
+            
+             Example: wrapper.SearchMembersInFile("type") → finds all members with "type" in name
+             Creates: BepInEx/Debug/IL2CPP-Search-type-timestamp.txt
+             </summary>
+        </member>
     </members>
 </doc>

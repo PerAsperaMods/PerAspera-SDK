@@ -130,7 +130,7 @@ namespace PerAspera.Core.IL2CPP
 
             foreach (var method in methods)
             {
-                var paramStr = string.Join(", ", method.GetParameters());
+                var paramStr = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name + " " + p.Name));
                 sb.AppendLine($"  {method.ReturnType.Name} {method.Name}({paramStr})");
             }
         }

@@ -90,6 +90,24 @@
             Generic method to execute any console command with parameters
             </summary>
         </member>
+        <member name="T:PerAspera.Core.IL2CPP.IL2CppDebugDumper">
+            <summary>
+            Debug dumper for IL2CPP objects — writes complete structure to file
+            Useful for understanding object layout when reflection strategies fail
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppDebugDumper.DumpObjectToFile(System.Object,System.String)">
+            <summary>
+            Dump complete object structure to file
+            Creates: BepInEx/Debug/IL2CPP-ObjectName-timestamp.txt
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.IL2CppDebugDumper.FindMembersToFile(System.Object,System.String)">
+            <summary>
+            Search for member names matching a pattern and save to file
+            Creates: BepInEx/Debug/IL2CPP-Search-pattern-timestamp.txt
+            </summary>
+        </member>
         <member name="T:PerAspera.Core.IL2CPP.IL2CppExtensions">
             <summary>
             Extension methods for safe IL2CPP object manipulation
