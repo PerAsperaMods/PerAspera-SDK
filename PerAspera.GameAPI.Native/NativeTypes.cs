@@ -52,4 +52,11 @@ namespace PerAspera.GameAPI.Native
         public object NativeInstance { get; }
         public PointOfInterestNative(object native) => NativeInstance = native;
     }
+
+    /// <summary>Thin holder for native SpecialSite instance (special site data).</summary>
+    public class SpecialSiteNative
+    {
+        public object NativeInstance { get; }
+        public SpecialSiteNative(object native) => NativeInstance = native;
+    }
 }

@@ -6,135 +6,86 @@ using PerAspera.Core;
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for accessing SpecialSite static data collection
-    /// SpecialSite inherits from StaticDataCollectionItem<SpecialSite>
+    /// Static wrapper for accessing SpecialSite collection from BaseGame
+    /// Handles IL2CPP reflection to get special sites data
     /// </summary>
     public static class SpecialSiteWrapper
     {
         private static readonly LogAspera Log = new LogAspera("SpecialSiteWrapper");
-        private static System.Type? _siteType;
 
         /// <summary>
-        /// Get all special sites from the static collection
+        /// Get all special sites from BaseGame.visualSites collection
         /// </summary>
-        public static IEnumerable<object> GetAllSites()
+        public static IEnumerable<object> GetAllSpecialSites()
         {
             var result = new List<object>();
 
             try
             {
-                var siteType = GetSpecialSiteType();
-                if (siteType == null)
-                    return result;
-
-                // Access StaticValues property (inherited from StaticDataCollectionItem<SpecialSite>)
-                var staticValuesProp = siteType.GetProperty("StaticValues",
-                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-
-                if (staticValuesProp?.GetValue(null) is System.Collections.IEnumerable sites)
+                // Get BaseGame instance
+                var baseGame = BaseGameWrapper.GetCurrent();
+                if (baseGame == null)
                 {
-                    foreach (var site in sites)
+                    Log.Warning("BaseGame not found");
+                    return result;
+                }
+
+                var nativeBaseGame = baseGame.GetNativeObject();
+                if (nativeBaseGame == null)
+                {
+                    Log.Warning("BaseGame native object is null");
+                    return result;
+                }
+
+                // Try to get visualSites property
+                var baseGameType = nativeBaseGame.GetType();
+                var visualSitesProp = baseGameType.GetProperty("visualSites",
+                    BindingFlags.Public | BindingFlags.Instance);
+
+                if (visualSitesProp != null)
+                {
+                    var visualSitesValue = visualSitesProp.GetValue(nativeBaseGame);
+                    Log.Info($"visualSites type: {visualSitesValue?.GetType().Name ?? "NULL"}");
+
+                    if (visualSitesValue is System.Collections.IDictionary dict)
                     {
-                        result.Add(site);
+                        Log.Info($"Found {dict.Count} visual sites");
+
+                        foreach (var key in dict.Keys)
+                        {
+                            try
+                            {
+                                var siteValue = dict[key];
+                                if (siteValue != null)
+                                {
+                                    // The value in the dictionary is the SpecialSite instance
+                                    result.Add(siteValue);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Warning($"Error accessing site: {ex.Message}");
+                            }
+                        }
+
+                        if (result.Count > 0)
+                        {
+                            Log.Info($"Successfully loaded {result.Count} special sites from visualSites");
+                            return result;
+                        }
                     }
                 }
-
-                Log.Info($"Loaded {result.Count} SpecialSite items from StaticValues");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error loading SpecialSite: {ex}");
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Get site by key from the static collection
-        /// </summary>
-        public static object? GetSiteByKey(string key)
-        {
-            try
-            {
-                var siteType = GetSpecialSiteType();
-                if (siteType == null)
-                    return null;
-
-                var getMethod = siteType.GetMethod("Get",
-                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-
-                if (getMethod != null)
+                else
                 {
-                    return getMethod.Invoke(null, new object[] { key });
+                    Log.Warning("visualSites property not found on BaseGame");
                 }
             }
             catch (Exception ex)
             {
-                Log.Error($"Error getting site by key: {ex}");
+                Log.Error($"Error loading SpecialSites: {ex}");
             }
 
-            return null;
-        }
-
-        /// <summary>
-        /// Get property value from site object
-        /// </summary>
-        public static T? GetSiteProperty<T>(object site, string propertyName)
-        {
-            try
-            {
-                if (site == null)
-                    return default;
-
-                var siteType = GetSpecialSiteType();
-                if (siteType == null)
-                    return default;
-
-                var prop = siteType.GetProperty(propertyName,
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (prop != null)
-                {
-                    return (T?)prop.GetValue(site);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error getting site property {propertyName}: {ex}");
-            }
-
-            return default;
-        }
-
-        private static System.Type? GetSpecialSiteType()
-        {
-            if (_siteType != null)
-                return _siteType;
-
-            try
-            {
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    _siteType = assembly.GetType("SpecialSite", false, true);
-                    if (_siteType != null)
-                        break;
-                }
-
-                if (_siteType == null)
-                {
-                    _siteType = System.Type.GetType("SpecialSite", false, true);
-                }
-
-                if (_siteType == null)
-                {
-                    Log.Warning("SpecialSite type not found");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error finding SpecialSite type: {ex}");
-            }
-
-            return _siteType;
+            return result;
         }
     }
 }

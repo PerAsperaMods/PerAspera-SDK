@@ -3183,6 +3183,81 @@
             <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
             <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper">
+             <summary>
+             Wrapper for a single PointOfInterest instance from the game
+             Provides safe, type-safe access to POI properties and methods
+            
+             Properties:
+             - Name: POI display name (String)
+             - PoiType: POI type (POIType enum/class)
+             - Coordinates: Latitude, Longitude
+             - Bounds: Northern/Southern/Eastern/Western latitudes/longitudes
+             - Diameter: POI size
+            
+             Example:
+             var poi = new PointOfInterestInstanceWrapper(nativePoi);
+             var name = poi.Name;
+             var type = poi.PoiType;
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.FromNative(System.Object)">
+            <summary>
+            Create wrapper from native PointOfInterest instance
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.Name">
+            <summary>POI display name</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.PoiType">
+            <summary>POI type (POIType enum/class)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.CenterLatitude">
+            <summary>POI center latitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.CenterLongitude">
+            <summary>POI center longitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.Diameter">
+            <summary>POI diameter</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.NorthernLatitude">
+            <summary>Northern boundary latitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.SouthernLatitude">
+            <summary>Southern boundary latitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.EasternLongitude">
+            <summary>Eastern boundary longitude</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.WesternLongitude">
+            <summary>Western boundary longitude</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetPoiTypeAsString">
+            <summary>
+            Get POI type as string (converts POIType enum to string)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetNameViaMethod">
+            <summary>
+            Get POI name via method call
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetLatitude">
+            <summary>
+            Get POI latitude via method call
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetLongitude">
+            <summary>
+            Get POI longitude via method call
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.IsPointInside(System.Object,System.Single,System.Single)">
+            <summary>
+            Check if a point is inside this POI
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper">
             <summary>
             Wrapper for accessing PointOfInterest static data collection

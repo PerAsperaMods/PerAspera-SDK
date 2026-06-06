@@ -41,31 +41,31 @@ namespace PerAspera.GameAPI.Wrappers
         // MANUAL ADDITIONS BELOW THIS LINE WILL BE PRESERVED
 
         /// <summary>POI display name</summary>
-        public string? Name => GetProperty<string>("name");
+        public string? Name => SafeInvoke<string>("get_name");
 
         /// <summary>POI type (POIType enum/class)</summary>
-        public object? PoiType => GetProperty<object>("poiType");
+        public object? PoiType => SafeInvoke<object>("get_poiType");
 
         /// <summary>POI center latitude</summary>
-        public float? CenterLatitude => GetProperty<float?>("centerLatitude");
+        public float? CenterLatitude => SafeInvoke<float?>("get_centerLatitude");
 
         /// <summary>POI center longitude</summary>
-        public float? CenterLongitude => GetProperty<float?>("centerLongitude");
+        public float? CenterLongitude => SafeInvoke<float?>("get_centerLongitude");
 
         /// <summary>POI diameter</summary>
-        public float? Diameter => GetProperty<float?>("diameter");
+        public float? Diameter => SafeInvoke<float?>("get_diameter");
 
         /// <summary>Northern boundary latitude</summary>
-        public float? NorthernLatitude => GetProperty<float?>("northernLatitude");
+        public float? NorthernLatitude => SafeInvoke<float?>("get_northernLatitude");
 
         /// <summary>Southern boundary latitude</summary>
-        public float? SouthernLatitude => GetProperty<float?>("southernLatitude");
+        public float? SouthernLatitude => SafeInvoke<float?>("get_southernLatitude");
 
         /// <summary>Eastern boundary longitude</summary>
-        public float? EasternLongitude => GetProperty<float?>("easternLongitude");
+        public float? EasternLongitude => SafeInvoke<float?>("get_easternLongitude");
 
         /// <summary>Western boundary longitude</summary>
-        public float? WesternLongitude => GetProperty<float?>("westernLongitude");
+        public float? WesternLongitude => SafeInvoke<float?>("get_westernLongitude");
 
         /// <summary>
         /// Get POI type as string (converts POIType enum to string)
@@ -81,7 +81,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public string? GetNameViaMethod()
         {
-            return InvokeMethod<string>("GetName");
+            return SafeInvoke<string>("GetName");
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public float? GetLatitude()
         {
-            return InvokeMethod<float?>("GetLatitude");
+            return SafeInvoke<float?>("GetLatitude");
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public float? GetLongitude()
         {
-            return InvokeMethod<float?>("GetLongitude");
+            return SafeInvoke<float?>("GetLongitude");
         }
 
         /// <summary>
