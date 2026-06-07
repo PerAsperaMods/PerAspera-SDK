@@ -1,91 +1,34 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using PerAspera.Core;
+using UnityEngine;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Static wrapper for accessing SpecialSite collection from BaseGame
-    /// Handles IL2CPP reflection to get special sites data
+    /// Wrapper around a native SpecialSite static-data object.
+    /// Exposes name, geo-position, and site class without touching StaticValues.
     /// </summary>
-    public static class SpecialSiteWrapper
+    public class SpecialSiteWrapper : WrapperBase
     {
         private static readonly LogAspera Log = new LogAspera("SpecialSiteWrapper");
+        private SpecialSite? _native;
 
-        /// <summary>
-        /// Get all special sites from BaseGame.visualSites collection
-        /// </summary>
-        public static IEnumerable<object> GetAllSpecialSites()
+        public SpecialSiteWrapper(object native) : base(native)
         {
-            var result = new List<object>();
-
-            try
-            {
-                // Get BaseGame instance
-                var baseGame = BaseGameWrapper.GetCurrent();
-                if (baseGame == null)
-                {
-                    Log.Warning("BaseGame not found");
-                    return result;
-                }
-
-                var nativeBaseGame = baseGame.GetNativeObject();
-                if (nativeBaseGame == null)
-                {
-                    Log.Warning("BaseGame native object is null");
-                    return result;
-                }
-
-                // Try to get visualSites property
-                var baseGameType = nativeBaseGame.GetType();
-                var visualSitesProp = baseGameType.GetProperty("visualSites",
-                    BindingFlags.Public | BindingFlags.Instance);
-
-                if (visualSitesProp != null)
-                {
-                    var visualSitesValue = visualSitesProp.GetValue(nativeBaseGame);
-                    Log.Info($"visualSites type: {visualSitesValue?.GetType().Name ?? "NULL"}");
-
-                    if (visualSitesValue is System.Collections.IDictionary dict)
-                    {
-                        Log.Info($"Found {dict.Count} visual sites");
-
-                        foreach (var key in dict.Keys)
-                        {
-                            try
-                            {
-                                var siteValue = dict[key];
-                                if (siteValue != null)
-                                {
-                                    // The value in the dictionary is the SpecialSite instance
-                                    result.Add(siteValue);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Warning($"Error accessing site: {ex.Message}");
-                            }
-                        }
-
-                        if (result.Count > 0)
-                        {
-                            Log.Info($"Successfully loaded {result.Count} special sites from visualSites");
-                            return result;
-                        }
-                    }
-                }
-                else
-                {
-                    Log.Warning("visualSites property not found on BaseGame");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error loading SpecialSites: {ex}");
-            }
-
-            return result;
+            try   { _native = (SpecialSite)native; }
+            catch (Exception ex) { Log.Error($"Failed to cast to SpecialSite: {ex.Message}"); }
         }
+
+        /// <summary>Localised name — researched version if available, unresearched fallback.</summary>
+        public string Name => _native?.GetName(true) ?? _native?.GetName(false) ?? "";
+
+        /// <summary>Site class enum as string: RUINS, CAVERN, ROVER, CRASH, LANDER, OTHER.</summary>
+        public string Category => _native?.siteClass.ToString() ?? "UNKNOWN";
+
+        /// <summary>Geographic position — x = latitude, y = longitude (degrees).</summary>
+        public Vector2? GeoPosition => _native?.geoPosition;
+
+        public float Latitude  => _native?.geoPosition.x ?? 0f;
+        public float Longitude => _native?.geoPosition.y ?? 0f;
     }
 }

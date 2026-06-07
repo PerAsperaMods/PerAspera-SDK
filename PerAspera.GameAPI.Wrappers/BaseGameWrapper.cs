@@ -232,7 +232,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Get canvas references for UI components
         /// Field: canvasRefs
         /// </summary>
-        public object? canvasRefs
+        public object? CanvasRefs
         {
             get => NativeObject?.GetFieldValue<object>("canvasRefs");
         }
@@ -452,39 +452,53 @@ namespace PerAspera.GameAPI.Wrappers
         /// Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
         /// Includes all POI from vanilla game + YAML mods
         /// </summary>
-        public VisualPointOfInterestListWrapper? VisualPOIs
+
+        public IList<VisualPointOfInterestWrapper>? GetPois()
         {
-            get
+            try
             {
-                try
+                // pois est un champ public (pas une propriété) — accès direct via _nativeBaseGame
+                var nativePois = _nativeBaseGame?.pois;
+                if (nativePois == null) return new List<VisualPointOfInterestWrapper>();
+
+                var result = new List<VisualPointOfInterestWrapper>();
+                foreach (var visPoi in nativePois)
                 {
-                    object? poisList = null;
-
-                    if (_nativeBaseGame != null)
-                    {
-                        poisList = _nativeBaseGame.GetMemberValue("pois");
-                    }
-                    else
-                    {
-                        poisList = GetNativeField<object>("pois");
-                    }
-
-                    if (poisList == null)
-                    {
-                        WrapperLog.Warning("BaseGame.pois not found");
-                        return null;
-                    }
-
-                    return new VisualPointOfInterestListWrapper(poisList);
+                    if (visPoi != null)
+                        result.Add(new VisualPointOfInterestWrapper(visPoi));
                 }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Failed to get visual POIs: {ex.Message}");
-                    return null;
-                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Error($"Failed to get visual POIs: {ex.Message}");
+                return new List<VisualPointOfInterestWrapper>();
             }
         }
 
+        public Dictionary<SpecialSiteWrapper, VisualResourceVeinWrapper>? GetVisualSites()
+        {
+            try
+            {
+                if (_nativeBaseGame != null && _nativeBaseGame.visualSites != null)
+                {
+                    var result = new Dictionary<SpecialSiteWrapper, VisualResourceVeinWrapper>();
+                    foreach (var kvp in _nativeBaseGame.visualSites)
+                    {
+                        var siteWrapper = new SpecialSiteWrapper(kvp.Key);
+                        var veinWrapper = new VisualResourceVeinWrapper(kvp.Value);
+                        result[siteWrapper] = veinWrapper;
+                    }
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Warning($"Direct access failed for visualSites, using reflection: {ex.Message}");
+                // Reflection fallback not implemented for complex dictionary — return null
+            }
+            return null;
+        }
         public override string ToString()
         {
             var universe = GetUniverse();

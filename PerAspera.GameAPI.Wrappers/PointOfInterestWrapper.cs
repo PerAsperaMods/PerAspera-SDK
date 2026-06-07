@@ -1,252 +1,65 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for accessing PointOfInterest static data collection
-    /// Handles IL2CPP reflection to get POI from StaticValues
+    /// Wrapper for a single PointOfInterest instance.
+    /// Uses direct IL2CPP cast — no reflection.
+    ///
+    /// Source: PointOfInterest.cs (IL2CPP dump)
+    /// Public methods: GetName(), GetLatitude(), GetLongitude(), GetDiameter(), GetPOIType()
+    /// Fields centerLatitude/centerLongitude are protected — accessed via the public methods above.
+    ///
+    /// <example>
+    /// var w = new PointOfInterestWrapper(nativePoi);
+    /// string name = w.Name;
+    /// float lat   = w.CenterLatitude ?? 0f;  // -13.37 for Coprates Chasma
+    /// float lon   = w.CenterLongitude ?? 0f; // -60.74 for Coprates Chasma
+    /// </example>
     /// </summary>
-    public static class PointOfInterestWrapper
+    public class PointOfInterestWrapper : WrapperBase
     {
         private static readonly LogAspera Log = new LogAspera("PointOfInterestWrapper");
-        private static System.Type? _poiType;
+        private PointOfInterest? _native;
 
-        /// <summary>
-        /// Get all POI items from the game
-        /// BEST METHOD: Access by key directly using PointOfInterest.Get(key)
-        /// Fallback: Try table field → StaticValues property
-        /// </summary>
-        public static IEnumerable<object> GetAllPOI()
+        public PointOfInterestWrapper(object native) : base(native)
         {
-            var result = new List<object>();
-
-            try
-            {
-                var poiType = GetPointOfInterestType();
-                if (poiType == null)
-                {
-                    Log.Warning("PointOfInterest type not found");
-                    return result;
-                }
-
-                Log.Info($"✅ Found PointOfInterest type: {poiType.FullName}");
-
-                var bindFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
-
-                // Strategy 1: Try 'table' field (Dictionary<string, PointOfInterest>)
-                Log.Info("Trying 'table' field for direct enumeration...");
-                var tableField = poiType.GetField("table", bindFlags);
-                if (tableField != null)
-                {
-                    var tableValue = tableField.GetValue(null);
-                    Log.Info($"  'table' field value type: {tableValue?.GetType().Name ?? "NULL"}");
-
-                    if (tableValue is System.Collections.IDictionary table)
-                    {
-                        Log.Info($"✅ Found 'table' field with {table.Count} entries");
-
-                        // Enumerate all table entries directly
-                        foreach (var key in table.Keys)
-                        {
-                            try
-                            {
-                                var value = table[key];
-                                if (value != null)
-                                {
-                                    result.Add(value);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Warning($"Error accessing table[{key}]: {ex.Message}");
-                            }
-                        }
-
-                        if (result.Count > 0)
-                        {
-                            Log.Info($"✅ Loaded {result.Count} POI from table enumeration");
-                            return result;
-                        }
-                    }
-                }
-
-                // Strategy 2: Try StaticValues property (inherited from StaticDataCollectionItem<T>)
-                Log.Info("Trying StaticValues property...");
-                var staticValuesProp = poiType.GetProperty("StaticValues", bindFlags);
-                if (staticValuesProp != null)
-                {
-                    var svValue = staticValuesProp.GetValue(null);
-                    Log.Info($"StaticValues return type: {svValue?.GetType().Name ?? "NULL"}");
-
-                    if (svValue != null && svValue is System.Collections.IEnumerable allPoi)
-                    {
-                        var count = 0;
-                        var countProp = svValue.GetType().GetProperty("Count");
-                        if (countProp != null)
-                        {
-                            var countValue = countProp.GetValue(svValue);
-                            Log.Info($"  StaticValues.Count = {countValue}");
-                        }
-
-                        foreach (var poi in allPoi)
-                        {
-                            result.Add(poi);
-                            count++;
-                        }
-                        Log.Info($"✅ Enumerated {count} items from StaticValues");
-                        if (count > 0) return result;
-                    }
-                    else if (svValue == null)
-                    {
-                        Log.Warning("  StaticValues property returned NULL");
-                    }
-                }
-
-                // Strategy 3: Try smallCraters field (fallback for direct access)
-                Log.Info("Trying smallCraters field...");
-                var smallCratersField = poiType.GetField("smallCraters", bindFlags);
-                Log.Info($"smallCraters field: {(smallCratersField == null ? "NOT FOUND" : "FOUND")}");
-                if (smallCratersField != null)
-                {
-                    var fieldValue = smallCratersField.GetValue(null);
-                    Log.Info($"  smallCraters value: {(fieldValue == null ? "NULL" : fieldValue.GetType().Name)}");
-
-                    if (fieldValue is System.Collections.IEnumerable craters)
-                    {
-                        var count = 0;
-                        foreach (var crater in craters)
-                        {
-                            result.Add(crater);
-                            count++;
-                        }
-                        Log.Info($"✅ Loaded {count} from smallCraters");
-                        if (count > 0) return result;
-                    }
-                }
-
-                Log.Warning($"❌ No data found from any strategy");
-                Log.Warning($"   Possible causes:");
-                Log.Warning($"   1. YAML mods haven't been loaded yet");
-                Log.Warning($"   2. Collections are populated lazily");
-                Log.Warning($"   3. Collections are empty in this game session");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error loading PointOfInterest: {ex}");
-                return result;
-            }
+            _native = native as PointOfInterest;
         }
 
-        /// <summary>
-        /// Get POI by key from the static collection — DIRECT ACCESS
-        /// This is the reliable way to access YAML mod POI data
-        /// </summary>
-        public static object? GetPOIByKey(string key)
+        public static PointOfInterestWrapper? FromNative(object? native)
+            => native != null ? new PointOfInterestWrapper(native) : null;
+
+        // ── Name / Type ───────────────────────────────────────────────────────
+
+        /// <summary>POI display name</summary>
+        public string? Name => _native?.GetName();
+
+        /// <summary>POI type enum</summary>
+        public PointOfInterest.POIType? PoiType => _native?.GetPOIType();
+
+        /// <summary>POI type as display string (e.g. "Chasma", "Mons", "Crater")</summary>
+        public string? GetPoiTypeAsString() => _native?.GetPOIType().ToString();
+
+        // ── Coordinates ───────────────────────────────────────────────────────
+
+        /// <summary>POI center latitude (°N positive, °S negative)</summary>
+        public float? CenterLatitude => _native?.GetLatitude();
+
+        /// <summary>POI center longitude (°E positive, °W negative)</summary>
+        public float? CenterLongitude => _native?.GetLongitude();
+
+        /// <summary>POI diameter in km</summary>
+        public float? Diameter => _native?.GetDiameter();
+
+        // ── Geometric helpers ─────────────────────────────────────────────────
+
+        /// <summary>Check if a geographic point is inside this POI's bounds</summary>
+        public bool IsPointInside(Planet planet, UnityEngine.Vector2 geoPos)
         {
-            try
-            {
-                var poiType = GetPointOfInterestType();
-                if (poiType == null)
-                {
-                    Log.Warning($"Cannot get POI by key '{key}' - type not found");
-                    return null;
-                }
-
-                var getMethod = poiType.GetMethod("Get",
-                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-
-                if (getMethod != null)
-                {
-                    Log.Info($"Using Get('{key}')...");
-                    var result = getMethod.Invoke(null, new object[] { key });
-
-                    if (result != null)
-                    {
-                        Log.Info($"✅ Found POI by key '{key}': {result.GetType().Name}");
-                    }
-                    else
-                    {
-                        Log.Warning($"Get('{key}') returned NULL");
-                    }
-
-                    return result;
-                }
-                else
-                {
-                    Log.Warning("Get(string) method not found on PointOfInterest type");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error getting POI by key '{key}': {ex.Message}\n{ex.StackTrace}");
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Get property value from POI object
-        /// </summary>
-        public static T? GetPOIProperty<T>(object poi, string propertyName)
-        {
-            try
-            {
-                if (poi == null)
-                    return default;
-
-                var poiType = GetPointOfInterestType();
-                if (poiType == null)
-                    return default;
-
-                var prop = poiType.GetProperty(propertyName,
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (prop != null)
-                {
-                    return (T?)prop.GetValue(poi);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error getting POI property {propertyName}: {ex}");
-            }
-
-            return default;
-        }
-
-        private static System.Type? GetPointOfInterestType()
-        {
-            if (_poiType != null)
-                return _poiType;
-
-            try
-            {
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    _poiType = assembly.GetType("PointOfInterest", false, true);
-                    if (_poiType != null)
-                        break;
-                }
-
-                if (_poiType == null)
-                {
-                    _poiType = System.Type.GetType("PointOfInterest", false, true);
-                }
-
-                if (_poiType == null)
-                {
-                    Log.Warning("PointOfInterest type not found");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error finding PointOfInterest type: {ex}");
-            }
-
-            return _poiType;
+            try { return _native?.IsPointInside(planet, geoPos) ?? false; }
+            catch { return false; }
         }
     }
 }

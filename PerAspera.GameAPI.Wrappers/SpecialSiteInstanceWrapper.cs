@@ -37,37 +37,22 @@ namespace PerAspera.GameAPI.Wrappers
         // AUTO-GENERATED SHELL ABOVE - DO NOT EDIT ABOVE THIS LINE
         // MANUAL ADDITIONS BELOW THIS LINE WILL BE PRESERVED
 
-        /// <summary>Site display name</summary>
-        public string? Name => SafeInvoke<string>("get_name");
-
-        /// <summary>Site center latitude</summary>
-        public float? CenterLatitude => SafeInvoke<float?>("get_centerLatitude");
-
-        /// <summary>Site center longitude</summary>
-        public float? CenterLongitude => SafeInvoke<float?>("get_centerLongitude");
+        /// <summary>Site display name via GetName(bool researched)</summary>
+        public string? Name => SafeInvoke<string>("GetName", true);
 
         /// <summary>
-        /// Get site name via method call
+        /// geoPosition.x = longitude, geoPosition.y = latitude (from YAML: x=longitude, y=latitude)
         /// </summary>
-        public string? GetNameViaMethod()
+        private UnityEngine.Vector2? GetGeoPosition()
         {
-            return SafeInvoke<string>("GetName");
+            try { return SafeInvoke<UnityEngine.Vector2>("get_geoPosition"); }
+            catch { return null; }
         }
 
-        /// <summary>
-        /// Get site latitude via method call
-        /// </summary>
-        public float? GetLatitude()
-        {
-            return SafeInvoke<float?>("GetLatitude");
-        }
+        /// <summary>Site center latitude (geoPosition.y)</summary>
+        public float? CenterLatitude => GetGeoPosition()?.y;
 
-        /// <summary>
-        /// Get site longitude via method call
-        /// </summary>
-        public float? GetLongitude()
-        {
-            return SafeInvoke<float?>("GetLongitude");
-        }
+        /// <summary>Site center longitude (geoPosition.x)</summary>
+        public float? CenterLongitude => GetGeoPosition()?.x;
     }
 }

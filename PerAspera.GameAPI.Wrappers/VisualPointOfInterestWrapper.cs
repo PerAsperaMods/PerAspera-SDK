@@ -18,64 +18,27 @@ namespace PerAspera.GameAPI.Wrappers
     ///     var name = poi.GetProperty("name");
     /// }
     /// </summary>
-    public class VisualPointOfInterestListWrapper
+    public class VisualPointOfInterestWrapper : WrapperBase
     {
-        private static readonly LogAspera Log = new LogAspera("VisualPointOfInterestListWrapper");
-        private readonly object _nativeList;
-        private IList<object>? _cachedList;
+        private static readonly LogAspera Log = new LogAspera("VisualPointOfInterestWrapper");
+        private VisualPointOfInterest? _nativeVisualPointOfInterest;
 
-        public VisualPointOfInterestListWrapper(object nativeList)
+        public VisualPointOfInterestWrapper(object nativeVisualPointOfInterest) : base(nativeVisualPointOfInterest)
         {
-            _nativeList = nativeList;
-        }
-
-        /// <summary>
-        /// Get all visual POI as managed list
-        /// Caches the conversion for performance
-        /// </summary>
-        public IList<object> GetAll()
-        {
-            if (_cachedList != null)
-                return _cachedList;
-
-            _cachedList = _nativeList.ConvertIl2CppList<object>() ?? new List<object>();
-            Log.Info($"Loaded {_cachedList.Count} VisualPointOfInterest instances");
-            return _cachedList;
-        }
-
-        /// <summary>
-        /// Get POI from a VisualPointOfInterest wrapper
-        /// </summary>
-        public static object? GetPOIFromVisualPOI(object visualPoi)
-        {
-            if (visualPoi == null)
-                return null;
-
-            return IL2CppPropertyReader.ReadProperty<object>(visualPoi, "poi");
-        }
-
-        /// <summary>
-        /// Get POI name from a VisualPointOfInterest
-        /// </summary>
-        public static string? GetNameFromVisualPOI(object visualPoi)
-        {
-            var poi = GetPOIFromVisualPOI(visualPoi);
-            if (poi == null)
-                return null;
-
-            return IL2CppPropertyReader.ReadProperty<string>(poi, "name");
-        }
-
-        /// <summary>
-        /// Count of visual POI
-        /// </summary>
-        public int Count
-        {
-            get
+            try
             {
-                var list = GetAll();
-                return list?.Count ?? 0;
+                _nativeVisualPointOfInterest = nativeVisualPointOfInterest as VisualPointOfInterest;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Failed to cast to VisualPointOfInterest: {ex.Message}");
             }
         }
+        public PointOfInterestWrapper? get_poi()
+        {
+            var poi = _nativeVisualPointOfInterest?.poi;
+            return poi != null ? new PointOfInterestWrapper(poi) : null;
+        }
+
     }
 }

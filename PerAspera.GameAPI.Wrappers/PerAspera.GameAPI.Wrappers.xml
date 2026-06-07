@@ -89,7 +89,7 @@
             Field: hasMods
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.canvasRefs">
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.CanvasRefs">
             <summary>
             Get canvas references for UI components
             Field: canvasRefs
@@ -161,7 +161,7 @@
             Convenience method: BaseGame -> Universe -> BlackBoard
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.VisualPOIs">
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetPois">
             <summary>
             Get wrapped list of all visual POI instances in the game
             Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
@@ -621,128 +621,71 @@
             <returns>Property value or null if not found</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BuildingWrapper">
-            <summary>
-            Wrapper for the native Building class
-            Provides safe access to building properties and operations
+             <summary>
+             Wrapper for the native Building class.
+             Provides safe access to building properties and operations.
             
-            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Building.md
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/tutorials/Buildings.md
-            🔧 Override System: F:\ModPeraspera\SDK\PerAspera.GameAPI.Overrides\ProductionOverrides.cs
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize Building wrapper with native building object
-            </summary>
-            <param name="nativeBuilding">Native building instance from game</param>
+             📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Building.md
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native building object
-            </summary>
+            <summary>Factory — retourne null si l'objet natif est null.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.Number">
-            <summary>
-            Unique building identifier number
-            Maps to: _number_k__BackingField
-            </summary>
+            <summary>Unique building identifier number.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetBuildingType">
-            <summary>
-            Building type definition (factory, hab, etc.)
-            Maps to: _buildingType field
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.BuildingTypeName">
-            <summary>
-            Building name from its type
-            Elegant wrapper around BuildingType.name access
-            </summary>
+            <summary>Building type definition (factory, hab, etc.)</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.TypeKey">
-            <summary>
-            Building type key (e.g., "SolarPanel", "Mine")
-            </summary>
+            <summary>Building type key (e.g., "SolarPanel", "Mine").</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.BuildingTypeName">
+            <summary>Building name from its type.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.Position">
-            <summary>
-            2D position on the planet surface
-            </summary>
+            <summary>2D position on the planet surface.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsAlive">
-            <summary>
-            Is the building alive (not destroyed)
-            </summary>
+            <summary>Is the building alive (not destroyed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsOperative">
-            <summary>
-            Is the building operational
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsActive">
-            <summary>
-            Is the building active (alive, built, operational and not broken)
-            Convenience property for common usage patterns
-            </summary>
+            <summary>Is the building operational.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsBuilt">
-            <summary>
-            Is the building fully built (not under construction)
-            </summary>
+            <summary>Is the building fully built (not under construction).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsPowered">
-            <summary>
-            Is the building powered
-            </summary>
+            <summary>Is the building powered.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsBroken">
-            <summary>
-            Is the building broken
-            </summary>
+            <summary>Is the building broken.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.Health">
-            <summary>
-            Current health (0.0 to 1.0)
-            </summary>
+            <summary>Current health (0.0 to 1.0).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsActive">
+            <summary>Is the building active (alive, built, operational and not broken).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetFaction">
-            <summary>
-            Get the faction that owns this building
-            </summary>
+            <summary>Get the faction that owns this building.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetStockpile">
-            <summary>
-            Get the building's stockpile
-            </summary>
+            <summary>Get the building's stockpile.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetResourceStock(System.String)">
-            <summary>
-            Get resource quantity in stockpile
-            </summary>
+            <summary>Get resource quantity in stockpile.</summary>
             <param name="resourceKey">Resource key (e.g., "resource_water")</param>
-            <returns>Current quantity in stockpile or 0 if not found</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ToggleOperative">
-            <summary>
-            Toggle operative state
-            </summary>
+            <summary>Toggle operative state.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.StartScrapping">
-            <summary>
-            Start scrapping the building
-            </summary>
+            <summary>Start scrapping the building.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.CancelScrapping">
-            <summary>
-            Cancel scrapping
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ToString">
-            <summary>
-            Returns detailed building status as formatted string
-            </summary>
-            <returns>Building status with core properties</returns>
+            <summary>Cancel scrapping.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ConsoleWrapper">
             <summary>
@@ -785,137 +728,6 @@
             </summary>
             <param name="nativeConsole">Native console instance</param>
             <returns>ConsoleWrapper instance</returns>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1">
-            <summary>
-            Base class for all native object wrappers, providing unified method call patterns.
-            Enables type-safe native method invocation with automatic error handling and logging.
-            </summary>
-            <typeparam name="T">The native object type being wrapped</typeparam>
-            <example>
-            <code>
-            public class FactionWrapper : NativeWrapper&lt;object&gt;
-            {
-                public string GetName() => CallNative&lt;string&gt;("get_Name") ?? "Unknown";
-                public void SetActive(bool active) => CallNativeVoid("SetActive", active);
-            }
-            </code>
-            </example>
-        </member>
-        <member name="F:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1._nativeObject">
-            <summary>
-            The wrapped native object instance
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeObject">
-            <summary>
-            Gets the underlying native object for direct access when needed
-            </summary>
-            <returns>The native object instance</returns>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.IsValidWrapper">
-            <summary>
-            Check if the native object is valid
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.#ctor(`0)">
-            <summary>
-            Initializes the wrapper with a native object instance
-            </summary>
-            <param name="nativeObject">The native object to wrap</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallNative``1(System.String,System.Object[])">
-            <summary>
-            Calls a native method with a return value using IL2CPP extensions
-            </summary>
-            <typeparam name="TResult">Expected return type</typeparam>
-            <param name="methodName">Name of the method to invoke</param>
-            <param name="parameters">Method parameters</param>
-            <returns>Method result or default(TResult) on failure</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallNativeVoid(System.String,System.Object[])">
-            <summary>
-            Calls a native void method using IL2CPP extensions
-            </summary>
-            <param name="methodName">Name of the method to invoke</param>
-            <param name="parameters">Method parameters</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeField``1(System.String,System.Nullable{System.Reflection.BindingFlags})">
-            <summary>
-            Gets a field value from the native object using IL2CPP extensions
-            </summary>
-            <typeparam name="TField">Expected field type</typeparam>
-            <param name="fieldName">Name of the field to access</param>
-            <param name="bindingFlags">Optional binding flags for field access</param>
-            <returns>Field value or default(TField) on failure</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.SetNativeField``1(System.String,``0,System.Nullable{System.Reflection.BindingFlags})">
-            <summary>
-            Sets a field value on the native object using IL2CPP extensions
-            </summary>
-            <typeparam name="TField">Field type</typeparam>
-            <param name="fieldName">Name of the field to set</param>
-            <param name="value">Value to set</param>
-            <param name="bindingFlags">Optional binding flags for field access</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeProperty``1(System.String)">
-            <summary>
-            Gets a property value from the native object using IL2CPP extensions
-            </summary>
-            <typeparam name="TProp">Expected property type</typeparam>
-            <param name="propertyName">Name of the property to access</param>
-            <returns>Property value or default(TProp) on failure</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.SetNativeProperty``1(System.String,``0)">
-            <summary>
-            Sets a property value on the native object using IL2CPP extensions
-            </summary>
-            <typeparam name="TProp">Property type</typeparam>
-            <param name="propertyName">Name of the property to set</param>
-            <param name="value">Value to set</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallStaticNative(System.Type,System.String,System.Object[])">
-            <summary>
-            Static method helper for calling static native methods
-            </summary>
-            <param name="nativeType">The native type containing the static method</param>
-            <param name="methodName">Name of the static method</param>
-            <param name="parameters">Method parameters</param>
-            <returns>Method result or null on failure</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.CallStaticNative``1(System.Type,System.String,System.Object[])">
-            <summary>
-            Static method helper for calling static native methods with typed return
-            </summary>
-            <typeparam name="TResult">Expected return type</typeparam>
-            <param name="nativeType">The native type containing the static method</param>
-            <param name="methodName">Name of the static method</param>
-            <param name="parameters">Method parameters</param>
-            <returns>Method result or default(TResult) on failure</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.GetNativeType">
-            <summary>
-            Get the Type of the native IL2CPP object (for debugging/inspection)
-            Returns null if no native object is wrapped
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.ValidateNativeObject(System.String)">
-            <summary>
-            Validate that the native object exists
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.DebugNativeStructure(System.Boolean,System.Boolean)">
-            <summary>
-            Debug function to inspect native object structure
-            Lists all fields and methods with their types for debugging
-            </summary>
-            <param name="includeInherited">Include fields/methods from base classes</param>
-            <param name="includePrivate">Include private members</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Core.NativeWrapper`1.DebugGameEventBus">
-            <summary>
-            Quick debug for GameEventBus specifically - searches for GameEventBus related members
-            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DroneWrapper">
             <summary>
@@ -1484,196 +1296,31 @@
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.FactionWrapper">
             <summary>
-            Wrapper for the native Faction class
-            Provides safe access to faction properties and operations
-            DOC: Faction.md - Player and AI faction management
+            Wrapper for the native Faction class.
+            Provides safe access to faction properties and operations.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize Faction wrapper with native faction object
-            </summary>
-            <param name="nativeFaction">Native faction instance from game</param>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.FactionAddResourceDistributed(System.String,System.String)">
+            <summary>Add resources distributed across faction buildings via console command.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ListAvailableConsoleCommands">
-            <summary>
-            List all available console commands (for debugging)
-            </summary>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.AddResearchPoints(System.Single)">
+            <summary>Add research points to this faction.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.testCMD">
-            <summary>
-            Test method for native command execution using both TextAction dispatch and CommandBus
-            Tests CmdFactionResourceAllocation command creation and dispatching
-            </summary>
-            <returns>True if command executed successfully</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetAsIHandleable">
-            <summary>
-            Get the Handle for this Faction instance
-            </summary>
-            <returns>HandleWrapper for safe access to handle properties</returns>
-            
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRawHandle">
-            <summary>
-            Get the raw Handle object for InteractionManager compatibility
-            </summary>
-            <returns>Raw handle object for InteractionManager calls</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native faction object
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetNativePropertySafe``1(System.String)">
-            <summary>
-            Helper method to get native property with multiple naming conventions
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.Name">
-            <summary>
-            Faction name identifier
-            Maps to: name field
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.DisplayName">
-            <summary>
-            Faction display name for UI
-            Maps to: displayName field
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.FactionType">
-            <summary>
-            Faction type (Player, AI, etc.)
-            Maps to: factionType field
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.IsPlayerFaction">
-            <summary>
-            Is this the player faction?
-            Maps to: isPlayerFaction property or comparison with playerFaction
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.MainStockpile">
-            <summary>
-            Main faction stockpile for resources
-            Maps to: mainStockpile field
-            </summary>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.TestAddResource(System.String,System.Single)">
+            <summary>Direct native call for resource addition (test/debug).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetResourceStock(System.String)">
-            <summary>
-            Get resource stock amount safely
-            Maps to: mainStockpile resource lookup
-            </summary>
-            <param name="resourceKey">Resource key (e.g., "resource_water")</param>
-            <returns>Current stock amount or 0 if not found</returns>
+            <summary>Get resource stock amount from faction stockpile.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.AddResource(System.String,System.Single)">
-            <summary>
-            Add resource to faction with safe error handling
-            Maps to: AddResource method or mainStockpile.AddResource
-            </summary>
-            <param name="resourceKey">Resource key (e.g., "resource_water")</param>
-            <param name="amount">Amount to add (can be negative to remove)</param>
-            <returns>True if operation succeeded</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRelationshipWith(PerAspera.GameAPI.Wrappers.FactionWrapper)">
-            <summary>
-            Get relationship status with another faction
-            Maps to: relations or diplomacy system
-            </summary>
-            <param name="otherFaction">Other faction to check relationship with</param>
-            <returns>Relationship value (-100 to 100, or null if unknown)</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetBuildings">
-            <summary>
-            Get all buildings owned by this faction
-            Maps to: buildings collection or planet filtering
-            </summary>
-            <returns>List of buildings owned by this faction</returns>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.AIDifficulty">
-            <summary>
-            AI difficulty level (for AI factions)
-            Maps to: aiDifficulty or difficultyLevel field
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.IsAI">
-            <summary>
-            Is this faction controlled by AI?
-            Maps to: isAI field or !isPlayerFaction
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.AIPersonality">
-            <summary>
-            AI personality type (aggressive, defensive, etc.)
-            Maps to: aiPersonality or behaviorType field
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.HasTechnology(System.String)">
-            <summary>
-            Check if faction has researched a specific technology
-            Maps to: researchedTechnologies or techTree system
-            </summary>
-            <param name="technologyKey">Technology key to check</param>
-            <returns>True if technology is researched</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ResearchTechnology(System.String)">
-            <summary>
-            Research a technology for this faction
-            Maps to: ResearchTechnology method
-            </summary>
-            <param name="technologyKey">Technology key to research</param>
-            <returns>True if research was initiated successfully</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetColor">
-            <summary>
-            Get faction color for UI display
-            Maps to: color or factionColor field
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetGameEventBus">
-            <summary>
-            Get the GameEventBus for this faction to dispatch commands
-            Accesses protected _gameEventBus field via reflection
-            </summary>
-            <returns>GameEventBus instance or null if not accessible</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ExecuteResourceImportCommand(System.String,System.Single)">
-            <summary>
-            Execute a resource import command for this faction
-            </summary>
-            <param name="resourceType">Type of resource to import (e.g., "WATER", "ICE", "CHG")</param>
-            <param name="amount">Amount of resource to import</param>
-            <returns>True if command executed successfully</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ExecuteCustomCommand(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
-            <summary>
-            Execute a custom command for this faction
-            </summary>
-            <param name="commandType">Type of command to execute</param>
-            <param name="parameters">Command parameters as key-value pairs</param>
-            <returns>True if command executed successfully</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetCommandDebugInfo">
-            <summary>
-            Get debug information about command execution capabilities
-            </summary>
-            <returns>Debug string with command execution status</returns>
+            <summary>Add resource to faction. Use negative amount to remove.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.DispatchCommand(System.String,System.Object[])">
             <summary>
-            Méthode utilitaire générique pour dispatcher des commandes via CommandBus
-            Évite de créer un wrapper pour chaque type de commande
+            Generic command dispatch via CommandBus. Avoids creating a wrapper per command type.
             </summary>
-            <param name="commandTypeName">Nom complet du type de commande (ex: "PerAspera.Commands.CmdFactionResourceAllocation")</param>
-            <param name="constructorArgs">Arguments pour le constructeur de la commande</param>
-            <returns>True si la commande a été dispatchée avec succès</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ToString">
-            <summary>
-            String representation for debugging
-            </summary>
+            <param name="commandTypeName">Full type name (e.g., "PerAspera.Commands.CmdFactionResourceAllocation")</param>
+            <param name="constructorArgs">Constructor arguments for the command.</param>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper">
             <summary>
@@ -3034,253 +2681,96 @@
             <param name="text">Text content</param>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.PlanetWrapper">
-            <summary>
-            Wrapper for the native Planet class
-            Provides safe access to planetary properties and climate data
+             <summary>
+             Wrapper for the native Planet class.
+             Provides safe access to planetary properties and building management.
+             For atmospheric data, use PerAspera.GameAPI.Climate.ClimateController directly.
             
-            📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
-            🤖 Agent Expert: @per-aspera-sdk-coordinator 
-            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-            🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
-            🎯 Examples: F:\ModPeraspera\Individual-Mods\MasterGui2\PlanetWrapper usage
-            </summary>
+             📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
+             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize Planet wrapper with native planet object
-            </summary>
-            <param name="nativePlanet">Native planet instance from game</param>
-            
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetHazardsManager">
+            <summary>Get HazardsManager for this planet.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetCurrent">
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetGamePosition(System.Single,System.Single)">
             <summary>
-            Get the current planet instance
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetTemperature">
-            <summary>
-            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
-            Example: ClimateController.Instance?.Atmosphere?.AverageTemperature ?? GetTemperatureFallback()
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAtmosphericPressure">
-            <summary>
-            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
-            Example: ClimateController.Instance?.Atmosphere?.TotalPressure ?? GetAtmosphericPressureFallback()
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetOxygenLevel">
-            <summary>
-            DEPRECATED: For atmospheric data, use PerAspera.GameAPI.Climate directly.
-            Example: ClimateController.Instance?.Atmosphere?.OxygenLevel ?? GetOxygenLevelFallback()
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsSafely">
-            <summary>
-            Get all buildings on the planet safely (null-checked)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Atmosphere">
-            <summary>
-            For atmospheric data, use PerAspera.GameAPI.Climate directly:
-            var climate = ClimateController.Instance?.Atmosphere;
-            This avoids circular dependencies and improves performance.
+            Convert geographic coordinates to the game's internal 2D position.
+            Convention: x=longitude, y=latitude.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Name">
-            <summary>
-            Planet name - Hardcoded to "Mars" for Per Aspera (future extensibility for multi-planet mods)
-            </summary>
+            <summary>Planet name. Hardcoded to "Mars" for Per Aspera.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetTemperature">
+            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAtmosphericPressure">
+            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetOxygenLevel">
+            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Atmosphere">
+            <summary>Use PerAspera.GameAPI.Climate.ClimateController.Instance.Atmosphere directly.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.WaterStock">
-            <summary>
-            Water stock on the planet (direct access for convenience)
-            Maps to: GetWaterStock() / SetWaterStock() methods
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.SiliconStock">
-            <summary>
-            Silicon reserves on the planet
-            Maps to: GetResourceStock("resource_silicon")
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.IronStock">
-            <summary>
-            Iron ore reserves on the planet
-            Maps to: GetResourceStock("resource_iron")
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.CarbonStock">
-            <summary>
-            Carbon reserves on the planet
-            Maps to: GetResourceStock("resource_carbon")
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.CalciteStock">
-            <summary>
-            Calcite (limestone) reserves on the planet
-            Maps to: GetResourceStock("resource_calcite")
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.HasSufficientWater">
-            <summary>
-            Check if planet has sufficient water for operations
-            Elegant wrapper around water stock checking
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.HasBalancedResources">
-            <summary>
-            Check if planet has balanced resource reserves
-            Combines multiple resource checks in elegant property
-            </summary>
+            <summary>Water stock on the planet.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetResourceStock(System.String)">
-            <summary>
-            Get stock of a specific resource with elegant error handling
-            Maps to: Complex resource lookup via KeeperTypeRegistry
-            </summary>
+            <summary>Get stock of a specific resource.</summary>
             <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
-            <returns>Current stock amount or 0 if resource not found</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.AddResource(System.String,System.Single)">
-            <summary>
-            Add resource to planet stock with elegant validation
-            Maps to: Complex resource addition via KeeperTypeRegistry
-            </summary>
-            <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
-            <param name="amount">Amount to add (can be negative to remove)</param>
-            <returns>True if operation succeeded</returns>
+            <summary>Add resource to planet stock. Use negative amount to remove.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildings">
-            <summary>
-            Get all buildings on this planet
-            Maps to: buildings field or GetBuildings() method
-            </summary>
-            <returns>List of all buildings on the planet</returns>
+            <summary>Get all buildings on this planet.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsSafely">
+            <summary>Get all buildings on the planet (array version).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsByFaction(PerAspera.GameAPI.Wrappers.FactionWrapper)">
-            <summary>
-            Get all buildings owned by a specific faction on this planet
-            </summary>
-            <param name="faction">Faction to filter by</param>
-            <returns>List of buildings owned by the faction</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.AreSameFaction(System.Object,System.Object)">
-            <summary>
-            Helper method to compare if two faction objects are the same
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetNativeObject">
-            <summary>
-            Get the native game object (for Harmony patches)
-            </summary>
-            <returns>Native planet object or null</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.MapResourceKeyToGasId(System.String)">
-            <summary>
-            Map resource key to gas ID used by Atmosphere.ModifyGas
-            </summary>
-            <param name="resourceKey">Resource key (e.g., "resource_nitrogen_release")</param>
-            <returns>Gas ID (e.g., "N2") or null if not mappable</returns>
-        </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper">
-             <summary>
-             Wrapper for a single PointOfInterest instance from the game
-             Provides safe, type-safe access to POI properties and methods
-            
-             Properties:
-             - Name: POI display name (String)
-             - PoiType: POI type (POIType enum/class)
-             - Coordinates: Latitude, Longitude
-             - Bounds: Northern/Southern/Eastern/Western latitudes/longitudes
-             - Diameter: POI size
-            
-             Example:
-             var poi = new PointOfInterestInstanceWrapper(nativePoi);
-             var name = poi.Name;
-             var type = poi.PoiType;
-             </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native PointOfInterest instance
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.Name">
-            <summary>POI display name</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.PoiType">
-            <summary>POI type (POIType enum/class)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.CenterLatitude">
-            <summary>POI center latitude</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.CenterLongitude">
-            <summary>POI center longitude</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.Diameter">
-            <summary>POI diameter</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.NorthernLatitude">
-            <summary>Northern boundary latitude</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.SouthernLatitude">
-            <summary>Southern boundary latitude</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.EasternLongitude">
-            <summary>Eastern boundary longitude</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.WesternLongitude">
-            <summary>Western boundary longitude</summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetPoiTypeAsString">
-            <summary>
-            Get POI type as string (converts POIType enum to string)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetNameViaMethod">
-            <summary>
-            Get POI name via method call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetLatitude">
-            <summary>
-            Get POI latitude via method call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.GetLongitude">
-            <summary>
-            Get POI longitude via method call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestInstanceWrapper.IsPointInside(System.Object,System.Single,System.Single)">
-            <summary>
-            Check if a point is inside this POI
-            </summary>
+            <summary>Get all buildings owned by a specific faction.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper">
-            <summary>
-            Wrapper for accessing PointOfInterest static data collection
-            Handles IL2CPP reflection to get POI from StaticValues
-            </summary>
+             <summary>
+             Wrapper for a single PointOfInterest instance.
+             Uses direct IL2CPP cast — no reflection.
+            
+             Source: PointOfInterest.cs (IL2CPP dump)
+             Public methods: GetName(), GetLatitude(), GetLongitude(), GetDiameter(), GetPOIType()
+             Fields centerLatitude/centerLongitude are protected — accessed via the public methods above.
+            
+             <example>
+             var w = new PointOfInterestWrapper(nativePoi);
+             string name = w.Name;
+             float lat   = w.CenterLatitude ?? 0f;  // -13.37 for Coprates Chasma
+             float lon   = w.CenterLongitude ?? 0f; // -60.74 for Coprates Chasma
+             </example>
+             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetAllPOI">
-            <summary>
-            Get all POI items from the game
-            BEST METHOD: Access by key directly using PointOfInterest.Get(key)
-            Fallback: Try table field → StaticValues property
-            </summary>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.Name">
+            <summary>POI display name</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetPOIByKey(System.String)">
-            <summary>
-            Get POI by key from the static collection — DIRECT ACCESS
-            This is the reliable way to access YAML mod POI data
-            </summary>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.PoiType">
+            <summary>POI type enum</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetPOIProperty``1(System.Object,System.String)">
-            <summary>
-            Get property value from POI object
-            </summary>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.GetPoiTypeAsString">
+            <summary>POI type as display string (e.g. "Chasma", "Mons", "Crater")</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.CenterLatitude">
+            <summary>POI center latitude (°N positive, °S negative)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.CenterLongitude">
+            <summary>POI center longitude (°E positive, °W negative)</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.Diameter">
+            <summary>POI diameter in km</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper.IsPointInside(Planet,UnityEngine.Vector2)">
+            <summary>Check if a geographic point is inside this POI's bounds</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceCommandHelper">
             <summary>
@@ -3490,11 +2980,6 @@
             Get resource color as System.Drawing.Color
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetNativeObject">
-            <summary>
-            Get the native game object (for Harmony patches)
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.ToString">
             <summary>
             String representation for debugging
@@ -3535,7 +3020,14 @@
             </summary>
             <returns>List of all resource keys currently available in game</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceTypeWrapper)" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDynamicDisplayName(PerAspera.GameAPI.Wrappers.ResourceTypeWrapper)">
+            <summary>
+            Get display name using native DisplayName property or fallback to formatted name
+            This is dynamic and uses the actual game data loaded from YAML
+            </summary>
+            <param name="resourceWrapper">ResourceType wrapper instance</param>
+            <returns>Localized display name from game data</returns>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetDisplayName">
             <summary>
             Get display name using instance method (preferred)
@@ -3585,7 +3077,13 @@
             Structure pour désérialiser climate-config.json
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsAtmosphericGas" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsAtmosphericGas">
+            <summary>
+            Check if this resource is any atmospheric gas (native or mod-registered)
+            Includes both native gases and mod-added atmospheric gases
+            </summary>
+            <returns>True if this is an atmospheric gas</returns>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.RegisterAtmosphericGas(System.String)">
             <summary>
             Register a custom atmospheric gas for mod use
@@ -4070,39 +3568,33 @@
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.Name">
-            <summary>Site display name</summary>
+            <summary>Site display name via GetName(bool researched)</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetGeoPosition">
+            <summary>
+            geoPosition.x = longitude, geoPosition.y = latitude (from YAML: x=longitude, y=latitude)
+            </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLatitude">
-            <summary>Site center latitude</summary>
+            <summary>Site center latitude (geoPosition.y)</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLongitude">
-            <summary>Site center longitude</summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetNameViaMethod">
-            <summary>
-            Get site name via method call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetLatitude">
-            <summary>
-            Get site latitude via method call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetLongitude">
-            <summary>
-            Get site longitude via method call
-            </summary>
+            <summary>Site center longitude (geoPosition.x)</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper">
             <summary>
-            Static wrapper for accessing SpecialSite collection from BaseGame
-            Handles IL2CPP reflection to get special sites data
+            Wrapper around a native SpecialSite static-data object.
+            Exposes name, geo-position, and site class without touching StaticValues.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GetAllSpecialSites">
-            <summary>
-            Get all special sites from BaseGame.visualSites collection
-            </summary>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.Name">
+            <summary>Localised name — researched version if available, unresearched fallback.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.Category">
+            <summary>Site class enum as string: RUINS, CAVERN, ROVER, CRASH, LANDER, OTHER.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper.GeoPosition">
+            <summary>Geographic position — x = latitude, y = longitude (degrees).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
             <summary>
@@ -4788,7 +4280,7 @@
             Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper">
+        <member name="T:PerAspera.GameAPI.Wrappers.VisualPointOfInterestWrapper">
              <summary>
              Wrapper for the list of VisualPointOfInterest instances in the game.
              VisualPointOfInterest = the in-game visual marker for POI on the map.
@@ -4803,111 +4295,50 @@
              }
              </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetAll">
+        <member name="T:PerAspera.GameAPI.Wrappers.WrapperBase">
             <summary>
-            Get all visual POI as managed list
-            Caches the conversion for performance
+            Base class for all game object wrappers.
+            Inherits reflection helpers from NativeWrapper&lt;object&gt; and adds BepInEx logging,
+            safe convenience accessors (SafeInvoke / SafeGetField), and debug dump utilities.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetPOIFromVisualPOI(System.Object)">
-            <summary>
-            Get POI from a VisualPointOfInterest wrapper
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.GetNameFromVisualPOI(System.Object)">
-            <summary>
-            Get POI name from a VisualPointOfInterest
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.VisualPointOfInterestListWrapper.Count">
-            <summary>
-            Count of visual POI
-            </summary>
-        </member>
-        <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.WrapperBase" -->
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.NativeObject">
-            <summary>
-            Legacy compatibility: The native IL2CPP game object being wrapped
-            Now delegates to base NativeWrapper._nativeObject
-            </summary>
+            <summary>The native IL2CPP game object being wrapped.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid">
-            <summary>
-            Check if the native object is valid
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValidWrapper">
-            <summary>
-            Public accessor for IsValid - allows cross-wrapper validation
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.GetNativeType">
-            <summary>
-            Get the Type of the native IL2CPP object (for debugging/inspection)
-            Returns null if no native object is wrapped
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
-            <summary>
-            Constructor with native object - now uses NativeWrapper base
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.ValidateNativeObject(System.String)">
-            <summary>
-            Validate that the native object exists
-            </summary>
+            <summary>True when the native object is non-null.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvoke``1(System.String,System.Object[])">
             <summary>
-            Safely invoke a method on the native object - delegates to NativeWrapper
+            Invoke a method on the native object, returning default on failure.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvokeVoid(System.String,System.Object[])">
             <summary>
-            Safely invoke a void method on the native object - delegates to NativeWrapper
+            Invoke a void method on the native object, swallowing exceptions.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeGetField``1(System.String)">
             <summary>
-            Safely get a field value from the native object - delegates to NativeWrapper
+            Read a field value from the native object, returning default on failure.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeSetField``1(System.String,``0)">
             <summary>
-            Safely set a field value on the native object - delegates to NativeWrapper
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DebugNativeStructure(System.Boolean,System.Boolean)">
-            <summary>
-            Debug function to inspect native object structure
-            Lists all fields and methods with their types for debugging
-            </summary>
-            <param name="includeInherited">Include fields/methods from base classes</param>
-            <param name="includePrivate">Include private members</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DebugGameEventBus">
-            <summary>
-            Quick debug for GameEventBus specifically - searches for GameEventBus related members
+            Write a field value on the native object, swallowing exceptions.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DumpToFile(System.String)">
-             <summary>
-             Dump complete native object structure to file for debugging
-             Creates a persistent file in BepInEx/Debug/ with all properties, fields, and methods
-             Useful when IL2CppPropertyReader cannot find a property
-            
-             Example: wrapper.DumpToFile("ObjectName")
-             Creates: BepInEx/Debug/IL2CPP-ObjectName-timestamp.txt
-             </summary>
+            <summary>
+            Dumps the full native object structure to a file under BepInEx/Debug/.
+            </summary>
+            <example>wrapper.DumpToFile("FactionWrapper") → BepInEx/Debug/IL2CPP-FactionWrapper-timestamp.txt</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SearchMembersInFile(System.String)">
-             <summary>
-             Search for members matching a pattern and save results to file
-             Useful for finding property names with partial matches
-            
-             Example: wrapper.SearchMembersInFile("type") → finds all members with "type" in name
-             Creates: BepInEx/Debug/IL2CPP-Search-type-timestamp.txt
-             </summary>
+            <summary>
+            Search for members matching a pattern and save results to BepInEx/Debug/.
+            </summary>
+            <example>wrapper.SearchMembersInFile("type") → BepInEx/Debug/IL2CPP-Search-type-timestamp.txt</example>
         </member>
     </members>
 </doc>

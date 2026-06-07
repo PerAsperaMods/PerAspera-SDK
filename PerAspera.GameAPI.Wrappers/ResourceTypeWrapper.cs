@@ -235,10 +235,9 @@ namespace PerAspera.GameAPI.Wrappers
         {
             get => MaterialType().Equals("Mined", StringComparison.OrdinalIgnoreCase);
         }
-        public bool isGas
+        public bool IsGas
         {
-            get =>  MaterialType().Equals("Released", StringComparison.OrdinalIgnoreCase);
-
+            get => MaterialType().Equals("Released", StringComparison.OrdinalIgnoreCase);
         }
         /// <summary>
         /// Is this a manufactured/processed resource?
@@ -359,19 +358,11 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get the native game object (for Harmony patches)
-        /// </summary>
-        public object? GetNativeObject()
-        {
-            return NativeObject;
-        }
-        
-        /// <summary>
         /// String representation for debugging
         /// </summary>
         public override string ToString()
         {
-            return $"ResourceType[{Name}] ({MaterialType}, Index: {Index}, Valid: {IsValid})";
+            return $"ResourceType[{Name}] ({MaterialType()}, Index: {Index}, Valid: {IsValid})";
         }
         
         // ==================== STATIC UTILITIES ====================
@@ -441,7 +432,6 @@ namespace PerAspera.GameAPI.Wrappers
             return availableKeys;
         }
         
-        /// <summary>
         /// <summary>
         /// Get display name using native DisplayName property or fallback to formatted name
         /// This is dynamic and uses the actual game data loaded from YAML
@@ -587,7 +577,6 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// <summary>
         /// Check if this resource is any atmospheric gas (native or mod-registered)
         /// Includes both native gases and mod-added atmospheric gases
         /// </summary>
@@ -597,7 +586,7 @@ namespace PerAspera.GameAPI.Wrappers
             if (string.IsNullOrEmpty(Name)) return false;
             
             // Must be MaterialType.Released (atmospheric)
-            if (!isGas) return false;
+            if (!IsGas) return false;
             
             // Must follow atmospheric gas naming pattern OR be registered
             return Name.EndsWith("_release") || _registeredAtmosphericGases.Contains(Name);
@@ -800,7 +789,7 @@ namespace PerAspera.GameAPI.Wrappers
                 "category" => Category,
                 "ismined" => IsMined,
                 "ismanufactured" => IsManufactured,
-                "isgas" => isGas,
+                "isgas" => IsGas,
                 "isatmosphericgas" => IsAtmosphericGas(),
                 "isnativeatmosphericgas" => IsNativeAtmosphericGas(),
                 "isvalid" => IsValid,

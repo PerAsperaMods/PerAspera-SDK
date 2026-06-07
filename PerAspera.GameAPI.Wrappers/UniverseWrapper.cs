@@ -1,4 +1,3 @@
-using AsmResolver.PE.DotNet.Metadata.Tables;
 using PerAspera.Commands;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
@@ -26,12 +25,6 @@ namespace PerAspera.GameAPI.Wrappers
             // ⚡ Cast to native Universe type for direct access with interop DLLs
             _nativeUniverse = nativeUniverse as Universe;
         }
-
-        public bool GetGamePaused()
-        {
-            return ((Universe)NativeObject).GetGamePaused();
-        }
-        public float gameSpeed { get { return (float)NativeObject.GetMemberValue("gameSpeed"); } set { NativeObject.SetMemberValue("gameSpeed", value);  } }
 
         public SliceMasterWrapper GetSliceMaster()
         {
@@ -292,7 +285,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.LogError($"Failed to get factions: {ex.Message}");
+                WrapperLog.Error($"Failed to get factions: {ex.Message}");
                 return new List<FactionWrapper>();
             }
         }
@@ -343,26 +336,25 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(name))
             {
-                Log.LogWarning("GetBlackBoard called with null or empty name");
+                WrapperLog.Warning("GetBlackBoard called with null or empty name");
                 return null;
             }
-            
+
             var blackboardsDict = SafeGetField<object>("blackboards");
             if (blackboardsDict == null)
             {
-                Log.LogWarning("blackboards dictionary is null in Universe");
+                WrapperLog.Warning("blackboards dictionary is null in Universe");
                 return null;
             }
-            
+
             try
             {
-                // Access Dictionary<string, Blackboard> using IL2CPP interop
                 var nativeBlackboard = blackboardsDict.InvokeMethod<object>("get_Item", name);
                 return nativeBlackboard != null ? new BlackBoardWrapper(nativeBlackboard) : null;
             }
             catch (Exception ex)
             {
-                Log.LogError($"Failed to get blackboard '{name}': {ex.Message}");
+                WrapperLog.Error($"Failed to get blackboard '{name}': {ex.Message}");
                 return null;
             }
         }
@@ -383,7 +375,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.LogError($"Failed to get blackboard names: {ex.Message}");
+                WrapperLog.Error($"Failed to get blackboard names: {ex.Message}");
                 return null;
             }
         }
@@ -405,7 +397,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.LogError($"Failed to check if blackboard '{name}' exists: {ex.Message}");
+                WrapperLog.Error($"Failed to check if blackboard '{name}' exists: {ex.Message}");
                 return false;
             }
         }
@@ -419,7 +411,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (blackboard?.GetNativeObject() == null)
             {
-                Log.LogWarning("Cannot add null blackboard to Universe");
+                WrapperLog.Warning("Cannot add null blackboard to Universe");
                 return;
             }
             
@@ -441,7 +433,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                Log.LogError($"Failed to get blackboard count: {ex.Message}");
+                WrapperLog.Error($"Failed to get blackboard count: {ex.Message}");
                 return 0;
             }
         }

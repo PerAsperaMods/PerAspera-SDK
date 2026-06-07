@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Wrappers.Core;
 
 namespace PerAspera.GameAPI.Wrappers
 {

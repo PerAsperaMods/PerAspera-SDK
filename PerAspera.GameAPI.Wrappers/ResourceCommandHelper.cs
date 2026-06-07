@@ -5,7 +5,6 @@ using System.Reflection;
 using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Wrappers.Core;
 using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers

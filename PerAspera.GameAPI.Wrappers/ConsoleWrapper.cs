@@ -1,6 +1,5 @@
 using BepInEx.Logging;
 using PerAspera.Core;
-using PerAspera.GameAPI.Wrappers.Core;
 using System;
 using System.Linq;
 using System.Reflection;

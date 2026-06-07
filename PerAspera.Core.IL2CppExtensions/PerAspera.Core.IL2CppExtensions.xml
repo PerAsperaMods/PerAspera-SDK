@@ -268,6 +268,23 @@
             Clear the strategy cache (useful for debugging or after IL2CPP changes)
             </summary>
         </member>
+        <member name="T:PerAspera.Core.IL2CPP.NativeWrapper`1">
+            <summary>
+            Generic base class for all native IL2CPP object wrappers.
+            Provides safe method invocation, field access, and debug utilities.
+            Zero game-specific logic â€” usable for any IL2CPP object.
+            </summary>
+            <example>
+            <code>
+            public class MyWrapper : NativeWrapper&lt;object&gt;
+            {
+                public MyWrapper(object native) : base(native) { }
+                public string GetName() => CallNative&lt;string&gt;("get_Name") ?? "Unknown";
+                public void SetActive(bool v) => CallNativeVoid("SetActive", v);
+            }
+            </code>
+            </example>
+        </member>
         <member name="T:PerAspera.Core.IL2CPP.PerAsperaExtensions">
             <summary>
             High-level convenience extensions for common Per Aspera operations

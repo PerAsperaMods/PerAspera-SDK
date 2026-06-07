@@ -173,16 +173,7 @@ namespace PerAspera.GameAPI.Wrappers
                     return;
                 }
 
-                // Create Il2Cpp list for native call
-                var il2cppList = new Il2CppSystem.Collections.Generic.List<GameObject>();
-                _nativeScene.GetRootGameObjects(il2cppList);
-
-                // Convert back to System list
-                rootObjects.Clear();
-                foreach (var obj in il2cppList)
-                {
-                    rootObjects.Add(obj);
-                }
+                _nativeScene.GetRootGameObjects(rootObjects);
             }
             catch (Exception ex)
             {

@@ -37,7 +37,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
 
                 // Access canvasRefs directly (it's a public field in BaseGame)
-                var canvasRefs = baseGame.canvasRefs;
+                var canvasRefs = baseGame.CanvasRefs;
                 if (canvasRefs == null)
                 {
                     Log.LogWarning("BaseGame.canvasRefs is null - UI may not be fully initialized yet");

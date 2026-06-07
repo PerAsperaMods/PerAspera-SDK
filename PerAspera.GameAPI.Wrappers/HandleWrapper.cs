@@ -1,4 +1,3 @@
-using PerAspera.GameAPI.Wrappers.Core;
 using System;
 
 namespace PerAspera.GameAPI.Wrappers
