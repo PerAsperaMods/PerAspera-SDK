@@ -17,6 +17,7 @@
     <PackageId>PerAspera.GameAPI.Overrides</PackageId>
     <IsPackable>true</IsPackable>
     <PackageTags>per-aspera;overrides;patching;harmony;modding</PackageTags>
+    <IsSharedLibrary>true</IsSharedLibrary>
   </PropertyGroup>
 
   <ItemGroup>

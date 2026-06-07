@@ -13,6 +13,7 @@
     <IsPackable>true</IsPackable>
     <Description>Per Aspera Game API Climate - Climate and atmosphere management</Description>
     <PackageTags>per-aspera;climate;atmosphere;terraforming</PackageTags>
+    <IsSharedLibrary>true</IsSharedLibrary>
   </PropertyGroup>
 
   <ItemGroup>

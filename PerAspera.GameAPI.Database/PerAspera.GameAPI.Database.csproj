@@ -13,6 +13,7 @@
     <IsPackable>true</IsPackable>
     <Description>Per Aspera Game API Database - YAML and SQLite database management</Description>
     <PackageTags>per-aspera;database;yaml;sqlite;datamodel</PackageTags>
+    <IsSharedLibrary>true</IsSharedLibrary>
   </PropertyGroup>
 
   <ItemGroup>
