@@ -18,7 +18,9 @@ packages/
 
 # Visual Studio
 .vs/
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/extensions.json
 *.suo
 *.user
 *.userosscache
@@ -70,11 +72,14 @@ Desktop.ini
 GameLibs/
 GameLibs-Package/
 *.dll
+gamelibs.props
+
 # Documentation (except README, CLAUDE.md and doc/)
 *.md
 !README.md
 !CLAUDE.md
 !doc/**/*.md
+!gamelibs.props.example
 
 # Scripts (except those in scripts/ folder)
 *.ps1

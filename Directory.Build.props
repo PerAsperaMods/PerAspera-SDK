@@ -1,10 +1,33 @@
 <Project>
-  <!-- Chain to root Directory.Build.props (imports gamelibs.props → GameDir, GameLibsDir) -->
+  <!-- Embedded in parent workspace → delegate to root Directory.Build.props -->
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props"
           Condition="Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')" />
 
+  <!-- Standalone SDK repo → load local gamelibs.props (gitignored, created by Setup-DevEnvironment.ps1) -->
+  <Import Project="$(MSBuildThisFileDirectory)gamelibs.props"
+          Condition="!Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props') and Exists('$(MSBuildThisFileDirectory)gamelibs.props')" />
+
+  <!-- Standalone: derive GameDir from PerAsperaGamePath (set in gamelibs.props or CI env var) -->
+  <PropertyGroup Condition="!Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')">
+    <GameDir Condition="'$(PerAsperaGamePath)' != ''">$(PerAsperaGamePath)</GameDir>
+    <GameDir Condition="'$(PERASPERAGAMEPATH)' != '' and '$(GameDir)' == ''">$(PERASPERAGAMEPATH)</GameDir>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreSources>
+    <BepInExInteropDir>$(GameDir)\BepInEx\interop</BepInExInteropDir>
+    <BepInExUnityLibsDir>$(GameDir)\BepInEx\unity-libs</BepInExUnityLibsDir>
+    <BepInExCoreDir>$(GameDir)\BepInEx\core</BepInExCoreDir>
+    <GameLibsDir>$(BepInExInteropDir)</GameLibsDir>
+  </PropertyGroup>
+
   <!-- Per Aspera SDK - Shared build configuration -->
-  
   <PropertyGroup>
     <SdkRoot>$(MSBuildThisFileDirectory)</SdkRoot>
     <IsCIBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</IsCIBuild>

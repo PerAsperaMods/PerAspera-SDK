@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Full path to your Per Aspera installation folder.
+         Created automatically by scripts/Setup-DevEnvironment.ps1 -->
+    <PerAsperaGamePath>D:\SteamLibrary\steamapps\common\Per Aspera</PerAsperaGamePath>
+  </PropertyGroup>
+</Project>
