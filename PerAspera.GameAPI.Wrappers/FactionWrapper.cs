@@ -69,6 +69,24 @@ namespace PerAspera.GameAPI.Wrappers
         public bool TestAddResource(string resourceType, float amount)
             => NativeObject.InvokeMethod("FactionAddResourceDistributed", resourceType, amount.ToString());
 
+        /// <summary>
+        /// Sets a bool variable on the faction blackboard.
+        /// Used by YAML rules/criteria: <c>$key == true</c>.
+        /// </summary>
+        public bool SetBlackboardBool(string key, bool value)
+        {
+            try
+            {
+                ((Faction)NativeObject).blackboardFaction?.SetValue(key, value);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                WrapperLog.Error($"SetBlackboardBool({key}) failed: {ex.Message}");
+                return false;
+            }
+        }
+
         // ==================== HANDLE / INTERACTION ====================
 
         public InteractionManagerWrapper GetInteractionManager()

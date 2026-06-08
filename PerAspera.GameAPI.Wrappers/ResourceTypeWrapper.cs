@@ -218,16 +218,16 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         // ==================== RESOURCE PROPERTIES ====================
-        
+
         /// <summary>
         /// Material type category (Mined, Manufactured, etc.)
         /// Maps to: materialType field
         /// </summary>
         public string MaterialType()
         {
-            return ((ResourceType)NativeObject).materialType.ToString(); 
+            return ((ResourceType)NativeObject).materialType.ToString();
         }
-        
+
         /// <summary>
         /// Is this a mined/extracted resource?
         /// </summary>
@@ -245,6 +245,118 @@ namespace PerAspera.GameAPI.Wrappers
         public bool IsManufactured
         {
             get => MaterialType().Equals("Manufactured", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // ==================== NATIVE CLASSIFICATION (IL2CPP Direct) ====================
+        // Calls the actual game methods — results reflect the game's internal state.
+        // Use these to diagnose why custom resources get index -001.
+
+        /// <summary>True if the game considers this resource "virtual" (not in ValueByIndex array).</summary>
+        public bool IsVirtualNative()
+        {
+            try { return ((ResourceType)NativeObject).IsVirtual(); }
+            catch { return false; }
+        }
+
+        /// <summary>True if materialType == Placeholder (YAML: materialType: Placeholder).</summary>
+        public bool IsPlaceholderNative()
+        {
+            try { return ((ResourceType)NativeObject).IsPlaceholder(); }
+            catch { return false; }
+        }
+
+        /// <summary>True if materialType == Placement (distinct from Placeholder).</summary>
+        public bool IsPlacementNative()
+        {
+            try { return ((ResourceType)NativeObject).IsPlacement(); }
+            catch { return false; }
+        }
+
+        /// <summary>True if materialType == Released.</summary>
+        public bool IsReleasedNative()
+        {
+            try { return ((ResourceType)NativeObject).IsReleased(); }
+            catch { return false; }
+        }
+
+        /// <summary>True if materialType == Mined.</summary>
+        public bool IsMinedNative()
+        {
+            try { return ((ResourceType)NativeObject).IsMined(); }
+            catch { return false; }
+        }
+
+        /// <summary>True if materialType == Manufactured.</summary>
+        public bool IsManufacturedNative()
+        {
+            try { return ((ResourceType)NativeObject).IsManufactured(); }
+            catch { return false; }
+        }
+
+        /// <summary>True for any atmospheric gas type (GasReleased/Captured/Converted).</summary>
+        public bool IsGasNative()
+        {
+            try { return ((ResourceType)NativeObject).IsGas(); }
+            catch { return false; }
+        }
+
+        /// <summary>One-line classification string for audit logs.</summary>
+        public string GetNativeClassificationSummary()
+        {
+            try
+            {
+                var rt = (ResourceType)NativeObject;
+                return $"Virtual={rt.IsVirtual()} Placeholder={rt.IsPlaceholder()} " +
+                       $"Placement={rt.IsPlacement()} Released={rt.IsReleased()} " +
+                       $"Mined={rt.IsMined()} Manufactured={rt.IsManufactured()} Gas={rt.IsGas()}";
+            }
+            catch (Exception ex)
+            {
+                return $"(classification error: {ex.Message})";
+            }
+        }
+
+        // ==================== STATIC INDEX DIAGNOSTICS ====================
+
+        /// <summary>
+        /// The current MaxIndex used by the game. ValueByIndex array has length MaxIndex+1.
+        /// If a resource has index > MaxIndex, accessing it crashes with IndexOutOfRange.
+        /// </summary>
+        public static int GetMaxIndex()
+        {
+            try { return ResourceType._MaxIndex; }
+            catch { return -1; }
+        }
+
+        /// <summary>
+        /// Length of the ValueByIndex array. Custom resources with index >= this will crash.
+        /// </summary>
+        public static int GetValueByIndexLength()
+        {
+            try { return ResourceType.ValueByIndex?.Length ?? 0; }
+            catch { return 0; }
+        }
+
+        /// <summary>
+        /// Re-runs ResourceType.PostInitialize() to rebuild NonVirtualResources and ValueByIndex
+        /// after mod resources have been loaded. Call this from CompleteLoadingPatch BEFORE the audit.
+        /// This fixes custom mod resources getting index -001 when AssignMaxIndex ran before mod YAML loaded.
+        /// </summary>
+        public static void RerunPostInitialize()
+        {
+            try
+            {
+                int beforeMax = ResourceType._MaxIndex;
+                int beforeLen = ResourceType.ValueByIndex?.Length ?? 0;
+                ResourceType.PostInitialize();
+                int afterMax = ResourceType._MaxIndex;
+                int afterLen = ResourceType.ValueByIndex?.Length ?? 0;
+                Log.LogInfo($"[RerunPostInitialize] MaxIndex: {beforeMax}→{afterMax} | ValueByIndex.Length: {beforeLen}→{afterLen}");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[RerunPostInitialize] Failed: {ex.Message}");
+            }
         }
         
         /// <summary>

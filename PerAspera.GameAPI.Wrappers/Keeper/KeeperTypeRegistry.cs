@@ -71,22 +71,18 @@ namespace PerAspera.GameAPI.Wrappers
         /// </summary>
         public static object? GetPlanet()
         {
-            var nativeUniverse = GetUniverse(); // Now returns native object
-            if (nativeUniverse == null)
-            {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} Universe not available yet");
-                return null;
-            }
-            
-            // Universe.GetPlanet() via reflection on native object
+            var nativeUniverse = GetUniverse();
+            if (nativeUniverse == null) return null; // silent — universe not ready yet
+
             try
             {
-                return nativeUniverse.InvokeMethod<object>("GetPlanet");
+                // property getter is more reliable in IL2CPP than method name lookup
+                return nativeUniverse.InvokeMethod<object>("get_planet")
+                       ?? nativeUniverse.InvokeMethod<object>("GetPlanet");
             }
-            catch (Exception ex)
+            catch
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get Planet: {ex.Message}");
-                return null;
+                return null; // silent — planet not ready yet (early ticks)
             }
         }
         
@@ -220,7 +216,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(buildingKey))
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetBuildingType called with null/empty key");
+                Log.Warning($"{LogPrefix} GetBuildingType called with null/empty key");
                 return null;
             }
 
@@ -243,7 +239,7 @@ namespace PerAspera.GameAPI.Wrappers
 
                 if (buildingTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} BuildingType class not found in any assembly");
+                    Log.Error($"{LogPrefix} BuildingType class not found in any assembly");
                     return null;
                 }
 
@@ -259,7 +255,7 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
+                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
@@ -283,18 +279,18 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
+                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
                 if (table != null && table.Contains(buildingKey)) return table[buildingKey];
 
-                UnityEngine.Debug.LogWarning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
+                Log.Warning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
                 return null;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get BuildingType '{buildingKey}': {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to get BuildingType '{buildingKey}': {ex.Message}");
                 return null;
             }
         }
@@ -310,7 +306,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(personKey))
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetPerson called with null/empty key");
+                Log.Warning($"{LogPrefix} GetPerson called with null/empty key");
                 return null;
             }
 
@@ -333,7 +329,7 @@ namespace PerAspera.GameAPI.Wrappers
 
                 if (personTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} Person class not found in any assembly");
+                    Log.Error($"{LogPrefix} Person class not found in any assembly");
                     return null;
                 }
 
@@ -349,7 +345,7 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
+                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
@@ -373,18 +369,18 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
+                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
                 if (table != null && table.Contains(personKey)) return table[personKey];
 
-                UnityEngine.Debug.LogWarning($"{LogPrefix} Person not found for key: {personKey}");
+                Log.Warning($"{LogPrefix} Person not found for key: {personKey}");
                 return null;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get Person '{personKey}': {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to get Person '{personKey}': {ex.Message}");
                 return null;
             }
         }
@@ -400,7 +396,7 @@ namespace PerAspera.GameAPI.Wrappers
         {
             if (string.IsNullOrEmpty(technologyKey))
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetTechnologyType called with null/empty key");
+                Log.Warning($"{LogPrefix} GetTechnologyType called with null/empty key");
                 return null;
             }
 
@@ -423,7 +419,7 @@ namespace PerAspera.GameAPI.Wrappers
 
                 if (technologyTypeClass == null)
                 {
-                    UnityEngine.Debug.LogError($"{LogPrefix} TechnologyType class not found in any assembly");
+                    Log.Error($"{LogPrefix} TechnologyType class not found in any assembly");
                     return null;
                 }
 
@@ -439,7 +435,7 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Get method invoke failed: {ex.Message}");
+                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
                     }
                 }
 
@@ -463,18 +459,18 @@ namespace PerAspera.GameAPI.Wrappers
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogWarning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
+                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
                     }
                 }
 
                 if (table != null && table.Contains(technologyKey)) return table[technologyKey];
 
-                UnityEngine.Debug.LogWarning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
+                Log.Warning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
                 return null;
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get TechnologyType '{technologyKey}': {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to get TechnologyType '{technologyKey}': {ex.Message}");
                 return null;
             }
         }
@@ -499,7 +495,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to find handle: {ex.Message}");
+                Log.Error($"{LogPrefix} Failed to find handle: {ex.Message}");
                 return null;
             }
         }

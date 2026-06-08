@@ -46,6 +46,22 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>Planet name. Hardcoded to "Mars" for Per Aspera.</summary>
         public string Name => "Mars";
 
+        // ==================== TEMPERATURE ====================
+
+        /// <summary>
+        /// Global average surface temperature in Kelvin. 0°C = 273.15 K.
+        /// Corresponds to Planet.GetAverageTemperature() in native code.
+        /// </summary>
+        public float GetAverageTemperature()
+            => SafeInvoke<float>("GetAverageTemperature");
+
+        /// <summary>
+        /// Surface temperature at a specific geographic position in Kelvin.
+        /// Corresponds to Planet.GetTemperature(longitude, latitude) in native code.
+        /// </summary>
+        public float GetTemperatureAt(float longitude, float latitude)
+            => SafeInvoke<float>("GetTemperature", longitude, latitude);
+
         // ==================== DEPRECATED CLIMATE ====================
 
         /// <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
@@ -70,7 +86,22 @@ namespace PerAspera.GameAPI.Wrappers
         public float WaterStock
         {
             get => SafeInvoke<float?>("GetWaterStock") ?? SafeGetField<float>("waterStock");
-            set => SafeInvokeVoid("SetWaterStock", value);
+            set
+            {
+                // Try property setter first, fallback to field write
+                try { SafeInvokeVoid("set_waterStock", value); return; } catch { }
+                try { SafeSetField("waterStock", value); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// Add water to planet stock. Positive = add, negative = remove.
+        /// Safe: reads current stock before writing.
+        /// </summary>
+        public void AddWaterStock(float amount)
+        {
+            try { WaterStock = WaterStock + amount; }
+            catch (Exception ex) { WrapperLog.Warning($"AddWaterStock({amount}) failed: {ex.Message}"); }
         }
 
         public float SiliconStock => GetResourceStock("resource_silicon");
@@ -117,6 +148,20 @@ namespace PerAspera.GameAPI.Wrappers
                 return false;
             }
         }
+
+        // ==================== TERRAIN & WATER ELEVATION ====================
+
+        /// <summary>Raw terrain elevation at world position (metres, no water).</summary>
+        public float GetAltitude(UnityEngine.Vector2 position)
+            => SafeInvoke<float>("GetAltitude", position);
+
+        /// <summary>Elevation at world position, returning water surface when submerged.</summary>
+        public float GetAltitudeWithWater(UnityEngine.Vector2 position)
+            => SafeInvoke<float>("GetAltitudeWithWater", position);
+
+        /// <summary>Global ocean surface elevation — rises as terraforming progresses.</summary>
+        public float GetWaterLevel()
+            => SafeInvoke<float>("GetWaterLevel");
 
         // ==================== BUILDING MANAGEMENT ====================
 

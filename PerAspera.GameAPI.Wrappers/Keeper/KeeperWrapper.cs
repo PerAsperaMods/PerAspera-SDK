@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers
@@ -12,6 +13,7 @@ namespace PerAspera.GameAPI.Wrappers
     public class KeeperWrapper : WrapperBase
     {
         private static readonly string LogPrefix = "[KeeperWrapper]";
+        private static readonly LogAspera _log = new LogAspera("Keeper");
         private Keeper? _nativeKeeper;
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} Register failed: {ex.Message}");
+                _log.Warning($"{LogPrefix} Register failed: {ex.Message}");
                 return default;
             }
         }
@@ -141,7 +143,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} Unregister failed: {ex.Message}");
+                _log.Warning($"{LogPrefix} Unregister failed: {ex.Message}");
             }
         }
         
@@ -273,7 +275,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"{LogPrefix} GetDiagnostics failed: {ex.Message}");
+                _log.Error($"{LogPrefix} GetDiagnostics failed: {ex.Message}");
                 return new KeeperDiagnostics { IsInitialized = false };
             }
         }

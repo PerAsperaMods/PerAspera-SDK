@@ -325,7 +325,7 @@ namespace PerAspera.GameAPI.Wrappers
                 return SafeInvoke<object>("get_marsManager");
             }
         }
-        
+        public BaseGameReferencesWrapper? baseGameReferences => new BaseGameReferencesWrapper(SafeInvoke<object>("get_baseGameReferences"));
         /// <summary>
         /// Get input raycaster for UI interactions
         /// Maps to: inputRaycaster field
