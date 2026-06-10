@@ -1,22 +1,27 @@
-﻿using PerAspera.Core.IL2CPP;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+#nullable enable
 
 namespace PerAspera.GameAPI.Wrappers
 {
+    /// <summary>
+    /// Wrapper for the native GameEventBus class.
+    /// MIGRATION 2026-06-10 — interop typé (GameEventBus._keeper exposé par le proxy).
+    /// </summary>
     public class GameEventBusWrapper : WrapperBase
     {
-        public GameEventBusWrapper(object nativeBaseGame) : base(nativeBaseGame)
-        {
-        }
+        /// <summary>Wraps an untyped native event bus (compat). Prefer the typed overload.</summary>
+        public GameEventBusWrapper(object nativeEventBus) : base(nativeEventBus) { }
 
+        /// <summary>Wraps a typed interop GameEventBus proxy.</summary>
+        public GameEventBusWrapper(GameEventBus nativeEventBus) : base(nativeEventBus) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        public GameEventBus? NativeGameEventBus => GetNativeObject() as GameEventBus;
+
+        /// <summary>Keeper of this event bus (typed read of GameEventBus._keeper).</summary>
         public KeeperWrapper? GetKeeper()
         {
-            return new KeeperWrapper(NativeObject.GetFieldValue<Keeper>("_keeper")); //private Keeper _keeper;
+            var keeper = NativeGameEventBus?._keeper;
+            return keeper != null ? new KeeperWrapper(keeper) : null;
         }
     }
-    
 }

@@ -21,37 +21,32 @@ namespace PerAspera.GameAPI.Wrappers.UI
             _nativeType = nativePanel.GetType();
         }
 
-        /// <summary>Find BuildingScreenPanel instance in the current scene.</summary>
+        /// <summary>
+        /// Typed BuildingScreenPanel proxy when the wrapped panel is one.
+        /// </summary>
+        public BuildingScreenPanel? AsBuildingScreenPanel
+            => GetNativeObject() as BuildingScreenPanel;
+
+        /// <summary>Find BuildingScreenPanel instance in the current scene (typed check).</summary>
         public static UIPanelWrapper? FindBuildingScreenPanel()
         {
             try
             {
-                var panelType = ReflectionHelpers.FindType("BuildingScreenPanel");
-                if (panelType == null)
-                    return null;
-
-                // Search all GameObjects and check their components
                 var allObjects = UnityEngine.Object.FindObjectsOfType<UnityEngine.Behaviour>();
                 foreach (var behaviour in allObjects)
-                {
-                    if (behaviour != null && behaviour.GetType() == panelType)
+                    if (behaviour is BuildingScreenPanel)
                         return new UIPanelWrapper(behaviour);
-                }
-
                 return null;
             }
             catch { return null; }
         }
 
-        /// <summary>Get the upgradeNormalBackground sprite from the panel.</summary>
+        /// <summary>
+        /// Get the upgradeNormalBackground sprite from the panel
+        /// (typed read of BuildingScreenPanel.upgradeNormalBackground).
+        /// </summary>
         public Sprite? GetPanelBackgroundSprite()
-        {
-            try
-            {
-                return Utilities.GetMemberValue<Sprite>(GetNativeObject(), new[] { "upgradeNormalBackground" });
-            }
-            catch { return null; }
-        }
+            => AsBuildingScreenPanel?.upgradeNormalBackground;
 
         /// <summary>Get panel by name (e.g., "statusPanel", "upgradePanel").</summary>
         public object? GetPanelByName(string panelName)

@@ -1,260 +1,115 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using PerAspera.Core.IL2CPP;
 using UnityEngine;
 
 namespace PerAspera.GameAPI.Wrappers.Enhanced
 {
     /// <summary>
-    /// Wrapper for the abstract ABCBuilding base class
-    /// Provides safe access to building functionality and IHandleable implementation
-    /// DOC: ABCBuilding is the base class for all buildings, implements IHandleable
+    /// Wrapper for the abstract ABCBuilding base class.
+    ///
+    /// MIGRATION 2026-06-10 — interop typé d'abord. ABCBuilding natif n'expose QUE
+    /// handle/GetName/Dispose ; tous les membres riches (buildingType, health, faction…)
+    /// vivent sur la classe dérivée Building — l'ancien SafeInvoke ne marchait que parce
+    /// que la réflexion résolvait sur le type runtime. Le wrapper expose désormais les
+    /// deux niveaux typés : <see cref="NativeABCBuilding"/> et <see cref="AsBuilding"/>.
+    /// Fantômes corrigés : energyProduction/efficiency/get_transform n'existent pas
+    /// (GetPosition retournait TOUJOURS Vector3.zero).
     /// </summary>
     public class ABCBuildingWrapper : WrapperBase
     {
-        private static readonly string LogPrefix = "[ABCBuildingWrapper]";
-        
+        /// <summary>Wraps an untyped native building (compat). Prefer the typed overload.</summary>
+        public ABCBuildingWrapper(object nativeBuilding) : base(nativeBuilding) { }
+
+        /// <summary>Wraps a typed interop ABCBuilding proxy.</summary>
+        public ABCBuildingWrapper(ABCBuilding nativeBuilding) : base(nativeBuilding) { }
+
+        /// <summary>Typed ABCBuilding proxy (null when the wrapper is invalid).</summary>
+        public ABCBuilding? NativeABCBuilding => GetNativeObject() as ABCBuilding;
+
         /// <summary>
-        /// Initialize ABCBuildingWrapper with native ABCBuilding instance
+        /// Typed Building proxy when the wrapped object is a concrete Building
+        /// (null pour les autres dérivés d'ABCBuilding).
         /// </summary>
-        /// <param name="nativeBuilding">Native ABCBuilding instance from game</param>
-        public ABCBuildingWrapper(object nativeBuilding) : base(nativeBuilding)
-        {
-        }
-        
-        /// <summary>
-        /// Create wrapper from native building object
-        /// </summary>
+        /// <example>float hp = abc.AsBuilding?._health ?? 0f;</example>
+        public Building? AsBuilding => GetNativeObject() as Building;
+
+        /// <summary>Create wrapper from native building object.</summary>
         public static ABCBuildingWrapper? FromNative(object? nativeBuilding)
-        {
-            return nativeBuilding != null ? new ABCBuildingWrapper(nativeBuilding) : null;
-        }
-        
+            => nativeBuilding != null ? new ABCBuildingWrapper(nativeBuilding) : null;
+
         // ==================== IHANDLEABLE IMPLEMENTATION ====================
-        
+
         /// <summary>
-        /// Get the Handle for this building (IHandleable.GetHandle())
-        /// Essential for Keeper system integration
+        /// Get the Handle for this building (typed read of ABCBuilding.handle).
+        /// Essential for Keeper system integration.
         /// </summary>
-        /// <returns>Handle object for Keeper lookup</returns>
-        public object? GetHandle()
-        {
-            try
-            {
-                return SafeInvoke<object>("GetHandle");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get handle: {ex.Message}");
-                return null;
-            }
-        }
-        
-        /// <summary>
-        /// Check if this building is registered in the Keeper system
-        /// </summary>
-        /// <returns>True if building has a valid handle and is registered</returns>
+        public Handle? GetHandle() => NativeABCBuilding?.handle;
+
+        /// <summary>Check if this building is registered in the Keeper system.</summary>
         public bool IsRegistered()
         {
             var handle = GetHandle();
             if (handle == null) return false;
-            
-            // Use KeeperTypeRegistry to verify registration
             return KeeperTypeRegistry.GetByHandle(handle) != null;
         }
-        
+
+        /// <summary>Native display name (typed call to ABCBuilding.GetName()).</summary>
+        public string GetName() => NativeABCBuilding?.GetName() ?? "Unknown";
+
         // ==================== CORE BUILDING PROPERTIES ====================
-        
-        /// <summary>
-        /// Get building type definition
-        /// Maps to: buildingType property
-        /// </summary>
+
+        /// <summary>Building type definition (typed via Building.buildingType).</summary>
         public BuildingTypeWrapper? GetBuildingType()
-        {
-            try
-            {
-                var nativeBuildingType = SafeInvoke<object>("get_buildingType");
-                return nativeBuildingType != null ? new BuildingTypeWrapper(nativeBuildingType) : null;
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get building type: {ex.Message}");
-                return null;
-            }
-        }
-        
+            => BuildingTypeWrapper.FromNative(AsBuilding?.buildingType);
+
         /// <summary>
-        /// Get building position in world space
-        /// Maps to: transform.position or position property
+        /// Building position in world space (typed via Building.position, Vector2 → Vector3).
+        /// (L'ancienne implémentation visait get_position en Vector3 puis get_transform —
+        /// les deux échouaient : retournait TOUJOURS Vector3.zero.)
         /// </summary>
         public Vector3 GetPosition()
         {
-            try
-            {
-                // Try position property first
-                var position = SafeInvoke<Vector3>("get_position");
-                if (position != Vector3.zero) return position;
-                
-                // Fallback to transform.position
-                var transform = SafeInvoke<Transform>("get_transform");
-                return transform?.position ?? Vector3.zero;
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get position: {ex.Message}");
-                return Vector3.zero;
-            }
+            var b = AsBuilding;
+            if (b == null) return Vector3.zero;
+            var pos = b.position;
+            return new Vector3(pos.x, pos.y, 0f);
         }
-        
-        /// <summary>
-        /// Get building's energy production rate
-        /// Maps to: energyProduction property
-        /// </summary>
-        public float GetEnergyProduction()
-        {
-            try
-            {
-                return SafeInvoke<float>("get_energyProduction");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get energy production: {ex.Message}");
-                return 0f;
-            }
-        }
-        
-        /// <summary>
-        /// Get building's health/condition
-        /// Maps to: health property
-        /// </summary>
-        public float GetHealth()
-        {
-            try
-            {
-                return SafeInvoke<float>("get_health");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get health: {ex.Message}");
-                return 0f;
-            }
-        }
-        
-        /// <summary>
-        /// Check if building is operational/functioning
-        /// Maps to: IsOperational() or operational property
-        /// </summary>
-        public bool IsOperational()
-        {
-            try
-            {
-                // Try method first
-                var result = SafeInvoke<bool>("IsOperational");
-                if (result) return true;
-                
-                // Fallback to property
-                return SafeInvoke<bool>("get_operational");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to check operational status: {ex.Message}");
-                return false;
-            }
-        }
-        
-        /// <summary>
-        /// Check if building construction is complete
-        /// Maps to: IsBuilt property or method
-        /// </summary>
-        public bool IsBuilt()
-        {
-            try
-            {
-                // Try property first
-                var built = SafeInvoke<bool>("get_IsBuilt");
-                if (built) return true;
-                
-                // Try method
-                return SafeInvoke<bool>("IsBuilt");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to check built status: {ex.Message}");
-                return false;
-            }
-        }
-        
+
+        /// <summary>N'a jamais existé — Building n'a pas d'energyProduction scalaire.</summary>
+        [Obsolete("Building.energyProduction n'existe pas — retournait toujours 0. La production max vient du BuildingType (BaseEnergyOutput) ; l'état runtime via Building.powerEfficiency (ProductivityBuffer).", false)]
+        public float GetEnergyProduction() => 0f;
+
+        /// <summary>Building health (typed read of Building._health).</summary>
+        public float GetHealth() => AsBuilding?._health ?? 0f;
+
+        /// <summary>Building operational state (typed read of Building._activated).</summary>
+        public bool IsOperational() => AsBuilding?._activated ?? false;
+
+        /// <summary>Construction complete (typed read of Building._built).</summary>
+        public bool IsBuilt() => AsBuilding?._built ?? false;
+
         // ==================== ADVANCED BUILDING OPERATIONS ====================
-        
+
+        /// <summary>Work progress (typed read of Building.workProgress).</summary>
+        public float GetWorkProgress() => AsBuilding?.workProgress ?? 0f;
+
         /// <summary>
-        /// Get building's work progress (0-100%)
-        /// Maps to: workProgress property
-        /// </summary>
-        public float GetWorkProgress()
-        {
-            try
-            {
-                return SafeInvoke<float>("get_workProgress");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get work progress: {ex.Message}");
-                return 0f;
-            }
-        }
-        
-        /// <summary>
-        /// Get building efficiency rating (0-1.0)
-        /// Calculated from health, operational status, and environment factors
+        /// Building efficiency estimate (0-1.0), from health and operational state.
+        /// (« efficiency » n'existe pas en float natif — calcul wrapper assumé.)
         /// </summary>
         public float GetEfficiency()
         {
-            try
-            {
-                var efficiency = SafeInvoke<float>("get_efficiency");
-                if (efficiency > 0) return efficiency;
-                
-                // Calculate basic efficiency from health and operational status
-                if (!IsOperational() || !IsBuilt()) return 0f;
-                
-                var health = GetHealth();
-                return Mathf.Clamp01(health / 100f); // Normalize health to 0-1
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get efficiency: {ex.Message}");
-                return 0f;
-            }
+            if (!IsOperational() || !IsBuilt()) return 0f;
+            return Mathf.Clamp01(GetHealth());
         }
-        
-        /// <summary>
-        /// Get the faction/owner of this building
-        /// Maps to: faction or owner property
-        /// </summary>
+
+        /// <summary>Faction owning this building (typed via Building.faction).</summary>
         public FactionWrapper? GetOwner()
-        {
-            try
-            {
-                var nativeFaction = SafeInvoke<object>("get_faction");
-                if (nativeFaction == null)
-                    nativeFaction = SafeInvoke<object>("get_owner");
-                    
-                return nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to get owner: {ex.Message}");
-                return null;
-            }
-        }
-        
+            => FactionWrapper.FromNative(AsBuilding?.faction);
+
         // ==================== UTILITY METHODS ====================
-        
-        /// <summary>
-        /// Get comprehensive building information for debugging/monitoring
-        /// </summary>
+
+        /// <summary>Comprehensive building information for debugging/monitoring.</summary>
         public BuildingInfo GetBuildingInfo()
         {
             return new BuildingInfo
@@ -262,7 +117,6 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
                 Handle = GetHandle(),
                 BuildingType = GetBuildingType()?.Name ?? "Unknown",
                 Position = GetPosition(),
-                EnergyProduction = GetEnergyProduction(),
                 Health = GetHealth(),
                 IsOperational = IsOperational(),
                 IsBuilt = IsBuilt(),
@@ -272,86 +126,97 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
                 LastUpdated = DateTime.Now
             };
         }
-        
-        /// <summary>
-        /// Get building name/identifier for display
-        /// </summary>
+
+        /// <summary>Building name/identifier for display.</summary>
         public string GetDisplayName()
         {
             var buildingType = GetBuildingType();
-            return buildingType?.GetDisplayName() ?? GetType().Name;
+            return buildingType?.GetDisplayName() ?? GetName();
         }
-        
-        /// <summary>
-        /// Check if this building matches a specific building type
-        /// </summary>
-        /// <param name="buildingTypeName">Building type name to check</param>
-        /// <returns>True if building matches the type</returns>
+
+        /// <summary>Check if this building matches a specific building type key.</summary>
         public bool IsOfType(string buildingTypeName)
         {
             var buildingType = GetBuildingType();
             return buildingType?.Name?.Equals(buildingTypeName, StringComparison.OrdinalIgnoreCase) ?? false;
         }
-        
-        /// <summary>
-        /// Perform validation checks on the building
-        /// </summary>
+
+        /// <summary>Perform validation checks on the building.</summary>
         public BuildingValidation Validate()
         {
             var validation = new BuildingValidation();
-            
+
             validation.IsValid = IsValid;
             validation.HasHandle = GetHandle() != null;
             validation.IsRegistered = IsRegistered();
             validation.IsBuilt = IsBuilt();
             validation.IsOperational = IsOperational();
             validation.HasValidType = GetBuildingType() != null;
-            validation.HealthOK = GetHealth() > 10f; // Arbitrary threshold
-            
-            validation.OverallStatus = validation.IsValid && validation.HasHandle && 
+            validation.HealthOK = GetHealth() > 0.1f;
+
+            validation.OverallStatus = validation.IsValid && validation.HasHandle &&
                                      validation.IsRegistered && validation.IsBuilt;
-                                     
+
             return validation;
         }
     }
-    
+
     /// <summary>
     /// Comprehensive building information for monitoring and debugging
     /// </summary>
     public struct BuildingInfo
     {
+        /// <summary>Native Keeper handle.</summary>
         public object? Handle { get; set; }
+        /// <summary>Building type key.</summary>
         public string BuildingType { get; set; }
+        /// <summary>World position.</summary>
         public Vector3 Position { get; set; }
-        public float EnergyProduction { get; set; }
+        /// <summary>Health (0-1).</summary>
         public float Health { get; set; }
+        /// <summary>Operational state.</summary>
         public bool IsOperational { get; set; }
+        /// <summary>Construction complete.</summary>
         public bool IsBuilt { get; set; }
+        /// <summary>Work progress.</summary>
         public float WorkProgress { get; set; }
+        /// <summary>Efficiency estimate (0-1).</summary>
         public float Efficiency { get; set; }
+        /// <summary>Owning faction name.</summary>
         public string Owner { get; set; }
+        /// <summary>Snapshot timestamp.</summary>
         public DateTime LastUpdated { get; set; }
-        
+
+        /// <summary>Human-readable summary.</summary>
         public override string ToString()
         {
-            return $"{BuildingType} at {Position} (Health: {Health:F1}%, Efficiency: {Efficiency:P})";
+            return $"{BuildingType} at {Position} (Health: {Health:F2}, Efficiency: {Efficiency:P})";
         }
     }
-    
+
     /// <summary>
     /// Building validation results for health checking
     /// </summary>
     public struct BuildingValidation
     {
+        /// <summary>Wrapper validity.</summary>
         public bool IsValid { get; set; }
+        /// <summary>Has a Keeper handle.</summary>
         public bool HasHandle { get; set; }
+        /// <summary>Registered in Keeper.</summary>
         public bool IsRegistered { get; set; }
+        /// <summary>Construction complete.</summary>
         public bool IsBuilt { get; set; }
+        /// <summary>Operational state.</summary>
         public bool IsOperational { get; set; }
+        /// <summary>Building type resolved.</summary>
         public bool HasValidType { get; set; }
+        /// <summary>Health above threshold.</summary>
         public bool HealthOK { get; set; }
+        /// <summary>Overall validation status.</summary>
         public bool OverallStatus { get; set; }
-        
+
+        /// <summary>Human-readable summary.</summary>
         public override string ToString()
         {
             return $"Valid: {OverallStatus} (Handle: {HasHandle}, Registered: {IsRegistered}, Built: {IsBuilt}, Operational: {IsOperational})";

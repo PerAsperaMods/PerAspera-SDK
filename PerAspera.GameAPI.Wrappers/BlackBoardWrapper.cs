@@ -1,299 +1,167 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
-using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Native;
-
-#nullable enable
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for the native Blackboard class (variable storage system)
-    /// Provides safe access to Blackboard variables used for quest/dialog state management
-    /// DOC: Blackboard.md - Variable storage with string/float/bool values
+    /// Wrapper for the native Blackboard class (variable storage system).
+    /// Provides safe access to Blackboard variables used for quest/dialog state management.
+    ///
+    /// MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="global::Blackboard"/>.
+    /// Vérifié contre Tools\InteropDump\ScriptsAssembly\Blackboard.cs — tous les membres
+    /// existent typés, y compris TryGetValue(out Value) et DefaultSet&lt;T&gt;.
+    ///
+    /// Rappel scope : les règles YAML MISSION lisent Universe.blackboardMain (« main.X »),
+    /// pas le blackboard de faction — voir /per-aspera-wrappers-sdk.
     /// </summary>
     public class BlackBoardWrapper : WrapperBase
     {
+        /// <summary>Wraps an untyped native blackboard (compat). Prefer the typed overload.</summary>
+        public BlackBoardWrapper(object nativeBlackBoard) : base(nativeBlackBoard) { }
+
+        /// <summary>Wraps a typed interop Blackboard proxy.</summary>
+        public BlackBoardWrapper(Blackboard nativeBlackBoard) : base(nativeBlackBoard) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>bb.NativeBlackboard?.SetValue("flag", true);</example>
+        public Blackboard? NativeBlackboard => base.GetNativeObject() as Blackboard;
+
         /// <summary>
-        /// Creates a new BlackBoard wrapper around a native blackboard instance
+        /// Get the native blackboard object (safely typed).
+        /// Conservé pour compatibilité — équivalent à <see cref="NativeBlackboard"/>.
         /// </summary>
-        /// <param name="nativeBlackBoard">Native blackboard object to wrap</param>
-        public BlackBoardWrapper(object nativeBlackBoard) : base(nativeBlackBoard)
-        {
-            NativeObject= nativeBlackBoard;
-        }
-        
-        /// <summary>
-        /// Get the native blackboard object (safely typed)
-        /// </summary>
-        public Blackboard? GetNativeObject()
-        {
-            return NativeObject as Blackboard;
-        }
-        /// <summary>
-        /// Get the name of this blackboard instance
-        /// Field: name (readonly string)
-        /// </summary>
-        public string? Name => SafeGetField<string>("name");
-        
+        public new Blackboard? GetNativeObject() => NativeBlackboard;
+
+        /// <summary>Name of this blackboard instance (typed read of Blackboard.name).</summary>
+        public string? Name => NativeBlackboard?.name;
+
         // ==================== VALUE ACCESS METHODS ====================
-        
+
         /// <summary>
-        /// Try to get a value from the blackboard
-        /// Method: TryGetValue(string variableName, out Value value)
+        /// Try to get a value from the blackboard (typed call with out parameter).
+        /// ⚠️ L'ancienne version passait par MakeGenericMethod/Invoke — le paramètre out
+        /// ne remontait pas correctement à travers la réflexion IL2CPP.
         /// </summary>
+        /// <example>if (bb.TryGetValue("mon_flag", out var v)) { ... }</example>
         public bool TryGetValue(string variableName, out object? value)
         {
             value = null;
-            if (!ValidateNativeObject(nameof(TryGetValue)))
-                return false;
-                
-            try
-            {
-                // Use reflection to call TryGetValue with out parameter
-                var method = NativeObject?.GetType().GetMethod("TryGetValue");
-                if (method == null) return false;
-                
-                var parameters = new object?[] { variableName, null };
-                var result = (bool)(method.Invoke(NativeObject, parameters) ?? false);
-                value = parameters[1]; // out parameter value
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to TryGetValue for {variableName} on BlackBoard: {ex.Message}");
-                return false;
-            }
+            var bb = NativeBlackboard;
+            if (bb == null) return false;
+            var found = bb.TryGetValue(variableName, out var nativeValue);
+            if (found) value = nativeValue;
+            return found;
         }
-        
-        /// <summary>
-        /// Get a value from the blackboard
-        /// Method: GetValue(string variableName)
-        /// Returns: Value (native Yarn.Value type)
-        /// </summary>
+
+        /// <summary>Get a value from the blackboard (typed — returns the native Value).</summary>
         public object? GetValue(string variableName)
-        {
-            return SafeInvoke<object>("GetValue", variableName);
-        }
-        
-        /// <summary>
-        /// Check if the blackboard contains a specific key
-        /// Method: ContainsKey(string variableName)
-        /// </summary>
+            => NativeBlackboard?.GetValue(variableName);
+
+        /// <summary>Check if the blackboard contains a specific key (typed).</summary>
         public bool ContainsKey(string variableName)
-        {
-            return SafeInvoke<bool>("ContainsKey", variableName);
-        }
-        
+            => NativeBlackboard?.ContainsKey(variableName) ?? false;
+
         // ==================== VALUE SETTING METHODS ====================
-        
-        /// <summary>
-        /// Set a string value in the blackboard
-        /// Method: SetValue(string variableName, string stringValue)
-        /// </summary>
+
+        /// <summary>Set a string value (typed Blackboard.SetValue overload).</summary>
+        /// <example>bb.SetValue("mon_texte", "bonjour");</example>
         public void SetValue(string variableName, string stringValue)
-        {
-            SafeInvokeVoid("SetValue", variableName, stringValue);
-        }
-        
-        /// <summary>
-        /// Set a float value in the blackboard
-        /// Method: SetValue(string variableName, float floatValue)
-        /// </summary>
+            => NativeBlackboard?.SetValue(variableName, stringValue);
+
+        /// <summary>Set a float value (typed Blackboard.SetValue overload).</summary>
+        /// <example>bb.SetValue("mon_compteur", 42f);</example>
         public void SetValue(string variableName, float floatValue)
-        {
-            SafeInvokeVoid("SetValue", variableName, floatValue);
-        }
-        
-        /// <summary>
-        /// Set a boolean value in the blackboard
-        /// Method: SetValue(string variableName, bool boolValue)
-        /// </summary>
+            => NativeBlackboard?.SetValue(variableName, floatValue);
+
+        /// <summary>Set a boolean value (typed Blackboard.SetValue overload).</summary>
+        /// <example>bb.SetValue("mon_flag", true);</example>
         public void SetValue(string variableName, bool boolValue)
-        {
-            SafeInvokeVoid("SetValue", variableName, boolValue);
-        }
-        
-        /// <summary>
-        /// Set a number value using the legacy SetNumber method
-        /// Method: SetNumber(string variableName, float number)
-        /// Note: Marked as obsolete in native code but still functional
-        /// </summary>
+            => NativeBlackboard?.SetValue(variableName, boolValue);
+
+        /// <summary>Set a number value via the legacy native SetNumber (typed).</summary>
         public void SetNumber(string variableName, float number)
-        {
-            SafeInvokeVoid("SetNumber", variableName, number);
-        }
-        
-        /// <summary>
-        /// Get a number value using the legacy GetNumber method
-        /// Method: GetNumber(string variableName)
-        /// Note: Marked as obsolete in native code but still functional
-        /// </summary>
+            => NativeBlackboard?.SetNumber(variableName, number);
+
+        /// <summary>Get a number value via the legacy native GetNumber (typed).</summary>
         public float GetNumber(string variableName)
-        {
-            return SafeInvoke<float>("GetNumber", variableName);
-        }
-        
+            => NativeBlackboard?.GetNumber(variableName) ?? 0f;
+
         // ==================== COLLECTION METHODS ====================
-        
-        /// <summary>
-        /// Get all variable keys in this blackboard
-        /// Method: GetKeys()
-        /// Returns: List&lt;string&gt; of variable names
-        /// </summary>
-        public IList<string>? GetKeys()
+
+        /// <summary>All variable keys in this blackboard (typed read).</summary>
+        public IList<string> GetKeys()
         {
-            var nativeList = SafeInvoke<object>("GetKeys");
-            if (nativeList == null) return null;
-            
-            try
-            {
-                // Convert IL2CPP List<string> to managed IList<string>
-                return nativeList.ConvertIl2CppList<string>();
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to convert GetKeys result: {ex.Message}");
-                return null;
-            }
+            var result = new List<string>();
+            var keys = NativeBlackboard?.GetKeys();
+            if (keys == null) return result;
+            foreach (var k in keys) result.Add(k);
+            return result;
         }
-        
-        /// <summary>
-        /// Get all dynamic variable keys in this blackboard
-        /// Method: GetDynamicKeys()
-        /// Returns: List&lt;string&gt; of dynamic variable names
-        /// </summary>
-        public IList<string>? GetDynamicKeys()
+
+        /// <summary>All dynamic variable keys in this blackboard (typed read).</summary>
+        public IList<string> GetDynamicKeys()
         {
-            var nativeList = SafeInvoke<object>("GetDynamicKeys");
-            if (nativeList == null) return null;
-            
-            try
-            {
-                // Convert IL2CPP List<string> to managed IList<string>
-                return nativeList.ConvertIl2CppList<string>();
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to convert GetDynamicKeys result: {ex.Message}");
-                return null;
-            }
+            var result = new List<string>();
+            var keys = NativeBlackboard?.GetDynamicKeys();
+            if (keys == null) return result;
+            foreach (var k in keys) result.Add(k);
+            return result;
         }
-        
+
         // ==================== UTILITY METHODS ====================
-        
-        /// <summary>
-        /// Increment a numeric variable by the specified amount
-        /// Method: Increment(string variableName, float amount)
-        /// </summary>
+
+        /// <summary>Increment a numeric variable by the specified amount (typed).</summary>
         public void Increment(string variableName, float amount)
-        {
-            SafeInvokeVoid("Increment", variableName, amount);
-        }
-        
-        /// <summary>
-        /// Clear all variables from this blackboard
-        /// Method: Clear()
-        /// </summary>
-        public void Clear()
-        {
-            SafeInvokeVoid("Clear");
-        }
-        
-        /// <summary>
-        /// Set a default value for a variable if it doesn't exist
-        /// Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-        /// Note: Generic method, requires special handling
-        /// </summary>
+            => NativeBlackboard?.Increment(variableName, amount);
+
+        /// <summary>Clear all variables from this blackboard (typed).</summary>
+        public void Clear() => NativeBlackboard?.Clear();
+
+        /// <summary>Set a default string value if the variable doesn't exist (typed generic).</summary>
         public void DefaultSetString(string variableName, string defaultValue)
-        {
-            try
-            {
-                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(string));
-                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to DefaultSetString for {variableName}: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Set a default numeric value for a variable if it doesn't exist
-        /// Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-        /// </summary>
+            => NativeBlackboard?.DefaultSet(variableName, defaultValue);
+
+        /// <summary>Set a default float value if the variable doesn't exist (typed generic).</summary>
         public void DefaultSetFloat(string variableName, float defaultValue)
-        {
-            try
-            {
-                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(float));
-                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to DefaultSetFloat for {variableName}: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Set a default boolean value for a variable if it doesn't exist
-        /// Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-        /// </summary>
+            => NativeBlackboard?.DefaultSet(variableName, defaultValue);
+
+        /// <summary>Set a default bool value if the variable doesn't exist (typed generic).</summary>
         public void DefaultSetBool(string variableName, bool defaultValue)
-        {
-            try
-            {
-                var method = NativeObject?.GetType().GetMethod("DefaultSet")?.MakeGenericMethod(typeof(bool));
-                method?.Invoke(NativeObject, new object[] { variableName, defaultValue });
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Failed to DefaultSetBool for {variableName}: {ex.Message}");
-            }
-        }
-        
+            => NativeBlackboard?.DefaultSet(variableName, defaultValue);
+
         // ==================== DEBUGGING & INFO ====================
-        
-        /// <summary>
-        /// Get a debug-friendly string representation of this blackboard
-        /// </summary>
+
+        /// <summary>Debug-friendly string representation of this blackboard.</summary>
         public override string ToString()
         {
             var name = Name ?? "Unknown";
-            var keyCount = GetKeys()?.Count ?? 0;
-            var dynamicKeyCount = GetDynamicKeys()?.Count ?? 0;
-            
+            var keyCount = GetKeys().Count;
+            var dynamicKeyCount = GetDynamicKeys().Count;
             return $"BlackBoard [{name}]: {keyCount} variables, {dynamicKeyCount} dynamic";
         }
-        
-        /// <summary>
-        /// Get detailed debug information about this blackboard
-        /// </summary>
+
+        /// <summary>Detailed debug information about this blackboard.</summary>
         public string GetDebugInfo()
         {
             var info = $"BlackBoard '{Name ?? "Unknown"}':\n";
-            
+
             var keys = GetKeys();
-            if (keys != null && keys.Count > 0)
+            if (keys.Count > 0)
             {
                 info += "  Variables:\n";
                 foreach (var key in keys)
-                {
-                    var value = GetValue(key);
-                    info += $"    {key} = {value}\n";
-                }
+                    info += $"    {key} = {GetValue(key)}\n";
             }
-            
+
             var dynamicKeys = GetDynamicKeys();
-            if (dynamicKeys != null && dynamicKeys.Count > 0)
+            if (dynamicKeys.Count > 0)
             {
                 info += "  Dynamic Variables:\n";
                 foreach (var key in dynamicKeys)
-                {
                     info += $"    {key} (dynamic)\n";
-                }
             }
-            
+
             return info;
         }
     }

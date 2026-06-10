@@ -1,58 +1,43 @@
-using System;
+#nullable enable
 using PerAspera.Core;
-using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for a single SpecialSite instance from the game
-    /// Provides safe, type-safe access to SpecialSite properties
+    /// Wrapper for a single SpecialSite instance from the game.
+    /// MIGRATION 2026-06-10 — interop typé (GetName/geoPosition exposés par le proxy).
     ///
-    /// Properties:
-    /// - Name: Site display name (String)
-    /// - Coordinates: Latitude, Longitude
-    ///
-    /// Example:
+    /// geoPosition.x = longitude, geoPosition.y = latitude (convention YAML).
+    /// </summary>
+    /// <example>
     /// var site = new SpecialSiteInstanceWrapper(nativeSite);
     /// var name = site.Name;
     /// var lat = site.CenterLatitude;
-    /// </summary>
+    /// </example>
     public class SpecialSiteInstanceWrapper : WrapperBase
     {
         private static readonly LogAspera Log = new LogAspera("SpecialSiteInstanceWrapper");
 
-        public SpecialSiteInstanceWrapper(object native) : base(native)
-        {
-        }
+        /// <summary>Wraps an untyped native site (compat). Prefer the typed overload.</summary>
+        public SpecialSiteInstanceWrapper(object native) : base(native) { }
 
-        /// <summary>
-        /// Create wrapper from native SpecialSite instance
-        /// </summary>
+        /// <summary>Wraps a typed interop SpecialSite proxy.</summary>
+        public SpecialSiteInstanceWrapper(SpecialSite native) : base(native) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        public SpecialSite? NativeSpecialSite => GetNativeObject() as SpecialSite;
+
+        /// <summary>Create wrapper from native SpecialSite instance.</summary>
         public static SpecialSiteInstanceWrapper? FromNative(object? native)
-        {
-            return native != null ? new SpecialSiteInstanceWrapper(native) : null;
-        }
+            => native != null ? new SpecialSiteInstanceWrapper(native) : null;
 
-        // AUTO-GENERATED SHELL ABOVE - DO NOT EDIT ABOVE THIS LINE
-        // MANUAL ADDITIONS BELOW THIS LINE WILL BE PRESERVED
+        /// <summary>Site display name (typed call to SpecialSite.GetName(researched: true)).</summary>
+        public string? Name => NativeSpecialSite?.GetName(true);
 
-        /// <summary>Site display name via GetName(bool researched)</summary>
-        public string? Name => SafeInvoke<string>("GetName", true);
+        /// <summary>Site center latitude (typed read of geoPosition.y).</summary>
+        public float? CenterLatitude => NativeSpecialSite?.geoPosition.y;
 
-        /// <summary>
-        /// geoPosition.x = longitude, geoPosition.y = latitude (from YAML: x=longitude, y=latitude)
-        /// </summary>
-        private UnityEngine.Vector2? GetGeoPosition()
-        {
-            try { return SafeInvoke<UnityEngine.Vector2>("get_geoPosition"); }
-            catch { return null; }
-        }
-
-        /// <summary>Site center latitude (geoPosition.y)</summary>
-        public float? CenterLatitude => GetGeoPosition()?.y;
-
-        /// <summary>Site center longitude (geoPosition.x)</summary>
-        public float? CenterLongitude => GetGeoPosition()?.x;
+        /// <summary>Site center longitude (typed read of geoPosition.x).</summary>
+        public float? CenterLongitude => NativeSpecialSite?.geoPosition.x;
     }
 }

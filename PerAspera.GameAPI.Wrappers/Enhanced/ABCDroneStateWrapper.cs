@@ -1,145 +1,68 @@
 #nullable enable
 using System;
-using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers.Enhanced
 {
     /// <summary>
-    /// Wrapper for the abstract ABCDroneState class
-    /// Provides safe access to drone state machine functionality
-    /// DOC: F:\ModPeraspera\Internal_doc\Decompiled_ILcpp2_Class\ABCDroneState.cs
+    /// Wrapper for the abstract ABCDroneState class (drone FSM state).
+    /// MIGRATION 2026-06-10 — interop typé : Enter/Exit/OnTick/OnFeed/DebugDetailedInfo
+    /// délèguent au proxy. OnFeed est désormais correctement typé
+    /// (Drone.InputEvent → Drone.StateID) au lieu d'object→object.
+    ///
+    /// Skill: /per-aspera-drone-routing (FSM, transitions, StateID).
     /// </summary>
     public class ABCDroneStateWrapper : WrapperBase
     {
-        private static readonly string LogPrefix = "[ABCDroneStateWrapper]";
-        
-        /// <summary>
-        /// Initialize ABCDroneStateWrapper with native ABCDroneState instance
-        /// </summary>
-        /// <param name="nativeDroneState">Native ABCDroneState from drone state machine</param>
-        public ABCDroneStateWrapper(object nativeDroneState) : base(nativeDroneState)
-        {
-        }
-        
-        /// <summary>
-        /// Create wrapper from native drone state object
-        /// </summary>
+        /// <summary>Wraps an untyped native drone state (compat). Prefer the typed overload.</summary>
+        public ABCDroneStateWrapper(object nativeDroneState) : base(nativeDroneState) { }
+
+        /// <summary>Wraps a typed interop ABCDroneState proxy.</summary>
+        public ABCDroneStateWrapper(ABCDroneState nativeDroneState) : base(nativeDroneState) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        public ABCDroneState? NativeDroneState => GetNativeObject() as ABCDroneState;
+
+        /// <summary>Create wrapper from native drone state object.</summary>
         public static ABCDroneStateWrapper? FromNative(object? nativeDroneState)
-        {
-            return nativeDroneState != null ? new ABCDroneStateWrapper(nativeDroneState) : null;
-        }
-        
+            => nativeDroneState != null ? new ABCDroneStateWrapper(nativeDroneState) : null;
+
         // ==================== STATE MACHINE METHODS ====================
-        
-        /// <summary>
-        /// Enter the drone state
-        /// Maps to: ABCDroneState.Enter() - virtual void method
-        /// </summary>
-        public void Enter()
-        {
-            try
-            {
-                SafeInvoke<object>("Enter");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to enter state: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Exit the drone state  
-        /// Maps to: ABCDroneState.Exit() - virtual void method
-        /// </summary>
-        public void Exit()
-        {
-            try
-            {
-                SafeInvoke<object>("Exit");
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to exit state: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Tick the drone state with delta time
-        /// Maps to: ABCDroneState.OnTick(float deltaDays) - abstract method
-        /// </summary>
+
+        /// <summary>Enter the drone state (typed call to ABCDroneState.Enter()).</summary>
+        public void Enter() => NativeDroneState?.Enter();
+
+        /// <summary>Exit the drone state (typed call to ABCDroneState.Exit()).</summary>
+        public void Exit() => NativeDroneState?.Exit();
+
+        /// <summary>Tick the drone state (typed call to ABCDroneState.OnTick(deltaDays)).</summary>
         /// <param name="deltaDays">Time delta in game days</param>
-        public void OnTick(float deltaDays)
-        {
-            try
-            {
-                SafeInvoke<object>("OnTick", deltaDays);
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to tick state: {ex.Message}");
-            }
-        }
-        
+        public void OnTick(float deltaDays) => NativeDroneState?.OnTick(deltaDays);
+
         /// <summary>
-        /// Feed input to the drone state machine
-        /// Maps to: ABCDroneState.OnFeed(InputEvent input) - abstract method
-        /// Returns: StateID for next state transition
+        /// Feed input to the drone state machine (typed call to ABCDroneState.OnFeed).
         /// </summary>
-        /// <param name="inputEvent">Input event for state machine</param>
-        /// <returns>StateID enum value or null if error</returns>
-        public object? OnFeed(object inputEvent)
-        {
-            try
-            {
-                return SafeInvoke<object>("OnFeed", inputEvent);
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogError($"{LogPrefix} Failed to feed input: {ex.Message}");
-                return null;
-            }
-        }
-        
-        /// <summary>
-        /// Get detailed debug information for this state
-        /// Maps to: ABCDroneState.DebugDetailedInfo() - abstract method
-        /// </summary>
-        /// <returns>Debug string information</returns>
+        /// <param name="input">Input event for the FSM</param>
+        /// <returns>StateID for the next state transition, or null when invalid</returns>
+        /// <example>var next = state.OnFeed(Drone.InputEvent.ARRIVED);</example>
+        public Drone.StateID? OnFeed(Drone.InputEvent input)
+            => NativeDroneState?.OnFeed(input);
+
+        /// <summary>Detailed debug information (typed call to DebugDetailedInfo()).</summary>
         public string GetDebugInfo()
-        {
-            try
-            {
-                return SafeInvoke<string>("DebugDetailedInfo") ?? "No debug info available";
-            }
-            catch (Exception ex)
-            {
-                return $"Error getting debug info: {ex.Message}";
-            }
-        }
-        
+            => NativeDroneState?.DebugDetailedInfo() ?? "No debug info available";
+
         // ==================== UTILITY METHODS ====================
-        
-        /// <summary>
-        /// Get the type name of this drone state
-        /// </summary>
+
+        /// <summary>Type name of this drone state (e.g., DroneStateMoving).</summary>
         public string GetStateTypeName()
-        {
-            return NativeObject?.GetType().Name ?? "Unknown";
-        }
-        
-        /// <summary>
-        /// Check if this is a specific state type
-        /// </summary>
+            => GetNativeObject()?.GetType().Name ?? "Unknown";
+
+        /// <summary>Check if this is a specific state type.</summary>
         /// <param name="expectedTypeName">Expected state type name</param>
-        /// <returns>True if matches expected type</returns>
         public bool IsStateType(string expectedTypeName)
-        {
-            return GetStateTypeName().Equals(expectedTypeName, StringComparison.OrdinalIgnoreCase);
-        }
-        
-        /// <summary>
-        /// Get runtime information about the state
-        /// </summary>
+            => GetStateTypeName().Equals(expectedTypeName, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Runtime information about the state.</summary>
         public StateInfo GetStateInfo()
         {
             return new StateInfo
@@ -151,17 +74,22 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced
             };
         }
     }
-    
+
     /// <summary>
     /// Information about a drone state for diagnostics
     /// </summary>
     public struct StateInfo
     {
+        /// <summary>State type name.</summary>
         public string TypeName { get; set; }
+        /// <summary>Wrapper validity.</summary>
         public bool IsValid { get; set; }
+        /// <summary>Native debug details.</summary>
         public string DebugInfo { get; set; }
+        /// <summary>Snapshot timestamp.</summary>
         public DateTime LastUpdated { get; set; }
-        
+
+        /// <summary>Human-readable summary.</summary>
         public override string ToString()
         {
             return $"{TypeName} (Valid: {IsValid}, Updated: {LastUpdated:HH:mm:ss})";

@@ -1,111 +1,77 @@
 #nullable enable
 using System;
-using PerAspera.GameAPI.Native;
-using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Elegant wrapper for the native Drone class
-    /// Transforms technical decompiled field names into beautiful, intuitive properties
-    /// DOC REFERENCES: Drone.md - Decompiled drone class analysis
+    /// Wrapper for the native Drone class (typed interop access).
+    ///
+    /// MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="global::Drone"/>.
+    /// Vérifié contre Tools\InteropDump\ScriptsAssembly\Drone.cs. Fantômes corrigés :
+    /// hasResource/currentWay/IsVisible/GetCargoAmount n'existent pas — l'état cargo réel
+    /// vient de Drone.cargo (Cargo : resource + quantity).
+    ///
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator — Skill: /per-aspera-drone-routing
     /// </summary>
     public class DroneWrapper : WrapperBase
     {
-        /// <summary>
-        /// Initialize Drone wrapper with native drone object
-        /// </summary>
-        /// <param name="nativeDrone">Native drone instance from game</param>
-        public DroneWrapper(object nativeDrone) : base(nativeDrone)
-        {
-        }
-        
-        /// <summary>
-        /// Get drone from Keeper registry by handle
-        /// </summary>
-        /// <param name="handle">Native drone handle</param>
-        /// <returns>Drone wrapper or null if not found</returns>
+        /// <summary>Wraps an untyped native drone (compat). Prefer the typed overload.</summary>
+        public DroneWrapper(object nativeDrone) : base(nativeDrone) { }
+
+        /// <summary>Wraps a typed interop Drone proxy.</summary>
+        public DroneWrapper(Drone nativeDrone) : base(nativeDrone) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>var cargo = drone.NativeDrone?.cargo;</example>
+        public Drone? NativeDrone => GetNativeObject() as Drone;
+
+        /// <summary>Factory — retourne null si l'objet natif est null.</summary>
+        public static DroneWrapper? FromNative(object? native)
+            => native != null ? new DroneWrapper(native) : null;
+
+        /// <summary>Get drone wrapper from a native drone object.</summary>
         public static DroneWrapper? GetByHandle(object handle)
-        {
-            // TODO: Implement via KeeperTypeRegistry when GetDrone method is available
-            try
-            {
-                // Temporary implementation - will be replaced with proper registry lookup
-                return handle != null ? new DroneWrapper(handle) : null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        
+            => FromNative(handle);
+
         // ==================== IDENTITY & POSITION ====================
-        
-        /// <summary>
-        /// Unique drone identifier number
-        /// Maps to: _number_k__BackingField
-        /// </summary>
-        public int DroneNumber
-        {
-            get => SafeInvoke<int?>("get_number") ?? 0;
-        }
-        
-        /// <summary>
-        /// Current 3D position on the planet
-        /// Maps to: _position3D_k__BackingField
-        /// </summary>
-        public object? Position
-        {
-            get => SafeInvoke<object>("get_position3D");
-        }
-        
-        /// <summary>
-        /// Current movement direction and rotation
-        /// Maps to: _directionRotation_k__BackingField
-        /// </summary>
-        public object? Direction
-        {
-            get => SafeInvoke<object>("get_directionRotation");
-        }
-        
+
+        /// <summary>Unique drone identifier number (typed read of Drone.number).</summary>
+        public int DroneNumber => NativeDrone?.number ?? 0;
+
+        /// <summary>Current 3D position on the planet (typed read of Drone.position3D).</summary>
+        public UnityEngine.Vector3 Position => NativeDrone?.position3D ?? UnityEngine.Vector3.zero;
+
+        /// <summary>Current movement rotation (typed read of Drone.directionRotation).</summary>
+        public UnityEngine.Quaternion Direction => NativeDrone?.directionRotation ?? UnityEngine.Quaternion.identity;
+
         // ==================== CARGO & CAPACITY ====================
-        
+
         /// <summary>
-        /// Maximum cargo capacity of this drone
-        /// Maps to: _cargoCapacity_k__BackingField
+        /// Maximum cargo capacity in units (typed read of Drone.cargoCapacity).
+        /// ⚠️ cargoCapacity natif est un CargoQuantity, pas un float — l'ancien binding
+        /// échouait silencieusement.
         /// </summary>
-        public float MaxCargoCapacity
-        {
-            get => SafeInvoke<float?>("get_cargoCapacity") ?? 0f;
-        }
-        
+        public float MaxCargoCapacity => NativeDrone?.cargoCapacity.ToFloat() ?? 0f;
+
+        /// <summary>Current cargo (typed Cargo proxy, null when empty).</summary>
+        public Cargo? Cargo => NativeDrone?.cargo;
+
         /// <summary>
-        /// Whether drone is currently carrying resources
-        /// Maps to: _hasResource_k__BackingField
+        /// Whether drone is currently carrying resources.
+        /// (« hasResource » n'existe pas — l'état réel est Drone.cargo != null.)
         /// </summary>
-        public bool IsCarryingCargo
-        {
-            get => SafeInvoke<bool?>("get_hasResource") ?? false;
-        }
-        
+        public bool IsCarryingCargo => NativeDrone?.cargo != null;
+
         /// <summary>
-        /// Current cargo load (calculated property)
-        /// Elegant wrapper combining cargo state checks
+        /// Current cargo load in units (typed read of Drone.cargo.quantity).
+        /// (« GetCargoAmount » n'existait pas — retournait toujours 0.)
         /// </summary>
-        public float CurrentCargoLoad
-        {
-            get
-            {
-                if (!IsCarryingCargo) return 0f;
-                // Try to get actual cargo amount if available
-                return SafeInvoke<float?>("GetCargoAmount") ?? 0f;
-            }
-        }
-        
-        /// <summary>
-        /// Percentage of cargo capacity currently used
-        /// Elegant computed property for cargo utilization
-        /// </summary>
+        public float CurrentCargoLoad => NativeDrone?.cargo?.quantity.ToFloat() ?? 0f;
+
+        /// <summary>Resource key currently carried, or null (typed).</summary>
+        public string? CargoResourceKey => NativeDrone?.cargo?.resource?.key;
+
+        /// <summary>Percentage of cargo capacity currently used.</summary>
         public float CargoUtilization
         {
             get
@@ -115,68 +81,37 @@ namespace PerAspera.GameAPI.Wrappers
                 return (CurrentCargoLoad / maxCapacity) * 100f;
             }
         }
-        
+
         // ==================== STATE & NAVIGATION ====================
-        
+
+        /// <summary>Current operational state ID (typed read of Drone.stateId).</summary>
+        public int StateId => (int)(NativeDrone?.stateId ?? 0);
+
+        /// <summary>N'a jamais existé — Drone n'a pas de currentWay exposé.</summary>
+        [Obsolete("Drone.currentWay n'existe pas — retournait toujours null. Voir l'état FSM via StateId et /per-aspera-drone-routing.", false)]
+        public object? NavigationPath => null;
+
         /// <summary>
-        /// Current operational state ID
-        /// Maps to: _stateId_k__BackingField
+        /// Whether drone is moving (FSM state check via stateId).
+        /// (L'ancienne implémentation testait le NavigationPath fantôme — toujours false.)
         /// </summary>
-        public int StateId
-        {
-            get => SafeInvoke<int?>("get_stateId") ?? 0;
-        }
-        
-        /// <summary>
-        /// Current navigation path being followed
-        /// Maps to: _currentWay_k__BackingField
-        /// </summary>
-        public object? NavigationPath
-        {
-            get => SafeInvoke<object>("get_currentWay");
-        }
-        
-        /// <summary>
-        /// Whether drone is currently following a path
-        /// Elegant wrapper around navigation state
-        /// </summary>
-        public bool IsNavigating
-        {
-            get => NavigationPath != null;
-        }
-        
+        public bool IsNavigating => NativeDrone?._currentState != null &&
+                                    NativeDrone._currentState.Pointer == NativeDrone._stateMoving?.Pointer;
+
         // ==================== HEALTH & STATUS ====================
-        
+
+        /// <summary>Whether drone is alive and operational (typed read of Drone.alive).</summary>
+        public bool IsAlive => NativeDrone?.alive ?? false;
+
+        /// <summary>Current health points (typed read of Drone.health).</summary>
+        public float Health => NativeDrone?.health ?? 0f;
+
+        /// <summary>N'a jamais existé sur Drone.</summary>
+        [Obsolete("Drone.IsVisible n'existe pas — retournait toujours true.", false)]
+        public bool IsVisible => true;
+
         /// <summary>
-        /// Whether drone is alive and operational
-        /// Maps to: _alive_k__BackingField
-        /// </summary>
-        public bool IsAlive
-        {
-            get => SafeInvoke<bool?>("get_alive") ?? false;
-        }
-        
-        /// <summary>
-        /// Current health points
-        /// Maps to: _health_k__BackingField
-        /// </summary>
-        public float Health
-        {
-            get => SafeInvoke<float?>("get_health") ?? 0f;
-        }
-        
-        /// <summary>
-        /// Whether drone is visible in the game world
-        /// Maps to: _IsVisible_k__BackingField
-        /// </summary>
-        public bool IsVisible
-        {
-            get => SafeInvoke<bool?>("get_IsVisible") ?? true;
-        }
-        
-        /// <summary>
-        /// Operational status combining multiple state checks
-        /// Elegant property for overall drone condition
+        /// Operational status combining multiple state checks.
         /// </summary>
         public DroneOperationalStatus OperationalStatus
         {
@@ -184,63 +119,37 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 if (!IsAlive) return DroneOperationalStatus.Destroyed;
                 if (Health < 20f) return DroneOperationalStatus.Damaged;
-                if (!IsVisible) return DroneOperationalStatus.Hidden;
                 if (IsNavigating) return DroneOperationalStatus.Moving;
                 if (IsCarryingCargo) return DroneOperationalStatus.Loaded;
                 return DroneOperationalStatus.Idle;
             }
         }
-        
+
         // ==================== SYSTEM REFERENCES ====================
-        
-        /// <summary>
-        /// Reference to the universe this drone exists in
-        /// Maps to: _universe_k__BackingField
-        /// </summary>
-        public object? Universe
-        {
-            get => SafeInvoke<object>("get_universe");
-        }
-        
-        /// <summary>
-        /// Reference to the planet this drone operates on
-        /// Maps to: _planet_k__BackingField
-        /// </summary>
-        public object? Planet
-        {
-            get => SafeInvoke<object>("get_planet");
-        }
-        
-        /// <summary>
-        /// Drone handle for system operations
-        /// Maps to: _handle_k__BackingField
-        /// </summary>
-        public object? Handle
-        {
-            get => SafeInvoke<object>("get_handle");
-        }
-        
+
+        /// <summary>Universe this drone exists in (typed).</summary>
+        public Universe? Universe => NativeDrone?.universe;
+
+        /// <summary>Planet this drone operates on (typed).</summary>
+        public Planet? Planet => NativeDrone?.planet;
+
+        /// <summary>Drone handle for system operations (typed).</summary>
+        public Handle? Handle => NativeDrone?.handle;
+
         // ==================== UTILITY METHODS ====================
-        
-        /// <summary>
-        /// Get detailed drone information for debugging
-        /// Elegant summary combining multiple properties
-        /// </summary>
+
+        /// <summary>Detailed drone information for debugging.</summary>
         public override string ToString()
         {
-            if (!ValidateNativeObject("ToString"))
-                return "Drone: Invalid";
-                
+            if (!IsValidWrapper) return "Drone: Invalid";
             return $"Drone #{DroneNumber}: {OperationalStatus}, " +
                    $"Cargo: {CargoUtilization:F1}% ({CurrentCargoLoad}/{MaxCargoCapacity}), " +
-                   $"Health: {Health:F1}, " +
-                   $"Navigation: {(IsNavigating ? "Active" : "Idle")}";
+                   $"Health: {Health:F1}";
         }
     }
-    
+
     /// <summary>
-    /// Elegant enum for drone operational status
-    /// Replaces complex state ID checking with clear status names
+    /// Drone operational status — clear names instead of raw state IDs.
     /// </summary>
     public enum DroneOperationalStatus
     {
