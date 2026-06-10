@@ -211,6 +211,27 @@ var resource = GameApi.wrapper.resourcetype;
 
 ## Règles techniques obligatoires
 
+### ⭐ Interop typé d'abord (vision 2026-06)
+
+> Audit : `F:\ModPeraspera\docs\SDK-CRITICAL-REVIEW.md` · Migration pilote : `PlanetWrapper`
+
+Les proxies interop générés par Il2CppInterop (`BepInEx\interop\` : `Planet`, `BaseGame`,
+`Faction`, `Universe`…) sont référencés par tous les projets et donnent un **accès typé
+compile-time** aux classes du jeu. **Ordre de préférence pour accéder au jeu :**
+
+1. **Membre typé du proxy interop** — IntelliSense, erreur de build si le jeu change.
+   Dans un wrapper : exposer le proxy (`public Planet? NativePlanet => GetNativeObject() as Planet;`)
+   et déléguer typé (`NativePlanet?.GetAverageTemperature() ?? 0f`).
+2. **Helpers Safe\*/Try\* de WrapperBase** — uniquement pour les membres natifs
+   réellement inaccessibles (privés/strippés), **après vérification dans le dump décompilé**.
+3. **Réflexion directe** — IL2CppExtensions seulement (règle ci-dessous, RS0030).
+
+**Pourquoi :** un binding string-based (`SafeInvoke<float>("X")`) vers un membre absent ne
+produit aucune erreur — juste `default(T)` silencieux. La migration PlanetWrapper a révélé
+plusieurs API fantômes (`GetResourceStock`, `AddResource`, `buildings`) qui n'ont jamais
+existé sur Planet et retournaient 0/vide depuis toujours. L'appel typé transforme cette
+classe de bugs invisibles en erreurs de compilation.
+
 ### ⛔ Reflection — isolation dans IL2CppExtensions
 
 **Toute utilisation de reflection est interdite hors de `PerAspera.Core.IL2CppExtensions`.**
@@ -232,8 +253,11 @@ MethodBase.GetMethodFromHandle(...);
 
 **Ce qu'on fait à la place :**
 ```csharp
-// ✅ Les wrappers héritent de WrapperBase et appellent SafeInvoke<T>
-public string? Name => SafeInvoke<string>("get_name");
+// ✅ D'ABORD : membre public → délégation typée au proxy interop (cf. règle ⭐ ci-dessus)
+public string Name => NativePlanet?.name ?? "Unknown";
+
+// ✅ FALLBACK : membre privé/strippé vérifié dans le dump → helpers WrapperBase
+public bool IsAlive => SafeGetField<bool>("_alive");
 
 // ✅ Si un nouveau helper de reflection est nécessaire :
 //    1. L'ajouter dans IL2CppExtensions (ex: un helper GetFieldValue générique)
