@@ -5,7 +5,23 @@
 
 ---
 
-## Graphe de dépendances (couches)
+## ⚠️ CONSOLIDATION 2026-06 — 4 assemblies
+
+> Les « couches » ci-dessous décrivent désormais des **namespaces dans 2 assemblies**,
+> plus des projets séparés (audit SDK-CRITICAL-REVIEW §1.1, exécuté 2026-06-10) :
+>
+> | Assembly | Absorbe |
+> |----------|---------|
+> | `PerAspera.Core` | Core + Core.IL2CppExtensions (dossier `IL2CppExtensions/`) |
+> | `PerAspera.GameAPI` | GameAPI + Native + Events + Commands + Wrappers + Climate + Overrides + UI (sous-dossiers) |
+> | `PerAspera.GameAPI.Database` | inchangé (isolé, SQLite) |
+> | `PerAspera.ModSDK` | inchangé (façade) |
+>
+> Tous les namespaces sont inchangés — les sections par domaine ci-dessous restent
+> valides comme documentation des APIs ; seul le découpage en projets a disparu.
+> `PerAspera.Abstractions` (placeholder vide) a été supprimé.
+
+## Graphe de dépendances (couches → namespaces)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

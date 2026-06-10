@@ -1,22 +1,19 @@
-# SDK Per Aspera — Contexte développement
+﻿# SDK Per Aspera — Contexte développement
 
 Sous-projet du workspace `F:\ModPeraspera\`. Voir [CLAUDE.md](../CLAUDE.md) à la racine pour le contexte global.
 
-## Ordre de build (dépendances)
+## Structure (consolidation 2026-06 — audit §1.1)
 
 ```
-1. PerAspera.Abstractions          (aucune dépendance)
-2. PerAspera.Core                  (aucune dépendance projet)
-3. PerAspera.Core.IL2CppExtensions (aucune dépendance projet — indépendant de Core)
-4. PerAspera.GameAPI.Native
-5. PerAspera.GameAPI               ← dépend de Core + Native
-6. PerAspera.GameAPI.Events        ← dépend de GameAPI
-7. PerAspera.GameAPI.Commands      ← dépend de GameAPI + Events
-8. PerAspera.GameAPI.Climate       ← dépend de GameAPI + Events
-9. PerAspera.GameAPI.Overrides     ← dépend de GameAPI
-10. PerAspera.GameAPI.Wrappers     ← dépend de GameAPI
-11. PerAspera.ModSDK               ← dépend de tout
+PerAspera.Core              (aucune dépendance projet)
+  └─ IL2CppExtensions/      namespace PerAspera.Core.IL2CPP (absorbé)
+PerAspera.GameAPI           ← Core + Database
+  └─ Native/ Events/ Commands/ Wrappers/ Climate/ Overrides/ UI/  (absorbés, namespaces inchangés)
+PerAspera.GameAPI.Database  (isolé — SQLite)
+PerAspera.ModSDK            ← Core + GameAPI
 ```
+
+4 projets, plus d'ordre de build à gérer — `dotnet build SDK.sln` suffit.
 
 ## Commandes de build
 
@@ -43,7 +40,7 @@ dotnet build PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj
 - `GameApi.wrapper.*` en priorité sur les instantiations directes
 - `LogAspera` pour tout logging (pas `Log.LogInfo` directement)
 - XML doc `<summary>` + `<example>` obligatoire sur toutes les méthodes publiques
-- Vérifier `F:\ModPeraspera\SDK-Enhanced-Classes\` avant tout ajout d'API
+- Vérifier `F:\ModPeraspera\docs\` avant tout ajout d'API
 
 ## Référence sources jeu décompilées
 

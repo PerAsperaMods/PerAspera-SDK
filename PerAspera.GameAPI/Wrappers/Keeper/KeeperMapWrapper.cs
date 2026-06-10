@@ -22,9 +22,12 @@ namespace PerAspera.GameAPI.Wrappers
         public KeeperMapWrapper(object nativeKeeperMap) : base(nativeKeeperMap)
         {
         }
+        /// <summary>Get the Keeper that owns this map.</summary>
         public KeeperWrapper? GetKeeper()
         {
-            return new KeeperWrapper(SafeInvoke<Keeper>("_keeper")); // private readonly Keeper _keeper;
+            if (NativeObject is not KeeperMap map) return null;
+            var keeper = map._keeper;
+            return keeper != null ? new KeeperWrapper(keeper) : null;
         }
         /// <summary>
         /// Get current KeeperMap from BaseGame.keeper.map
@@ -55,153 +58,56 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== CORE KEEPERMAP METHODS ====================
         
         /// <summary>
-        /// Direct native Find<T> method access
-        /// Raw performance for specialized use cases
-        /// Performance: O(1) Dictionary lookup
+        /// Direct native Find&lt;T&gt; method access.
+        /// Performance: O(1) Dictionary lookup.
         /// </summary>
         /// <typeparam name="T">Expected entity type</typeparam>
-        /// <param name="handle">Entity Handle</param>
+        /// <param name="handle">Entity Handle (accepts boxed Handle struct or Handle directly)</param>
         /// <returns>Typed entity instance or null if not found</returns>
         public T? Find<T>(object handle) where T : class
         {
-            try
-            {
-                if (handle == null || NativeObject == null) return null;
-                
-                return SafeInvoke<T>("Find", handle);
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} Find<{typeof(T).Name}> failed: {ex.Message}");
-                return null;
-            }
+            if (NativeObject is not KeeperMap map || handle is not Handle h) return null;
+            var result = map.Find<T>(h);
+            return result;
         }
         
         /// <summary>
-        /// Direct native Contains method access
-        /// Handle existence validation
-        /// Performance: O(1) Dictionary.ContainsKey
+        /// Direct native Contains method access.
+        /// Performance: O(1) Dictionary.ContainsKey.
         /// </summary>
-        /// <param name="handle">Handle to check</param>
+        /// <param name="handle">Handle to check (accepts boxed Handle struct)</param>
         /// <returns>True if Handle exists in KeeperMap</returns>
         public bool Contains(object handle)
         {
-            try
-            {
-                if (handle == null || NativeObject == null) return false;
-                
-                return SafeInvoke<bool>("Contains", handle);
-            }
-            catch (Exception ex)
-            {
-                Log.LogInfo($"{LogPrefix} Contains failed: {ex.Message}");
-                return false;
-            }
+            if (NativeObject is not KeeperMap map || handle is not Handle h) return false;
+            return map.Contains(h);
         }
         
         /// <summary>
-        /// Non-generic Find method for base IHandleable access
-        /// Returns base interface type for unknown entity types
+        /// Find an entity by Handle via the typed interop proxy.
+        /// Returns null if the handle is not in the map or the wrapper is invalid.
         /// </summary>
-        /// <param name="handle">Entity Handle</param>
-        /// <returns>IHandleable instance or null</returns>
-        public object? FindBase(object handle)
+        /// <param name="handle">Entity Handle (accepts Handle or object)</param>
+        public IHandleable? FindBase(object? handle)
         {
-            try
-            {
-                if (handle == null || NativeObject == null) return null;
-                
-                Log.LogInfo($"{LogPrefix} FindBase called with handle type: {handle.GetType().FullName}");
-                
-                // Use specific parameter type to avoid ambiguous method resolution
-                var handleType = handle.GetType();
-                var allFindMethods = NativeObject.GetType().GetMethods()
-                    .Where(m => m.Name == "Find").ToArray();
-                    
-                Log.LogInfo($"{LogPrefix} Found {allFindMethods.Length} Find methods");
-                foreach (var method in allFindMethods)
-                {
-                    var paramTypes = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
-                    Log.LogInfo($"{LogPrefix}   - Find({paramTypes}) → {method.ReturnType.Name} (Generic: {method.IsGenericMethodDefinition})");
-                }
-                
-                // Try to find exact match first
-                var exactMatch = allFindMethods.FirstOrDefault(m => 
-                    !m.IsGenericMethodDefinition &&
-                    m.GetParameters().Length == 1 &&
-                    m.GetParameters()[0].ParameterType == handleType);
-                
-                if (exactMatch != null)
-                {
-                    Log.LogInfo($"{LogPrefix} Using exact match method");
-                    return exactMatch.Invoke(NativeObject, new object[] { handle });
-                }
-                
-                // Try generic method with specific type
-                var genericMethod = allFindMethods.FirstOrDefault(m => 
-                    m.IsGenericMethodDefinition &&
-                    m.GetParameters().Length == 1);
-                    
-                if (genericMethod != null)
-                {
-                    Log.LogInfo($"{LogPrefix} Using generic method");
-                    var specificMethod = genericMethod.MakeGenericMethod(typeof(object));
-                    return specificMethod.Invoke(NativeObject, new object[] { handle });
-                }
-                
-                Log.LogWarning($"{LogPrefix} No suitable Find method found for {handleType.Name}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} FindBase failed: {ex.Message}");
-                return null;
-            }
+            if (handle is not Handle h || NativeObject is not KeeperMap map) return null;
+            return map.Find(h);
         }
         
         // ==================== ADVANCED OPERATIONS ====================
         
         /// <summary>
-        /// Access to internal _objects Dictionary for advanced operations
-        /// Use with caution - requires IL2CPP knowledge
-        /// Returns: Dictionary<Handle, IHandleable> equivalent
+        /// Access to internal _objects dictionary via the publicized interop proxy.
+        /// Returns the native Il2Cpp Dictionary&lt;Handle, IHandleable&gt; or null.
         /// </summary>
-        public object? GetObjectsDict()
-        {
-            try
-            {
-                if (NativeObject == null) return null;
-                
-                return NativeObject.GetFieldValue<object>("_objects");
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} GetObjectsDict failed: {ex.Message}");
-                return null;
-            }
-        }
+        public Il2CppSystem.Collections.Generic.Dictionary<Handle, IHandleable>? GetObjectsDict()
+            => NativeObject is KeeperMap map ? map._objects : null;
         
         
         /// <summary>
-        /// Get total entity count in KeeperMap
-        /// Diagnostic method for monitoring
+        /// Get total entity count in KeeperMap (typed _objects.Count).
         /// </summary>
-        public int GetEntityCount()
-        {
-            try
-            {
-                var objectsDict = GetObjectsDict();
-                if (objectsDict == null) return 0;
-                
-                var count = objectsDict.GetPropertyValue<object>("Count");
-                return count is int intCount ? intCount : 0;
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} GetEntityCount failed: {ex.Message}");
-                return 0;
-            }
-        }
+        public int GetEntityCount() => GetObjectsDict()?.Count ?? 0;
         
         // ==================== BULK ENUMERATION ====================
         
@@ -213,41 +119,11 @@ namespace PerAspera.GameAPI.Wrappers
         public IEnumerable<object> EnumerateHandles()
         {
             var objectsDict = GetObjectsDict();
-            if (objectsDict == null) 
-                return Enumerable.Empty<object>();
-            
-            return EnumerateHandlesInternal(objectsDict);
-        }
-        
-        private IEnumerable<object> EnumerateHandlesInternal(object objectsDict)
-        {
-            var results = new List<object>();
-            
-            try
-            {
-                // Get Dictionary.Keys collection
-                var keys = objectsDict.InvokeMethod<object>("get_Keys");
-                if (keys == null) return results;
-                
-                var enumerator = keys.InvokeMethod<object>("GetEnumerator");
-                if (enumerator == null) return results;
-                
-                // Enumerate all Handles
-                while (enumerator.InvokeMethod<bool>("MoveNext"))
-                {
-                    var current = enumerator.GetPropertyValue<object>("Current");
-                    if (current != null)
-                    {
-                        results.Add(current);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} EnumerateHandles failed: {ex.Message}");
-            }
-            
-            return results;
+            if (objectsDict == null) yield break;
+
+            // Itération typée du dictionnaire IL2CPP (clé = Handle, struct)
+            foreach (var kvp in objectsDict)
+                yield return kvp.Key;
         }
         
         /// <summary>
@@ -258,41 +134,11 @@ namespace PerAspera.GameAPI.Wrappers
         public IEnumerable<object> EnumerateEntities()
         {
             var objectsDict = GetObjectsDict();
-            if (objectsDict == null) 
-                return Enumerable.Empty<object>();
-            
-            return EnumerateEntitiesInternal(objectsDict);
-        }
-        
-        private IEnumerable<object> EnumerateEntitiesInternal(object objectsDict)
-        {
-            var results = new List<object>();
-            
-            try
-            {
-                // Get Dictionary.Values collection
-                var values = objectsDict.InvokeMethod<object>("get_Values");
-                if (values == null) return results;
-                
-                var enumerator = values.InvokeMethod<object>("GetEnumerator");
-                if (enumerator == null) return results;
-                
-                // Enumerate all entities
-                while (enumerator.InvokeMethod<bool>("MoveNext"))
-                {
-                    var current = enumerator.GetPropertyValue<object>("Current");
-                    if (current != null)
-                    {
-                        results.Add(current);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"{LogPrefix} EnumerateEntities failed: {ex.Message}");
-            }
-            
-            return results;
+            if (objectsDict == null) yield break;
+
+            // Itération typée du dictionnaire IL2CPP (valeur = IHandleable)
+            foreach (var kvp in objectsDict)
+                if (kvp.Value != null) yield return kvp.Value;
         }
         
         /// <summary>

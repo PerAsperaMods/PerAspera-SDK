@@ -160,8 +160,8 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Fill list with root GameObjects (allocation-free)
-        /// Method: GetRootGameObjects(List<GameObject> rootObjects)
+        /// Fill list with root GameObjects.
+        /// L'API interop attend une List IL2CPP — conversion managée → IL2CPP → managée ici.
         /// </summary>
         public void GetRootGameObjects(System.Collections.Generic.List<GameObject> rootObjects)
         {
@@ -173,7 +173,10 @@ namespace PerAspera.GameAPI.Wrappers
                     return;
                 }
 
-                _nativeScene.GetRootGameObjects(rootObjects);
+                var il2cppList = new Il2CppSystem.Collections.Generic.List<GameObject>();
+                _nativeScene.GetRootGameObjects(il2cppList);
+                foreach (var go in il2cppList)
+                    if (go != null) rootObjects.Add(go);
             }
             catch (Exception ex)
             {
