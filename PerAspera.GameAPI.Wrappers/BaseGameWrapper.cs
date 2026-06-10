@@ -1,504 +1,205 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
-using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for BaseGame singleton
-    /// Provides type-safe access to main game systems
+    /// Wrapper for BaseGame singleton.
+    /// Provides type-safe access to main game systems.
     ///
-    /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
+    /// MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="global::BaseGame"/>.
+    /// Vérifié contre Tools\InteropDump\ScriptsAssembly\BaseGame.cs. Les anciens doubles
+    /// chemins « typé + fallback réflexion » ont été supprimés (le fallback ne servait à
+    /// rien : si le membre typé compile, il existe). Corrections au passage :
+    /// loadedSave/hasCheats/hasMods/difficulty sont STATIQUES (les lectures d'instance de
+    /// l'ancien code échouaient silencieusement), et currentDay n'existe pas sur BaseGame
+    /// (le sol courant vient de Universe.GetMartianSol()).
+    ///
     /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
-    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-    /// 📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
-    ///
-    /// ⚡ INTEROP UPDATE: Now uses direct IL2CPP access with reflection fallback for compatibility
     /// </summary>
     public class BaseGameWrapper : WrapperBase
     {
-        private BaseGame? _nativeBaseGame;
+        /// <summary>Wraps an untyped native BaseGame (compat). Prefer the typed overload.</summary>
+        public BaseGameWrapper(object nativeBaseGame) : base(nativeBaseGame) { }
 
-        public BaseGameWrapper(object nativeBaseGame) : base(nativeBaseGame)
-        {
-            // Try to cast to native type for direct access
-            try
-            {
-                _nativeBaseGame = (BaseGame)nativeBaseGame;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Failed to cast to BaseGame, using reflection fallback: {ex.Message}");
-            }
-        }
+        /// <summary>Wraps a typed interop BaseGame proxy.</summary>
+        public BaseGameWrapper(BaseGame nativeBaseGame) : base(nativeBaseGame) { }
 
-        /// <summary>
-        /// Get current BaseGame singleton instance
-        /// </summary>
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>var keeper = baseGame.NativeBaseGame?.keeper;</example>
+        public BaseGame? NativeBaseGame => GetNativeObject() as BaseGame;
+
+        /// <summary>Get current BaseGame singleton instance.</summary>
+        /// <example>var baseGame = BaseGameWrapper.GetCurrent();</example>
         public static BaseGameWrapper? GetCurrent()
         {
             var instance = GameTypeInitializer.GetBaseGameInstance();
-
             return instance != null ? new BaseGameWrapper(instance) : null;
         }
 
         // ==================== GAME STATE ====================
 
-        /// <summary>
-        /// Check if the game is paused
-        /// Delegates to Universe for pause state
-        /// </summary>
-        public bool IsPaused()
-        {
-            try
-            {
-                var universe = GetUniverse();
-                return universe?.IsPaused ?? false;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Failed to get pause state: {ex.Message}");
-                return false;
-            }
-        }
+        /// <summary>Check if the game is paused (delegates to Universe).</summary>
+        public bool IsPaused() => GetUniverse()?.IsPaused ?? false;
 
         /// <summary>
-        /// Get current game day/sol
+        /// Current martian sol (game day). Typed call to Universe.GetMartianSol().
+        /// (L'ancien binding « currentDay » n'existait pas sur BaseGame — retournait null.)
         /// </summary>
-        public int? GetCurrentDay()
-        {
-            try
-            {
-                if (_nativeBaseGame != null)
-                {
-                    return (int)_nativeBaseGame.GetMemberValue("currentDay");
-                }
-                return (int)SafeInvoke<int>("get_currentDay");
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Failed to get current day: {ex.Message}");
-                return null;
-            }
-        }
+        /// <example>int? sol = baseGame.GetCurrentDay();</example>
+        public int? GetCurrentDay() => NativeBaseGame?.universe?.GetMartianSol();
 
         // ==================== CORE SYSTEMS ====================
 
-        /// <summary>
-        /// Get Keeper instance (entity registry and manager)
-        /// Property: keeper { get; private set; }
-        /// Backing field: _keeper_k__BackingField
-        /// </summary>
+        /// <summary>Get Keeper instance (entity registry and manager).</summary>
+        /// <example>var keeper = baseGame.GetKeeper();</example>
         public KeeperWrapper? GetKeeper()
         {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeBaseGame != null)
-                {
-                    var keeper = _nativeBaseGame.keeper;
-                    return keeper != null ? new KeeperWrapper(keeper) : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for keeper, using reflection: {ex.Message}");
-            }
-
-            // 🔄 Reflection fallback
-            return new KeeperWrapper(SafeInvoke<Keeper>("get_keeper"));
+            var keeper = NativeBaseGame?.keeper;
+            return keeper != null ? new KeeperWrapper(keeper) : null;
         }
 
-        /// <summary>
-        /// Get Universe wrapper instance (time, factions, planet)
-        /// Property: universe { get; }
-        /// Backing field: _universe_k__BackingField
-        /// </summary>
+        /// <summary>Get Universe wrapper instance (time, factions, planet).</summary>
+        /// <example>var universe = baseGame.GetUniverse();</example>
         public UniverseWrapper? GetUniverse()
         {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeBaseGame != null)
-                {
-                    var universe = _nativeBaseGame.universe;
-                    return universe != null ? new UniverseWrapper(universe) : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for universe, using reflection: {ex.Message}");
-            }
+            var universe = NativeBaseGame?.universe;
+            return universe != null ? new UniverseWrapper(universe) : null;
+        }
 
-            // 🔄 Reflection fallback
-            var nativeUniverse = SafeInvoke<object>("get_universe");
-            return nativeUniverse != null ? new UniverseWrapper(nativeUniverse) : null;
-        }
-        
-        /// <summary>
-        /// Check if game is in quitting state
-        /// Static property: isQuitting { get; }
-        /// </summary>
-        public bool IsQuitting
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs (static property)
-                    return BaseGame.isQuitting;
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for isQuitting, using reflection: {ex.Message}");
-                    // 🔄 Reflection fallback
-                    return SafeInvoke<bool?>("get_isQuitting") ?? false;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// Check if game is ending (credits/end sequence)
-        /// Static property: isEnding { get; }
-        /// </summary>
-        public bool IsEnding
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs (static property)
-                    return BaseGame.isEnding;
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for isEnding, using reflection: {ex.Message}");
-                    // 🔄 Reflection fallback
-                    return SafeInvoke<bool?>("get_isEnding") ?? false;
-                }
-            }
-        }
-        
+        /// <summary>Check if game is in quitting state (static native property).</summary>
+        public bool IsQuitting => BaseGame.isQuitting;
+
+        /// <summary>Check if game is ending — credits/end sequence (static native property).</summary>
+        public bool IsEnding => BaseGame.isEnding;
+
         // ==================== INITIALIZATION STATE ====================
-        
-        /// <summary>
-        /// Check if main scene has finished initialization
-        /// Field: MainSceneHasFinishedInit
-        /// </summary>
-        public bool MainSceneFinishedInit
-        {
-            get => NativeObject?.GetFieldValue<bool>("MainSceneHasFinishedInit") ?? false;
-        }
-        
-        /// <summary>
-        /// Check if game is currently loading
-        /// Field: isLoading
-        /// </summary>
-        public bool IsLoading
-        {
-            get => NativeObject?.GetFieldValue<bool>("isLoading") ?? false;
-        }
-        
-        /// <summary>
-        /// Get loaded save file name
-        /// Field: loadedSave
-        /// </summary>
-        public string? LoadedSave
-        {
-            get => NativeObject?.GetFieldValue<string>("loadedSave");
-        }
-        
-        // ==================== GAME STATE ====================
-        
-        /// <summary>
-        /// Check if game has cheats enabled
-        /// Field: hasCheats
-        /// </summary>
-        public bool HasCheats
-        {
-            get => NativeObject?.GetFieldValue<bool>("hasCheats") ?? false;
-        }
-        
-        /// <summary>
-        /// Check if game has mods enabled
-        /// Field: hasMods
-        /// </summary>
-        public bool HasMods
-        {
-            get => NativeObject?.GetFieldValue<bool>("hasMods") ?? false;
-        }
-        
-        /// <summary>
-        /// Get canvas references for UI components
-        /// Field: canvasRefs
-        /// </summary>
-        public object? CanvasRefs
-        {
-            get => NativeObject?.GetFieldValue<object>("canvasRefs");
-        }
-        
-        /// <summary>
-        /// Get current difficulty level
-        /// Field: difficulty
-        /// </summary>
-        public int Difficulty
-        {
-            get => NativeObject?.GetFieldValue<int>("difficulty") ?? 0;
-        }
-        
-        // ==================== METHODS ====================
-        
-        /// <summary>
-        /// Trigger OnFinishLoading callback
-        /// Method: OnFinishLoading()
-        /// </summary>
-        public void OnFinishLoading()
-        {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeBaseGame != null)
-                {
-                    _nativeBaseGame.OnFinishLoading();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for OnFinishLoading, using reflection: {ex.Message}");
-            }
 
-            // 🔄 Reflection fallback
-            SafeInvokeVoid("OnFinishLoading");
+        /// <summary>Check if main scene has finished initialization.</summary>
+        public bool MainSceneFinishedInit => NativeBaseGame?.MainSceneHasFinishedInit ?? false;
+
+        /// <summary>Check if game is currently loading.</summary>
+        public bool IsLoading => NativeBaseGame?.isLoading ?? false;
+
+        /// <summary>
+        /// Loaded save file name (static native field, tuple name+header).
+        /// (L'ancien code lisait « loadedSave » comme champ d'instance string — toujours null.)
+        /// </summary>
+        public string? LoadedSave => BaseGame.loadedSave?.Item1;
+
+        // ==================== GAME STATE FLAGS ====================
+
+        /// <summary>Check if game has cheats enabled (static native field).</summary>
+        public bool HasCheats => BaseGame.hasCheats;
+
+        /// <summary>Check if game has mods enabled (static native field).</summary>
+        public bool HasMods => BaseGame.hasMods;
+
+        /// <summary>Current difficulty (native BaseGame.Difficulty enum, static field).</summary>
+        /// <example>var diff = baseGame.GameDifficulty;</example>
+        public BaseGame.Difficulty GameDifficulty => BaseGame.difficulty;
+
+        /// <summary>N'a jamais fonctionné — « difficulty » est un champ STATIQUE de type Difficulty.</summary>
+        [Obsolete("Lecture d'instance int de « difficulty » — toujours 0 (champ statique de type Difficulty). Utiliser GameDifficulty.", false)]
+        public int Difficulty => 0;
+
+        /// <summary>List of enabled mod names (static native field).</summary>
+        public IList<string> GetModList()
+        {
+            var result = new List<string>();
+            var mods = BaseGame.modList;
+            if (mods == null) return result;
+            foreach (var m in mods) result.Add(m);
+            return result;
         }
-        
+
         // ==================== SYSTEM REFERENCES ====================
-        
-        /// <summary>
-        /// Get camera controller reference
-        /// Maps to: cameraController field
-        /// </summary>
-        public object? CameraController
+
+        /// <summary>Canvas references for UI components (typed).</summary>
+        public GameCanvasReferences? CanvasRefs => NativeBaseGame?.canvasRefs;
+
+        /// <summary>Camera controller (typed OrbitingCamera).</summary>
+        public OrbitingCamera? CameraController => NativeBaseGame?.cameraController;
+
+        /// <summary>Mars terrain manager (typed).</summary>
+        public MarsManager? MarsManager => NativeBaseGame?.marsManager;
+
+        /// <summary>Input raycaster for UI interactions (typed).</summary>
+        public InputRaycaster? InputRaycaster => NativeBaseGame?.inputRaycaster;
+
+        /// <summary>Base game references wrapper.</summary>
+        public BaseGameReferencesWrapper? baseGameReferences
         {
             get
             {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeBaseGame != null)
-                    {
-                        return _nativeBaseGame.cameraController;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for cameraController, using reflection: {ex.Message}");
-                }
-
-                // 🔄 Reflection fallback
-                return SafeInvoke<object>("get_cameraController");
+                var refs = NativeBaseGame?.baseGameReferences;
+                return refs != null ? new BaseGameReferencesWrapper(refs) : null;
             }
         }
-        
-        /// <summary>
-        /// Get mars terrain manager
-        /// Maps to: marsManager field
-        /// </summary>
-        public object? MarsManager
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeBaseGame != null)
-                    {
-                        return _nativeBaseGame.marsManager;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for marsManager, using reflection: {ex.Message}");
-                }
 
-                // 🔄 Reflection fallback
-                return SafeInvoke<object>("get_marsManager");
-            }
-        }
-        public BaseGameReferencesWrapper? baseGameReferences => new BaseGameReferencesWrapper(SafeInvoke<object>("get_baseGameReferences"));
-        /// <summary>
-        /// Get input raycaster for UI interactions
-        /// Maps to: inputRaycaster field
-        /// </summary>
-        public object? InputRaycaster
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeBaseGame != null)
-                    {
-                        return _nativeBaseGame.inputRaycaster;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for inputRaycaster, using reflection: {ex.Message}");
-                }
+        // ==================== METHODS ====================
 
-                // 🔄 Reflection fallback
-                return SafeInvoke<object>("get_inputRaycaster");
-            }
-        }
-        
-        
+        /// <summary>Trigger OnFinishLoading callback.</summary>
+        public void OnFinishLoading() => NativeBaseGame?.OnFinishLoading();
 
-        
-        /// <summary>
-        /// Exit to main menu
-        /// Method: ExitToMainMenu()
-        /// </summary>
-        public void ExitToMainMenu()
-        {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeBaseGame != null)
-                {
-                    _nativeBaseGame.ExitToMainMenu();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for ExitToMainMenu, using reflection: {ex.Message}");
-            }
+        /// <summary>Exit to main menu.</summary>
+        public void ExitToMainMenu() => NativeBaseGame?.ExitToMainMenu();
 
-            // 🔄 Reflection fallback
-            SafeInvokeVoid("ExitToMainMenu");
-        }
-        
-        /// <summary>
-        /// Force exit game
-        /// Method: ForceExit()
-        /// </summary>
-        public void ForceExit()
-        {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeBaseGame != null)
-                {
-                    _nativeBaseGame.ForceExit();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for ForceExit, using reflection: {ex.Message}");
-            }
+        /// <summary>Force exit game.</summary>
+        public void ForceExit() => NativeBaseGame?.ForceExit();
 
-            // 🔄 Reflection fallback
-            SafeInvokeVoid("ForceExit");
-        }
-        
         // ==================== BLACKBOARD ACCESS ====================
-        
-        /// <summary>
-        /// Get the main blackboard via Universe
-        /// Convenience method: BaseGame -> Universe -> BlackBoard
-        /// </summary>
+
+        /// <summary>Get the main blackboard via Universe.</summary>
         public BlackBoardWrapper? GetMainBlackBoard()
         {
             var universe = GetUniverse();
-            return  new BlackBoardWrapper( universe?.GetMainBlackBoard());
+            return new BlackBoardWrapper(universe?.GetMainBlackBoard());
         }
-        
-        /// <summary>
-        /// Get a specific blackboard by name via Universe
-        /// Convenience method: BaseGame -> Universe -> BlackBoard
-        /// </summary>
+
+        /// <summary>Get a specific blackboard by name via Universe.</summary>
         public BlackBoardWrapper? GetBlackBoard(string name)
-        {
-            var universe = GetUniverse();
-            return universe?.GetBlackBoard(name);
-        }
-        
-        /// <summary>
-        /// Check if a blackboard exists via Universe
-        /// Convenience method: BaseGame -> Universe -> BlackBoard
-        /// </summary>
+            => GetUniverse()?.GetBlackBoard(name);
+
+        /// <summary>Check if a blackboard exists via Universe.</summary>
         public bool HasBlackBoard(string name)
-        {
-            var universe = GetUniverse();
-            return universe?.HasBlackBoard(name) ?? false;
-        }
-        
-        /// <summary>
-        /// Get all blackboard names via Universe
-        /// Convenience method: BaseGame -> Universe -> BlackBoard
-        /// </summary>
+            => GetUniverse()?.HasBlackBoard(name) ?? false;
+
+        /// <summary>Get all blackboard names via Universe.</summary>
         public IList<string>? GetBlackBoardNames()
-        {
-            var universe = GetUniverse();
-            return universe?.GetBlackBoardNames();
-        }
+            => GetUniverse()?.GetBlackBoardNames();
 
         // ==================== VISUAL POI ACCESS ====================
 
         /// <summary>
         /// Get wrapped list of all visual POI instances in the game
-        /// Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
-        /// Includes all POI from vanilla game + YAML mods
+        /// (vanilla + YAML mods). Typed read of BaseGame.pois.
         /// </summary>
-
-        public IList<VisualPointOfInterestWrapper>? GetPois()
+        /// <example>foreach (var poi in baseGame.GetPois()!) { ... }</example>
+        public IList<VisualPointOfInterestWrapper> GetPois()
         {
-            try
-            {
-                // pois est un champ public (pas une propriété) — accès direct via _nativeBaseGame
-                var nativePois = _nativeBaseGame?.pois;
-                if (nativePois == null) return new List<VisualPointOfInterestWrapper>();
-
-                var result = new List<VisualPointOfInterestWrapper>();
-                foreach (var visPoi in nativePois)
-                {
-                    if (visPoi != null)
-                        result.Add(new VisualPointOfInterestWrapper(visPoi));
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to get visual POIs: {ex.Message}");
-                return new List<VisualPointOfInterestWrapper>();
-            }
+            var result = new List<VisualPointOfInterestWrapper>();
+            var nativePois = NativeBaseGame?.pois;
+            if (nativePois == null) return result;
+            foreach (var visPoi in nativePois)
+                if (visPoi != null) result.Add(new VisualPointOfInterestWrapper(visPoi));
+            return result;
         }
 
+        /// <summary>Visual special sites with their resource veins (typed read of BaseGame.visualSites).</summary>
         public Dictionary<SpecialSiteWrapper, VisualResourceVeinWrapper>? GetVisualSites()
         {
-            try
-            {
-                if (_nativeBaseGame != null && _nativeBaseGame.visualSites != null)
-                {
-                    var result = new Dictionary<SpecialSiteWrapper, VisualResourceVeinWrapper>();
-                    foreach (var kvp in _nativeBaseGame.visualSites)
-                    {
-                        var siteWrapper = new SpecialSiteWrapper(kvp.Key);
-                        var veinWrapper = new VisualResourceVeinWrapper(kvp.Value);
-                        result[siteWrapper] = veinWrapper;
-                    }
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for visualSites, using reflection: {ex.Message}");
-                // Reflection fallback not implemented for complex dictionary — return null
-            }
-            return null;
+            var sites = NativeBaseGame?.visualSites;
+            if (sites == null) return null;
+
+            var result = new Dictionary<SpecialSiteWrapper, VisualResourceVeinWrapper>();
+            foreach (var kvp in sites)
+                result[new SpecialSiteWrapper(kvp.Key)] = new VisualResourceVeinWrapper(kvp.Value);
+            return result;
         }
+
+        /// <summary>Human-readable game state summary.</summary>
         public override string ToString()
         {
             var universe = GetUniverse();

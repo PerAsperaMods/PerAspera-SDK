@@ -5,24 +5,41 @@ using System.Linq;
 using System.Reflection;
 using PerAspera.Commands;
 using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Native;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for the native Faction class.
+    /// Wrapper for the native Faction class (typed interop access).
     /// Provides safe access to faction properties and operations.
+    ///
+    /// MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="global::Faction"/>.
+    /// Vérifié contre Tools\InteropDump\ScriptsAssembly\Faction.cs. Nombreuses API fantômes
+    /// corrigées : displayName/factionType/isPlayerFaction/mainStockpile/aiDifficulty/
+    /// aiPersonality/color n'existent pas ; GetResourceStock et HasTechnology étaient des
+    /// chaînes de noms devinés qui échouaient toutes — réimplémentées sur les vrais membres.
+    ///
+    /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
     /// </summary>
     public class FactionWrapper : WrapperBase
     {
+        /// <summary>Wraps an untyped native faction (compat). Prefer the typed overload.</summary>
         public FactionWrapper(object nativeFaction) : base(nativeFaction) { }
 
+        /// <summary>Wraps a typed interop Faction proxy.</summary>
+        public FactionWrapper(Faction nativeFaction) : base(nativeFaction) { }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>var bb = faction.NativeFaction?.blackboardFaction;</example>
+        public Faction? NativeFaction => GetNativeObject() as Faction;
+
+        /// <summary>Factory — retourne null si l'objet natif est null.</summary>
         public static FactionWrapper? FromNative(object? nativeFaction)
             => nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
 
         // ==================== CONSOLE COMMANDS ====================
 
         /// <summary>Add resources distributed across faction buildings via console command.</summary>
+        /// <example>faction.FactionAddResourceDistributed("resource_water", "500");</example>
         public bool FactionAddResourceDistributed(string resourceString, string amountString)
         {
             var consoleWrapper = ConsoleWrapper.GetInstance();
@@ -43,58 +60,50 @@ namespace PerAspera.GameAPI.Wrappers
             }
         }
 
+        /// <summary>List available console commands in the log.</summary>
         public static void ListAvailableConsoleCommands()
-        {
-            ConsoleWrapper.GetInstance()?.ListCommands();
-        }
+            => ConsoleWrapper.GetInstance()?.ListCommands();
 
         // ==================== NATIVE METHODS ====================
 
-        /// <summary>Add research points to this faction.</summary>
+        /// <summary>Add research points to this faction (typed).</summary>
+        /// <example>faction.AddResearchPoints(100f);</example>
         public bool AddResearchPoints(float amount)
         {
-            try
-            {
-                ((Faction)NativeObject).AddResearchPoints(amount);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"AddResearchPoints failed: {ex.Message}");
-                return false;
-            }
+            var f = NativeFaction;
+            if (f == null) return false;
+            f.AddResearchPoints(amount);
+            return true;
         }
 
-        /// <summary>Direct native call for resource addition (test/debug).</summary>
+        /// <summary>N'a jamais fonctionné — méthode d'instance inexistante.</summary>
+        [Obsolete("Invocation string-based de « FactionAddResourceDistributed » en instance — n'a jamais fonctionné. Utiliser AddResource() (typé) ou FactionAddResourceDistributed() (console).", false)]
         public bool TestAddResource(string resourceType, float amount)
-            => NativeObject.InvokeMethod("FactionAddResourceDistributed", resourceType, amount.ToString());
+            => AddResource(resourceType, amount);
 
         /// <summary>
-        /// Sets a bool variable on the faction blackboard.
+        /// Sets a bool variable on the faction blackboard (typed).
         /// Used by YAML rules/criteria: <c>$key == true</c>.
         /// </summary>
+        /// <example>faction.SetBlackboardBool("mon_flag", true);</example>
         public bool SetBlackboardBool(string key, bool value)
         {
-            try
-            {
-                ((Faction)NativeObject).blackboardFaction?.SetValue(key, value);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"SetBlackboardBool({key}) failed: {ex.Message}");
-                return false;
-            }
+            var bb = NativeFaction?.blackboardFaction;
+            if (bb == null) return false;
+            bb.SetValue(key, value);
+            return true;
         }
 
         // ==================== HANDLE / INTERACTION ====================
 
+        /// <summary>Get the interaction manager (typed read of Faction.interactionManager).</summary>
         public InteractionManagerWrapper GetInteractionManager()
-            => new InteractionManagerWrapper(NativeObject.GetMemberValue<InteractionManager>("interactionManager"));
+            => new InteractionManagerWrapper(NativeFaction?.interactionManager);
 
+        /// <summary>Cast the native faction to IHandleable.</summary>
         public IHandleable? GetAsIHandleable()
         {
-            try { return (IHandleable)GetNativeObject(); }
+            try { return (IHandleable?)GetNativeObject(); }
             catch (InvalidCastException)
             {
                 WrapperLog.Warning("Cannot cast Faction to IHandleable in IL2CPP context");
@@ -102,242 +111,183 @@ namespace PerAspera.GameAPI.Wrappers
             }
         }
 
+        /// <summary>Get the faction handle (typed read of Faction.handle).</summary>
         public HandleWrapper? GetHandle()
         {
-            try
-            {
-                var handleObj = SafeInvoke<Handle>("get_handle");
-                if (handleObj != null) return HandleWrapper.FromNative(handleObj);
-
-                string[] names = { "<Handle>k__BackingField", "handle", "_handle", "m_handle" };
-                foreach (var fieldName in names)
-                {
-                    try
-                    {
-                        var h = GetNativeField<Handle>(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-                        if (h != null) return HandleWrapper.FromNative(h);
-                    }
-                    catch { }
-                }
-                WrapperLog.Warning($"[GetHandle] No handle field found on {GetNativeObject()?.GetType().Name}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"[GetHandle] {ex.Message}");
-                return null;
-            }
+            var h = NativeFaction?.handle;
+            return h != null ? HandleWrapper.FromNative(h) : null;
         }
 
-        public object? GetRawHandle()
-        {
-            try { return GetNativeField<object>("handle"); }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"[GetRawHandle] {ex.Message}");
-                return null;
-            }
-        }
+        /// <summary>Get the raw native handle object.</summary>
+        public object? GetRawHandle() => NativeFaction?.handle;
 
         // ==================== CORE IDENTIFICATION ====================
 
-        public string Name        => GetNativePropertySafe<string>("name") ?? "Unknown";
-        public string DisplayName => GetNativePropertySafe<string>("displayName") ?? Name;
-        public object? FactionType => GetNativePropertySafe<object>("factionType");
-        public bool IsPlayerFaction => GetNativePropertySafe<bool?>("isPlayerFaction") ?? false;
+        /// <summary>Faction name (typed read of Faction.name).</summary>
+        public string Name => NativeFaction?.name ?? "Unknown";
 
-        // ==================== RESOURCES ====================
+        /// <summary>N'a jamais existé — retournait toujours Name.</summary>
+        [Obsolete("Faction.displayName n'existe pas dans le jeu — retournait toujours Name. Utiliser Name.", false)]
+        public string DisplayName => Name;
 
-        public object? MainStockpile => GetNativePropertySafe<object>("mainStockpile");
+        /// <summary>N'a jamais existé sur Faction.</summary>
+        [Obsolete("Faction.factionType n'existe pas dans le jeu — retournait toujours null.", false)]
+        public object? FactionType => null;
 
-        /// <summary>Get resource stock amount from faction stockpile.</summary>
-        public float GetResourceStock(string resourceKey)
+        /// <summary>
+        /// True when this faction is the player faction.
+        /// (L'ancienne lecture de « isPlayerFaction » n'existait pas — toujours false.
+        /// Réimplémenté par comparaison avec Universe.GetPlayerFaction().)
+        /// </summary>
+        public bool IsPlayerFaction
         {
-            try
+            get
             {
-                if (MainStockpile == null) return 0f;
-                return CallNative<float?>("GetResourceStock", resourceKey) ??
-                       CallNative<float?>("GetStock", resourceKey) ??
-                       CallNative<float?>("GetResourceAmount", resourceKey) ?? 0f;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"GetResourceStock failed for {resourceKey}: {ex.Message}");
-                return 0f;
+                var me = NativeFaction;
+                if (me == null) return false;
+                var player = UniverseWrapper.GetCurrent()?.NativeUniverse?.GetPlayerFaction();
+                return player != null && me.Pointer == player.Pointer;
             }
         }
 
-        /// <summary>Add resource to faction. Use negative amount to remove.</summary>
+        // ==================== RESOURCES ====================
+
+        /// <summary>N'a jamais existé sur Faction.</summary>
+        [Obsolete("Faction.mainStockpile n'existe pas dans le jeu — retournait toujours null. Les stocks sont par bâtiment : GetResourceStock() les agrège.", false)]
+        public object? MainStockpile => null;
+
+        /// <summary>
+        /// Total resource stock across all faction buildings (units).
+        /// (L'ancienne chaîne GetResourceStock/GetStock/GetResourceAmount n'existait pas —
+        /// retournait toujours 0. Réimplémenté en agrégeant les stockpiles des bâtiments.)
+        /// </summary>
+        /// <example>float water = faction.GetResourceStock("resource_water");</example>
+        public float GetResourceStock(string resourceKey)
+        {
+            var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey) as ResourceType;
+            var buildings = NativeFaction?.buildings;
+            if (resourceType == null || buildings == null) return 0f;
+
+            float total = 0f;
+            foreach (var b in buildings)
+            {
+                var stockpile = b?.GetStockpile();
+                if (stockpile != null)
+                    total += stockpile.GetTotalStock(resourceType).ToFloat();
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Add resource to faction (typed Faction.AddResource(ResourceType, int)).
+        /// Use negative amount to remove. Amount is truncated to whole units.
+        /// </summary>
+        /// <example>faction.AddResource("resource_water", 500f);</example>
         public bool AddResource(string resourceKey, float amount)
         {
-            try
-            {
-                var result = CallNative<bool?>("AddResource", resourceKey, amount);
-                if (result.HasValue) return result.Value;
-
-                var stockpile = MainStockpile;
-                if (stockpile != null)
-                {
-                    var r2 = CallNative<bool?>("AddResource", stockpile, resourceKey, amount);
-                    if (r2.HasValue) return r2.Value;
-                }
-                WrapperLog.Warning($"Could not add {resourceKey} to faction {Name}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"AddResource {resourceKey} failed: {ex.Message}");
-                return false;
-            }
+            var f = NativeFaction;
+            var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey) as ResourceType;
+            if (f == null || resourceType == null) return false;
+            f.AddResource(resourceType, (int)amount);
+            return true;
         }
 
         // ==================== RELATIONS ====================
 
-        public float? GetRelationshipWith(FactionWrapper otherFaction)
-        {
-            if (!otherFaction.IsValidWrapper) return null;
-            try
-            {
-                return CallNative<float?>("GetRelationship", otherFaction.GetNativeObject()) ??
-                       CallNative<float?>("GetDiplomacyStatus", otherFaction.GetNativeObject()) ??
-                       CallNative<float?>("GetStanding", otherFaction.GetNativeObject());
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"GetRelationshipWith failed: {ex.Message}");
-                return null;
-            }
-        }
+        /// <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
+        [Obsolete("GetRelationship/GetDiplomacyStatus/GetStanding n'existent pas sur Faction — retournait toujours null. Pas de système de diplomatie exposé.", false)]
+        public float? GetRelationshipWith(FactionWrapper otherFaction) => null;
 
         // ==================== BUILDINGS ====================
 
+        /// <summary>All buildings of this faction (typed read of Faction.buildings).</summary>
+        /// <example>foreach (var b in faction.GetBuildings()) { ... }</example>
         public List<BuildingWrapper> GetBuildings()
         {
-            try
-            {
-                var buildings = CallNative<object>("get_buildings");
-                if (buildings == null)
-                {
-                    var planet = PlanetWrapper.GetCurrent();
-                    if (planet != null)
-                    {
-                        var planetBuildings = CallNative<object>("get_buildings", planet.GetNativeObject());
-                        if (planetBuildings is System.Collections.IEnumerable pe)
-                        {
-                            return pe.Cast<object?>()
-                                     .Where(b => b != null)
-                                     .Select(b => new BuildingWrapper(b!))
-                                     .Where(bw => bw.IsValidWrapper)
-                                     .ToList();
-                        }
-                    }
-                    return new List<BuildingWrapper>();
-                }
-
-                if (buildings is System.Collections.IEnumerable enumerable)
-                {
-                    return enumerable.Cast<object?>()
-                                     .Where(b => b != null)
-                                     .Select(b => new BuildingWrapper(b!))
-                                     .ToList();
-                }
-                return new List<BuildingWrapper>();
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"GetBuildings failed: {ex.Message}");
-                return new List<BuildingWrapper>();
-            }
+            var result = new List<BuildingWrapper>();
+            var buildings = NativeFaction?.buildings;
+            if (buildings == null) return result;
+            foreach (var b in buildings)
+                if (b != null) result.Add(new BuildingWrapper(b));
+            return result;
         }
 
         // ==================== AI BEHAVIOR ====================
 
-        public int AIDifficulty => GetNativeProperty<int?>("aiDifficulty") ??
-                                   GetNativeProperty<int?>("difficultyLevel") ?? 0;
+        /// <summary>N'a jamais existé sur Faction.</summary>
+        [Obsolete("Faction.aiDifficulty/difficultyLevel n'existent pas — retournait toujours 0. La difficulté globale : BaseGameWrapper.GameDifficulty.", false)]
+        public int AIDifficulty => 0;
 
-        public bool IsAI => GetNativeProperty<bool?>("isAI") ?? !IsPlayerFaction;
+        /// <summary>True when this faction is AI-controlled (= not the player faction).</summary>
+        public bool IsAI => !IsPlayerFaction;
 
-        public string AIPersonality => GetNativeProperty<string>("aiPersonality") ??
-                                       GetNativeProperty<string>("behaviorType") ?? "default";
+        /// <summary>N'a jamais existé sur Faction.</summary>
+        [Obsolete("Faction.aiPersonality/behaviorType n'existent pas — retournait toujours \"default\".", false)]
+        public string AIPersonality => "default";
 
         // ==================== TECHNOLOGY ====================
 
+        /// <summary>
+        /// True when the technology is researched.
+        /// (L'ancienne chaîne HasTechnology/IsTechResearched/HasResearched n'existait pas —
+        /// retournait toujours false. Réimplémenté via Faction.GetResearchedTechnologies().)
+        /// </summary>
+        /// <example>bool done = faction.HasTechnology("tech_solar_panels");</example>
         public bool HasTechnology(string technologyKey)
         {
-            try
+            var f = NativeFaction;
+            if (f == null || string.IsNullOrEmpty(technologyKey)) return false;
+            var researched = f.GetResearchedTechnologies();
+            if (researched == null) return false;
+
+            // IEnumerable<T> IL2CPP : MoveNext vit sur l'interface non-générique → Cast explicite
+            var enumerator = researched.GetEnumerator();
+            var iterator = enumerator.Cast<Il2CppSystem.Collections.IEnumerator>();
+            while (iterator.MoveNext())
             {
-                return CallNative<bool?>("HasTechnology", technologyKey) ??
-                       CallNative<bool?>("IsTechResearched", technologyKey) ??
-                       CallNative<bool?>("HasResearched", technologyKey) ?? false;
+                var tech = enumerator.Current;
+                if (tech?.TechnologyType?.key == technologyKey) return true;
             }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"HasTechnology {technologyKey} failed: {ex.Message}");
-                return false;
-            }
+            return false;
         }
 
+        /// <summary>
+        /// Research a technology immediately (typed Faction.ResearchTechnology(TechnologyType)).
+        /// </summary>
+        /// <example>faction.ResearchTechnology("tech_solar_panels");</example>
         public bool ResearchTechnology(string technologyKey)
         {
-            try
-            {
-                return CallNative<bool?>("ResearchTechnology", technologyKey) ?? false;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"ResearchTechnology {technologyKey} failed: {ex.Message}");
-                return false;
-            }
+            var f = NativeFaction;
+            if (f == null || !TechnologyType.Has(technologyKey)) return false;
+            var techType = TechnologyType.Get(technologyKey);
+            if (techType == null) return false;
+            f.ResearchTechnology(techType);
+            return true;
         }
 
         // ==================== UTILITIES ====================
 
-        public System.Drawing.Color GetColor()
-        {
-            try
-            {
-                var color = GetNativeProperty<object>("color") ?? GetNativeProperty<object>("factionColor");
-                return color != null ? ExtractColor(color) : System.Drawing.Color.Gray;
-            }
-            catch { return System.Drawing.Color.Gray; }
-        }
-
-        private static System.Drawing.Color ExtractColor(object unityColor)
-        {
-            try
-            {
-                var r = unityColor.GetFieldValue<float?>("r") ?? 0.5f;
-                var g = unityColor.GetFieldValue<float?>("g") ?? 0.5f;
-                var b = unityColor.GetFieldValue<float?>("b") ?? 0.5f;
-                var a = unityColor.GetFieldValue<float?>("a") ?? 1.0f;
-                return System.Drawing.Color.FromArgb((int)(a * 255), (int)(r * 255), (int)(g * 255), (int)(b * 255));
-            }
-            catch { return System.Drawing.Color.Gray; }
-        }
+        /// <summary>N'a jamais fonctionné — Faction n'a pas de couleur exposée.</summary>
+        [Obsolete("Faction.color/factionColor n'existent pas — retournait toujours Gray.", false)]
+        public System.Drawing.Color GetColor() => System.Drawing.Color.Gray;
 
         // ==================== GAME EVENT BUS ====================
 
-        public object? GetGameEventBus()
-        {
-            var bus = SafeInvoke<object>("get__gameEventBus");
-            if (bus != null) return bus;
-
-            bus = GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance) ??
-                  GetNativeField<object>("gameEventBus",  BindingFlags.Public    | BindingFlags.Instance) ??
-                  GetNativeField<object>("m_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance) ??
-                  GetNativeField<object>("_gameEventBus", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-            return bus;
-        }
+        /// <summary>Game event bus of this faction (typed read of Faction._gameEventBus).</summary>
+        public GameEventBus? GetGameEventBus() => NativeFaction?._gameEventBus;
 
         // ==================== COMMAND EXECUTION ====================
 
+        /// <summary>Execute a resource import command via the interaction manager.</summary>
+        /// <example>faction.ExecuteResourceImportCommand("resource_water", 1000f);</example>
         public bool ExecuteResourceImportCommand(string resourceType, float amount = 1000f)
         {
             var mgr = GetInteractionManager();
             var action = ResourceCommandHelper.CreateNativeTextAction(resourceType, amount);
-            return mgr.DispatchAction(NativeObject, GetGameEventBus(), action, "ExecuteResourceImportCommand");
+            return mgr.DispatchAction(GetNativeObject(), GetGameEventBus(), action, "ExecuteResourceImportCommand");
         }
 
+        /// <summary>Execute a custom resource command by type name.</summary>
         public bool ExecuteCustomCommand(string commandType, Dictionary<string, object>? parameters = null)
         {
             try
@@ -361,6 +311,7 @@ namespace PerAspera.GameAPI.Wrappers
 
         /// <summary>
         /// Generic command dispatch via CommandBus. Avoids creating a wrapper per command type.
+        /// ⚠️ Réflexion managed (RS0030) — à migrer vers GameAPI.Commands à terme.
         /// </summary>
         /// <param name="commandTypeName">Full type name (e.g., "PerAspera.Commands.CmdFactionResourceAllocation")</param>
         /// <param name="constructorArgs">Constructor arguments for the command.</param>
@@ -410,6 +361,7 @@ namespace PerAspera.GameAPI.Wrappers
             }
         }
 
+        /// <summary>Debug summary of command-related state.</summary>
         public string GetCommandDebugInfo()
         {
             var handle = GetHandle();
@@ -419,28 +371,7 @@ namespace PerAspera.GameAPI.Wrappers
                    $"  IsPlayer: {IsPlayerFaction}  IsValid: {IsValidWrapper}";
         }
 
-        // ==================== INTERNAL ====================
-
-        private T? GetNativePropertySafe<T>(string propertyName)
-        {
-            string[] names = {
-                $"_{propertyName}_k__BackingField",
-                propertyName,
-                $"_{propertyName}",
-                $"m_{propertyName}"
-            };
-            foreach (var name in names)
-            {
-                try
-                {
-                    var v = GetNativeProperty<T>(name);
-                    if (v != null) return v;
-                }
-                catch { }
-            }
-            return default;
-        }
-
+        /// <summary>Human-readable faction summary.</summary>
         public override string ToString()
             => $"Faction[{Name}] (Valid:{IsValidWrapper} Player:{IsPlayerFaction} AI:{IsAI})";
     }

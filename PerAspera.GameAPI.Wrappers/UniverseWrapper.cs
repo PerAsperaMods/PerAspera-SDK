@@ -1,445 +1,194 @@
-using PerAspera.Commands;
-using PerAspera.Core.IL2CPP;
-using PerAspera.GameAPI.Native;
+#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using PerAspera.Commands;
 
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
-    /// Wrapper for the native Universe class
-    /// Provides safe access to time, game state and universe-level properties
-    /// 
-    /// 📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Universe.md (290 fields, 143 methods)
+    /// Wrapper for the native Universe class.
+    /// Provides safe access to time, game state and universe-level properties.
+    ///
+    /// MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="global::Universe"/>.
+    /// Vérifié contre Tools\InteropDump\ScriptsAssembly\Universe.cs. Corrections au passage :
+    /// « SetPaused » n'existe pas (vrais noms : SetGamePaused/ToggleGamePaused — Pause/Unpause
+    /// n'avaient JAMAIS fonctionné), « GetBaseGame » n'existe pas sur Universe, et
+    /// AddBlackBoard passait le wrapper au lieu de l'objet natif.
+    ///
     /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
-    /// 🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-    /// 🕰️ Time System: Game state, pause, time management functionality
     /// </summary>
     public class UniverseWrapper : WrapperBase
     {
-        private readonly Universe? _nativeUniverse;
+        /// <summary>Wraps an untyped native Universe (compat). Prefer the typed overload.</summary>
+        public UniverseWrapper(object nativeUniverse) : base(nativeUniverse) { }
 
-        public UniverseWrapper(object nativeUniverse) : base(nativeUniverse)
-        {
-            // ⚡ Cast to native Universe type for direct access with interop DLLs
-            _nativeUniverse = nativeUniverse as Universe;
-        }
+        /// <summary>Wraps a typed interop Universe proxy.</summary>
+        public UniverseWrapper(Universe nativeUniverse) : base(nativeUniverse) { }
 
-        public SliceMasterWrapper GetSliceMaster()
-        {
-            return new SliceMasterWrapper ( NativeObject.InvokeMethod<SliceMaster>("get_sliceMaster"));
-        }
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>int sol = universe.NativeUniverse?.GetMartianSol() ?? 0;</example>
+        public Universe? NativeUniverse => GetNativeObject() as Universe;
 
-
-        public CommandBus GetCommandBus()
-        {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeUniverse != null)
-                {
-                    return _nativeUniverse.commandBus;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for commandBus, using reflection: {ex.Message}");
-            }
-
-            // 🔄 Reflection fallback
-            return SafeInvoke<CommandBus>("get_commandBus");
-        }
-
-        /// <summary>
-        /// Get the current universe instance
-        /// </summary>
+        /// <summary>Get the current universe instance.</summary>
+        /// <example>var universe = UniverseWrapper.GetCurrent();</example>
         public static UniverseWrapper? GetCurrent()
         {
             var universe = KeeperTypeRegistry.GetUniverse();
             return universe != null ? new UniverseWrapper(universe) : null;
         }
-        
-        /// <summary>
-        /// Get Keeper instance for Universe entities (factions, planets, resources)
-        /// Property: keeper { get; }
-        /// </summary>
+
+        // ==================== CORE SYSTEMS ====================
+
+        /// <summary>Get the SliceMaster (planet slicing system).</summary>
+        public SliceMasterWrapper GetSliceMaster()
+            => new SliceMasterWrapper(NativeUniverse?.sliceMaster);
+
+        /// <summary>Get the native CommandBus (typed).</summary>
+        public CommandBus? GetCommandBus() => NativeUniverse?.commandBus;
+
+        /// <summary>Get Keeper instance for Universe entities (factions, planets, resources).</summary>
         public KeeperWrapper? GetKeeper()
         {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeUniverse != null)
-                {
-                    var keeper = _nativeUniverse.keeper;
-                    return keeper != null ? new KeeperWrapper(keeper) : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for keeper, using reflection: {ex.Message}");
-            }
-
-            // 🔄 Reflection fallback
-            var nativeKeeper = SafeInvoke<object>("get_keeper");
-            return nativeKeeper != null ? new KeeperWrapper(nativeKeeper) : null;
-        }
-        
-        public FactionWrapper GetPlayerFaction()
-        {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeUniverse != null)
-                {
-                    var faction = _nativeUniverse.GetPlayerFaction();
-                    return faction != null ? new FactionWrapper(faction) : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for GetPlayerFaction, using reflection: {ex.Message}");
-            }
-
-            // 🔄 Reflection fallback
-            var nativeFaction = SafeInvoke<object>("GetPlayerFaction");
-            return nativeFaction != null ? new FactionWrapper(nativeFaction) : null;
+            var keeper = NativeUniverse?.keeper;
+            return keeper != null ? new KeeperWrapper(keeper) : null;
         }
 
+        /// <summary>Get the player faction.</summary>
+        /// <example>var player = universe.GetPlayerFaction();</example>
+        public FactionWrapper? GetPlayerFaction()
+            => FactionWrapper.FromNative(NativeUniverse?.GetPlayerFaction());
 
         // ==================== TIME PROPERTIES ====================
 
-        /// <summary>
-        /// Get current Martian sol (days passed)
-        /// </summary>
-        public int CurrentSol
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeUniverse != null)
-                    {
-                        return _nativeUniverse.GetMartianSol();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for GetMartianSol, using reflection: {ex.Message}");
-                }
+        /// <summary>Current Martian sol — days passed (typed Universe.GetMartianSol()).</summary>
+        public int CurrentSol => NativeUniverse?.GetMartianSol() ?? 0;
 
-                // 🔄 Reflection fallback
-                return SafeInvoke<int?>("GetDaysPassed") ?? 0;
-            }
-        }
-        
-        /// <summary>
-        /// Get current game speed multiplier
-        /// </summary>
+        /// <summary>Current game speed multiplier (typed Get/SetGameSpeed).</summary>
         public float GameSpeed
         {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeUniverse != null)
-                    {
-                        return _nativeUniverse.GetGameSpeed();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for GetGameSpeed, using reflection: {ex.Message}");
-                }
-
-                // 🔄 Reflection fallback
-                return SafeInvoke<float?>("GetGameSpeed") ?? 1.0f;
-            }
-            set
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeUniverse != null)
-                    {
-                        _nativeUniverse.SetGameSpeed(value);
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for SetGameSpeed, using reflection: {ex.Message}");
-                }
-
-                // 🔄 Reflection fallback
-                SafeInvokeVoid("SetGameSpeed", value);
-            }
+            get => NativeUniverse?.GetGameSpeed() ?? 1.0f;
+            set => NativeUniverse?.SetGameSpeed(value);
         }
 
         /// <summary>
-        /// Controls the number of simulation ticks per in-game day
-        /// Higher values = faster simulation, lower values = slower simulation
+        /// Number of simulation ticks per in-game day (static native field Universe.TICKS_PER_DAY).
+        /// Higher values = faster simulation.
         /// </summary>
         public int TicksPerDay
         {
-            get => NativeObject.GetMemberValue<int>("TICKS_PER_DAY");
-            set => NativeObject.SetMemberValue("TICKS_PER_DAY", value);
+            get => Universe.TICKS_PER_DAY;
+            set => Universe.TICKS_PER_DAY = value;
         }
-        
-        /// <summary>
-        /// Check if game is paused
-        /// </summary>
-        public bool IsPaused
-        {
-            get
-            {
-                try
-                {
-                    // ⚡ Direct access with interop DLLs
-                    if (_nativeUniverse != null)
-                    {
-                        return _nativeUniverse.GetGamePaused();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WrapperLog.Warning($"Direct access failed for GetGamePaused, using reflection: {ex.Message}");
-                }
 
-                // 🔄 Reflection fallback
-                return SafeInvoke<bool>("GetGamePaused");
-            }
-        }
-        
+        /// <summary>Check if game is paused (typed Universe.GetGamePaused()).</summary>
+        public bool IsPaused => NativeUniverse?.GetGamePaused() ?? false;
+
         // ==================== GAME STATE ====================
-        
-        /// <summary>
-        /// Get the planet wrapper instance
-        /// </summary>
+
+        /// <summary>Get the planet wrapper instance.</summary>
+        /// <example>var planet = universe.GetPlanet();</example>
         public PlanetWrapper? GetPlanet()
         {
-            try
-            {
-                // ⚡ Direct access with interop DLLs
-                if (_nativeUniverse != null)
-                {
-                    var planet = _nativeUniverse.GetPlanet();
-                    return planet != null ? new PlanetWrapper(planet) : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Warning($"Direct access failed for GetPlanet, using reflection: {ex.Message}");
-            }
-
-            // 🔄 Reflection fallback
-            var nativePlanet = SafeInvoke<object>("GetPlanet");
-            return nativePlanet != null ? new PlanetWrapper(nativePlanet) : null;
+            var planet = NativeUniverse?.GetPlanet();
+            return planet != null ? new PlanetWrapper(planet) : null;
         }
-        
-        /// <summary>
-        /// Get the current planet instance (alias for GetPlanet for convenience)
-        /// </summary>
+
+        /// <summary>Get the current planet instance (alias for GetPlanet).</summary>
         public PlanetWrapper? CurrentPlanet => GetPlanet();
-        
-        /// <summary>
-        /// Get the base game wrapper instance
-        /// </summary>
-        public BaseGameWrapper? GetBaseGame()
-        {
-            var nativeBaseGame = SafeInvoke<object>("GetBaseGame");
-            return nativeBaseGame != null ? new BaseGameWrapper(nativeBaseGame) : null;
-        }
-        
 
-        
         /// <summary>
-        /// Get all factions in the universe
-        /// Maps to: factions field or GetFactions() method
+        /// Get the base game wrapper instance.
+        /// (« GetBaseGame » n'existe pas sur Universe — délègue à BaseGameWrapper.GetCurrent().)
         /// </summary>
+        public BaseGameWrapper? GetBaseGame() => BaseGameWrapper.GetCurrent();
+
+        /// <summary>Get all factions in the universe (typed read of Universe.factions).</summary>
+        /// <example>foreach (var f in universe.GetFactions()) { ... }</example>
         public List<FactionWrapper> GetFactions()
         {
-            try
-            {
-                var nativeFactions = SafeInvoke<object>("get_factions") ?? 
-                                   SafeInvoke<object>("GetFactions");
-                
-                if (nativeFactions == null) return new List<FactionWrapper>();
-                
-                var factionWrappers = new List<FactionWrapper>();
-                var enumerable = nativeFactions as System.Collections.IEnumerable;
-                if (enumerable != null)
-                {
-                    foreach (var faction in enumerable)
-                    {
-                        if (faction != null)
-                        {
-                            factionWrappers.Add(new FactionWrapper(faction));
-                        }
-                    }
-                }
-                
-                return factionWrappers;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to get factions: {ex.Message}");
-                return new List<FactionWrapper>();
-            }
+            var result = new List<FactionWrapper>();
+            var factions = NativeUniverse?.factions;
+            if (factions == null) return result;
+            foreach (var faction in factions)
+                if (faction != null) result.Add(new FactionWrapper(faction));
+            return result;
         }
-        
+
         // ==================== ACTIONS ====================
-        
+
         /// <summary>
-        /// Pause the game
+        /// Pause the game (typed Universe.SetGamePaused(true)).
+        /// ⚠️ L'ancienne implémentation visait « SetPaused » qui n'existe pas — elle
+        /// n'a jamais rien fait. Celle-ci fonctionne réellement.
         /// </summary>
-        public void Pause()
-        {
-            SafeInvokeVoid("SetPaused", true);
-        }
-        
-        /// <summary>
-        /// Unpause the game
-        /// </summary>
-        public void Unpause()
-        {
-            SafeInvokeVoid("SetPaused", false);
-        }
-        
-        /// <summary>
-        /// Toggle pause state
-        /// </summary>
-        public void TogglePause()
-        {
-            SafeInvokeVoid("SetPaused", !IsPaused);
-        }
-        
+        public void Pause() => NativeUniverse?.SetGamePaused(true);
+
+        /// <summary>Unpause the game (typed Universe.SetGamePaused(false)).</summary>
+        public void Unpause() => NativeUniverse?.SetGamePaused(false);
+
+        /// <summary>Toggle pause state (typed Universe.ToggleGamePaused()).</summary>
+        public void TogglePause() => NativeUniverse?.ToggleGamePaused();
+
         // ==================== BLACKBOARD SYSTEM ====================
-        
-        /// <summary>
-        /// Get the main blackboard instance
-        /// Field: blackboardMain (public Blackboard)
-        /// </summary>
+        // blackboardMain et le dictionnaire blackboards sont exposés typés par le proxy.
+
+        /// <summary>Get the main blackboard instance (lu par les règles YAML MISSION, scope « main. »).</summary>
+        /// <example>universe.GetMainBlackBoard()?.SetValue("mon_flag", true);</example>
         public BlackBoardWrapper? GetMainBlackBoard()
         {
-            var nativeBlackboard = SafeGetField<object>("blackboardMain");
-            return nativeBlackboard != null ? new BlackBoardWrapper(nativeBlackboard) : null;
+            var bb = NativeUniverse?.blackboardMain;
+            return bb != null ? new BlackBoardWrapper(bb) : null;
         }
-        
-        /// <summary>
-        /// Get a specific blackboard by name from the blackboards dictionary
-        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-        /// </summary>
+
+        /// <summary>Get a specific blackboard by name (typed dictionary access).</summary>
         public BlackBoardWrapper? GetBlackBoard(string name)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                WrapperLog.Warning("GetBlackBoard called with null or empty name");
-                return null;
-            }
-
-            var blackboardsDict = SafeGetField<object>("blackboards");
-            if (blackboardsDict == null)
-            {
-                WrapperLog.Warning("blackboards dictionary is null in Universe");
-                return null;
-            }
-
-            try
-            {
-                var nativeBlackboard = blackboardsDict.InvokeMethod<object>("get_Item", name);
-                return nativeBlackboard != null ? new BlackBoardWrapper(nativeBlackboard) : null;
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to get blackboard '{name}': {ex.Message}");
-                return null;
-            }
+            if (string.IsNullOrEmpty(name)) return null;
+            var dict = NativeUniverse?.blackboards;
+            if (dict == null || !dict.ContainsKey(name)) return null;
+            var bb = dict[name];
+            return bb != null ? new BlackBoardWrapper(bb) : null;
         }
-        
-        /// <summary>
-        /// Get all blackboard names from the blackboards dictionary
-        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-        /// </summary>
-        public IList<string>? GetBlackBoardNames()
+
+        /// <summary>Get all blackboard names.</summary>
+        public IList<string> GetBlackBoardNames()
         {
-            var blackboardsDict = SafeGetField<object>("blackboards");
-            if (blackboardsDict == null) return null;
-            
-            try
-            {
-                var keys = blackboardsDict.InvokeMethod<object>("get_Keys");
-                return keys?.ConvertIl2CppList<string>();
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to get blackboard names: {ex.Message}");
-                return null;
-            }
+            var result = new List<string>();
+            var dict = NativeUniverse?.blackboards;
+            if (dict == null) return result;
+            foreach (var kvp in dict) result.Add(kvp.Key);
+            return result;
         }
-        
-        /// <summary>
-        /// Check if a blackboard with the given name exists
-        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-        /// </summary>
+
+        /// <summary>Check if a blackboard with the given name exists.</summary>
         public bool HasBlackBoard(string name)
         {
             if (string.IsNullOrEmpty(name)) return false;
-            
-            var blackboardsDict = SafeGetField<object>("blackboards");
-            if (blackboardsDict == null) return false;
-            
-            try
-            {
-                return blackboardsDict.InvokeMethod<bool>("ContainsKey", name);
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to check if blackboard '{name}' exists: {ex.Message}");
-                return false;
-            }
+            return NativeUniverse?.blackboards?.ContainsKey(name) ?? false;
         }
-        
+
         /// <summary>
-        /// Add a new blackboard to the universe
-        /// Method: AddBlackboard(Blackboard blackboard)
-        /// Note: Based on decompiled Universe.md method
+        /// Add a new blackboard to the universe (typed Universe.AddBlackboard).
+        /// ⚠️ L'ancienne implémentation passait le WRAPPER à l'appel natif (bug) —
+        /// l'objet natif est maintenant déballé correctement.
         /// </summary>
         public void AddBlackBoard(BlackBoardWrapper blackboard)
         {
-            if (blackboard?.GetNativeObject() == null)
+            var native = blackboard?.GetNativeObject() as Blackboard;
+            if (native == null)
             {
-                WrapperLog.Warning("Cannot add null blackboard to Universe");
+                WrapperLog.Warning("Cannot add null/invalid blackboard to Universe");
                 return;
             }
-            
-            SafeInvokeVoid("AddBlackboard", blackboard);
+            NativeUniverse?.AddBlackboard(native);
         }
-        
-        /// <summary>
-        /// Get count of blackboards in the universe
-        /// Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-        /// </summary>
-        public int GetBlackBoardCount()
-        {
-            var blackboardsDict = SafeGetField<object>("blackboards");
-            if (blackboardsDict == null) return 0;
-            
-            try
-            {
-                return blackboardsDict.InvokeMethod<int>("get_Count");
-            }
-            catch (Exception ex)
-            {
-                WrapperLog.Error($"Failed to get blackboard count: {ex.Message}");
-                return 0;
-            }
-        }
+
+        /// <summary>Get count of blackboards in the universe.</summary>
+        public int GetBlackBoardCount() => NativeUniverse?.blackboards?.Count ?? 0;
 
         // ==================== INFO ====================
 
+        /// <summary>Human-readable universe state summary.</summary>
         public override string ToString()
         {
             var blackboardCount = GetBlackBoardCount();
