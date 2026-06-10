@@ -1,0 +1,16 @@
+; Règle d'architecture (ARCHITECTURE.md §Reflection) : la réflexion est interdite hors
+; de PerAspera.Core.IL2CppExtensions. Utiliser les helpers SafeInvoke/SafeGetField des
+; wrappers, ou ajouter un helper dans IL2CppExtensions si un besoin n'est pas couvert.
+; Format : DocId;message — analyzer Microsoft.CodeAnalysis.BannedApiAnalyzers (RS0030).
+M:System.Type.GetMethod(System.String);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke ou un helper IL2CppExtensions
+M:System.Type.GetMethod(System.String,System.Reflection.BindingFlags);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke ou un helper IL2CppExtensions
+M:System.Type.GetMethod(System.String,System.Type[]);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke ou un helper IL2CppExtensions
+M:System.Type.GetField(System.String);Réflexion interdite hors IL2CppExtensions — utiliser SafeGetField ou un helper IL2CppExtensions
+M:System.Type.GetField(System.String,System.Reflection.BindingFlags);Réflexion interdite hors IL2CppExtensions — utiliser SafeGetField ou un helper IL2CppExtensions
+M:System.Type.GetProperty(System.String);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke("get_X") ou un helper IL2CppExtensions
+M:System.Type.GetProperty(System.String,System.Reflection.BindingFlags);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke("get_X") ou un helper IL2CppExtensions
+M:System.Reflection.MethodBase.Invoke(System.Object,System.Object[]);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke ou un helper IL2CppExtensions
+M:System.Reflection.FieldInfo.GetValue(System.Object);Réflexion interdite hors IL2CppExtensions — utiliser SafeGetField ou un helper IL2CppExtensions
+M:System.Reflection.FieldInfo.SetValue(System.Object,System.Object);Réflexion interdite hors IL2CppExtensions — utiliser SafeSetField ou un helper IL2CppExtensions
+M:System.Reflection.PropertyInfo.GetValue(System.Object);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke("get_X") ou un helper IL2CppExtensions
+M:System.Reflection.PropertyInfo.SetValue(System.Object,System.Object);Réflexion interdite hors IL2CppExtensions — utiliser SafeInvoke("set_X") ou un helper IL2CppExtensions

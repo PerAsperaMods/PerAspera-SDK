@@ -6,8 +6,8 @@ Sous-projet du workspace `F:\ModPeraspera\`. Voir [CLAUDE.md](../CLAUDE.md) à l
 
 ```
 1. PerAspera.Abstractions          (aucune dépendance)
-2. PerAspera.Core
-3. PerAspera.Core.IL2CppExtensions ← dépend de Core
+2. PerAspera.Core                  (aucune dépendance projet)
+3. PerAspera.Core.IL2CppExtensions (aucune dépendance projet — indépendant de Core)
 4. PerAspera.GameAPI.Native
 5. PerAspera.GameAPI               ← dépend de Core + Native
 6. PerAspera.GameAPI.Events        ← dépend de GameAPI
@@ -27,19 +27,19 @@ Sous-projet du workspace `F:\ModPeraspera\`. Voir [CLAUDE.md](../CLAUDE.md) à l
 # Build rapide (projet individuel)
 dotnet build PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj
 
-# DLL buildées → SDK-DLL\ (copier dans BepInEx/plugins/ pour tester)
+# Déploiement vers le jeu : Deploy-SDK-DLLs.ps1 → BepInEx\plugins\SDK\
 ```
 
 ## Import SDK dans les mods
 
 ```xml
 <!-- Dans le .csproj de chaque mod -->
-<Import Project="F:\ModPeraspera\SDK\SDK-DLL\sdkDLL.props" />
+<Import Project="F:\ModPeraspera\SDK_DLL\sdkDLL.props" />
 ```
 
 ## Règles critiques
 
-- `System.Type` JAMAIS `Type` nu (conflit IL2CPP entre assemblies)
+- `Type` nu = `System.Type` via alias global (`Directory.Build.props`) — plus de conflit CS0104 avec les assemblies du jeu
 - `GameApi.wrapper.*` en priorité sur les instantiations directes
 - `LogAspera` pour tout logging (pas `Log.LogInfo` directement)
 - XML doc `<summary>` + `<example>` obligatoire sur toutes les méthodes publiques

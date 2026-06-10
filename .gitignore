@@ -75,10 +75,12 @@ GameLibs-Package/
 *.dll
 gamelibs.props
 
-# Documentation (except README, CLAUDE.md and doc/)
+# Documentation (except README, CLAUDE.md, ARCHITECTURE.md, CHANGELOG.md and doc/)
 *.md
 !README.md
 !CLAUDE.md
+!ARCHITECTURE.md
+!CHANGELOG.md
 !doc/**/*.md
 !gamelibs.props.example
 
