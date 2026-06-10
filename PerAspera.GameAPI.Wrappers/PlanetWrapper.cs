@@ -31,15 +31,17 @@ namespace PerAspera.GameAPI.Wrappers
 
         // ==================== COORDINATE CONVERSION ====================
 
-        /// <summary>
-        /// Convert geographic coordinates to the game's internal 2D position.
-        /// Convention: x=longitude, y=latitude.
-        /// </summary>
+        /// <summary>Convert geographic coordinates to the game's internal 2D position.</summary>
         public UnityEngine.Vector2 GetGamePosition(float longitude, float latitude)
-        {
-            try { return SafeInvoke<UnityEngine.Vector2>("GetPosition", longitude, latitude); }
-            catch { return UnityEngine.Vector2.zero; }
-        }
+            => SafeInvoke<UnityEngine.Vector2>("GetPosition", longitude, latitude);
+
+        /// <summary>Convert a game 2D world position to longitude (degrees).</summary>
+        public float GetLongitude(UnityEngine.Vector2 position)
+            => SafeInvoke<float>("GetLongitude", position);
+
+        /// <summary>Convert a game 2D world position to latitude (degrees).</summary>
+        public float GetLatitude(UnityEngine.Vector2 position)
+            => SafeInvoke<float>("GetLatitude", position);
 
         // ==================== PLANET IDENTITY ====================
 
@@ -88,9 +90,10 @@ namespace PerAspera.GameAPI.Wrappers
             get => SafeInvoke<float?>("GetWaterStock") ?? SafeGetField<float>("waterStock");
             set
             {
-                // Try property setter first, fallback to field write
-                try { SafeInvokeVoid("set_waterStock", value); return; } catch { }
-                try { SafeSetField("waterStock", value); } catch { }
+                // Property setter when available, otherwise direct field write.
+                // SafeInvokeVoid never throws, so the old try/catch fallback was dead code.
+                if (!TryInvokeVoid("set_waterStock", value))
+                    TrySetField("waterStock", value);
             }
         }
 

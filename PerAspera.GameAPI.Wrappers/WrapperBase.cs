@@ -23,7 +23,12 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>True when the native object is non-null.</summary>
         protected bool IsValid => GetNativeObject() != null;
 
-        protected WrapperBase(object? nativeObject) : base(nativeObject ?? new object())
+        /// <summary>
+        /// Wraps the given native object. Null is tolerated but the wrapper is then
+        /// invalid: <see cref="IsValid"/> = false and every Safe* accessor returns default.
+        /// (Previously a placeholder object was substituted, which made IsValid lie.)
+        /// </summary>
+        protected WrapperBase(object? nativeObject) : base(nativeObject)
         {
             if (nativeObject == null)
                 WrapperLog.Warning($"Creating {GetType().Name} with null native object");
@@ -44,6 +49,15 @@ namespace PerAspera.GameAPI.Wrappers
             => CallNativeVoid(methodName, args);
 
         /// <summary>
+        /// Invoke a void method on the native object and report success.
+        /// Use this instead of SafeInvokeVoid when a fallback is needed —
+        /// SafeInvokeVoid never throws, so try/catch around it is dead code.
+        /// </summary>
+        /// <example>if (!TryInvokeVoid("set_waterStock", v)) TrySetField("waterStock", v);</example>
+        protected bool TryInvokeVoid(string methodName, params object[] args)
+            => CallNativeVoid(methodName, args);
+
+        /// <summary>
         /// Read a field value from the native object, returning default on failure.
         /// </summary>
         protected T? SafeGetField<T>(string fieldName)
@@ -53,6 +67,12 @@ namespace PerAspera.GameAPI.Wrappers
         /// Write a field value on the native object, swallowing exceptions.
         /// </summary>
         protected void SafeSetField<T>(string fieldName, T value)
+            => SetNativeField(fieldName, value);
+
+        /// <summary>
+        /// Write a field value on the native object and report success.
+        /// </summary>
+        protected bool TrySetField<T>(string fieldName, T value)
             => SetNativeField(fieldName, value);
 
         // ==================== DEBUG FILE DUMPS ====================
