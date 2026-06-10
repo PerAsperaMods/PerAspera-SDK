@@ -19,6 +19,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
     /// DOC REFERENCES: F:\ModPeraspera\Internal_doc\IMPLEMENTATION\Feature2-Events-Implementation.cs
     /// </summary>
     [BepInPlugin("peraspera.sdk.keeper.events", "Keeper Event System Enhancement", "1.0.0")]
+    [BepInDependency("peraspera.sdk.keeper.registration", BepInDependency.DependencyFlags.HardDependency)]
     public class EventSystemEnhancementPlugin : BasePlugin
     {
         private static ManualLogSource? logger;

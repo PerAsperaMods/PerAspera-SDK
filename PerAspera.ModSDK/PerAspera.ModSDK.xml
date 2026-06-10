@@ -28,14 +28,14 @@
         </member>
         <member name="T:PerAspera.ModSDK.PerAsperaSDKPlugin">
             <summary>
-            Plugin principal PerAspera SDK - Fournit l'infrastructure de modding complète
+            Plugin principal PerAspera SDK - Fournit l'infrastructure de modding compl�te
             Uses new event architecture (PerAspera.GameAPI.Events v2)
             </summary>
         </member>
         <member name="M:PerAspera.ModSDK.PerAsperaSDKPlugin.InitializeNativeEventSystem">
             <summary>
-            Initialise le système d'interception des événements natifs du jeu
-            Uses new PerAspera.GameAPI.Events architecture v2
+            Initialise le système d'interception des événements natifs du jeu.
+            Uses new PerAspera.GameAPI.Events architecture v2.
             </summary>
         </member>
         <member name="T:PerAspera.ModSDK.Properties.Resources">

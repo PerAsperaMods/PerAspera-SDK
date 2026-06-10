@@ -18,9 +18,9 @@ namespace PerAspera.GameAPI.Wrappers
     /// buildings sur Planet) sont marquées [Obsolete] avec un message honnête —
     /// elles retournaient silencieusement 0/vide depuis toujours.
     ///
-    /// 📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
+    /// 📖 Enhanced Documentation: F:\ModPeraspera\docs\Planet-Enhanced.md
     /// 🤖 Agent Expert: @per-aspera-sdk-coordinator
-    /// 🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
+    /// 🔧 Gap Analysis: F:\ModPeraspera\docs\Capabilities-Matrix.md
     /// </summary>
     public class PlanetWrapper : WrapperBase
     {
@@ -114,19 +114,15 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== RESOURCES ====================
 
         /// <summary>
-        /// Water stock on the planet (typed read of Planet.waterStock).
-        /// ⚠️ Write: the native setter is PRIVATE — the write is best-effort and its
-        /// failure is logged (the previous reflection-based write silently never worked).
+        /// Water stock on the planet.
+        /// Typed read/write via the publicized interop proxy (BepInEx.AssemblyPublicizer).
+        /// The native setter is private in-game but publicized at compile time — no reflection needed.
         /// </summary>
-        /// <example>float water = planet.WaterStock;</example>
+        /// <example>float water = planet.WaterStock; planet.WaterStock = 5000f;</example>
         public float WaterStock
         {
             get => NativePlanet?.waterStock ?? 0f;
-            set
-            {
-                if (!TryInvokeVoid("set_waterStock", value) && !TrySetField("waterStock", value))
-                    WrapperLog.Warning("WaterStock write failed: the native setter is private — drive water via game commands/simulation instead");
-            }
+            set { if (NativePlanet != null) NativePlanet.waterStock = value; }
         }
 
         /// <summary>

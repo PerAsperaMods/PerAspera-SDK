@@ -504,7 +504,7 @@ namespace PerAspera.GameAPI.Wrappers
                 "baseenergyoutput" => BaseEnergyOutput,
                 "energyconsumption" => EnergyConsumption,
                 "isvalid" => IsValid,
-                _ => SafeInvoke<object>(propertyName)
+                _ => null  // unknown property — add a case above if needed
             };
         }
     }

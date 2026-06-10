@@ -4,299 +4,245 @@
         <name>PerAspera.GameAPI.Wrappers</name>
     </assembly>
     <members>
+        <member name="T:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper">
+            <summary>
+            Wrapper for the native BaseGameReferences class.
+            MIGRATION 2026-06-10 — interop typé (BaseGameReferences.mars exposé par le proxy).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native references object (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper.#ctor(BaseGameReferences)">
+            <summary>Wraps a typed interop BaseGameReferences proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper.NativeBaseGameReferences">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper.Mars">
+            <summary>Mars manager (typed read of BaseGameReferences.mars).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGameWrapper">
              <summary>
-             Wrapper for BaseGame singleton
-             Provides type-safe access to main game systems
+             Wrapper for BaseGame singleton.
+             Provides type-safe access to main game systems.
             
-             📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\BaseGame.md (349 fields, 145 methods)
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:BaseGame"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\BaseGame.cs. Les anciens doubles
+             chemins « typé + fallback réflexion » ont été supprimés (le fallback ne servait à
+             rien : si le membre typé compile, il existe). Corrections au passage :
+             loadedSave/hasCheats/hasMods/difficulty sont STATIQUES (les lectures d'instance de
+             l'ancien code échouaient silencieusement), et currentDay n'existe pas sur BaseGame
+             (le sol courant vient de Universe.GetMartianSol()).
+            
              🤖 Agent Expert: @per-aspera-sdk-coordinator
-             🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-             📝 Examples: F:\ModPeraspera\Individual-Mods\PerAspera-CommandsDemo\BaseGame usage
-            
-             ⚡ INTEROP UPDATE: Now uses direct IL2CPP access with reflection fallback for compatibility
              </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native BaseGame (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.#ctor(BaseGame)">
+            <summary>Wraps a typed interop BaseGame proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.NativeBaseGame">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>var keeper = baseGame.NativeBaseGame?.keeper;</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrent">
-            <summary>
-            Get current BaseGame singleton instance
-            </summary>
+            <summary>Get current BaseGame singleton instance.</summary>
+            <example>var baseGame = BaseGameWrapper.GetCurrent();</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsPaused">
-            <summary>
-            Check if the game is paused
-            Delegates to Universe for pause state
-            </summary>
+            <summary>Check if the game is paused (delegates to Universe).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetCurrentDay">
             <summary>
-            Get current game day/sol
+            Current martian sol (game day). Typed call to Universe.GetMartianSol().
+            (L'ancien binding « currentDay » n'existait pas sur BaseGame — retournait null.)
             </summary>
+            <example>int? sol = baseGame.GetCurrentDay();</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetKeeper">
-            <summary>
-            Get Keeper instance (entity registry and manager)
-            Property: keeper { get; private set; }
-            Backing field: _keeper_k__BackingField
-            </summary>
+            <summary>Get Keeper instance (entity registry and manager).</summary>
+            <example>var keeper = baseGame.GetKeeper();</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetUniverse">
-            <summary>
-            Get Universe wrapper instance (time, factions, planet)
-            Property: universe { get; }
-            Backing field: _universe_k__BackingField
-            </summary>
+            <summary>Get Universe wrapper instance (time, factions, planet).</summary>
+            <example>var universe = baseGame.GetUniverse();</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsQuitting">
-            <summary>
-            Check if game is in quitting state
-            Static property: isQuitting { get; }
-            </summary>
+            <summary>Check if game is in quitting state (static native property).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsEnding">
-            <summary>
-            Check if game is ending (credits/end sequence)
-            Static property: isEnding { get; }
-            </summary>
+            <summary>Check if game is ending — credits/end sequence (static native property).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.MainSceneFinishedInit">
-            <summary>
-            Check if main scene has finished initialization
-            Field: MainSceneHasFinishedInit
-            </summary>
+            <summary>Check if main scene has finished initialization.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.IsLoading">
-            <summary>
-            Check if game is currently loading
-            Field: isLoading
-            </summary>
+            <summary>Check if game is currently loading.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.LoadedSave">
             <summary>
-            Get loaded save file name
-            Field: loadedSave
+            Loaded save file name (static native field, tuple name+header).
+            (L'ancien code lisait « loadedSave » comme champ d'instance string — toujours null.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.HasCheats">
-            <summary>
-            Check if game has cheats enabled
-            Field: hasCheats
-            </summary>
+            <summary>Check if game has cheats enabled (static native field).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.HasMods">
-            <summary>
-            Check if game has mods enabled
-            Field: hasMods
-            </summary>
+            <summary>Check if game has mods enabled (static native field).</summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.CanvasRefs">
-            <summary>
-            Get canvas references for UI components
-            Field: canvasRefs
-            </summary>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GameDifficulty">
+            <summary>Current difficulty (native BaseGame.Difficulty enum, static field).</summary>
+            <example>var diff = baseGame.GameDifficulty;</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.Difficulty">
-            <summary>
-            Get current difficulty level
-            Field: difficulty
-            </summary>
+            <summary>N'a jamais fonctionné — « difficulty » est un champ STATIQUE de type Difficulty.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.OnFinishLoading">
-            <summary>
-            Trigger OnFinishLoading callback
-            Method: OnFinishLoading()
-            </summary>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetModList">
+            <summary>List of enabled mod names (static native field).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.CanvasRefs">
+            <summary>Canvas references for UI components (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.CameraController">
-            <summary>
-            Get camera controller reference
-            Maps to: cameraController field
-            </summary>
+            <summary>Camera controller (typed OrbitingCamera).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.MarsManager">
-            <summary>
-            Get mars terrain manager
-            Maps to: marsManager field
-            </summary>
+            <summary>Mars terrain manager (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.InputRaycaster">
-            <summary>
-            Get input raycaster for UI interactions
-            Maps to: inputRaycaster field
-            </summary>
+            <summary>Input raycaster for UI interactions (typed).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BaseGameWrapper.baseGameReferences">
+            <summary>Base game references wrapper.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.OnFinishLoading">
+            <summary>Trigger OnFinishLoading callback.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.ExitToMainMenu">
-            <summary>
-            Exit to main menu
-            Method: ExitToMainMenu()
-            </summary>
+            <summary>Exit to main menu.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.ForceExit">
-            <summary>
-            Force exit game
-            Method: ForceExit()
-            </summary>
+            <summary>Force exit game.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetMainBlackBoard">
-            <summary>
-            Get the main blackboard via Universe
-            Convenience method: BaseGame -> Universe -> BlackBoard
-            </summary>
+            <summary>Get the main blackboard via Universe.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetBlackBoard(System.String)">
-            <summary>
-            Get a specific blackboard by name via Universe
-            Convenience method: BaseGame -> Universe -> BlackBoard
-            </summary>
+            <summary>Get a specific blackboard by name via Universe.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.HasBlackBoard(System.String)">
-            <summary>
-            Check if a blackboard exists via Universe
-            Convenience method: BaseGame -> Universe -> BlackBoard
-            </summary>
+            <summary>Check if a blackboard exists via Universe.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetBlackBoardNames">
-            <summary>
-            Get all blackboard names via Universe
-            Convenience method: BaseGame -> Universe -> BlackBoard
-            </summary>
+            <summary>Get all blackboard names via Universe.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetPois">
             <summary>
             Get wrapped list of all visual POI instances in the game
-            Clean API: var pois = baseGame.VisualPOIs; foreach (var poi in pois.GetAll()) { ... }
-            Includes all POI from vanilla game + YAML mods
+            (vanilla + YAML mods). Typed read of BaseGame.pois.
             </summary>
+            <example>foreach (var poi in baseGame.GetPois()!) { ... }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.GetVisualSites">
+            <summary>Visual special sites with their resource veins (typed read of BaseGame.visualSites).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BaseGameWrapper.ToString">
+            <summary>Human-readable game state summary.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BlackBoardWrapper">
-            <summary>
-            Wrapper for the native Blackboard class (variable storage system)
-            Provides safe access to Blackboard variables used for quest/dialog state management
-            DOC: Blackboard.md - Variable storage with string/float/bool values
-            </summary>
+             <summary>
+             Wrapper for the native Blackboard class (variable storage system).
+             Provides safe access to Blackboard variables used for quest/dialog state management.
+            
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:Blackboard"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\Blackboard.cs — tous les membres
+             existent typés, y compris TryGetValue(out Value) et DefaultSet&lt;T&gt;.
+            
+             Rappel scope : les règles YAML MISSION lisent Universe.blackboardMain (« main.X »),
+             pas le blackboard de faction — voir /per-aspera-wrappers-sdk.
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.#ctor(System.Object)">
-            <summary>
-            Creates a new BlackBoard wrapper around a native blackboard instance
-            </summary>
-            <param name="nativeBlackBoard">Native blackboard object to wrap</param>
+            <summary>Wraps an untyped native blackboard (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.#ctor(Blackboard)">
+            <summary>Wraps a typed interop Blackboard proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.NativeBlackboard">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>bb.NativeBlackboard?.SetValue("flag", true);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetNativeObject">
             <summary>
-            Get the native blackboard object (safely typed)
+            Get the native blackboard object (safely typed).
+            Conservé pour compatibilité — équivalent à <see cref="P:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.NativeBlackboard"/>.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.Name">
-            <summary>
-            Get the name of this blackboard instance
-            Field: name (readonly string)
-            </summary>
+            <summary>Name of this blackboard instance (typed read of Blackboard.name).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.TryGetValue(System.String,System.Object@)">
             <summary>
-            Try to get a value from the blackboard
-            Method: TryGetValue(string variableName, out Value value)
+            Try to get a value from the blackboard (typed call with out parameter).
+            ⚠️ L'ancienne version passait par MakeGenericMethod/Invoke — le paramètre out
+            ne remontait pas correctement à travers la réflexion IL2CPP.
             </summary>
+            <example>if (bb.TryGetValue("mon_flag", out var v)) { ... }</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetValue(System.String)">
-            <summary>
-            Get a value from the blackboard
-            Method: GetValue(string variableName)
-            Returns: Value (native Yarn.Value type)
-            </summary>
+            <summary>Get a value from the blackboard (typed — returns the native Value).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.ContainsKey(System.String)">
-            <summary>
-            Check if the blackboard contains a specific key
-            Method: ContainsKey(string variableName)
-            </summary>
+            <summary>Check if the blackboard contains a specific key (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.SetValue(System.String,System.String)">
-            <summary>
-            Set a string value in the blackboard
-            Method: SetValue(string variableName, string stringValue)
-            </summary>
+            <summary>Set a string value (typed Blackboard.SetValue overload).</summary>
+            <example>bb.SetValue("mon_texte", "bonjour");</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.SetValue(System.String,System.Single)">
-            <summary>
-            Set a float value in the blackboard
-            Method: SetValue(string variableName, float floatValue)
-            </summary>
+            <summary>Set a float value (typed Blackboard.SetValue overload).</summary>
+            <example>bb.SetValue("mon_compteur", 42f);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.SetValue(System.String,System.Boolean)">
-            <summary>
-            Set a boolean value in the blackboard
-            Method: SetValue(string variableName, bool boolValue)
-            </summary>
+            <summary>Set a boolean value (typed Blackboard.SetValue overload).</summary>
+            <example>bb.SetValue("mon_flag", true);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.SetNumber(System.String,System.Single)">
-            <summary>
-            Set a number value using the legacy SetNumber method
-            Method: SetNumber(string variableName, float number)
-            Note: Marked as obsolete in native code but still functional
-            </summary>
+            <summary>Set a number value via the legacy native SetNumber (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetNumber(System.String)">
-            <summary>
-            Get a number value using the legacy GetNumber method
-            Method: GetNumber(string variableName)
-            Note: Marked as obsolete in native code but still functional
-            </summary>
+            <summary>Get a number value via the legacy native GetNumber (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetKeys">
-            <summary>
-            Get all variable keys in this blackboard
-            Method: GetKeys()
-            Returns: List&lt;string&gt; of variable names
-            </summary>
+            <summary>All variable keys in this blackboard (typed read).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetDynamicKeys">
-            <summary>
-            Get all dynamic variable keys in this blackboard
-            Method: GetDynamicKeys()
-            Returns: List&lt;string&gt; of dynamic variable names
-            </summary>
+            <summary>All dynamic variable keys in this blackboard (typed read).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.Increment(System.String,System.Single)">
-            <summary>
-            Increment a numeric variable by the specified amount
-            Method: Increment(string variableName, float amount)
-            </summary>
+            <summary>Increment a numeric variable by the specified amount (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.Clear">
-            <summary>
-            Clear all variables from this blackboard
-            Method: Clear()
-            </summary>
+            <summary>Clear all variables from this blackboard (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.DefaultSetString(System.String,System.String)">
-            <summary>
-            Set a default value for a variable if it doesn't exist
-            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-            Note: Generic method, requires special handling
-            </summary>
+            <summary>Set a default string value if the variable doesn't exist (typed generic).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.DefaultSetFloat(System.String,System.Single)">
-            <summary>
-            Set a default numeric value for a variable if it doesn't exist
-            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-            </summary>
+            <summary>Set a default float value if the variable doesn't exist (typed generic).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.DefaultSetBool(System.String,System.Boolean)">
-            <summary>
-            Set a default boolean value for a variable if it doesn't exist
-            Method: DefaultSet&lt;T&gt;(string variableName, T defaultValue)
-            </summary>
+            <summary>Set a default bool value if the variable doesn't exist (typed generic).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.ToString">
-            <summary>
-            Get a debug-friendly string representation of this blackboard
-            </summary>
+            <summary>Debug-friendly string representation of this blackboard.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BlackBoardWrapper.GetDebugInfo">
-            <summary>
-            Get detailed debug information about this blackboard
-            </summary>
+            <summary>Detailed debug information about this blackboard.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper">
             <summary>
@@ -312,6 +258,13 @@
             </summary>
             <param name="nativeBuildingType">Native building type instance from game</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.#ctor(BuildingType)">
+            <summary>Wraps a typed interop BuildingType proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.NativeBuildingType">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>int cap = bt.NativeBuildingType?.droneCapacity ?? 0;</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.FromNative(System.Object)">
             <summary>
             Create wrapper from native building type object
@@ -319,39 +272,34 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Name">
             <summary>
-            Building type name/key identifier
-            Maps to: name field (e.g., "building_solar_panel", "building_water_mine")
+            Building type key identifier (typed read of StaticDataCollectionItem.key).
+            E.g., "solar_panel_field", "water_mine".
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.DisplayName">
             <summary>
-            Building display name for UI
-            Maps to: displayName or localizedName field
+            Building display name for UI (typed read of BuildingType.name).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Description">
             <summary>
-            Building description
-            Maps to: description field
+            Building description (typed read of BuildingType.description).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Index">
-            <summary>
-            Building index for efficient lookups
-            Maps to: index field
-            </summary>
+            <summary>N'a jamais existé — BuildingType n'a pas d'index.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Category">
             <summary>
-            Building category (Power, Mining, Manufacturing, etc.)
-            Maps to: category or buildingCategory field
+            Building category key (typed read of BuildingType.categoryType.key).
+            (L'ancienne chaîne category/buildingCategory/type n'existait pas.)
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.CategoryType">
+            <summary>Typed category proxy (BuildingCategoryType).</summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.SubCategory">
-            <summary>
-            Building subcategory for detailed organization
-            Maps to: subCategory field
-            </summary>
+            <summary>N'a jamais existé sur BuildingType.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.IsPowerBuilding">
             <summary>
@@ -369,83 +317,101 @@
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ConstructionCost">
-            <summary>
-            Construction cost in resources
-            Maps to: constructionCost or cost field
-            </summary>
+            <summary>N'a jamais existé — pas de coût scalaire ; voir GetConstructionResources().</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ConstructionTime">
-            <summary>
-            Construction time in game time units
-            Maps to: constructionTime or buildTime field
-            </summary>
+            <summary>N'a jamais existé sur BuildingType.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetConstructionResources">
             <summary>
-            Required resources for construction
-            Maps to: requiredResources array
+            Required resources for construction, by resource key (units).
+            Typed read of BuildingType.requiredConstructionResources.
+            (L'ancienne chaîne requiredResources/constructionResources/materials n'existait pas.)
             </summary>
+            <example>foreach (var (res, qty) in bt.GetConstructionResources()) { ... }</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.MaintenanceCost">
-            <summary>
-            Maintenance cost per time unit
-            Maps to: maintenanceCost field
-            </summary>
+            <summary>N'a jamais existé — voir healthLossPerDay/maintenancePriority typés.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.HealthLossPerDay">
+            <summary>Daily health loss (typed read of BuildingType.healthLossPerDay).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.MaxHealth">
+            <summary>Maximum building health (typed read of BuildingType.maxHealth).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.BaseEnergyOutput">
             <summary>
-            Base energy production (for power buildings)
-            Maps to: baseEnergyOutput or energyProduction field
+            Base energy production — the highest of the five typed production fields
+            (solar/eolic/thermal/fission/fusion ; un bâtiment n'en utilise qu'un).
+            (L'ancienne chaîne baseEnergyOutput/energyProduction/powerOutput n'existait pas.)
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.MaxSolarPowerProduction">
+            <summary>Solar power production (typed).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.EnergyStorageCapacity">
+            <summary>Energy storage capacity (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.EnergyConsumption">
             <summary>
-            Energy consumption (for non-power buildings)
-            Maps to: energyConsumption or powerConsumption field
+            Energy consumption (typed read of BuildingType.powerConsumption).
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ColonistCapacity">
+            <summary>Colonist capacity (typed).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.DroneCapacity">
+            <summary>Drone capacity (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetProductionRates">
             <summary>
-            Base resource production rates
-            Maps to: productionRates or outputs field
+            Resource production: output resource key → quantity per cycle.
+            Typed read of BuildingType.outputResource/outputQuantity.
+            (L'ancienne chaîne productionRates/outputs/produces n'existait pas.)
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.OutputResourceKey">
+            <summary>Output resource key, or null when the building produces nothing (typed).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ProgressPerDay">
+            <summary>Production progress per day (typed read of BuildingType.progressPerDay).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetConsumptionRates">
             <summary>
-            Resource consumption rates
-            Maps to: consumptionRates or inputs field
+            Resource consumption: input resource key → quantity.
+            Typed read of BuildingType.inputResources.
+            (L'ancienne chaîne consumptionRates/inputs/consumes n'existait pas.)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetSize">
-            <summary>
-            Building size (width, height)
-            Maps to: size or dimensions field
-            </summary>
+            <summary>N'a jamais existé — les bâtiments occupent un rayon, pas une grille.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ReservedRadius">
+            <summary>Reserved placement radius (typed read of BuildingType._reservedRadius).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.PrefabName">
             <summary>
-            Building prefab name for instantiation
-            Maps to: prefabName field
+            Building prefab name for instantiation (typed read of BuildingType.prefabName).
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.Icon">
+            <summary>Icon sprite for UI display (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.IconName">
             <summary>
-            Icon name for UI display
-            Maps to: iconName field
+            Icon sprite name.
+            ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+            échouait et retournait toujours le fallback.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetRequiredTechnologies">
-            <summary>
-            Required technologies to unlock this building
-            Maps to: requiredTechs or prerequisites field
-            </summary>
+            <summary>N'a jamais fonctionné — ces membres n'existent pas sur BuildingType.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.IsUnlockedFor(PerAspera.GameAPI.Wrappers.FactionWrapper)">
             <summary>
-            Check if building is unlocked for a faction
+            ⚠️ A toujours retourné TRUE : la chaîne IsUnlockedFor/IsAvailable n'existait pas,
+            et le fallback testait All() sur une liste vide de prérequis (= true).
             </summary>
-            <param name="faction">Faction to check unlock status for</param>
-            <returns>True if building is unlocked</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetEfficiencyRating">
             <summary>
@@ -454,7 +420,8 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetConstructionComplexity">
             <summary>
-            Get construction complexity rating (1-5)
+            Get construction complexity rating (1-5), based on the typed
+            construction resources (total quantity + variety).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetDisplayName">
@@ -467,11 +434,6 @@
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ToTitleCase(System.String)">
             <summary>
             Convert string to title case
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.GetNativeObject">
-            <summary>
-            Get the native game object (for Harmony patches)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingTypeWrapper.ToString">
@@ -622,12 +584,27 @@
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BuildingWrapper">
              <summary>
-             Wrapper for the native Building class.
+             Wrapper for the native Building class (typed interop access).
              Provides safe access to building properties and operations.
             
-             📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Building.md
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:Building"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\Building.cs.
+             Les proxies interop exposent même les champs privés natifs (_built, _health…) en typé.
+             Anciens noms fantômes (StartScrapping/CancelScrapping n'existaient pas) → [Obsolete]
+             avec redirection vers les vrais membres (ToggleScrap/ForceScrapStart).
+            
              🤖 Agent Expert: @per-aspera-sdk-coordinator
              </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native building (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.#ctor(Building)">
+            <summary>Wraps a typed interop Building proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.NativeBuilding">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>var hp = building.NativeBuilding?._health;</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.FromNative(System.Object)">
             <summary>Factory — retourne null si l'objet natif est null.</summary>
@@ -639,7 +616,7 @@
             <summary>Building type definition (factory, hab, etc.)</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.TypeKey">
-            <summary>Building type key (e.g., "SolarPanel", "Mine").</summary>
+            <summary>Building type key (e.g., "solar_panel", "mine").</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.BuildingTypeName">
             <summary>Building name from its type.</summary>
@@ -648,10 +625,10 @@
             <summary>2D position on the planet surface.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsAlive">
-            <summary>Is the building alive (not destroyed).</summary>
+            <summary>Is the building alive (not destroyed). Typed read of Building._alive.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsOperative">
-            <summary>Is the building operational.</summary>
+            <summary>Is the building operational. Typed read of Building._activated.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.BuildingWrapper.IsBuilt">
             <summary>Is the building fully built (not under construction).</summary>
@@ -672,20 +649,44 @@
             <summary>Get the faction that owns this building.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetStockpile">
-            <summary>Get the building's stockpile.</summary>
+            <summary>Get the building's stockpile (native Stockpile proxy).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.GetResourceStock(System.String)">
-            <summary>Get resource quantity in stockpile.</summary>
+            <summary>
+            Get resource quantity in stockpile (total stock, in units).
+            Typed: Stockpile.GetTotalStock(ResourceType).ToFloat().
+            (L'ancien binding « get_Item » n'existait pas — retournait toujours 0.)
+            </summary>
             <param name="resourceKey">Resource key (e.g., "resource_water")</param>
+            <example>float water = building.GetResourceStock("resource_water");</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ToggleOperative">
-            <summary>Toggle operative state.</summary>
+            <summary>
+            Toggle operative state (typed write of Building.activated).
+            ⚠️ L'ancienne implémentation visait « ToggleOperative » qui n'existe pas — elle
+            n'a jamais rien fait. Celle-ci fonctionne réellement.
+            </summary>
+            <example>building.ToggleOperative();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ToggleScrap">
+            <summary>Toggle pending-scrap state (native Building.ToggleScrap).</summary>
+            <example>building.ToggleScrap();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ForceScrapStart">
+            <summary>Force scrapping to start immediately (native Building.ForceScrapStart).</summary>
+            <example>building.ForceScrapStart();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.CanScrap">
+            <summary>True when the building can be scrapped (native Building.CanScrap).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.StartScrapping">
-            <summary>Start scrapping the building.</summary>
+            <summary>N'a jamais fonctionné — « StartScrapping » n'existe pas côté jeu.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.CancelScrapping">
-            <summary>Cancel scrapping.</summary>
+            <summary>N'a jamais fonctionné — « CancelScrapping » n'existe pas côté jeu.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.BuildingWrapper.ToString">
+            <summary>Human-readable building summary.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ConsoleWrapper">
             <summary>
@@ -730,137 +731,111 @@
             <returns>ConsoleWrapper instance</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DroneWrapper">
-            <summary>
-            Elegant wrapper for the native Drone class
-            Transforms technical decompiled field names into beautiful, intuitive properties
-            DOC REFERENCES: Drone.md - Decompiled drone class analysis
-            </summary>
+             <summary>
+             Wrapper for the native Drone class (typed interop access).
+            
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:Drone"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\Drone.cs. Fantômes corrigés :
+             hasResource/currentWay/IsVisible/GetCargoAmount n'existent pas — l'état cargo réel
+             vient de Drone.cargo (Cargo : resource + quantity).
+            
+             🤖 Agent Expert: @per-aspera-sdk-coordinator — Skill: /per-aspera-drone-routing
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DroneWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize Drone wrapper with native drone object
-            </summary>
-            <param name="nativeDrone">Native drone instance from game</param>
+            <summary>Wraps an untyped native drone (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DroneWrapper.#ctor(Drone)">
+            <summary>Wraps a typed interop Drone proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.NativeDrone">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>var cargo = drone.NativeDrone?.cargo;</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.DroneWrapper.FromNative(System.Object)">
+            <summary>Factory — retourne null si l'objet natif est null.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DroneWrapper.GetByHandle(System.Object)">
-            <summary>
-            Get drone from Keeper registry by handle
-            </summary>
-            <param name="handle">Native drone handle</param>
-            <returns>Drone wrapper or null if not found</returns>
+            <summary>Get drone wrapper from a native drone object.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.DroneNumber">
-            <summary>
-            Unique drone identifier number
-            Maps to: _number_k__BackingField
-            </summary>
+            <summary>Unique drone identifier number (typed read of Drone.number).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Position">
-            <summary>
-            Current 3D position on the planet
-            Maps to: _position3D_k__BackingField
-            </summary>
+            <summary>Current 3D position on the planet (typed read of Drone.position3D).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Direction">
-            <summary>
-            Current movement direction and rotation
-            Maps to: _directionRotation_k__BackingField
-            </summary>
+            <summary>Current movement rotation (typed read of Drone.directionRotation).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.MaxCargoCapacity">
             <summary>
-            Maximum cargo capacity of this drone
-            Maps to: _cargoCapacity_k__BackingField
+            Maximum cargo capacity in units (typed read of Drone.cargoCapacity).
+            ⚠️ cargoCapacity natif est un CargoQuantity, pas un float — l'ancien binding
+            échouait silencieusement.
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Cargo">
+            <summary>Current cargo (typed Cargo proxy, null when empty).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.IsCarryingCargo">
             <summary>
-            Whether drone is currently carrying resources
-            Maps to: _hasResource_k__BackingField
+            Whether drone is currently carrying resources.
+            (« hasResource » n'existe pas — l'état réel est Drone.cargo != null.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.CurrentCargoLoad">
             <summary>
-            Current cargo load (calculated property)
-            Elegant wrapper combining cargo state checks
+            Current cargo load in units (typed read of Drone.cargo.quantity).
+            (« GetCargoAmount » n'existait pas — retournait toujours 0.)
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.CargoResourceKey">
+            <summary>Resource key currently carried, or null (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.CargoUtilization">
-            <summary>
-            Percentage of cargo capacity currently used
-            Elegant computed property for cargo utilization
-            </summary>
+            <summary>Percentage of cargo capacity currently used.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.StateId">
-            <summary>
-            Current operational state ID
-            Maps to: _stateId_k__BackingField
-            </summary>
+            <summary>Current operational state ID (typed read of Drone.stateId).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.NavigationPath">
-            <summary>
-            Current navigation path being followed
-            Maps to: _currentWay_k__BackingField
-            </summary>
+            <summary>N'a jamais existé — Drone n'a pas de currentWay exposé.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.IsNavigating">
             <summary>
-            Whether drone is currently following a path
-            Elegant wrapper around navigation state
+            Whether drone is moving (FSM state check via stateId).
+            (L'ancienne implémentation testait le NavigationPath fantôme — toujours false.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.IsAlive">
-            <summary>
-            Whether drone is alive and operational
-            Maps to: _alive_k__BackingField
-            </summary>
+            <summary>Whether drone is alive and operational (typed read of Drone.alive).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Health">
-            <summary>
-            Current health points
-            Maps to: _health_k__BackingField
-            </summary>
+            <summary>Current health points (typed read of Drone.health).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.IsVisible">
-            <summary>
-            Whether drone is visible in the game world
-            Maps to: _IsVisible_k__BackingField
-            </summary>
+            <summary>N'a jamais existé sur Drone.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.OperationalStatus">
             <summary>
-            Operational status combining multiple state checks
-            Elegant property for overall drone condition
+            Operational status combining multiple state checks.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Universe">
-            <summary>
-            Reference to the universe this drone exists in
-            Maps to: _universe_k__BackingField
-            </summary>
+            <summary>Universe this drone exists in (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Planet">
-            <summary>
-            Reference to the planet this drone operates on
-            Maps to: _planet_k__BackingField
-            </summary>
+            <summary>Planet this drone operates on (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.DroneWrapper.Handle">
-            <summary>
-            Drone handle for system operations
-            Maps to: _handle_k__BackingField
-            </summary>
+            <summary>Drone handle for system operations (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DroneWrapper.ToString">
-            <summary>
-            Get detailed drone information for debugging
-            Elegant summary combining multiple properties
-            </summary>
+            <summary>Detailed drone information for debugging.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DroneOperationalStatus">
             <summary>
-            Elegant enum for drone operational status
-            Replaces complex state ID checking with clear status names
+            Drone operational status — clear names instead of raw state IDs.
             </summary>
         </member>
         <member name="F:PerAspera.GameAPI.Wrappers.DroneOperationalStatus.Destroyed">
@@ -885,196 +860,237 @@
             <summary>Drone is actively working on a task</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper">
-            <summary>
-            Wrapper for the abstract ABCBuilding base class
-            Provides safe access to building functionality and IHandleable implementation
-            DOC: ABCBuilding is the base class for all buildings, implements IHandleable
-            </summary>
+             <summary>
+             Wrapper for the abstract ABCBuilding base class.
+            
+             MIGRATION 2026-06-10 — interop typé d'abord. ABCBuilding natif n'expose QUE
+             handle/GetName/Dispose ; tous les membres riches (buildingType, health, faction…)
+             vivent sur la classe dérivée Building — l'ancien SafeInvoke ne marchait que parce
+             que la réflexion résolvait sur le type runtime. Le wrapper expose désormais les
+             deux niveaux typés : <see cref="P:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.NativeABCBuilding"/> et <see cref="P:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.AsBuilding"/>.
+             Fantômes corrigés : energyProduction/efficiency/get_transform n'existent pas
+             (GetPosition retournait TOUJOURS Vector3.zero).
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native building (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.#ctor(ABCBuilding)">
+            <summary>Wraps a typed interop ABCBuilding proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.NativeABCBuilding">
+            <summary>Typed ABCBuilding proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.AsBuilding">
             <summary>
-            Initialize ABCBuildingWrapper with native ABCBuilding instance
+            Typed Building proxy when the wrapped object is a concrete Building
+            (null pour les autres dérivés d'ABCBuilding).
             </summary>
-            <param name="nativeBuilding">Native ABCBuilding instance from game</param>
+            <example>float hp = abc.AsBuilding?._health ?? 0f;</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native building object
-            </summary>
+            <summary>Create wrapper from native building object.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetHandle">
             <summary>
-            Get the Handle for this building (IHandleable.GetHandle())
-            Essential for Keeper system integration
+            Get the Handle for this building (typed read of ABCBuilding.handle).
+            Essential for Keeper system integration.
             </summary>
-            <returns>Handle object for Keeper lookup</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsRegistered">
-            <summary>
-            Check if this building is registered in the Keeper system
-            </summary>
-            <returns>True if building has a valid handle and is registered</returns>
+            <summary>Check if this building is registered in the Keeper system.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetName">
+            <summary>Native display name (typed call to ABCBuilding.GetName()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetBuildingType">
-            <summary>
-            Get building type definition
-            Maps to: buildingType property
-            </summary>
+            <summary>Building type definition (typed via Building.buildingType).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetPosition">
             <summary>
-            Get building position in world space
-            Maps to: transform.position or position property
+            Building position in world space (typed via Building.position, Vector2 → Vector3).
+            (L'ancienne implémentation visait get_position en Vector3 puis get_transform —
+            les deux échouaient : retournait TOUJOURS Vector3.zero.)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetEnergyProduction">
-            <summary>
-            Get building's energy production rate
-            Maps to: energyProduction property
-            </summary>
+            <summary>N'a jamais existé — Building n'a pas d'energyProduction scalaire.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetHealth">
-            <summary>
-            Get building's health/condition
-            Maps to: health property
-            </summary>
+            <summary>Building health (typed read of Building._health).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsOperational">
-            <summary>
-            Check if building is operational/functioning
-            Maps to: IsOperational() or operational property
-            </summary>
+            <summary>Building operational state (typed read of Building._activated).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsBuilt">
-            <summary>
-            Check if building construction is complete
-            Maps to: IsBuilt property or method
-            </summary>
+            <summary>Construction complete (typed read of Building._built).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetWorkProgress">
-            <summary>
-            Get building's work progress (0-100%)
-            Maps to: workProgress property
-            </summary>
+            <summary>Work progress (typed read of Building.workProgress).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetEfficiency">
             <summary>
-            Get building efficiency rating (0-1.0)
-            Calculated from health, operational status, and environment factors
+            Building efficiency estimate (0-1.0), from health and operational state.
+            (« efficiency » n'existe pas en float natif — calcul wrapper assumé.)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetOwner">
-            <summary>
-            Get the faction/owner of this building
-            Maps to: faction or owner property
-            </summary>
+            <summary>Faction owning this building (typed via Building.faction).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetBuildingInfo">
-            <summary>
-            Get comprehensive building information for debugging/monitoring
-            </summary>
+            <summary>Comprehensive building information for debugging/monitoring.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.GetDisplayName">
-            <summary>
-            Get building name/identifier for display
-            </summary>
+            <summary>Building name/identifier for display.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.IsOfType(System.String)">
-            <summary>
-            Check if this building matches a specific building type
-            </summary>
-            <param name="buildingTypeName">Building type name to check</param>
-            <returns>True if building matches the type</returns>
+            <summary>Check if this building matches a specific building type key.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCBuildingWrapper.Validate">
-            <summary>
-            Perform validation checks on the building
-            </summary>
+            <summary>Perform validation checks on the building.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo">
             <summary>
             Comprehensive building information for monitoring and debugging
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.Handle">
+            <summary>Native Keeper handle.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.BuildingType">
+            <summary>Building type key.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.Position">
+            <summary>World position.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.Health">
+            <summary>Health (0-1).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.IsOperational">
+            <summary>Operational state.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.IsBuilt">
+            <summary>Construction complete.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.WorkProgress">
+            <summary>Work progress.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.Efficiency">
+            <summary>Efficiency estimate (0-1).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.Owner">
+            <summary>Owning faction name.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.LastUpdated">
+            <summary>Snapshot timestamp.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.BuildingInfo.ToString">
+            <summary>Human-readable summary.</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation">
             <summary>
             Building validation results for health checking
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.IsValid">
+            <summary>Wrapper validity.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.HasHandle">
+            <summary>Has a Keeper handle.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.IsRegistered">
+            <summary>Registered in Keeper.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.IsBuilt">
+            <summary>Construction complete.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.IsOperational">
+            <summary>Operational state.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.HasValidType">
+            <summary>Building type resolved.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.HealthOK">
+            <summary>Health above threshold.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.OverallStatus">
+            <summary>Overall validation status.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.BuildingValidation.ToString">
+            <summary>Human-readable summary.</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper">
-            <summary>
-            Wrapper for the abstract ABCDroneState class
-            Provides safe access to drone state machine functionality
-            DOC: F:\ModPeraspera\Internal_doc\Decompiled_ILcpp2_Class\ABCDroneState.cs
-            </summary>
+             <summary>
+             Wrapper for the abstract ABCDroneState class (drone FSM state).
+             MIGRATION 2026-06-10 — interop typé : Enter/Exit/OnTick/OnFeed/DebugDetailedInfo
+             délèguent au proxy. OnFeed est désormais correctement typé
+             (Drone.InputEvent → Drone.StateID) au lieu d'object→object.
+            
+             Skill: /per-aspera-drone-routing (FSM, transitions, StateID).
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize ABCDroneStateWrapper with native ABCDroneState instance
-            </summary>
-            <param name="nativeDroneState">Native ABCDroneState from drone state machine</param>
+            <summary>Wraps an untyped native drone state (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.#ctor(ABCDroneState)">
+            <summary>Wraps a typed interop ABCDroneState proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.NativeDroneState">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native drone state object
-            </summary>
+            <summary>Create wrapper from native drone state object.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.Enter">
-            <summary>
-            Enter the drone state
-            Maps to: ABCDroneState.Enter() - virtual void method
-            </summary>
+            <summary>Enter the drone state (typed call to ABCDroneState.Enter()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.Exit">
-            <summary>
-            Exit the drone state  
-            Maps to: ABCDroneState.Exit() - virtual void method
-            </summary>
+            <summary>Exit the drone state (typed call to ABCDroneState.Exit()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.OnTick(System.Single)">
-            <summary>
-            Tick the drone state with delta time
-            Maps to: ABCDroneState.OnTick(float deltaDays) - abstract method
-            </summary>
+            <summary>Tick the drone state (typed call to ABCDroneState.OnTick(deltaDays)).</summary>
             <param name="deltaDays">Time delta in game days</param>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.OnFeed(System.Object)">
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.OnFeed(Drone.InputEvent)">
             <summary>
-            Feed input to the drone state machine
-            Maps to: ABCDroneState.OnFeed(InputEvent input) - abstract method
-            Returns: StateID for next state transition
+            Feed input to the drone state machine (typed call to ABCDroneState.OnFeed).
             </summary>
-            <param name="inputEvent">Input event for state machine</param>
-            <returns>StateID enum value or null if error</returns>
+            <param name="input">Input event for the FSM</param>
+            <returns>StateID for the next state transition, or null when invalid</returns>
+            <example>var next = state.OnFeed(Drone.InputEvent.ARRIVED);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetDebugInfo">
-            <summary>
-            Get detailed debug information for this state
-            Maps to: ABCDroneState.DebugDetailedInfo() - abstract method
-            </summary>
-            <returns>Debug string information</returns>
+            <summary>Detailed debug information (typed call to DebugDetailedInfo()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetStateTypeName">
-            <summary>
-            Get the type name of this drone state
-            </summary>
+            <summary>Type name of this drone state (e.g., DroneStateMoving).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.IsStateType(System.String)">
-            <summary>
-            Check if this is a specific state type
-            </summary>
+            <summary>Check if this is a specific state type.</summary>
             <param name="expectedTypeName">Expected state type name</param>
-            <returns>True if matches expected type</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.ABCDroneStateWrapper.GetStateInfo">
-            <summary>
-            Get runtime information about the state
-            </summary>
+            <summary>Runtime information about the state.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo">
             <summary>
             Information about a drone state for diagnostics
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo.TypeName">
+            <summary>State type name.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo.IsValid">
+            <summary>Wrapper validity.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo.DebugInfo">
+            <summary>Native debug details.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo.LastUpdated">
+            <summary>Snapshot timestamp.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.StateInfo.ToString">
+            <summary>Human-readable summary.</summary>
         </member>
         <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemEnhancementPlugin" -->
         <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Events.EventSystemEnhancementPlugin.OnGameInitialized">
@@ -1295,32 +1311,155 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.FactionWrapper">
-            <summary>
-            Wrapper for the native Faction class.
-            Provides safe access to faction properties and operations.
-            </summary>
+             <summary>
+             Wrapper for the native Faction class (typed interop access).
+             Provides safe access to faction properties and operations.
+            
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:Faction"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\Faction.cs. Nombreuses API fantômes
+             corrigées : displayName/factionType/isPlayerFaction/mainStockpile/aiDifficulty/
+             aiPersonality/color n'existent pas ; GetResourceStock et HasTechnology étaient des
+             chaînes de noms devinés qui échouaient toutes — réimplémentées sur les vrais membres.
+            
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native faction (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.#ctor(Faction)">
+            <summary>Wraps a typed interop Faction proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.NativeFaction">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>var bb = faction.NativeFaction?.blackboardFaction;</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.FromNative(System.Object)">
+            <summary>Factory — retourne null si l'objet natif est null.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.FactionAddResourceDistributed(System.String,System.String)">
             <summary>Add resources distributed across faction buildings via console command.</summary>
+            <example>faction.FactionAddResourceDistributed("resource_water", "500");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ListAvailableConsoleCommands">
+            <summary>List available console commands in the log.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.AddResearchPoints(System.Single)">
-            <summary>Add research points to this faction.</summary>
+            <summary>Add research points to this faction (typed).</summary>
+            <example>faction.AddResearchPoints(100f);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.TestAddResource(System.String,System.Single)">
-            <summary>Direct native call for resource addition (test/debug).</summary>
+            <summary>N'a jamais fonctionné — méthode d'instance inexistante.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.SetBlackboardBool(System.String,System.Boolean)">
+            <summary>
+            Sets a bool variable on the faction blackboard (typed).
+            Used by YAML rules/criteria: <c>$key == true</c>.
+            </summary>
+            <example>faction.SetBlackboardBool("mon_flag", true);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetInteractionManager">
+            <summary>Get the interaction manager (typed read of Faction.interactionManager).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetAsIHandleable">
+            <summary>Cast the native faction to IHandleable.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetHandle">
+            <summary>Get the faction handle (typed read of Faction.handle).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRawHandle">
+            <summary>Get the raw native handle object.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.Name">
+            <summary>Faction name (typed read of Faction.name).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.DisplayName">
+            <summary>N'a jamais existé — retournait toujours Name.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.FactionType">
+            <summary>N'a jamais existé sur Faction.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.IsPlayerFaction">
+            <summary>
+            True when this faction is the player faction.
+            (L'ancienne lecture de « isPlayerFaction » n'existait pas — toujours false.
+            Réimplémenté par comparaison avec Universe.GetPlayerFaction().)
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.MainStockpile">
+            <summary>N'a jamais existé sur Faction.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetResourceStock(System.String)">
-            <summary>Get resource stock amount from faction stockpile.</summary>
+            <summary>
+            Total resource stock across all faction buildings (units).
+            (L'ancienne chaîne GetResourceStock/GetStock/GetResourceAmount n'existait pas —
+            retournait toujours 0. Réimplémenté en agrégeant les stockpiles des bâtiments.)
+            </summary>
+            <example>float water = faction.GetResourceStock("resource_water");</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.AddResource(System.String,System.Single)">
-            <summary>Add resource to faction. Use negative amount to remove.</summary>
+            <summary>
+            Add resource to faction (typed Faction.AddResource(ResourceType, int)).
+            Use negative amount to remove. Amount is truncated to whole units.
+            </summary>
+            <example>faction.AddResource("resource_water", 500f);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRelationshipWith(PerAspera.GameAPI.Wrappers.FactionWrapper)">
+            <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetBuildings">
+            <summary>All buildings of this faction (typed read of Faction.buildings).</summary>
+            <example>foreach (var b in faction.GetBuildings()) { ... }</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.AIDifficulty">
+            <summary>N'a jamais existé sur Faction.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.IsAI">
+            <summary>True when this faction is AI-controlled (= not the player faction).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.FactionWrapper.AIPersonality">
+            <summary>N'a jamais existé sur Faction.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.HasTechnology(System.String)">
+            <summary>
+            True when the technology is researched.
+            (L'ancienne chaîne HasTechnology/IsTechResearched/HasResearched n'existait pas —
+            retournait toujours false. Réimplémenté via Faction.GetResearchedTechnologies().)
+            </summary>
+            <example>bool done = faction.HasTechnology("tech_solar_panels");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ResearchTechnology(System.String)">
+            <summary>
+            Research a technology immediately (typed Faction.ResearchTechnology(TechnologyType)).
+            </summary>
+            <example>faction.ResearchTechnology("tech_solar_panels");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetColor">
+            <summary>N'a jamais fonctionné — Faction n'a pas de couleur exposée.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetGameEventBus">
+            <summary>Game event bus of this faction (typed read of Faction._gameEventBus).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ExecuteResourceImportCommand(System.String,System.Single)">
+            <summary>Execute a resource import command via the interaction manager.</summary>
+            <example>faction.ExecuteResourceImportCommand("resource_water", 1000f);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ExecuteCustomCommand(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>Execute a custom resource command by type name.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.DispatchCommand(System.String,System.Object[])">
             <summary>
             Generic command dispatch via CommandBus. Avoids creating a wrapper per command type.
+            ⚠️ Réflexion managed (RS0030) — à migrer vers GameAPI.Commands à terme.
             </summary>
             <param name="commandTypeName">Full type name (e.g., "PerAspera.Commands.CmdFactionResourceAllocation")</param>
             <param name="constructorArgs">Constructor arguments for the command.</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetCommandDebugInfo">
+            <summary>Debug summary of command-related state.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.ToString">
+            <summary>Human-readable faction summary.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.IYamlTypeWrapper">
             <summary>
@@ -1483,6 +1622,24 @@
             <summary>
             Get technologies by category
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.GameEventBusWrapper">
+            <summary>
+            Wrapper for the native GameEventBus class.
+            MIGRATION 2026-06-10 — interop typé (GameEventBus._keeper exposé par le proxy).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameEventBusWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native event bus (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameEventBusWrapper.#ctor(GameEventBus)">
+            <summary>Wraps a typed interop GameEventBus proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.GameEventBusWrapper.NativeGameEventBus">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.GameEventBusWrapper.GetKeeper">
+            <summary>Keeper of this event bus (typed read of GameEventBus._keeper).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.HandleWrapper">
             <summary>
@@ -2279,31 +2436,45 @@
             </summary>
             <param name="nativeKeeperMap">Native KeeperMap from BaseGame.keeper.map</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetKeeper">
+            <summary>Get the Keeper that owns this map.</summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetCurrent">
             <summary>
             Get current KeeperMap from BaseGame.keeper.map
             Factory method for wrapper creation
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.Find``1(System.Object)" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.Find``1(System.Object)">
+            <summary>
+            Direct native Find&lt;T&gt; method access.
+            Performance: O(1) Dictionary lookup.
+            </summary>
+            <typeparam name="T">Expected entity type</typeparam>
+            <param name="handle">Entity Handle (accepts boxed Handle struct or Handle directly)</param>
+            <returns>Typed entity instance or null if not found</returns>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.Contains(System.Object)">
             <summary>
-            Direct native Contains method access
-            Handle existence validation
-            Performance: O(1) Dictionary.ContainsKey
+            Direct native Contains method access.
+            Performance: O(1) Dictionary.ContainsKey.
             </summary>
-            <param name="handle">Handle to check</param>
+            <param name="handle">Handle to check (accepts boxed Handle struct)</param>
             <returns>True if Handle exists in KeeperMap</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.FindBase(System.Object)">
             <summary>
-            Non-generic Find method for base IHandleable access
-            Returns base interface type for unknown entity types
+            Find an entity by Handle via the typed interop proxy.
+            Returns null if the handle is not in the map or the wrapper is invalid.
             </summary>
-            <param name="handle">Entity Handle</param>
-            <returns>IHandleable instance or null</returns>
+            <param name="handle">Entity Handle (accepts Handle or object)</param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetObjectsDict" -->
+        <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetObjectsDict">
+            <summary>
+            Access to internal _objects dictionary via the publicized interop proxy.
+            Returns the native Il2Cpp Dictionary&lt;Handle, IHandleable&gt; or null.
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperMapWrapper.GetEntityCount">
             <summary>
             Get total entity count in KeeperMap
@@ -2443,16 +2614,16 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.Register(System.Object)">
             <summary>
-            Register an entity with the Keeper system
-            Returns Handle for future lookups
+            Register an entity with the Keeper system.
+            Returns Handle for future lookups.
             </summary>
             <param name="handleable">Entity to register (must implement IHandleable)</param>
             <returns>Handle for the registered entity</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.Unregister(System.Object)">
             <summary>
-            Unregister an entity from the Keeper system
-            Removes the Handle→Object mapping
+            Unregister an entity from the Keeper system.
+            Removes the Handle→Object mapping.
             </summary>
             <param name="handleable">Entity to unregister</param>
         </member>
@@ -2469,13 +2640,10 @@
             Advanced usage - requires Unity ECS knowledge
             </summary>
             <returns>Unity ECS World or null if not available</returns>
+            <summary>Get ECS World instance (Unity.Entities.World). Advanced usage only.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.GetEntityManager">
-            <summary>
-            Get EntityManager for ECS entity operations
-            Advanced usage - requires Unity ECS knowledge
-            </summary>
-            <returns>Unity EntityManager or null if not available</returns>
+            <summary>Get EntityManager for ECS entity operations. Advanced usage only.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.KeeperWrapper.IsReady">
             <summary>
@@ -2509,6 +2677,13 @@
             </summary>
             <param name="nativeKnowledge">Native knowledge instance from game</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.#ctor(KnowledgeType)">
+            <summary>Wraps a typed interop KnowledgeType proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.NativeKnowledgeType">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>var title = knowledge.NativeKnowledgeType?.title;</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.FromNative(System.Object)">
             <summary>
             Create wrapper from native knowledge object
@@ -2516,38 +2691,34 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Name">
             <summary>
-            Knowledge entry name/key identifier
-            Maps to: name field (e.g., "knowledge_water", "knowledge_solar_panel")
+            Knowledge entry key identifier (typed read of StaticDataCollectionItem.key).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Title">
             <summary>
-            Knowledge title for display
-            Maps to: title field
+            Knowledge title for display (typed read of KnowledgeType.title).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Content">
             <summary>
-            Knowledge content/description
-            Maps to: content field
+            Knowledge content/description (typed read of KnowledgeType.content).
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.ContentAMI">
+            <summary>AMI variant of the content (typed read of KnowledgeType.contentAMI).</summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Index">
-            <summary>
-            Knowledge index for efficient lookups
-            Maps to: index field
-            </summary>
+            <summary>N'a jamais existé — KnowledgeType n'a pas d'index.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Path">
             <summary>
-            Knowledge path for hierarchical organization
-            Maps to: path field (e.g., "Buildings/Power/SolarPanel")
+            Knowledge path for hierarchical organization (typed read of KnowledgeType.path).
+            E.g., "Buildings/Power/SolarPanel".
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.LocalizedPath">
             <summary>
-            Localized path for UI navigation
-            Maps to: localizedPath field
+            Localized path for UI navigation (typed read of KnowledgeType.localizedPath).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Category">
@@ -2562,21 +2733,23 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetContentTable">
             <summary>
-            Content table with structured information
-            Maps to: contentTable array
+            Content table with structured information (typed read of KnowledgeType.contentTable).
+            ⚠️ L'ancienne version invoquait get_field/get_text sur l'objet Knowledge au lieu
+            de l'entrée (bug) — retournait des entrées vides.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.Image">
-            <summary>
-            Associated image for knowledge entry
-            Maps to: image field
-            </summary>
+            <summary>Associated image sprite (typed read of KnowledgeType.image).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.Knowledge.IconName">
             <summary>
-            Icon name for UI display
-            Maps to: iconName field
+            Icon sprite name for UI display.
+            ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+            échouait et retournait toujours le fallback.
             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetContentBuilding">
+            <summary>Building associated to this knowledge entry, when any (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsBuildingKnowledge">
             <summary>
@@ -2604,18 +2777,10 @@
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.IsUnlockedFor(PerAspera.GameAPI.Wrappers.FactionWrapper)">
-            <summary>
-            Check if this knowledge is unlocked for a faction
-            </summary>
-            <param name="faction">Faction to check unlock status for</param>
-            <returns>True if knowledge is unlocked</returns>
+            <summary>N'a jamais fonctionné — aucun de ces noms n'existe sur KnowledgeType.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.UnlockFor(PerAspera.GameAPI.Wrappers.FactionWrapper)">
-            <summary>
-            Unlock this knowledge for a faction
-            </summary>
-            <param name="faction">Faction to unlock knowledge for</param>
-            <returns>True if knowledge was unlocked successfully</returns>
+            <summary>N'a jamais fonctionné — aucun de ces noms n'existe sur KnowledgeType.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.MatchesSearch(System.String[])">
             <summary>
@@ -2648,11 +2813,6 @@
             Convert string to title case
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.GetNativeObject">
-            <summary>
-            Get the native game object (for Harmony patches)
-            </summary>
-        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.Knowledge.ToString">
             <summary>
             String representation for debugging
@@ -2680,59 +2840,173 @@
             <param name="field">Field name</param>
             <param name="text">Text content</param>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.MarsManagerWrapper">
+            <summary>
+            Wrapper for the native MarsManager class (planet visuals).
+            MIGRATION 2026-06-10 — interop typé (marsRenderer/waterRenderer exposés par le proxy).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.MarsManagerWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native MarsManager (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.MarsManagerWrapper.#ctor(MarsManager)">
+            <summary>Wraps a typed interop MarsManager proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.MarsManagerWrapper.NativeMarsManager">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.MarsManagerWrapper.waterRenderer">
+            <summary>Water mesh renderer (typed read of MarsManager.waterRenderer).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.MarsManagerWrapper.marsRenderer">
+            <summary>Mars surface mesh renderer (typed read of MarsManager.marsRenderer).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.PlanetWrapper">
              <summary>
              Wrapper for the native Planet class.
-             Provides safe access to planetary properties and building management.
+             Provides safe access to planetary properties.
              For atmospheric data, use PerAspera.GameAPI.Climate.ClimateController directly.
             
-             📖 Enhanced Documentation: F:\ModPeraspera\SDK-Enhanced-Classes\Planet-Enhanced.md
+             MIGRATION PILOTE (2026-06-10) — interop typé d'abord :
+             les membres délèguent au proxy interop <see cref="T:Planet"/> (vérification à la
+             compilation, IntelliSense, erreur de build si le jeu change) au lieu de la réflexion
+             string-based SafeInvoke. La réflexion ne subsiste que pour les membres natifs
+             réellement inaccessibles (ex: setter privé de waterStock).
+             Les API qui n'ont JAMAIS existé côté jeu (GetResourceStock, AddResource,
+             buildings sur Planet) sont marquées [Obsolete] avec un message honnête —
+             elles retournaient silencieusement 0/vide depuis toujours.
+            
+             📖 Enhanced Documentation: F:\ModPeraspera\docs\Planet-Enhanced.md
              🤖 Agent Expert: @per-aspera-sdk-coordinator
-             🔧 Gap Analysis: F:\ModPeraspera\SDK-Enhanced-Classes\Capabilities-Matrix.md
+             🔧 Gap Analysis: F:\ModPeraspera\docs\Capabilities-Matrix.md
              </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native planet (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.#ctor(Planet)">
+            <summary>Wraps a typed interop Planet proxy.</summary>
+            <example>var wrapper = new PlanetWrapper(myPlanetProxy);</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.NativePlanet">
+            <summary>
+            Typed interop proxy of the wrapped planet.
+            Null when the wrapper is invalid or wraps a non-Planet object.
+            </summary>
+            <example>var temp = wrapper.NativePlanet?.GetAverageTemperature();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetCurrent">
+            <summary>Gets a wrapper around the current planet, or null when unavailable.</summary>
+            <example>var planet = PlanetWrapper.GetCurrent();</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetHazardsManager">
-            <summary>Get HazardsManager for this planet.</summary>
+            <summary>Get HazardsManager for this planet (typed field access).</summary>
+            <example>var hazards = planet.GetHazardsManager();</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetGamePosition(System.Single,System.Single)">
-            <summary>
-            Convert geographic coordinates to the game's internal 2D position.
-            Convention: x=longitude, y=latitude.
-            </summary>
+            <summary>Convert geographic coordinates to the game's internal 2D position.</summary>
+            <example>var pos = planet.GetGamePosition(137.4f, -4.6f);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetLongitude(UnityEngine.Vector2)">
+            <summary>Convert a game 2D world position to longitude (degrees).</summary>
+            <example>float lon = planet.GetLongitude(pos);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetLatitude(UnityEngine.Vector2)">
+            <summary>Convert a game 2D world position to latitude (degrees).</summary>
+            <example>float lat = planet.GetLatitude(pos);</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Name">
             <summary>Planet name. Hardcoded to "Mars" for Per Aspera.</summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAverageTemperature">
+            <summary>
+            Global average surface temperature in Kelvin. 0°C = 273.15 K.
+            Typed call to Planet.GetAverageTemperature().
+            </summary>
+            <example>float kelvin = planet.GetAverageTemperature();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetTemperatureAt(System.Single,System.Single)">
+            <summary>
+            Surface temperature at a specific geographic position in Kelvin.
+            Typed call to Planet.GetTemperature(longitude, latitude).
+            </summary>
+            <example>float kelvin = planet.GetTemperatureAt(137.4f, -4.6f);</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetTemperature">
-            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+            <summary>N'a jamais existé : Planet n'a pas de GetTemperature() sans paramètres.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAtmosphericPressure">
-            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+            <summary>N'a jamais existé sur Planet — utiliser ClimateController.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetOxygenLevel">
-            <summary>Use PerAspera.GameAPI.Climate.ClimateController for atmospheric data.</summary>
+            <summary>N'a jamais existé sur Planet — utiliser ClimateController.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.Atmosphere">
             <summary>Use PerAspera.GameAPI.Climate.ClimateController.Instance.Atmosphere directly.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.WaterStock">
-            <summary>Water stock on the planet.</summary>
+            <summary>
+            Water stock on the planet.
+            Typed read/write via the publicized interop proxy (BepInEx.AssemblyPublicizer).
+            The native setter is private in-game but publicized at compile time — no reflection needed.
+            </summary>
+            <example>float water = planet.WaterStock; planet.WaterStock = 5000f;</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.AddWaterStock(System.Single)">
+            <summary>
+            Add water to planet stock. Positive = add, negative = remove.
+            ⚠️ Same caveat as the WaterStock setter: best-effort, failure is logged.
+            </summary>
+            <example>planet.AddWaterStock(500f);</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.HasSufficientWater">
+            <summary>True when water stock exceeds 1000.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetResourceStock(System.String)">
-            <summary>Get stock of a specific resource.</summary>
-            <param name="resourceKey">Resource key (e.g., "resource_water", "resource_silicon")</param>
+            <summary>N'a jamais fonctionné — Planet n'a pas de stocks de ressources.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.SiliconStock">
+            <summary>N'a jamais fonctionné — voir GetResourceStock.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.IronStock">
+            <summary>N'a jamais fonctionné — voir GetResourceStock.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.CarbonStock">
+            <summary>N'a jamais fonctionné — voir GetResourceStock.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.CalciteStock">
+            <summary>N'a jamais fonctionné — voir GetResourceStock.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.PlanetWrapper.HasBalancedResources">
+            <summary>N'a jamais fonctionné — reposait sur des stocks fantômes.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.AddResource(System.String,System.Single)">
-            <summary>Add resource to planet stock. Use negative amount to remove.</summary>
+            <summary>N'a jamais fonctionné — Planet n'a pas d'AddResource.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAltitude(UnityEngine.Vector2)">
+            <summary>Raw terrain elevation at world position (metres, no water).</summary>
+            <example>float alt = planet.GetAltitude(pos);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetAltitudeWithWater(UnityEngine.Vector2)">
+            <summary>Elevation at world position, returning water surface when submerged.</summary>
+            <example>float alt = planet.GetAltitudeWithWater(pos);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetWaterLevel">
+            <summary>Global ocean surface elevation — rises as terraforming progresses.</summary>
+            <example>float level = planet.GetWaterLevel();</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildings">
-            <summary>Get all buildings on this planet.</summary>
+            <summary>N'a jamais fonctionné — les bâtiments sont sur Faction, pas Planet.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsSafely">
-            <summary>Get all buildings on the planet (array version).</summary>
+            <summary>N'a jamais fonctionné — voir GetBuildings.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.PlanetWrapper.GetBuildingsByFaction(PerAspera.GameAPI.Wrappers.FactionWrapper)">
-            <summary>Get all buildings owned by a specific faction.</summary>
+            <summary>
+            Get all buildings owned by a specific faction.
+            Délègue à FactionWrapper.GetBuildings() (Faction.buildings existe côté jeu).
+            </summary>
+            <example>var buildings = planet.GetBuildingsByFaction(faction);</example>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.PointOfInterestWrapper">
              <summary>
@@ -2809,26 +3083,44 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper">
+             <summary>
+             Wrapper for ResourcesPanel providing safe access to resource management UI.
+            
+             MIGRATION 2026-06-10 — interop typé : GameCanvasReferences.resourcesPanel,
+             ResourcesPanel.resourceItems et resourceTypesCached sont tous exposés typés.
+             Le downcast ResourcesPanelBase → ResourcesPanel passe par TryCast (IL2CPP).
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native panel (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.#ctor(ResourcesPanelBase)">
+            <summary>Wraps a typed interop ResourcesPanelBase proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.NativeResourcesPanelBase">
+            <summary>Typed base proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.AsResourcesPanel">
             <summary>
-            Wrapper for ResourcesPanel providing safe access to resource management UI
-            Provides access to cached resource types and resource items
+            Typed ResourcesPanel proxy (null si l'instance n'est pas vue comme un
+            ResourcesPanel concret côté managé).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.GetCurrent">
             <summary>
-            Get current ResourcesPanel instance from game's canvas references
+            Get current ResourcesPanel instance from game's canvas references (typed chain).
             </summary>
+            <example>var panel = ResourcesPanelWrapper.GetCurrent();</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.resourceItems">
             <summary>
-            Dictionary mapping ResourceType to ResourceItem UI components
-            Provides access to UI elements for each resource
+            Dictionary mapping ResourceType to ResourceItem UI components (typed read).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper.resourceTypesCached">
             <summary>
-            Cached list of all available ResourceType instances
-            Includes both vanilla and mod-added resources
+            Cached list of all available ResourceType instances (typed read).
+            Includes both vanilla and mod-added resources.
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper">
@@ -2880,6 +3172,13 @@
             </summary>
             <param name="nativeResourceType">Native resource type instance from game</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.#ctor(ResourceType)">
+            <summary>Wraps a typed interop ResourceType proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.NativeResourceType">
+            <summary>Typed interop proxy (null when the wrapper is invalid or YAML-only).</summary>
+            <example>var mat = resource.NativeResourceType?.materialType;</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.FromNative(System.Object)">
             <summary>
             Create wrapper from native resource type object
@@ -2902,26 +3201,27 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Name">
             <summary>
-            Resource type name/key identifier
-            Maps to: name field (e.g., "resource_water", "resource_iron")
+            Resource type key identifier (typed read of StaticDataCollectionItem.key).
+            E.g., "resource_water", "resource_iron".
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.DisplayName">
             <summary>
-            Resource display name for UI
-            Maps to: displayName or localizedName field
+            Resource display name for UI.
+            (« displayName »/« localizedName » n'existent pas sur ResourceType natif —
+            retourne le name natif, ou Name. Les wrappers YAML overrident avec leur displayName.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Index">
             <summary>
-            Resource index for efficient lookups
-            Maps to: index field
+            Resource index for efficient lookups (typed read of ResourceType.index).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.ColorHex">
             <summary>
-            Resource color for UI display
-            Maps to: color field
+            Resource color for UI display as RRGGBB hex.
+            (L'ancien binding lisait « color » comme string — c'est un UnityEngine.Color,
+            la lecture échouait et retournait toujours "FFFFFF". Conversion réelle désormais.)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.MaterialType">
@@ -2940,22 +3240,68 @@
             Is this a manufactured/processed resource?
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsVirtualNative">
+            <summary>True if the game considers this resource "virtual" (not in ValueByIndex array).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsPlaceholderNative">
+            <summary>True if materialType == Placeholder (YAML: materialType: Placeholder).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsPlacementNative">
+            <summary>True if materialType == Placement (distinct from Placeholder).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsReleasedNative">
+            <summary>True if materialType == Released.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsMinedNative">
+            <summary>True if materialType == Mined.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsManufacturedNative">
+            <summary>True if materialType == Manufactured.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IsGasNative">
+            <summary>True for any atmospheric gas type (GasReleased/Captured/Converted).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetNativeClassificationSummary">
+            <summary>One-line classification string for audit logs.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetMaxIndex">
+            <summary>
+            The current MaxIndex used by the game. ValueByIndex array has length MaxIndex+1.
+            If a resource has index > MaxIndex, accessing it crashes with IndexOutOfRange.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetValueByIndexLength">
+            <summary>
+            Length of the ValueByIndex array. Custom resources with index >= this will crash.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.RerunPostInitialize">
+            <summary>
+            Re-runs ResourceType.PostInitialize() to rebuild NonVirtualResources and ValueByIndex
+            after mod resources have been loaded. Call this from CompleteLoadingPatch BEFORE the audit.
+            This fixes custom mod resources getting index -001 when AssignMaxIndex ran before mod YAML loaded.
+            </summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.PrefabName">
             <summary>
-            Resource prefab name for instantiation
-            Maps to: prefabName field
+            Resource prefab name for instantiation (typed read of ResourceType.prefabName).
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Icon">
+            <summary>
+            Icon sprite for UI display (typed).
+            ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+            échouait et retournait toujours le fallback.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.IconName">
             <summary>
-            Icon name for UI display
-            Maps to: iconName field
+            Icon sprite name for UI display (name of the loaded Sprite).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.Knowledge">
             <summary>
-            Associated knowledge entry for this resource
-            Maps to: knowledge field
+            Associated knowledge entry for this resource (typed KnowledgeType proxy).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetKnowledge">
@@ -2965,14 +3311,14 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.VeinIconNames">
             <summary>
-            Vein icon names for resource deposits
-            Maps to: veinIconsName array
+            Vein icon sprite names for resource deposits.
+            (« veinIconsName » n'existait pas — le membre réel est veinIcon, List de Sprites ;
+            l'ancien binding retournait toujours une liste vide.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.CubeMaterial">
             <summary>
-            Cube material for resource display
-            Maps to: cubeMaterial field
+            Cube material for resource display (typed read of ResourceType.cubeMaterial).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceTypeWrapper.GetColor">
@@ -3489,97 +3835,78 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SliceMasterWrapper">
-            <summary>
-            Wrapper for the native SliceMaster class
-            Provides safe access to game timing and tick management
+             <summary>
+             Wrapper for the native SliceMaster class (game timing and tick management).
+             MIGRATION 2026-06-10 — interop typé : tous les membres délèguent au proxy.
             
-            📚 Based on: SliceMaster (ScriptsAssembly) with tickTime, tickTimeMultiplier, realDeltaTime properties
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-            ⏰ Timing System: Game speed, tick timing, real-time management
-            </summary>
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native SliceMaster (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.#ctor(SliceMaster)">
+            <summary>Wraps a typed interop SliceMaster proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.NativeSliceMaster">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.tickTimeMultiplier">
             <summary>
-            Gets or sets the tick time multiplier for game speed control.
+            Tick time multiplier for game speed control (typed).
             Values between 0.001 and 10.0 are typically supported.
             </summary>
-            <example>
-            <code>
-            var sliceMaster = universe.GetSliceMaster();
-            sliceMaster.tickTimeMultiplier = 2.0f; // 2x speed
-            sliceMaster.tickTimeMultiplier = 0.5f; // Half speed
-            </code>
-            </example>
+            <example>universe.GetSliceMaster().tickTimeMultiplier = 2.0f; // 2x speed</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.tickTime">
             <summary>
-            Gets or sets the actual tick time used by the game engine.
-            This is the base timing value before multipliers are applied.
+            Base tick time used by the game engine, before multipliers (typed).
             </summary>
-            <example>
-            <code>
-            var sliceMaster = universe.GetSliceMaster();
-            var currentTick = sliceMaster.tickTime;
-            sliceMaster.tickTime = 0.05f; // Direct tick time control
-            </code>
-            </example>
+            <example>var currentTick = sliceMaster.tickTime;</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.realDeltaTime">
-            <summary>
-            Gets or sets the real delta time used by the timing system.
-            This represents the actual frame-to-frame time progression.
-            </summary>
-            <example>
-            <code>
-            var sliceMaster = universe.GetSliceMaster();
-            var deltaTime = sliceMaster.realDeltaTime;
-            </code>
-            </example>
+            <summary>Real frame-to-frame delta time used by the timing system (typed).</summary>
+            <example>var deltaTime = sliceMaster.realDeltaTime;</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.timerAcc">
-            <summary>
-            Gets or sets the timer accumulator for tick timing management.
-            </summary>
+            <summary>Timer accumulator for tick timing management (typed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SliceMasterWrapper.framesBetween">
-            <summary>
-            Gets or sets the number of frames between tick processing.
-            </summary>
+            <summary>Number of frames between tick processing (typed).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper">
              <summary>
-             Wrapper for a single SpecialSite instance from the game
-             Provides safe, type-safe access to SpecialSite properties
+             Wrapper for a single SpecialSite instance from the game.
+             MIGRATION 2026-06-10 — interop typé (GetName/geoPosition exposés par le proxy).
             
-             Properties:
-             - Name: Site display name (String)
-             - Coordinates: Latitude, Longitude
-            
-             Example:
+             geoPosition.x = longitude, geoPosition.y = latitude (convention YAML).
+             </summary>
+             <example>
              var site = new SpecialSiteInstanceWrapper(nativeSite);
              var name = site.Name;
              var lat = site.CenterLatitude;
-             </summary>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native site (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.#ctor(SpecialSite)">
+            <summary>Wraps a typed interop SpecialSite proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.NativeSpecialSite">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.FromNative(System.Object)">
-            <summary>
-            Create wrapper from native SpecialSite instance
-            </summary>
+            <summary>Create wrapper from native SpecialSite instance.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.Name">
-            <summary>Site display name via GetName(bool researched)</summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.GetGeoPosition">
-            <summary>
-            geoPosition.x = longitude, geoPosition.y = latitude (from YAML: x=longitude, y=latitude)
-            </summary>
+            <summary>Site display name (typed call to SpecialSite.GetName(researched: true)).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLatitude">
-            <summary>Site center latitude (geoPosition.y)</summary>
+            <summary>Site center latitude (typed read of geoPosition.y).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.SpecialSiteInstanceWrapper.CenterLongitude">
-            <summary>Site center longitude (geoPosition.x)</summary>
+            <summary>Site center longitude (typed read of geoPosition.x).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SpecialSiteWrapper">
             <summary>
@@ -3625,6 +3952,27 @@
             Utile pour tests et génération dynamique de dialogues avant conversion en YAML/TextAsset.
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Swarm">
+            <summary>
+            Wrapper for the native Swarm class (drone swarm).
+            MIGRATION 2026-06-10 — interop typé (Swarm._keeper exposé par le proxy).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Swarm.#ctor(System.Object)">
+            <summary>Wraps an untyped native swarm (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Swarm.#ctor(Swarm)">
+            <summary>Wraps a typed interop Swarm proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Swarm.NativeSwarm">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Swarm.FromNative(System.Object)">
+            <summary>Factory — retourne null si l'objet natif est null.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Swarm.GetKeeper">
+            <summary>Keeper this swarm belongs to (typed read of Swarm._keeper).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.TechnologyWrapper">
             <summary>
             Wrapper for the native TechnologyType class
@@ -3639,6 +3987,13 @@
             </summary>
             <param name="nativeTechnology">Native TechnologyType instance from game</param>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.#ctor(TechnologyType)">
+            <summary>Wraps a typed interop TechnologyType proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.NativeTechnologyType">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>float pts = tech.NativeTechnologyType?.requiredResearchPoints ?? 0f;</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.FromNative(System.Object)">
             <summary>
             Create wrapper from native TechnologyType object
@@ -3646,56 +4001,54 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Name">
             <summary>
-            Technology name/key identifier
-            Maps to: name field (e.g., "tech_advanced_solar", "tech_water_extraction")
+            Technology key identifier (typed read of StaticDataCollectionItem.key).
+            E.g., "tech_advanced_solar".
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.DisplayName">
             <summary>
-            Technology display name for UI
-            Maps to: displayName or localizedName field
+            Technology display name for UI (typed read of TechnologyType.name).
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ShortName">
+            <summary>Short name for compact UI (typed read of TechnologyType.shortName).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Description">
             <summary>
-            Technology description
-            Maps to: description field
+            Technology description (typed read of TechnologyType.description).
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Index">
-            <summary>
-            Technology index for efficient lookups
-            Maps to: index field
-            </summary>
+            <summary>N'a jamais existé — TechnologyType n'a pas d'index.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Category">
             <summary>
-            Technology category/branch (Engineering, Biology, Space)
-            Maps to: category or branch field
+            Technology category (typed read of TechnologyType.categoryName).
+            (L'ancienne chaîne category/branch/tree n'existait pas.)
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Position">
+            <summary>Position in the tech tree lane (typed read of TechnologyType.position).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.IsRepeatable">
+            <summary>True when this tech can be researched repeatedly (typed).</summary>
+        </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Tier">
-            <summary>
-            Technology tier/level (1, 2, 3, etc.)
-            Maps to: tier or level field
-            </summary>
+            <summary>N'a jamais existé — tier/level n'existent pas sur TechnologyType.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ResearchCost">
             <summary>
-            Research cost in research points
-            Maps to: cost or researchCost field
+            Research cost in research points (typed read of TechnologyType.requiredResearchPoints).
+            (L'ancienne chaîne cost/researchCost n'existait pas — retournait toujours 0.)
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ResearchTime">
-            <summary>
-            Time required to research (in game time units)
-            Maps to: researchTime or duration field
-            </summary>
+            <summary>N'a jamais existé — pas de durée fixe, le temps dépend des points/jour.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetPrerequisites">
             <summary>
-            Prerequisites needed to unlock this technology
-            Maps to: prerequisites or requiredTechs array
+            Prerequisites needed to unlock this technology (typed read of TechnologyType.requirements).
+            (L'ancienne chaîne prerequisites/requiredTechs/dependencies n'existait pas.)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ArePrerequisitesMet(PerAspera.GameAPI.Wrappers.FactionWrapper)">
@@ -3705,17 +4058,19 @@
             <param name="faction">Faction to check prerequisites for</param>
             <returns>True if all prerequisites are researched</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetUnlockedBuildings">
+        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetActions">
             <summary>
-            Buildings unlocked by this technology
-            Maps to: unlockedBuildings array
+            Unlock actions of this technology (typed read of TechnologyType.actions).
+            C'est le vrai mécanisme d'unlock : chaque TextAction décrit ce que la techno
+            débloque (bâtiments, ressources, effets…).
             </summary>
+            <example>foreach (var action in tech.GetActions()) { ... }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetUnlockedBuildings">
+            <summary>N'a jamais fonctionné — ces membres n'existent pas.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetUnlockedResources">
-            <summary>
-            Resources unlocked by this technology
-            Maps to: unlockedResources array
-            </summary>
+            <summary>N'a jamais fonctionné — ces membres n'existent pas.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.IsResearchedBy(PerAspera.GameAPI.Wrappers.FactionWrapper)">
             <summary>
@@ -3741,9 +4096,12 @@
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.IconPath">
             <summary>
-            Get technology icon path
-            Maps to: iconPath or icon field
+            Icon sprite name (typed — « iconName » natif est un Sprite, pas une string ;
+            l'ancien binding iconPath/icon n'existait pas).
             </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.TechnologyWrapper.Icon">
+            <summary>Icon sprite for UI display (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.IsMilestoneTechnology">
             <summary>
@@ -3751,14 +4109,10 @@
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetComplexityRating">
-            <summary>
-            Get technology complexity rating (1-5)
-            </summary>
+            <summary>Reposait sur le Tier fantôme — retournait toujours 1.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetEstimatedResearchTime">
-            <summary>
-            Get estimated research time in human-readable format
-            </summary>
+            <summary>Reposait sur le ResearchTime fantôme — retournait toujours « 0 minutes ».</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetDisplayName">
             <summary>
@@ -3770,11 +4124,6 @@
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ToTitleCase(System.String)">
             <summary>
             Convert string to title case
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.GetNativeObject">
-            <summary>
-            Get the native game object (for Harmony patches)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.TechnologyWrapper.ToString">
@@ -3945,11 +4294,19 @@
             Provides safe access to game panel sprites, buttons, and properties.
             </summary>
         </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.AsBuildingScreenPanel">
+            <summary>
+            Typed BuildingScreenPanel proxy when the wrapped panel is one.
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.FindBuildingScreenPanel">
-            <summary>Find BuildingScreenPanel instance in the current scene.</summary>
+            <summary>Find BuildingScreenPanel instance in the current scene (typed check).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetPanelBackgroundSprite">
-            <summary>Get the upgradeNormalBackground sprite from the panel.</summary>
+            <summary>
+            Get the upgradeNormalBackground sprite from the panel
+            (typed read of BuildingScreenPanel.upgradeNormalBackground).
+            </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UI.UIPanelWrapper.GetPanelByName(System.String)">
             <summary>Get panel by name (e.g., "statusPanel", "upgradePanel").</summary>
@@ -4165,120 +4522,116 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.UniverseWrapper">
-            <summary>
-            Wrapper for the native Universe class
-            Provides safe access to time, game state and universe-level properties
+             <summary>
+             Wrapper for the native Universe class.
+             Provides safe access to time, game state and universe-level properties.
             
-            📚 Vanilla Reference: F:\ModPeraspera\CleanedScriptAssemblyClass\Universe.md (290 fields, 143 methods)
-            🤖 Agent Expert: @per-aspera-sdk-coordinator
-            🌐 User Wiki: https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/
-            🕰️ Time System: Game state, pause, time management functionality
-            </summary>
+             MIGRATION 2026-06-10 — interop typé d'abord : délégation au proxy <see cref="T:Universe"/>.
+             Vérifié contre Tools\InteropDump\ScriptsAssembly\Universe.cs. Corrections au passage :
+             « SetPaused » n'existe pas (vrais noms : SetGamePaused/ToggleGamePaused — Pause/Unpause
+             n'avaient JAMAIS fonctionné), « GetBaseGame » n'existe pas sur Universe, et
+             AddBlackBoard passait le wrapper au lieu de l'objet natif.
+            
+             🤖 Agent Expert: @per-aspera-sdk-coordinator
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.#ctor(System.Object)">
+            <summary>Wraps an untyped native Universe (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.#ctor(Universe)">
+            <summary>Wraps a typed interop Universe proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.NativeUniverse">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+            <example>int sol = universe.NativeUniverse?.GetMartianSol() ?? 0;</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetCurrent">
-            <summary>
-            Get the current universe instance
-            </summary>
+            <summary>Get the current universe instance.</summary>
+            <example>var universe = UniverseWrapper.GetCurrent();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetSliceMaster">
+            <summary>Get the SliceMaster (planet slicing system).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetCommandBus">
+            <summary>Get the native CommandBus (typed).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetKeeper">
-            <summary>
-            Get Keeper instance for Universe entities (factions, planets, resources)
-            Property: keeper { get; }
-            </summary>
+            <summary>Get Keeper instance for Universe entities (factions, planets, resources).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetPlayerFaction">
+            <summary>Get the player faction.</summary>
+            <example>var player = universe.GetPlayerFaction();</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.CurrentSol">
-            <summary>
-            Get current Martian sol (days passed)
-            </summary>
+            <summary>Current Martian sol — days passed (typed Universe.GetMartianSol()).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.GameSpeed">
-            <summary>
-            Get current game speed multiplier
-            </summary>
+            <summary>Current game speed multiplier (typed Get/SetGameSpeed).</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.TicksPerDay">
             <summary>
-            Controls the number of simulation ticks per in-game day
-            Higher values = faster simulation, lower values = slower simulation
+            Number of simulation ticks per in-game day (static native field Universe.TICKS_PER_DAY).
+            Higher values = faster simulation.
             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.IsPaused">
-            <summary>
-            Check if game is paused
-            </summary>
+            <summary>Check if game is paused (typed Universe.GetGamePaused()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetPlanet">
-            <summary>
-            Get the planet wrapper instance
-            </summary>
+            <summary>Get the planet wrapper instance.</summary>
+            <example>var planet = universe.GetPlanet();</example>
         </member>
         <member name="P:PerAspera.GameAPI.Wrappers.UniverseWrapper.CurrentPlanet">
-            <summary>
-            Get the current planet instance (alias for GetPlanet for convenience)
-            </summary>
+            <summary>Get the current planet instance (alias for GetPlanet).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetBaseGame">
             <summary>
-            Get the base game wrapper instance
+            Get the base game wrapper instance.
+            (« GetBaseGame » n'existe pas sur Universe — délègue à BaseGameWrapper.GetCurrent().)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetFactions">
-            <summary>
-            Get all factions in the universe
-            Maps to: factions field or GetFactions() method
-            </summary>
+            <summary>Get all factions in the universe (typed read of Universe.factions).</summary>
+            <example>foreach (var f in universe.GetFactions()) { ... }</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.Pause">
             <summary>
-            Pause the game
+            Pause the game (typed Universe.SetGamePaused(true)).
+            ⚠️ L'ancienne implémentation visait « SetPaused » qui n'existe pas — elle
+            n'a jamais rien fait. Celle-ci fonctionne réellement.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.Unpause">
-            <summary>
-            Unpause the game
-            </summary>
+            <summary>Unpause the game (typed Universe.SetGamePaused(false)).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.TogglePause">
-            <summary>
-            Toggle pause state
-            </summary>
+            <summary>Toggle pause state (typed Universe.ToggleGamePaused()).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetMainBlackBoard">
-            <summary>
-            Get the main blackboard instance
-            Field: blackboardMain (public Blackboard)
-            </summary>
+            <summary>Get the main blackboard instance (lu par les règles YAML MISSION, scope « main. »).</summary>
+            <example>universe.GetMainBlackBoard()?.SetValue("mon_flag", true);</example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetBlackBoard(System.String)">
-            <summary>
-            Get a specific blackboard by name from the blackboards dictionary
-            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-            </summary>
+            <summary>Get a specific blackboard by name (typed dictionary access).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetBlackBoardNames">
-            <summary>
-            Get all blackboard names from the blackboards dictionary
-            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-            </summary>
+            <summary>Get all blackboard names.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.HasBlackBoard(System.String)">
-            <summary>
-            Check if a blackboard with the given name exists
-            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-            </summary>
+            <summary>Check if a blackboard with the given name exists.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.AddBlackBoard(PerAspera.GameAPI.Wrappers.BlackBoardWrapper)">
             <summary>
-            Add a new blackboard to the universe
-            Method: AddBlackboard(Blackboard blackboard)
-            Note: Based on decompiled Universe.md method
+            Add a new blackboard to the universe (typed Universe.AddBlackboard).
+            ⚠️ L'ancienne implémentation passait le WRAPPER à l'appel natif (bug) —
+            l'objet natif est maintenant déballé correctement.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.GetBlackBoardCount">
-            <summary>
-            Get count of blackboards in the universe
-            Field: blackboards (private Dictionary&lt;string, Blackboard&gt;)
-            </summary>
+            <summary>Get count of blackboards in the universe.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.UniverseWrapper.ToString">
+            <summary>Human-readable universe state summary.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.VisualPointOfInterestWrapper">
              <summary>
@@ -4295,6 +4648,27 @@
              }
              </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.Way">
+            <summary>
+            Wrapper for the native Way class (routing path segment).
+            MIGRATION 2026-06-10 — interop typé (Way._keeper exposé par le proxy).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Way.#ctor(System.Object)">
+            <summary>Wraps an untyped native way (compat). Prefer the typed overload.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Way.#ctor(Way)">
+            <summary>Wraps a typed interop Way proxy.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.Way.NativeWay">
+            <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Way.FromNative(System.Object)">
+            <summary>Factory — retourne null si l'objet natif est null.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.Way.GetKeeper">
+            <summary>Keeper this way belongs to (typed read of Way._keeper).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Wrappers.WrapperBase">
             <summary>
             Base class for all game object wrappers.
@@ -4308,6 +4682,13 @@
         <member name="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid">
             <summary>True when the native object is non-null.</summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.#ctor(System.Object)">
+            <summary>
+            Wraps the given native object. Null is tolerated but the wrapper is then
+            invalid: <see cref="P:PerAspera.GameAPI.Wrappers.WrapperBase.IsValid"/> = false and every Safe* accessor returns default.
+            (Previously a placeholder object was substituted, which made IsValid lie.)
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeInvoke``1(System.String,System.Object[])">
             <summary>
             Invoke a method on the native object, returning default on failure.
@@ -4318,6 +4699,14 @@
             Invoke a void method on the native object, swallowing exceptions.
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.TryInvokeVoid(System.String,System.Object[])">
+            <summary>
+            Invoke a void method on the native object and report success.
+            Use this instead of SafeInvokeVoid when a fallback is needed —
+            SafeInvokeVoid never throws, so try/catch around it is dead code.
+            </summary>
+            <example>if (!TryInvokeVoid("set_waterStock", v)) TrySetField("waterStock", v);</example>
+        </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeGetField``1(System.String)">
             <summary>
             Read a field value from the native object, returning default on failure.
@@ -4326,6 +4715,11 @@
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.SafeSetField``1(System.String,``0)">
             <summary>
             Write a field value on the native object, swallowing exceptions.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.TrySetField``1(System.String,``0)">
+            <summary>
+            Write a field value on the native object and report success.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.WrapperBase.DumpToFile(System.String)">

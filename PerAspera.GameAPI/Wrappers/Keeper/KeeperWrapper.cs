@@ -65,86 +65,35 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>KeeperMapWrapper instance or null if unavailable</returns>
         public KeeperMapWrapper? GetKeeperMap()
         {
-            try
-            {
-                if (NativeObject == null) return null;
-
-                // Try direct access first
-                if (_nativeKeeper != null)
-                {
-                    var keeperMap = _nativeKeeper.map;
-                    if (keeperMap != null)
-                    {
-                        return new KeeperMapWrapper(keeperMap);
-                    }
-                }
-
-                // Fallback to reflection
-                var keeperMapRef = GetNativeField<object>("map");
-                if (keeperMapRef == null) return null;
-                
-                return new KeeperMapWrapper(keeperMapRef);
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} GetKeeperMap failed: {ex.Message}");
-                return null;
-            }
+            var m = _nativeKeeper?.map;
+            return m != null ? new KeeperMapWrapper(m) : null;
         }
         
         /// <summary>
-        /// Register an entity with the Keeper system
-        /// Returns Handle for future lookups
+        /// Register an entity with the Keeper system.
+        /// Returns Handle for future lookups.
         /// </summary>
         /// <param name="handleable">Entity to register (must implement IHandleable)</param>
         /// <returns>Handle for the registered entity</returns>
         public Handle Register(object handleable)
         {
-            try
-            {
-                if (NativeObject == null || handleable == null) return default;
-
-                // Try direct access first
-                if (_nativeKeeper != null && handleable is IHandleable iHandleable)
-                {
-                    return _nativeKeeper.Register(iHandleable);
-                }
-
-                // Fallback to reflection
-                return SafeInvoke<Handle>("Register", handleable);
-            }
-            catch (Exception ex)
-            {
-                _log.Warning($"{LogPrefix} Register failed: {ex.Message}");
-                return default;
-            }
+            if (_nativeKeeper == null || handleable == null) return default;
+            if (handleable is IHandleable iHandleable)
+                return _nativeKeeper.Register(iHandleable);
+            _log.Warning($"{LogPrefix} Register: handleable does not implement IHandleable");
+            return default;
         }
         
         /// <summary>
-        /// Unregister an entity from the Keeper system
-        /// Removes the Handle→Object mapping
+        /// Unregister an entity from the Keeper system.
+        /// Removes the Handle→Object mapping.
         /// </summary>
         /// <param name="handleable">Entity to unregister</param>
         public void Unregister(object handleable)
         {
-            try
-            {
-                if (NativeObject == null || handleable == null) return;
-
-                // Try direct access first
-                if (_nativeKeeper != null && handleable is IHandleable iHandleable)
-                {
-                    _nativeKeeper.Unregister(iHandleable);
-                    return;
-                }
-
-                // Fallback to reflection
-                SafeInvoke<object>("Unregister", handleable);
-            }
-            catch (Exception ex)
-            {
-                _log.Warning($"{LogPrefix} Unregister failed: {ex.Message}");
-            }
+            if (_nativeKeeper == null || handleable == null) return;
+            if (handleable is IHandleable iHandleable)
+                _nativeKeeper.Unregister(iHandleable);
         }
         
         // ==================== DIAGNOSTICS & DEBUGGING ====================
@@ -154,74 +103,21 @@ namespace PerAspera.GameAPI.Wrappers
         /// Advanced usage only - prefer KeeperMapWrapper for normal operations
         /// </summary>
         /// <returns>Native HandleManager object or null</returns>
-        public object? GetHandleManager()
-        {
-            try
-            {
-                if (NativeObject == null) return null;
-
-                // Try direct access first
-                if (_nativeKeeper != null)
-                {
-                    return _nativeKeeper.handleManager;
-                }
-
-                // Fallback to reflection
-                return SafeInvoke<object>("get_handleManager");
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} GetHandleManager failed: {ex.Message}");
-                return null;
-            }
-        }
+        public HandleManager? GetHandleManager()
+            => _nativeKeeper?.handleManager;
         
         /// <summary>
         /// Get ECS World instance for Entity-Component-System operations
         /// Advanced usage - requires Unity ECS knowledge
         /// </summary>
         /// <returns>Unity ECS World or null if not available</returns>
-        public object? GetECSWorld()
-        {
-            try
-            {
-                if (NativeObject == null) return null;
+        /// <summary>Get ECS World instance (Unity.Entities.World). Advanced usage only.</summary>
+        public global::Unity.Entities.World? GetECSWorld()
+            => _nativeKeeper?.ecsWorld;
 
-                // Try direct access first
-                if (_nativeKeeper != null)
-                {
-                    return _nativeKeeper.ecsWorld;
-                }
-
-                // Fallback to reflection
-                return SafeInvoke<object>("get_ecsWorld");
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} GetECSWorld failed: {ex.Message}");
-                return null;
-            }
-        }
-        
-        /// <summary>
-        /// Get EntityManager for ECS entity operations
-        /// Advanced usage - requires Unity ECS knowledge
-        /// </summary>
-        /// <returns>Unity EntityManager or null if not available</returns>
-        public object? GetEntityManager()
-        {
-            try
-            {
-                if (NativeObject == null) return null;
-                
-                return SafeInvoke<object>("get_entityManager");
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"{LogPrefix} GetEntityManager failed: {ex.Message}");
-                return null;
-            }
-        }
+        /// <summary>Get EntityManager for ECS entity operations. Advanced usage only.</summary>
+        public global::Unity.Entities.EntityManager? GetEntityManager()
+            => _nativeKeeper?.entityManager;
         
         /// <summary>
         /// Check if Keeper is properly initialized and ready for use

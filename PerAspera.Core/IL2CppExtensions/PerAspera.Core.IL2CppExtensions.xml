@@ -269,21 +269,44 @@
             </summary>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.NativeWrapper`1">
+             <summary>
+             Generic base class for all native IL2CPP object wrappers.
+             Provides safe method invocation, field access, and debug utilities.
+             Zero game-specific logic - usable for any IL2CPP object.
+            
+             A wrapper built around a null native object is allowed: <see cref="P:PerAspera.Core.IL2CPP.NativeWrapper`1.IsValidWrapper"/>
+             reports false and every CallNative/GetNativeField returns default without throwing.
+             </summary>
+             <example>
+             <code>
+             public class MyWrapper : NativeWrapper&lt;object&gt;
+             {
+                 public MyWrapper(object native) : base(native) { }
+                 public string GetName() => CallNative&lt;string&gt;("get_Name") ?? "Unknown";
+                 public void SetActive(bool v) => CallNativeVoid("SetActive", v);
+             }
+             </code>
+             </example>
+        </member>
+        <member name="P:PerAspera.Core.IL2CPP.NativeWrapper`1.IsValidWrapper">
+            <summary>True when the wrapped native object is non-null. Honest: a wrapper
+            constructed with null reports false (no placeholder object is substituted).</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.#ctor(`0)">
             <summary>
-            Generic base class for all native IL2CPP object wrappers.
-            Provides safe method invocation, field access, and debug utilities.
-            Zero game-specific logic â€” usable for any IL2CPP object.
+            Wraps the given native object. Null is tolerated (the wrapper is then invalid:
+            <see cref="P:PerAspera.Core.IL2CPP.NativeWrapper`1.IsValidWrapper"/> = false and all accessors return default).
             </summary>
-            <example>
-            <code>
-            public class MyWrapper : NativeWrapper&lt;object&gt;
-            {
-                public MyWrapper(object native) : base(native) { }
-                public string GetName() => CallNative&lt;string&gt;("get_Name") ?? "Unknown";
-                public void SetActive(bool v) => CallNativeVoid("SetActive", v);
-            }
-            </code>
-            </example>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.CallNativeVoid(System.String,System.Object[])">
+            <summary>
+            Invoke a void method on the native object.
+            </summary>
+            <returns>True when the method was found and invoked without error —
+            callers implementing a fallback (e.g. direct field write) must check this.</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.SetNativeField``1(System.String,``0,System.Nullable{System.Reflection.BindingFlags})">
+            <returns>True when the field was found and written.</returns>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.PerAsperaExtensions">
             <summary>
@@ -516,6 +539,41 @@
             <typeparam name="T">Target type</typeparam>
             <param name="obj">Object to cast</param>
             <returns>Casted object or default(T)</returns>
+        </member>
+        <member name="T:PerAspera.Core.IL2CPP.UnityMeshExtensions">
+             <summary>
+             Safe wrappers for UnityEngine.Mesh methods that are stripped in IL2CPP.
+            
+             Per Aspera's IL2CPP binary only preserves the List&lt;T&gt; overloads of Mesh APIs.
+             The array overloads (mesh.vertices = array, SetVertices(Vector3[]), etc.) exist
+             in unity-libs (compile-time reference) but throw MissingMethodException at runtime.
+            
+             <example>
+             // Instead of: mesh.vertices = new[] { ... }   ← MissingMethodException at runtime
+             // Use:
+             mesh.SetVerticesSafe(new[] { new Vector3(-r, 0f, -r), ... });
+             mesh.SetTrianglesSafe(new[] { 0, 1, 2, 0, 2, 3 });
+             mesh.SetUVsSafe(0, new[] { new Vector2(0f, 0f), ... });
+             </example>
+             </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.UnityMeshExtensions.SetVerticesSafe(UnityEngine.Mesh,System.Collections.Generic.IEnumerable{UnityEngine.Vector3})">
+            <summary>
+            Sets mesh vertices using the List overload preserved in IL2CPP.
+            Replaces mesh.vertices = array and SetVertices(Vector3[]), both stripped at runtime.
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.UnityMeshExtensions.SetTrianglesSafe(UnityEngine.Mesh,System.Collections.Generic.IEnumerable{System.Int32},System.Int32)">
+            <summary>
+            Sets mesh triangles using the List overload preserved in IL2CPP.
+            Replaces mesh.triangles = array and SetTriangles(int[], int), both stripped at runtime.
+            </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.UnityMeshExtensions.SetUVsSafe(UnityEngine.Mesh,System.Int32,System.Collections.Generic.IEnumerable{UnityEngine.Vector2})">
+            <summary>
+            Sets mesh UVs using the List overload preserved in IL2CPP.
+            Replaces mesh.uv = array and SetUVs(int, Vector2[]), both stripped at runtime.
+            </summary>
         </member>
     </members>
 </doc>

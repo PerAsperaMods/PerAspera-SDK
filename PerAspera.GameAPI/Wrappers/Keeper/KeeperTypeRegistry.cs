@@ -74,16 +74,10 @@ namespace PerAspera.GameAPI.Wrappers
             var nativeUniverse = GetUniverse();
             if (nativeUniverse == null) return null; // silent — universe not ready yet
 
-            try
-            {
-                // property getter is more reliable in IL2CPP than method name lookup
-                return nativeUniverse.InvokeMethod<object>("get_planet")
-                       ?? nativeUniverse.InvokeMethod<object>("GetPlanet");
-            }
-            catch
-            {
-                return null; // silent — planet not ready yet (early ticks)
-            }
+            if (nativeUniverse is Universe u)
+                return u.planet ?? u.GetPlanet();
+
+            return null; // universe not typed — early lifecycle or bad state
         }
         
         // ==================== STATIC DATA TYPES ====================
@@ -97,100 +91,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>ResourceType instance or null</returns>
         public static object? GetResourceType(string resourceKey)
         {
-            if (string.IsNullOrEmpty(resourceKey))
-            {
-                Log.Warning($"{LogPrefix} GetResourceType called with null/empty key");
-                return null;
-            }
-
-            try
-            {
-                // Get ResourceType class via IL2CPP reflection
-                // ResourceType inherits from StaticDataCollectionItem<ResourceType>
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                System.Type? resourceTypeClass = null;
-
-                foreach (var assembly in assemblies)
-                {
-                    resourceTypeClass = assembly.GetType("ResourceType", false, true);
-                    if (resourceTypeClass != null) break;
-                }
-
-                if (resourceTypeClass == null)
-                {
-                    // Try with full namespace
-                    resourceTypeClass = System.Type.GetType("ResourceType", false, true);
-                }
-
-                if (resourceTypeClass == null)
-                {
-                    Log.Error($"{LogPrefix} ResourceType class not found in any assembly");
-                    return null;
-                }
-
-                // StaticDataCollectionItem<T>.Get(string key) — inherited static, needs FlattenHierarchy
-                var getMethod = resourceTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                    System.Reflection.BindingFlags.FlattenHierarchy);
-                if (getMethod != null)
-                {
-                    try
-                    {
-                        var result = getMethod.Invoke(null, new object[] { resourceKey });
-                        if (result != null)
-                            return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
-                    }
-                }
-
-                // Fallback: StaticDataCollectionItem<T>.table (public static Dictionary<string,T>)
-                // In IL2CPP proxies, static fields may be properties — try both GetField and GetProperty.
-                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
-                System.Collections.IDictionary? table = null;
-                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
-
-                foreach (var tableName in possibleTableNames)
-                {
-                    try
-                    {
-                        var tableField = resourceTypeClass.GetField(tableName, bindAll);
-                        if (tableField != null)
-                            table = tableField.GetValue(null) as System.Collections.IDictionary;
-
-                        if (table == null)
-                        {
-                            var tableProp = resourceTypeClass.GetProperty(tableName, bindAll);
-                            if (tableProp != null)
-                                table = tableProp.GetValue(null) as System.Collections.IDictionary;
-                        }
-
-                        if (table != null)
-                        {
-                            Log.Info($"{LogPrefix} Found table '{tableName}' with {table.Count} entries");
-                            break;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
-                    }
-                }
-
-                if (table != null && table.Contains(resourceKey))
-                    return table[resourceKey];
-
-                Log.Warning($"{LogPrefix} ResourceType not found for key: {resourceKey}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"{LogPrefix} Failed to get ResourceType '{resourceKey}': {ex.Message}");
-                return null;
-            }
+            if (string.IsNullOrEmpty(resourceKey)) return null;
+            try   { return ResourceType.Has(resourceKey) ? ResourceType.Get(resourceKey) : null; }
+            catch (Exception ex) { Log.Warning($"{LogPrefix} GetResourceType failed for '{resourceKey}': {ex.Message}"); return null; }
         }
         
         /// <summary>
@@ -214,85 +117,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>BuildingType instance or null</returns>
         public static object? GetBuildingType(string buildingKey)
         {
-            if (string.IsNullOrEmpty(buildingKey))
-            {
-                Log.Warning($"{LogPrefix} GetBuildingType called with null/empty key");
-                return null;
-            }
-
-            try
-            {
-                // Get BuildingType class via IL2CPP reflection
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                System.Type? buildingTypeClass = null;
-
-                foreach (var assembly in assemblies)
-                {
-                    buildingTypeClass = assembly.GetType("BuildingType", false, true);
-                    if (buildingTypeClass != null) break;
-                }
-
-                if (buildingTypeClass == null)
-                {
-                    buildingTypeClass = System.Type.GetType("BuildingType", false, true);
-                }
-
-                if (buildingTypeClass == null)
-                {
-                    Log.Error($"{LogPrefix} BuildingType class not found in any assembly");
-                    return null;
-                }
-
-                var getMethod = buildingTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                    System.Reflection.BindingFlags.FlattenHierarchy);
-                if (getMethod != null)
-                {
-                    try
-                    {
-                        var result = getMethod.Invoke(null, new object[] { buildingKey });
-                        if (result != null) return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
-                    }
-                }
-
-                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
-                System.Collections.IDictionary? table = null;
-                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
-
-                foreach (var tableName in possibleTableNames)
-                {
-                    try
-                    {
-                        var tableField = buildingTypeClass.GetField(tableName, bindAll);
-                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
-                        if (table == null)
-                        {
-                            var tableProp = buildingTypeClass.GetProperty(tableName, bindAll);
-                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
-                        }
-                        if (table != null) break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
-                    }
-                }
-
-                if (table != null && table.Contains(buildingKey)) return table[buildingKey];
-
-                Log.Warning($"{LogPrefix} BuildingType not found for key: {buildingKey}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"{LogPrefix} Failed to get BuildingType '{buildingKey}': {ex.Message}");
-                return null;
-            }
+            if (string.IsNullOrEmpty(buildingKey)) return null;
+            try   { return BuildingType.Has(buildingKey) ? BuildingType.Get(buildingKey) : null; }
+            catch (Exception ex) { Log.Warning($"{LogPrefix} GetBuildingType failed for '{buildingKey}': {ex.Message}"); return null; }
         }
         
         /// <summary>
@@ -304,85 +131,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>Person instance or null</returns>
         public static object? GetPerson(string personKey)
         {
-            if (string.IsNullOrEmpty(personKey))
-            {
-                Log.Warning($"{LogPrefix} GetPerson called with null/empty key");
-                return null;
-            }
-
-            try
-            {
-                // Get Person class via IL2CPP reflection
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                System.Type? personTypeClass = null;
-
-                foreach (var assembly in assemblies)
-                {
-                    personTypeClass = assembly.GetType("Person", false, true);
-                    if (personTypeClass != null) break;
-                }
-
-                if (personTypeClass == null)
-                {
-                    personTypeClass = System.Type.GetType("Person", false, true);
-                }
-
-                if (personTypeClass == null)
-                {
-                    Log.Error($"{LogPrefix} Person class not found in any assembly");
-                    return null;
-                }
-
-                var getMethod = personTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                    System.Reflection.BindingFlags.FlattenHierarchy);
-                if (getMethod != null)
-                {
-                    try
-                    {
-                        var result = getMethod.Invoke(null, new object[] { personKey });
-                        if (result != null) return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
-                    }
-                }
-
-                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
-                System.Collections.IDictionary? table = null;
-                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
-
-                foreach (var tableName in possibleTableNames)
-                {
-                    try
-                    {
-                        var tableField = personTypeClass.GetField(tableName, bindAll);
-                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
-                        if (table == null)
-                        {
-                            var tableProp = personTypeClass.GetProperty(tableName, bindAll);
-                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
-                        }
-                        if (table != null) break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
-                    }
-                }
-
-                if (table != null && table.Contains(personKey)) return table[personKey];
-
-                Log.Warning($"{LogPrefix} Person not found for key: {personKey}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"{LogPrefix} Failed to get Person '{personKey}': {ex.Message}");
-                return null;
-            }
+            if (string.IsNullOrEmpty(personKey)) return null;
+            try   { return Person.Has(personKey) ? Person.Get(personKey) : null; }
+            catch (Exception ex) { Log.Warning($"{LogPrefix} GetPerson failed for '{personKey}': {ex.Message}"); return null; }
         }
         
         /// <summary>
@@ -394,85 +145,9 @@ namespace PerAspera.GameAPI.Wrappers
         /// <returns>TechnologyType instance or null</returns>
         public static object? GetTechnologyType(string technologyKey)
         {
-            if (string.IsNullOrEmpty(technologyKey))
-            {
-                Log.Warning($"{LogPrefix} GetTechnologyType called with null/empty key");
-                return null;
-            }
-
-            try
-            {
-                // Get TechnologyType class via IL2CPP reflection
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                System.Type? technologyTypeClass = null;
-
-                foreach (var assembly in assemblies)
-                {
-                    technologyTypeClass = assembly.GetType("TechnologyType", false, true);
-                    if (technologyTypeClass != null) break;
-                }
-
-                if (technologyTypeClass == null)
-                {
-                    technologyTypeClass = System.Type.GetType("TechnologyType", false, true);
-                }
-
-                if (technologyTypeClass == null)
-                {
-                    Log.Error($"{LogPrefix} TechnologyType class not found in any assembly");
-                    return null;
-                }
-
-                var getMethod = technologyTypeClass.GetMethod("Get",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                    System.Reflection.BindingFlags.FlattenHierarchy);
-                if (getMethod != null)
-                {
-                    try
-                    {
-                        var result = getMethod.Invoke(null, new object[] { technologyKey });
-                        if (result != null) return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Get method invoke failed: {ex.Message}");
-                    }
-                }
-
-                string[] possibleTableNames = { "table", "_table", "Table", "items", "_items", "Items", "data", "_data", "Data" };
-                System.Collections.IDictionary? table = null;
-                var bindAll = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static |
-                              System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
-
-                foreach (var tableName in possibleTableNames)
-                {
-                    try
-                    {
-                        var tableField = technologyTypeClass.GetField(tableName, bindAll);
-                        if (tableField != null) table = tableField.GetValue(null) as System.Collections.IDictionary;
-                        if (table == null)
-                        {
-                            var tableProp = technologyTypeClass.GetProperty(tableName, bindAll);
-                            if (tableProp != null) table = tableProp.GetValue(null) as System.Collections.IDictionary;
-                        }
-                        if (table != null) break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning($"{LogPrefix} Failed to access table '{tableName}': {ex.Message}");
-                    }
-                }
-
-                if (table != null && table.Contains(technologyKey)) return table[technologyKey];
-
-                Log.Warning($"{LogPrefix} TechnologyType not found for key: {technologyKey}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"{LogPrefix} Failed to get TechnologyType '{technologyKey}': {ex.Message}");
-                return null;
-            }
+            if (string.IsNullOrEmpty(technologyKey)) return null;
+            try   { return TechnologyType.Has(technologyKey) ? TechnologyType.Get(technologyKey) : null; }
+            catch (Exception ex) { Log.Warning($"{LogPrefix} GetTechnologyType failed for '{technologyKey}': {ex.Message}"); return null; }
         }
         
         // ==================== ENTITY LOOKUP ====================
@@ -488,16 +163,8 @@ namespace PerAspera.GameAPI.Wrappers
             var keeper = GetKeeper();
             if (keeper == null) return null;
             
-            try
-            {
-                // Keeper.Find(handle)
-                return keeper.InvokeMethod<object>("Find", handle);
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"{LogPrefix} Failed to find handle: {ex.Message}");
-                return null;
-            }
+            if (handle is not Handle h) return null;
+            return keeper.GetKeeperMap()?.FindBase(h);
         }
         
         /// <summary>
