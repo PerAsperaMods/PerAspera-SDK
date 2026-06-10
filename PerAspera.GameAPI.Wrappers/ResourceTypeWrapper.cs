@@ -136,7 +136,16 @@ namespace PerAspera.GameAPI.Wrappers
         public ResourceTypeWrapper(object nativeResourceType) : base(nativeResourceType)
         {
         }
-        
+
+        /// <summary>Wraps a typed interop ResourceType proxy.</summary>
+        public ResourceTypeWrapper(ResourceType nativeResourceType) : base(nativeResourceType)
+        {
+        }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid or YAML-only).</summary>
+        /// <example>var mat = resource.NativeResourceType?.materialType;</example>
+        public ResourceType? NativeResourceType => GetNativeObject() as ResourceType;
+
         /// <summary>
         /// Create wrapper from native resource type object
         /// </summary>
@@ -181,40 +190,37 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== CORE IDENTIFICATION ====================
         
         /// <summary>
-        /// Resource type name/key identifier
-        /// Maps to: name field (e.g., "resource_water", "resource_iron")
+        /// Resource type key identifier (typed read of StaticDataCollectionItem.key).
+        /// E.g., "resource_water", "resource_iron".
         /// </summary>
-        public virtual string Name
-        {
-            get => SafeInvoke<string>("get_name") ?? "unknown_resource";
-        }
-        
+        public virtual string Name => NativeResourceType?.key ?? "unknown_resource";
+
         /// <summary>
-        /// Resource display name for UI
-        /// Maps to: displayName or localizedName field
+        /// Resource display name for UI.
+        /// (« displayName »/« localizedName » n'existent pas sur ResourceType natif —
+        /// retourne le name natif, ou Name. Les wrappers YAML overrident avec leur displayName.)
         /// </summary>
-        public virtual string DisplayName
-        {
-            get => SafeInvoke<string>("get_displayName") ?? 
-                   SafeInvoke<string>("get_localizedName") ?? Name;
-        }
-        
+        public virtual string DisplayName => NativeResourceType?.name ?? Name;
+
         /// <summary>
-        /// Resource index for efficient lookups
-        /// Maps to: index field
+        /// Resource index for efficient lookups (typed read of ResourceType.index).
         /// </summary>
-        public virtual int Index
-        {
-            get => SafeInvoke<int?>("get_index") ?? -1;
-        }
-        
+        public virtual int Index => NativeResourceType?.index ?? -1;
+
         /// <summary>
-        /// Resource color for UI display
-        /// Maps to: color field
+        /// Resource color for UI display as RRGGBB hex.
+        /// (L'ancien binding lisait « color » comme string — c'est un UnityEngine.Color,
+        /// la lecture échouait et retournait toujours "FFFFFF". Conversion réelle désormais.)
         /// </summary>
         public virtual string ColorHex
         {
-            get => SafeInvoke<string>("get_color") ?? "FFFFFF";
+            get
+            {
+                var rt = NativeResourceType;
+                if (rt == null) return "FFFFFF";
+                var c = rt.color;
+                return $"{(int)(c.r * 255):X2}{(int)(c.g * 255):X2}{(int)(c.b * 255):X2}";
+            }
         }
         
         // ==================== RESOURCE PROPERTIES ====================
@@ -224,9 +230,7 @@ namespace PerAspera.GameAPI.Wrappers
         /// Maps to: materialType field
         /// </summary>
         public string MaterialType()
-        {
-            return ((ResourceType)NativeObject).materialType.ToString();
-        }
+            => NativeResourceType?.materialType.ToString() ?? "Unknown";
 
         /// <summary>
         /// Is this a mined/extracted resource?
@@ -252,68 +256,34 @@ namespace PerAspera.GameAPI.Wrappers
         // Use these to diagnose why custom resources get index -001.
 
         /// <summary>True if the game considers this resource "virtual" (not in ValueByIndex array).</summary>
-        public bool IsVirtualNative()
-        {
-            try { return ((ResourceType)NativeObject).IsVirtual(); }
-            catch { return false; }
-        }
+        public bool IsVirtualNative() => NativeResourceType?.IsVirtual() ?? false;
 
         /// <summary>True if materialType == Placeholder (YAML: materialType: Placeholder).</summary>
-        public bool IsPlaceholderNative()
-        {
-            try { return ((ResourceType)NativeObject).IsPlaceholder(); }
-            catch { return false; }
-        }
+        public bool IsPlaceholderNative() => NativeResourceType?.IsPlaceholder() ?? false;
 
         /// <summary>True if materialType == Placement (distinct from Placeholder).</summary>
-        public bool IsPlacementNative()
-        {
-            try { return ((ResourceType)NativeObject).IsPlacement(); }
-            catch { return false; }
-        }
+        public bool IsPlacementNative() => NativeResourceType?.IsPlacement() ?? false;
 
         /// <summary>True if materialType == Released.</summary>
-        public bool IsReleasedNative()
-        {
-            try { return ((ResourceType)NativeObject).IsReleased(); }
-            catch { return false; }
-        }
+        public bool IsReleasedNative() => NativeResourceType?.IsReleased() ?? false;
 
         /// <summary>True if materialType == Mined.</summary>
-        public bool IsMinedNative()
-        {
-            try { return ((ResourceType)NativeObject).IsMined(); }
-            catch { return false; }
-        }
+        public bool IsMinedNative() => NativeResourceType?.IsMined() ?? false;
 
         /// <summary>True if materialType == Manufactured.</summary>
-        public bool IsManufacturedNative()
-        {
-            try { return ((ResourceType)NativeObject).IsManufactured(); }
-            catch { return false; }
-        }
+        public bool IsManufacturedNative() => NativeResourceType?.IsManufactured() ?? false;
 
         /// <summary>True for any atmospheric gas type (GasReleased/Captured/Converted).</summary>
-        public bool IsGasNative()
-        {
-            try { return ((ResourceType)NativeObject).IsGas(); }
-            catch { return false; }
-        }
+        public bool IsGasNative() => NativeResourceType?.IsGas() ?? false;
 
         /// <summary>One-line classification string for audit logs.</summary>
         public string GetNativeClassificationSummary()
         {
-            try
-            {
-                var rt = (ResourceType)NativeObject;
-                return $"Virtual={rt.IsVirtual()} Placeholder={rt.IsPlaceholder()} " +
-                       $"Placement={rt.IsPlacement()} Released={rt.IsReleased()} " +
-                       $"Mined={rt.IsMined()} Manufactured={rt.IsManufactured()} Gas={rt.IsGas()}";
-            }
-            catch (Exception ex)
-            {
-                return $"(classification error: {ex.Message})";
-            }
+            var rt = NativeResourceType;
+            if (rt == null) return "(no native resource)";
+            return $"Virtual={rt.IsVirtual()} Placeholder={rt.IsPlaceholder()} " +
+                   $"Placement={rt.IsPlacement()} Released={rt.IsReleased()} " +
+                   $"Mined={rt.IsMined()} Manufactured={rt.IsManufactured()} Gas={rt.IsGas()}";
         }
 
         // ==================== STATIC INDEX DIAGNOSTICS ====================
@@ -360,33 +330,28 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Resource prefab name for instantiation
-        /// Maps to: prefabName field
+        /// Resource prefab name for instantiation (typed read of ResourceType.prefabName).
         /// </summary>
-        public string PrefabName
-        {
-            get => SafeInvoke<string>("get_prefabName") ?? Name;
-        }
-        
+        public string PrefabName => NativeResourceType?.prefabName ?? Name;
+
         /// <summary>
-        /// Icon name for UI display
-        /// Maps to: iconName field
+        /// Icon sprite for UI display (typed).
+        /// ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+        /// échouait et retournait toujours le fallback.
         /// </summary>
-        public string IconName
-        {
-            get => SafeInvoke<string>("get_iconName") ?? "Resource Icons/Unknown";
-        }
+        public UnityEngine.Sprite? Icon => NativeResourceType?.iconName;
+
+        /// <summary>
+        /// Icon sprite name for UI display (name of the loaded Sprite).
+        /// </summary>
+        public string IconName => NativeResourceType?.iconName?.name ?? "Resource Icons/Unknown";
         
         // ==================== KNOWLEDGE INTEGRATION ====================
         
         /// <summary>
-        /// Associated knowledge entry for this resource
-        /// Maps to: knowledge field
+        /// Associated knowledge entry for this resource (typed KnowledgeType proxy).
         /// </summary>
-        public object? Knowledge
-        {
-            get => SafeInvoke<object>("get_knowledge");
-        }
+        public object? Knowledge => NativeResourceType?.knowledge;
         
         /// <summary>
         /// Get knowledge wrapper for this resource
@@ -400,48 +365,28 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== RESOURCE VEINS ====================
         
         /// <summary>
-        /// Vein icon names for resource deposits
-        /// Maps to: veinIconsName array
+        /// Vein icon sprite names for resource deposits.
+        /// (« veinIconsName » n'existait pas — le membre réel est veinIcon, List de Sprites ;
+        /// l'ancien binding retournait toujours une liste vide.)
         /// </summary>
         public List<string> VeinIconNames
         {
             get
             {
-                try
-                {
-                    var veinIcons = SafeInvoke<object>("get_veinIconsName");
-                    var iconList = new List<string>();
-                    
-                    if (veinIcons is System.Collections.IEnumerable enumerable)
-                    {
-                        foreach (var icon in enumerable)
-                        {
-                            var iconString = icon?.ToString();
-                            if (!string.IsNullOrEmpty(iconString))
-                            {
-                                iconList.Add(iconString);
-                            }
-                        }
-                    }
-                    
-                    return iconList;
-                }
-                catch (Exception ex)
-                {
-                    Log.LogWarning($"Failed to get vein icons for resource {Name}: {ex.Message}");
-                    return new List<string>();
-                }
+                var iconList = new List<string>();
+                var veinIcons = NativeResourceType?.veinIconsName;
+                if (veinIcons == null) return iconList;
+                foreach (var sprite in veinIcons)
+                    if (sprite != null && !string.IsNullOrEmpty(sprite.name))
+                        iconList.Add(sprite.name);
+                return iconList;
             }
         }
-        
+
         /// <summary>
-        /// Cube material for resource display
-        /// Maps to: cubeMaterial field
+        /// Cube material for resource display (typed read of ResourceType.cubeMaterial).
         /// </summary>
-        public string CubeMaterial
-        {
-            get => SafeInvoke<string>("get_cubeMaterial") ?? "ResourceCube";
-        }
+        public string CubeMaterial => NativeResourceType?.cubeMaterialName ?? "ResourceCube";
         
         // ==================== UTILITIES ====================
         

@@ -22,7 +22,16 @@ namespace PerAspera.GameAPI.Wrappers
         public BuildingTypeWrapper(object nativeBuildingType) : base(nativeBuildingType)
         {
         }
-        
+
+        /// <summary>Wraps a typed interop BuildingType proxy.</summary>
+        public BuildingTypeWrapper(BuildingType nativeBuildingType) : base(nativeBuildingType)
+        {
+        }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>int cap = bt.NativeBuildingType?.droneCapacity ?? 0;</example>
+        public BuildingType? NativeBuildingType => GetNativeObject() as BuildingType;
+
         /// <summary>
         /// Create wrapper from native building type object
         /// </summary>
@@ -30,70 +39,43 @@ namespace PerAspera.GameAPI.Wrappers
         {
             return nativeBuildingType != null ? new BuildingTypeWrapper(nativeBuildingType) : null;
         }
-        
+
         // ==================== CORE IDENTIFICATION ====================
-        
+
         /// <summary>
-        /// Building type name/key identifier
-        /// Maps to: name field (e.g., "building_solar_panel", "building_water_mine")
+        /// Building type key identifier (typed read of StaticDataCollectionItem.key).
+        /// E.g., "solar_panel_field", "water_mine".
         /// </summary>
-        public string Name
-        {
-            get => SafeInvoke<string>("get_name") ?? "unknown_building";
-        }
-        
+        public string Name => NativeBuildingType?.key ?? "unknown_building";
+
         /// <summary>
-        /// Building display name for UI
-        /// Maps to: displayName or localizedName field
+        /// Building display name for UI (typed read of BuildingType.name).
         /// </summary>
-        public string DisplayName
-        {
-            get => SafeInvoke<string>("get_displayName") ?? 
-                   SafeInvoke<string>("get_localizedName") ?? 
-                   SafeInvoke<string>("get_title") ?? Name;
-        }
-        
+        public string DisplayName => NativeBuildingType?.name ?? Name;
+
         /// <summary>
-        /// Building description
-        /// Maps to: description field
+        /// Building description (typed read of BuildingType.description).
         /// </summary>
-        public string Description
-        {
-            get => SafeInvoke<string>("get_description") ?? 
-                   SafeInvoke<string>("get_content") ?? "No description available";
-        }
-        
-        /// <summary>
-        /// Building index for efficient lookups
-        /// Maps to: index field
-        /// </summary>
-        public int Index
-        {
-            get => SafeInvoke<int?>("get_index") ?? -1;
-        }
-        
+        public string Description => NativeBuildingType?.description ?? "No description available";
+
+        /// <summary>N'a jamais existé — BuildingType n'a pas d'index.</summary>
+        [Obsolete("BuildingType.index n'existe pas dans le jeu — retournait toujours -1.", false)]
+        public int Index => -1;
+
         // ==================== BUILDING CATEGORY ====================
-        
+
         /// <summary>
-        /// Building category (Power, Mining, Manufacturing, etc.)
-        /// Maps to: category or buildingCategory field
+        /// Building category key (typed read of BuildingType.categoryType.key).
+        /// (L'ancienne chaîne category/buildingCategory/type n'existait pas.)
         /// </summary>
-        public string Category
-        {
-            get => SafeInvoke<string>("get_category") ?? 
-                   SafeInvoke<string>("get_buildingCategory") ?? 
-                   SafeInvoke<string>("get_type") ?? "General";
-        }
-        
-        /// <summary>
-        /// Building subcategory for detailed organization
-        /// Maps to: subCategory field
-        /// </summary>
-        public string SubCategory
-        {
-            get => SafeInvoke<string>("get_subCategory") ?? 
-                   SafeInvoke<string>("get_subType") ?? "";
-        }
+        public string Category => NativeBuildingType?.categoryType?.key ?? "General";
+
+        /// <summary>Typed category proxy (BuildingCategoryType).</summary>
+        public BuildingCategoryType? CategoryType => NativeBuildingType?.categoryType;
+
+        /// <summary>N'a jamais existé sur BuildingType.</summary>
+        [Obsolete("BuildingType.subCategory/subType n'existent pas — retournait toujours \"\".", false)]
+        public string SubCategory => "";
         
         /// <summary>
         /// Check if this is a power generation building
@@ -128,321 +110,151 @@ namespace PerAspera.GameAPI.Wrappers
         
         // ==================== CONSTRUCTION PROPERTIES ====================
         
+        /// <summary>N'a jamais existé — pas de coût scalaire ; voir GetConstructionResources().</summary>
+        [Obsolete("BuildingType.constructionCost/cost n'existent pas — retournait toujours 0. Utiliser GetConstructionResources() (typé).", false)]
+        public float ConstructionCost => 0f;
+
+        /// <summary>N'a jamais existé sur BuildingType.</summary>
+        [Obsolete("BuildingType.constructionTime/buildTime n'existent pas — retournait toujours 0.", false)]
+        public float ConstructionTime => 0f;
+
         /// <summary>
-        /// Construction cost in resources
-        /// Maps to: constructionCost or cost field
+        /// Required resources for construction, by resource key (units).
+        /// Typed read of BuildingType.requiredConstructionResources.
+        /// (L'ancienne chaîne requiredResources/constructionResources/materials n'existait pas.)
         /// </summary>
-        public float ConstructionCost
-        {
-            get => SafeInvoke<float?>("get_constructionCost") ?? 
-                   SafeInvoke<float?>("get_cost") ?? 0f;
-        }
-        
-        /// <summary>
-        /// Construction time in game time units
-        /// Maps to: constructionTime or buildTime field
-        /// </summary>
-        public float ConstructionTime
-        {
-            get => SafeInvoke<float?>("get_constructionTime") ?? 
-                   SafeInvoke<float?>("get_buildTime") ?? 0f;
-        }
-        
-        /// <summary>
-        /// Required resources for construction
-        /// Maps to: requiredResources array
-        /// </summary>
+        /// <example>foreach (var (res, qty) in bt.GetConstructionResources()) { ... }</example>
         public Dictionary<string, float> GetConstructionResources()
         {
-            try
-            {
-                var resources = SafeInvoke<object>("get_requiredResources") ?? 
-                              SafeInvoke<object>("get_constructionResources") ??
-                              SafeInvoke<object>("get_materials");
-                
-                var resourceDict = new Dictionary<string, float>();
-                
-                if (resources is System.Collections.IDictionary dictionary)
-                {
-                    foreach (var key in dictionary.Keys)
-                    {
-                        var value = dictionary[key];
-                        if (key != null && value != null)
-                        {
-                            resourceDict[key.ToString()] = Convert.ToSingle(value);
-                        }
-                    }
-                }
-                else if (resources is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var item in enumerable)
-                    {
-                        if (item != null)
-                        {
-                            var resourceType = SafeInvoke<string>("get_resourceType", item) ?? 
-                                             SafeInvoke<string>("get_name", item) ?? "unknown";
-                            var amount = SafeInvoke<float?>("get_amount", item) ?? 
-                                       SafeInvoke<float?>("get_quantity", item) ?? 0f;
-                            resourceDict[resourceType] = amount;
-                        }
-                    }
-                }
-                
-                return resourceDict;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get construction resources for building {Name}: {ex.Message}");
-                return new Dictionary<string, float>();
-            }
+            var resourceDict = new Dictionary<string, float>();
+            var resources = NativeBuildingType?.requiredConstructionResources;
+            if (resources == null) return resourceDict;
+            foreach (var kvp in resources)
+                if (kvp.Key != null)
+                    resourceDict[kvp.Key.key] = kvp.Value.ToFloat();
+            return resourceDict;
         }
-        
-        /// <summary>
-        /// Maintenance cost per time unit
-        /// Maps to: maintenanceCost field
-        /// </summary>
-        public float MaintenanceCost
-        {
-            get => SafeInvoke<float?>("get_maintenanceCost") ?? 
-                   SafeInvoke<float?>("get_upkeepCost") ?? 0f;
-        }
+
+        /// <summary>N'a jamais existé — voir healthLossPerDay/maintenancePriority typés.</summary>
+        [Obsolete("BuildingType.maintenanceCost/upkeepCost n'existent pas — retournait toujours 0. Voir HealthLossPerDay.", false)]
+        public float MaintenanceCost => 0f;
+
+        /// <summary>Daily health loss (typed read of BuildingType.healthLossPerDay).</summary>
+        public float HealthLossPerDay => NativeBuildingType?.healthLossPerDay ?? 0f;
+
+        /// <summary>Maximum building health (typed read of BuildingType.maxHealth).</summary>
+        public float MaxHealth => NativeBuildingType?.maxHealth ?? 0f;
         
         // ==================== PRODUCTION PROPERTIES ====================
         
         /// <summary>
-        /// Base energy production (for power buildings)
-        /// Maps to: baseEnergyOutput or energyProduction field
+        /// Base energy production — the highest of the five typed production fields
+        /// (solar/eolic/thermal/fission/fusion ; un bâtiment n'en utilise qu'un).
+        /// (L'ancienne chaîne baseEnergyOutput/energyProduction/powerOutput n'existait pas.)
         /// </summary>
         public float BaseEnergyOutput
         {
-            get => SafeInvoke<float?>("get_baseEnergyOutput") ?? 
-                   SafeInvoke<float?>("get_energyProduction") ?? 
-                   SafeInvoke<float?>("get_powerOutput") ?? 0f;
+            get
+            {
+                var bt = NativeBuildingType;
+                if (bt == null) return 0f;
+                return Math.Max(bt.maxSolarPowerProduction,
+                       Math.Max(bt.maxEolicPowerProduction,
+                       Math.Max(bt.maxThermalPowerProduction,
+                       Math.Max(bt.maxFissionPowerProduction, bt.maxFusionPowerProduction))));
+            }
         }
-        
+
+        /// <summary>Solar power production (typed).</summary>
+        public float MaxSolarPowerProduction => NativeBuildingType?.maxSolarPowerProduction ?? 0f;
+
+        /// <summary>Energy storage capacity (typed).</summary>
+        public float EnergyStorageCapacity => NativeBuildingType?.energyStorageCapacity ?? 0f;
+
         /// <summary>
-        /// Energy consumption (for non-power buildings)
-        /// Maps to: energyConsumption or powerConsumption field
+        /// Energy consumption (typed read of BuildingType.powerConsumption).
         /// </summary>
-        public float EnergyConsumption
-        {
-            get => SafeInvoke<float?>("get_energyConsumption") ?? 
-                   SafeInvoke<float?>("get_powerConsumption") ?? 
-                   SafeInvoke<float?>("get_energyRequired") ?? 0f;
-        }
+        public float EnergyConsumption => NativeBuildingType?.powerConsumption ?? 0f;
+
+        /// <summary>Colonist capacity (typed).</summary>
+        public int ColonistCapacity => NativeBuildingType?.colonistCapacity ?? 0;
+
+        /// <summary>Drone capacity (typed).</summary>
+        public int DroneCapacity => NativeBuildingType?.droneCapacity ?? 0;
         
         /// <summary>
-        /// Base resource production rates
-        /// Maps to: productionRates or outputs field
+        /// Resource production: output resource key → quantity per cycle.
+        /// Typed read of BuildingType.outputResource/outputQuantity.
+        /// (L'ancienne chaîne productionRates/outputs/produces n'existait pas.)
         /// </summary>
         public Dictionary<string, float> GetProductionRates()
         {
-            try
-            {
-                var production = SafeInvoke<object>("get_productionRates") ?? 
-                               SafeInvoke<object>("get_outputs") ??
-                               SafeInvoke<object>("get_produces");
-                
-                var productionDict = new Dictionary<string, float>();
-                
-                if (production is System.Collections.IDictionary dictionary)
-                {
-                    foreach (var key in dictionary.Keys)
-                    {
-                        var value = dictionary[key];
-                        if (key != null && value != null)
-                        {
-                            productionDict[key.ToString()] = Convert.ToSingle(value);
-                        }
-                    }
-                }
-                else if (production is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var item in enumerable)
-                    {
-                        if (item != null)
-                        {
-                            var resourceType = SafeInvoke<string>("get_resourceType", item) ?? 
-                                             SafeInvoke<string>("get_name", item) ?? "unknown";
-                            var rate = SafeInvoke<float?>("get_rate", item) ?? 
-                                     SafeInvoke<float?>("get_amount", item) ?? 0f;
-                            productionDict[resourceType] = rate;
-                        }
-                    }
-                }
-                
-                return productionDict;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get production rates for building {Name}: {ex.Message}");
-                return new Dictionary<string, float>();
-            }
+            var productionDict = new Dictionary<string, float>();
+            var bt = NativeBuildingType;
+            var output = bt?.outputResource;
+            if (bt == null || output == null) return productionDict;
+            productionDict[output.key] = bt.outputQuantity.ToFloat();
+            return productionDict;
         }
-        
+
+        /// <summary>Output resource key, or null when the building produces nothing (typed).</summary>
+        public string? OutputResourceKey => NativeBuildingType?.outputResource?.key;
+
+        /// <summary>Production progress per day (typed read of BuildingType.progressPerDay).</summary>
+        public float ProgressPerDay => NativeBuildingType?.progressPerDay ?? 0f;
+
         /// <summary>
-        /// Resource consumption rates
-        /// Maps to: consumptionRates or inputs field
+        /// Resource consumption: input resource key → quantity.
+        /// Typed read of BuildingType.inputResources.
+        /// (L'ancienne chaîne consumptionRates/inputs/consumes n'existait pas.)
         /// </summary>
         public Dictionary<string, float> GetConsumptionRates()
         {
-            try
-            {
-                var consumption = SafeInvoke<object>("get_consumptionRates") ?? 
-                                SafeInvoke<object>("get_inputs") ??
-                                SafeInvoke<object>("get_consumes");
-                
-                var consumptionDict = new Dictionary<string, float>();
-                
-                if (consumption is System.Collections.IDictionary dictionary)
-                {
-                    foreach (var key in dictionary.Keys)
-                    {
-                        var value = dictionary[key];
-                        if (key != null && value != null)
-                        {
-                            consumptionDict[key.ToString()] = Convert.ToSingle(value);
-                        }
-                    }
-                }
-                else if (consumption is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var item in enumerable)
-                    {
-                        if (item != null)
-                        {
-                            var resourceType = SafeInvoke<string>("get_resourceType", item) ?? 
-                                             SafeInvoke<string>("get_name", item) ?? "unknown";
-                            var rate = SafeInvoke<float?>("get_rate", item) ?? 
-                                     SafeInvoke<float?>("get_amount", item) ?? 0f;
-                            consumptionDict[resourceType] = rate;
-                        }
-                    }
-                }
-                
-                return consumptionDict;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get consumption rates for building {Name}: {ex.Message}");
-                return new Dictionary<string, float>();
-            }
+            var consumptionDict = new Dictionary<string, float>();
+            var inputs = NativeBuildingType?.inputResources;
+            if (inputs == null) return consumptionDict;
+            foreach (var kvp in inputs)
+                if (kvp.Key != null)
+                    consumptionDict[kvp.Key.key] = kvp.Value.ToFloat();
+            return consumptionDict;
         }
         
         // ==================== PHYSICAL PROPERTIES ====================
         
+        /// <summary>N'a jamais existé — les bâtiments occupent un rayon, pas une grille.</summary>
+        [Obsolete("BuildingType.size/dimensions n'existent pas — retournait toujours (1,1). Voir ReservedRadius.", false)]
+        public (int Width, int Height) GetSize() => (1, 1);
+
+        /// <summary>Reserved placement radius (typed read of BuildingType._reservedRadius).</summary>
+        public float ReservedRadius => NativeBuildingType?._reservedRadius ?? 0f;
+
         /// <summary>
-        /// Building size (width, height)
-        /// Maps to: size or dimensions field
+        /// Building prefab name for instantiation (typed read of BuildingType.prefabName).
         /// </summary>
-        public (int Width, int Height) GetSize()
-        {
-            try
-            {
-                var size = SafeInvoke<object>("get_size") ?? SafeInvoke<object>("get_dimensions");
-                if (size != null)
-                {
-                    var width = SafeInvoke<int?>("get_width", size) ?? SafeInvoke<int?>("get_x", size) ?? 1;
-                    var height = SafeInvoke<int?>("get_height", size) ?? SafeInvoke<int?>("get_y", size) ?? 1;
-                    return (width, height);
-                }
-                
-                // Fallback to individual properties
-                var w = SafeInvoke<int?>("get_width") ?? 1;
-                var h = SafeInvoke<int?>("get_height") ?? 1;
-                return (w, h);
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get size for building {Name}: {ex.Message}");
-                return (1, 1);
-            }
-        }
-        
+        public string PrefabName => NativeBuildingType?.prefabName ?? Name;
+
+        /// <summary>Icon sprite for UI display (typed).</summary>
+        public UnityEngine.Sprite? Icon => NativeBuildingType?.iconName;
+
         /// <summary>
-        /// Building prefab name for instantiation
-        /// Maps to: prefabName field
+        /// Icon sprite name.
+        /// ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+        /// échouait et retournait toujours le fallback.
         /// </summary>
-        public string PrefabName
-        {
-            get => SafeInvoke<string>("get_prefabName") ?? Name;
-        }
-        
-        /// <summary>
-        /// Icon name for UI display
-        /// Maps to: iconName field
-        /// </summary>
-        public string IconName
-        {
-            get => SafeInvoke<string>("get_iconName") ?? $"Building Icons/{Name}";
-        }
+        public string IconName => NativeBuildingType?.iconName?.name ?? $"Building Icons/{Name}";
         
         // ==================== REQUIREMENTS ====================
         
+        /// <summary>N'a jamais fonctionné — ces membres n'existent pas sur BuildingType.</summary>
+        [Obsolete("requiredTechs/prerequisites/unlockRequirements n'existent pas sur BuildingType — retournait toujours vide. Le déblocage passe par BuildingType.availability et les actions des technologies (TechnologyWrapper.GetActions()).", false)]
+        public List<string> GetRequiredTechnologies() => new List<string>();
+
         /// <summary>
-        /// Required technologies to unlock this building
-        /// Maps to: requiredTechs or prerequisites field
+        /// ⚠️ A toujours retourné TRUE : la chaîne IsUnlockedFor/IsAvailable n'existait pas,
+        /// et le fallback testait All() sur une liste vide de prérequis (= true).
         /// </summary>
-        public List<string> GetRequiredTechnologies()
-        {
-            try
-            {
-                var techs = SafeInvoke<object>("get_requiredTechs") ?? 
-                          SafeInvoke<object>("get_prerequisites") ??
-                          SafeInvoke<object>("get_unlockRequirements");
-                
-                var techList = new List<string>();
-                
-                if (techs is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var tech in enumerable)
-                    {
-                        if (tech != null)
-                        {
-                            var techName = SafeInvoke<string>("get_name", tech) ?? tech.ToString();
-                            if (!string.IsNullOrEmpty(techName))
-                            {
-                                techList.Add(techName);
-                            }
-                        }
-                    }
-                }
-                
-                return techList;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get required technologies for building {Name}: {ex.Message}");
-                return new List<string>();
-            }
-        }
-        
-        /// <summary>
-        /// Check if building is unlocked for a faction
-        /// </summary>
-        /// <param name="faction">Faction to check unlock status for</param>
-        /// <returns>True if building is unlocked</returns>
-        public bool IsUnlockedFor(FactionWrapper faction)
-        {
-            if (!faction.IsValidWrapper) return false;
-            
-            try
-            {
-                var result = SafeInvoke<bool?>("IsUnlockedFor", faction.GetNativeObject()) ??
-                           SafeInvoke<bool?>("IsAvailable", faction.GetNativeObject());
-                           
-                if (result.HasValue) return result.Value;
-                
-                // Check if all required technologies are researched
-                var requiredTechs = GetRequiredTechnologies();
-                return requiredTechs.All(tech => faction.HasTechnology(tech));
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to check unlock status of building {Name} for faction {faction.Name}: {ex.Message}");
-                return false;
-            }
-        }
+        [Obsolete("A toujours retourné true (bug : All() sur liste vide). Le déblocage passe par BuildingType.availability — pas encore exposé typé.", false)]
+        public bool IsUnlockedFor(FactionWrapper faction) => true;
         
         // ==================== UTILITIES ====================
         
@@ -463,17 +275,19 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get construction complexity rating (1-5)
+        /// Get construction complexity rating (1-5), based on the typed
+        /// construction resources (total quantity + variety).
         /// </summary>
         public int GetConstructionComplexity()
         {
-            var cost = ConstructionCost;
-            var resourceCount = GetConstructionResources().Count;
-            
-            if (cost > 1000 || resourceCount > 5) return 5;
-            if (cost > 500 || resourceCount > 3) return 4;
-            if (cost > 250 || resourceCount > 2) return 3;
-            if (cost > 100 || resourceCount > 1) return 2;
+            var resources = GetConstructionResources();
+            var totalQty = resources.Values.Sum();
+            var resourceCount = resources.Count;
+
+            if (totalQty > 1000 || resourceCount > 5) return 5;
+            if (totalQty > 500 || resourceCount > 3) return 4;
+            if (totalQty > 250 || resourceCount > 2) return 3;
+            if (totalQty > 100 || resourceCount > 1) return 2;
             return 1;
         }
         
@@ -514,19 +328,11 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get the native game object (for Harmony patches)
-        /// </summary>
-        public object? GetNativeObject()
-        {
-            return NativeObject;
-        }
-        
-        /// <summary>
         /// String representation for debugging
         /// </summary>
         public override string ToString()
         {
-            return $"BuildingType[{Name}] ({Category}, Index: {Index}, Valid: {IsValid})";
+            return $"BuildingType[{Name}] ({Category}, Valid: {IsValid})";
         }
         
         // ==================== STATIC UTILITIES ====================
@@ -690,11 +496,11 @@ namespace PerAspera.GameAPI.Wrappers
                 "displayname" => DisplayName,
                 "description" => Description,
                 "category" => Category,
-                "subcategory" => SubCategory,
-                "index" => Index,
-                "constructioncost" => ConstructionCost,
-                "constructiontime" => ConstructionTime,
-                "maintenancecost" => MaintenanceCost,
+                "outputresource" => OutputResourceKey,
+                "progressperday" => ProgressPerDay,
+                "maxhealth" => MaxHealth,
+                "colonistcapacity" => ColonistCapacity,
+                "dronecapacity" => DroneCapacity,
                 "baseenergyoutput" => BaseEnergyOutput,
                 "energyconsumption" => EnergyConsumption,
                 "isvalid" => IsValid,

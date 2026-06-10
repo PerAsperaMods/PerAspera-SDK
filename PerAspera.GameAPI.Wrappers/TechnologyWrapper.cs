@@ -22,7 +22,16 @@ namespace PerAspera.GameAPI.Wrappers
         public TechnologyWrapper(object nativeTechnology) : base(nativeTechnology)
         {
         }
-        
+
+        /// <summary>Wraps a typed interop TechnologyType proxy.</summary>
+        public TechnologyWrapper(TechnologyType nativeTechnology) : base(nativeTechnology)
+        {
+        }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>float pts = tech.NativeTechnologyType?.requiredResearchPoints ?? 0f;</example>
+        public TechnologyType? NativeTechnologyType => GetNativeObject() as TechnologyType;
+
         /// <summary>
         /// Create wrapper from native TechnologyType object
         /// </summary>
@@ -30,125 +39,74 @@ namespace PerAspera.GameAPI.Wrappers
         {
             return nativeTechnology != null ? new TechnologyWrapper(nativeTechnology) : null;
         }
-        
+
         // ==================== CORE IDENTIFICATION ====================
-        
+
         /// <summary>
-        /// Technology name/key identifier
-        /// Maps to: name field (e.g., "tech_advanced_solar", "tech_water_extraction")
+        /// Technology key identifier (typed read of StaticDataCollectionItem.key).
+        /// E.g., "tech_advanced_solar".
         /// </summary>
-        public string Name
-        {
-            get => SafeInvoke<string>("get_name") ?? "unknown_tech";
-        }
-        
+        public string Name => NativeTechnologyType?.key ?? "unknown_tech";
+
         /// <summary>
-        /// Technology display name for UI
-        /// Maps to: displayName or localizedName field
+        /// Technology display name for UI (typed read of TechnologyType.name).
         /// </summary>
-        public string DisplayName
-        {
-            get => SafeInvoke<string>("get_displayName") ?? 
-                   SafeInvoke<string>("get_localizedName") ?? 
-                   SafeInvoke<string>("get_title") ?? Name;
-        }
-        
+        public string DisplayName => NativeTechnologyType?.name ?? Name;
+
+        /// <summary>Short name for compact UI (typed read of TechnologyType.shortName).</summary>
+        public string ShortName => NativeTechnologyType?.shortName ?? DisplayName;
+
         /// <summary>
-        /// Technology description
-        /// Maps to: description field
+        /// Technology description (typed read of TechnologyType.description).
         /// </summary>
-        public string Description
-        {
-            get => SafeInvoke<string>("get_description") ?? 
-                   SafeInvoke<string>("get_content") ?? "No description available";
-        }
-        
-        /// <summary>
-        /// Technology index for efficient lookups
-        /// Maps to: index field
-        /// </summary>
-        public int Index
-        {
-            get => SafeInvoke<int?>("get_index") ?? -1;
-        }
-        
+        public string Description => NativeTechnologyType?.description ?? "No description available";
+
+        /// <summary>N'a jamais existé — TechnologyType n'a pas d'index.</summary>
+        [Obsolete("TechnologyType.index n'existe pas dans le jeu — retournait toujours -1.", false)]
+        public int Index => -1;
+
         // ==================== RESEARCH TREE ====================
-        
+
         /// <summary>
-        /// Technology category/branch (Engineering, Biology, Space)
-        /// Maps to: category or branch field
+        /// Technology category (typed read of TechnologyType.categoryName).
+        /// (L'ancienne chaîne category/branch/tree n'existait pas.)
         /// </summary>
-        public string Category
-        {
-            get => SafeInvoke<string>("get_category") ?? 
-                   SafeInvoke<string>("get_branch") ?? 
-                   SafeInvoke<string>("get_tree") ?? "General";
-        }
-        
+        public string Category => NativeTechnologyType?.categoryName ?? "General";
+
+        /// <summary>Position in the tech tree lane (typed read of TechnologyType.position).</summary>
+        public int Position => NativeTechnologyType?.position ?? 0;
+
+        /// <summary>True when this tech can be researched repeatedly (typed).</summary>
+        public bool IsRepeatable => NativeTechnologyType?.isRepeatable ?? false;
+
+        /// <summary>N'a jamais existé — tier/level n'existent pas sur TechnologyType.</summary>
+        [Obsolete("TechnologyType.tier/level n'existent pas — retournait toujours 1. Voir Position (position dans la lane).", false)]
+        public int Tier => 1;
+
         /// <summary>
-        /// Technology tier/level (1, 2, 3, etc.)
-        /// Maps to: tier or level field
+        /// Research cost in research points (typed read of TechnologyType.requiredResearchPoints).
+        /// (L'ancienne chaîne cost/researchCost n'existait pas — retournait toujours 0.)
         /// </summary>
-        public int Tier
-        {
-            get => SafeInvoke<int?>("get_tier") ?? 
-                   SafeInvoke<int?>("get_level") ?? 1;
-        }
-        
-        /// <summary>
-        /// Research cost in research points
-        /// Maps to: cost or researchCost field
-        /// </summary>
-        public float ResearchCost
-        {
-            get => SafeInvoke<float?>("get_cost") ?? 
-                   SafeInvoke<float?>("get_researchCost") ?? 0f;
-        }
-        
-        /// <summary>
-        /// Time required to research (in game time units)
-        /// Maps to: researchTime or duration field
-        /// </summary>
-        public float ResearchTime
-        {
-            get => SafeInvoke<float?>("get_researchTime") ?? 
-                   SafeInvoke<float?>("get_duration") ?? 0f;
-        }
+        public float ResearchCost => NativeTechnologyType?.requiredResearchPoints ?? 0f;
+
+        /// <summary>N'a jamais existé — pas de durée fixe, le temps dépend des points/jour.</summary>
+        [Obsolete("TechnologyType.researchTime/duration n'existent pas — retournait toujours 0. Le temps = ResearchCost / points de recherche par jour de la faction.", false)]
+        public float ResearchTime => 0f;
         
         // ==================== PREREQUISITES ====================
         
         /// <summary>
-        /// Prerequisites needed to unlock this technology
-        /// Maps to: prerequisites or requiredTechs array
+        /// Prerequisites needed to unlock this technology (typed read of TechnologyType.requirements).
+        /// (L'ancienne chaîne prerequisites/requiredTechs/dependencies n'existait pas.)
         /// </summary>
         public List<TechnologyWrapper> GetPrerequisites()
         {
-            try
-            {
-                var prerequisites = SafeInvoke<object>("get_prerequisites") ?? 
-                                  SafeInvoke<object>("get_requiredTechs") ??
-                                  SafeInvoke<object>("get_dependencies");
-                
-                var prereqList = new List<TechnologyWrapper>();
-                
-                if (prerequisites is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var prereq in enumerable)
-                    {
-                        if (prereq != null)
-                        {
-                            prereqList.Add(new TechnologyWrapper(prereq));
-                        }
-                    }
-                }
-                
-                return prereqList;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get prerequisites for technology {Name}: {ex.Message}");
-                return new List<TechnologyWrapper>();
-            }
+            var prereqList = new List<TechnologyWrapper>();
+            var requirements = NativeTechnologyType?.requirements;
+            if (requirements == null) return prereqList;
+            foreach (var prereq in requirements)
+                if (prereq != null) prereqList.Add(new TechnologyWrapper(prereq));
+            return prereqList;
         }
         
         /// <summary>
@@ -167,71 +125,28 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== UNLOCKS ====================
         
         /// <summary>
-        /// Buildings unlocked by this technology
-        /// Maps to: unlockedBuildings array
+        /// Unlock actions of this technology (typed read of TechnologyType.actions).
+        /// C'est le vrai mécanisme d'unlock : chaque TextAction décrit ce que la techno
+        /// débloque (bâtiments, ressources, effets…).
         /// </summary>
-        public List<object> GetUnlockedBuildings()
+        /// <example>foreach (var action in tech.GetActions()) { ... }</example>
+        public List<TextActionWrapper> GetActions()
         {
-            try
-            {
-                var buildings = SafeInvoke<object>("get_unlockedBuildings") ?? 
-                              SafeInvoke<object>("get_buildings") ??
-                              SafeInvoke<object>("get_unlocks");
-                
-                var buildingList = new List<object>();
-                
-                if (buildings is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var building in enumerable)
-                    {
-                        if (building != null)
-                        {
-                            buildingList.Add(building);
-                        }
-                    }
-                }
-                
-                return buildingList;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get unlocked buildings for technology {Name}: {ex.Message}");
-                return new List<object>();
-            }
+            var result = new List<TextActionWrapper>();
+            var actions = NativeTechnologyType?.actions;
+            if (actions == null) return result;
+            foreach (var action in actions)
+                if (action != null) result.Add(new TextActionWrapper(action));
+            return result;
         }
-        
-        /// <summary>
-        /// Resources unlocked by this technology
-        /// Maps to: unlockedResources array
-        /// </summary>
-        public List<ResourceTypeWrapper> GetUnlockedResources()
-        {
-            try
-            {
-                var resources = SafeInvoke<object>("get_unlockedResources") ?? 
-                              SafeInvoke<object>("get_resources");
-                
-                var resourceList = new List<ResourceTypeWrapper>();
-                
-                if (resources is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var resource in enumerable)
-                    {
-                        if (resource != null)
-                        {
-                            resourceList.Add(new ResourceTypeWrapper(resource));
-                        }
-                    }
-                }
-                
-                return resourceList;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get unlocked resources for technology {Name}: {ex.Message}");
-                return new List<ResourceTypeWrapper>();
-            }
-        }
+
+        /// <summary>N'a jamais fonctionné — ces membres n'existent pas.</summary>
+        [Obsolete("unlockedBuildings/buildings/unlocks n'existent pas sur TechnologyType — retournait toujours vide. Les unlocks passent par TechnologyType.actions : voir GetActions().", false)]
+        public List<object> GetUnlockedBuildings() => new List<object>();
+
+        /// <summary>N'a jamais fonctionné — ces membres n'existent pas.</summary>
+        [Obsolete("unlockedResources/resources n'existent pas sur TechnologyType — retournait toujours vide. Les unlocks passent par TechnologyType.actions : voir GetActions().", false)]
+        public List<ResourceTypeWrapper> GetUnlockedResources() => new List<ResourceTypeWrapper>();
         
         // ==================== RESEARCH STATUS ====================
         
@@ -273,16 +188,14 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== UTILITIES ====================
         
         /// <summary>
-        /// Get technology icon path
-        /// Maps to: iconPath or icon field
+        /// Icon sprite name (typed — « iconName » natif est un Sprite, pas une string ;
+        /// l'ancien binding iconPath/icon n'existait pas).
         /// </summary>
-        public string IconPath
-        {
-            get => SafeInvoke<string>("get_iconPath") ?? 
-                   SafeInvoke<string>("get_icon") ?? 
-                   $"Technology Icons/{Name}";
-        }
-        
+        public string IconPath => NativeTechnologyType?.iconName?.name ?? $"Technology Icons/{Name}";
+
+        /// <summary>Icon sprite for UI display (typed).</summary>
+        public UnityEngine.Sprite? Icon => NativeTechnologyType?.iconName;
+
         /// <summary>
         /// Check if this is a key/milestone technology
         /// </summary>
@@ -291,29 +204,14 @@ namespace PerAspera.GameAPI.Wrappers
             var milestones = new[] { "terraforming", "colonization", "space", "advanced", "expert" };
             return milestones.Any(milestone => Name.Contains(milestone, StringComparison.OrdinalIgnoreCase));
         }
-        
-        /// <summary>
-        /// Get technology complexity rating (1-5)
-        /// </summary>
-        public int GetComplexityRating()
-        {
-            if (Tier <= 1) return 1;
-            if (Tier <= 2) return 2;
-            if (Tier <= 3) return 3;
-            if (IsMilestoneTechnology()) return 5;
-            return 4;
-        }
-        
-        /// <summary>
-        /// Get estimated research time in human-readable format
-        /// </summary>
-        public string GetEstimatedResearchTime()
-        {
-            var time = ResearchTime;
-            if (time < 60) return $"{time:F0} minutes";
-            if (time < 1440) return $"{time/60:F1} hours";
-            return $"{time/1440:F1} days";
-        }
+
+        /// <summary>Reposait sur le Tier fantôme — retournait toujours 1.</summary>
+        [Obsolete("Reposait sur Tier qui n'a jamais existé — retournait toujours 1. Utiliser ResearchCost ou Position pour estimer la complexité.", false)]
+        public int GetComplexityRating() => 1;
+
+        /// <summary>Reposait sur le ResearchTime fantôme — retournait toujours « 0 minutes ».</summary>
+        [Obsolete("Reposait sur ResearchTime qui n'a jamais existé. Le temps = ResearchCost / points de recherche par jour de la faction.", false)]
+        public string GetEstimatedResearchTime() => "unknown";
         
         /// <summary>
         /// Get localized display name from game data
@@ -352,19 +250,11 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get the native game object (for Harmony patches)
-        /// </summary>
-        public object? GetNativeObject()
-        {
-            return NativeObject;
-        }
-        
-        /// <summary>
         /// String representation for debugging
         /// </summary>
         public override string ToString()
         {
-            return $"Technology[{Name}] (Tier {Tier}, Category: {Category}, Valid: {IsValid})";
+            return $"Technology[{Name}] (Category: {Category}, Cost: {ResearchCost}, Valid: {IsValid})";
         }
 
         // ==================== IYamlTypeWrapper IMPLEMENTATION ====================
@@ -393,12 +283,12 @@ namespace PerAspera.GameAPI.Wrappers
             {
                 "name" => Name,
                 "displayname" => DisplayName,
+                "shortname" => ShortName,
                 "description" => Description,
                 "category" => Category,
-                "index" => Index,
+                "position" => Position,
+                "isrepeatable" => IsRepeatable,
                 "researchcost" => ResearchCost,
-                "researchtime" => ResearchTime,
-                "tier" => Tier,
                 "isvalid" => IsValid,
                 _ => SafeInvoke<object>(propertyName)
             };

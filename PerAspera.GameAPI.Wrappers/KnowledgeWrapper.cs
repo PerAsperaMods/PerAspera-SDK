@@ -21,7 +21,16 @@ namespace PerAspera.GameAPI.Wrappers
         public Knowledge(object nativeKnowledge) : base(nativeKnowledge)
         {
         }
-        
+
+        /// <summary>Wraps a typed interop KnowledgeType proxy.</summary>
+        public Knowledge(KnowledgeType nativeKnowledge) : base(nativeKnowledge)
+        {
+        }
+
+        /// <summary>Typed interop proxy (null when the wrapper is invalid).</summary>
+        /// <example>var title = knowledge.NativeKnowledgeType?.title;</example>
+        public KnowledgeType? NativeKnowledgeType => GetNativeObject() as KnowledgeType;
+
         /// <summary>
         /// Create wrapper from native knowledge object
         /// </summary>
@@ -29,66 +38,43 @@ namespace PerAspera.GameAPI.Wrappers
         {
             return nativeKnowledge != null ? new Knowledge(nativeKnowledge) : null;
         }
-        
+
         // ==================== CORE IDENTIFICATION ====================
-        
+
         /// <summary>
-        /// Knowledge entry name/key identifier
-        /// Maps to: name field (e.g., "knowledge_water", "knowledge_solar_panel")
+        /// Knowledge entry key identifier (typed read of StaticDataCollectionItem.key).
         /// </summary>
-        public string Name
-        {
-            get => SafeInvoke<string>("get_name") ?? "unknown_knowledge";
-        }
-        
+        public string Name => NativeKnowledgeType?.key ?? "unknown_knowledge";
+
         /// <summary>
-        /// Knowledge title for display
-        /// Maps to: title field
+        /// Knowledge title for display (typed read of KnowledgeType.title).
         /// </summary>
-        public string Title
-        {
-            get => SafeInvoke<string>("get_title") ?? 
-                   SafeInvoke<string>("get_displayName") ?? Name;
-        }
-        
+        public string Title => NativeKnowledgeType?.title ?? Name;
+
         /// <summary>
-        /// Knowledge content/description
-        /// Maps to: content field
+        /// Knowledge content/description (typed read of KnowledgeType.content).
         /// </summary>
-        public string Content
-        {
-            get => SafeInvoke<string>("get_content") ?? 
-                   SafeInvoke<string>("get_description") ?? "No content available";
-        }
-        
-        /// <summary>
-        /// Knowledge index for efficient lookups
-        /// Maps to: index field
-        /// </summary>
-        public int Index
-        {
-            get => SafeInvoke<int?>("get_index") ?? -1;
-        }
-        
+        public string Content => NativeKnowledgeType?.content ?? "No content available";
+
+        /// <summary>AMI variant of the content (typed read of KnowledgeType.contentAMI).</summary>
+        public string ContentAMI => NativeKnowledgeType?.contentAMI ?? "";
+
+        /// <summary>N'a jamais existé — KnowledgeType n'a pas d'index.</summary>
+        [Obsolete("KnowledgeType.index n'existe pas dans le jeu — retournait toujours -1.", false)]
+        public int Index => -1;
+
         // ==================== KNOWLEDGE ORGANIZATION ====================
-        
+
         /// <summary>
-        /// Knowledge path for hierarchical organization
-        /// Maps to: path field (e.g., "Buildings/Power/SolarPanel")
+        /// Knowledge path for hierarchical organization (typed read of KnowledgeType.path).
+        /// E.g., "Buildings/Power/SolarPanel".
         /// </summary>
-        public string Path
-        {
-            get => SafeInvoke<string>("get_path") ?? "Uncategorized";
-        }
-        
+        public string Path => NativeKnowledgeType?.path ?? "Uncategorized";
+
         /// <summary>
-        /// Localized path for UI navigation
-        /// Maps to: localizedPath field
+        /// Localized path for UI navigation (typed read of KnowledgeType.localizedPath).
         /// </summary>
-        public string LocalizedPath
-        {
-            get => SafeInvoke<string>("get_localizedPath") ?? Path;
-        }
+        public string LocalizedPath => NativeKnowledgeType?.localizedPath ?? Path;
         
         /// <summary>
         /// Knowledge category (Buildings, Resources, Technologies, etc.)
@@ -123,54 +109,36 @@ namespace PerAspera.GameAPI.Wrappers
         // ==================== CONTENT DETAILS ====================
         
         /// <summary>
-        /// Content table with structured information
-        /// Maps to: contentTable array
+        /// Content table with structured information (typed read of KnowledgeType.contentTable).
+        /// ⚠️ L'ancienne version invoquait get_field/get_text sur l'objet Knowledge au lieu
+        /// de l'entrée (bug) — retournait des entrées vides.
         /// </summary>
         public List<KnowledgeTableEntry> GetContentTable()
         {
-            try
-            {
-                var contentTable = SafeInvoke<object>("get_contentTable");
-                var tableEntries = new List<KnowledgeTableEntry>();
-                
-                if (contentTable is System.Collections.IEnumerable enumerable)
-                {
-                    foreach (var entry in enumerable)
-                    {
-                        if (entry != null)
-                        {
-                            var field = SafeInvoke<string>("get_field", entry) ?? "";
-                            var text = SafeInvoke<string>("get_text", entry) ?? "";
-                            tableEntries.Add(new KnowledgeTableEntry(field, text));
-                        }
-                    }
-                }
-                
-                return tableEntries;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to get content table for knowledge {Name}: {ex.Message}");
-                return new List<KnowledgeTableEntry>();
-            }
+            var tableEntries = new List<KnowledgeTableEntry>();
+            var contentTable = NativeKnowledgeType?.contentTable;
+            if (contentTable == null) return tableEntries;
+            foreach (var entry in contentTable)
+                if (entry != null)
+                    tableEntries.Add(new KnowledgeTableEntry(entry.field ?? "", entry.text ?? ""));
+            return tableEntries;
         }
-        
+
+        /// <summary>Associated image sprite (typed read of KnowledgeType.image).</summary>
+        public UnityEngine.Sprite? Image => NativeKnowledgeType?.image;
+
         /// <summary>
-        /// Associated image for knowledge entry
-        /// Maps to: image field
+        /// Icon sprite name for UI display.
+        /// ⚠️ « iconName » natif est un Sprite, pas une string — l'ancien binding string
+        /// échouait et retournait toujours le fallback.
         /// </summary>
-        public object? Image
+        public string IconName => NativeKnowledgeType?.iconName?.name ?? "KnowledgeBase/Unknown";
+
+        /// <summary>Building associated to this knowledge entry, when any (typed).</summary>
+        public BuildingTypeWrapper? GetContentBuilding()
         {
-            get => SafeInvoke<object>("get_image");
-        }
-        
-        /// <summary>
-        /// Icon name for UI display
-        /// Maps to: iconName field
-        /// </summary>
-        public string IconName
-        {
-            get => SafeInvoke<string>("get_iconName") ?? "KnowledgeBase/Unknown";
+            var bt = NativeKnowledgeType?.contentBuilding;
+            return bt != null ? new BuildingTypeWrapper(bt) : null;
         }
         
         // ==================== KNOWLEDGE TYPES ====================
@@ -223,54 +191,13 @@ namespace PerAspera.GameAPI.Wrappers
         
         // ==================== UNLOCK STATUS ====================
         
-        /// <summary>
-        /// Check if this knowledge is unlocked for a faction
-        /// </summary>
-        /// <param name="faction">Faction to check unlock status for</param>
-        /// <returns>True if knowledge is unlocked</returns>
-        public bool IsUnlockedFor(FactionWrapper faction)
-        {
-            if (!faction.IsValidWrapper) return false;
-            
-            try
-            {
-                return SafeInvoke<bool?>("IsUnlockedFor", faction.GetNativeObject()) ??
-                       SafeInvoke<bool?>("IsKnown", faction.GetNativeObject()) ??
-                       SafeInvoke<bool?>("HasKnowledge", faction.GetNativeObject()) ?? false;
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to check unlock status of knowledge {Name} for faction {faction.Name}: {ex.Message}");
-                return false;
-            }
-        }
-        
-        /// <summary>
-        /// Unlock this knowledge for a faction
-        /// </summary>
-        /// <param name="faction">Faction to unlock knowledge for</param>
-        /// <returns>True if knowledge was unlocked successfully</returns>
-        public bool UnlockFor(FactionWrapper faction)
-        {
-            if (!faction.IsValidWrapper) return false;
-            
-            try
-            {
-                var result = SafeInvoke<bool?>("UnlockFor", faction.GetNativeObject()) ??
-                           SafeInvoke<bool?>("Unlock", faction.GetNativeObject()) ??
-                           SafeInvoke<bool?>("Grant", faction.GetNativeObject());
-                
-                if (result.HasValue) return result.Value;
-                
-                Log.LogWarning($"Could not unlock knowledge {Name} for faction {faction.Name}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Log.LogError($"Error unlocking knowledge {Name} for faction {faction.Name}: {ex.Message}");
-                return false;
-            }
-        }
+        /// <summary>N'a jamais fonctionné — aucun de ces noms n'existe sur KnowledgeType.</summary>
+        [Obsolete("IsUnlockedFor/IsKnown/HasKnowledge n'existent pas sur KnowledgeType — retournait toujours false. Le déblocage de knowledge se gère côté Faction.", false)]
+        public bool IsUnlockedFor(FactionWrapper faction) => false;
+
+        /// <summary>N'a jamais fonctionné — aucun de ces noms n'existe sur KnowledgeType.</summary>
+        [Obsolete("UnlockFor/Unlock/Grant n'existent pas sur KnowledgeType — n'a jamais rien débloqué. Le déblocage de knowledge se gère côté Faction.", false)]
+        public bool UnlockFor(FactionWrapper faction) => false;
         
         // ==================== SEARCH & FILTERING ====================
         
@@ -366,19 +293,11 @@ namespace PerAspera.GameAPI.Wrappers
         }
         
         /// <summary>
-        /// Get the native game object (for Harmony patches)
-        /// </summary>
-        public object? GetNativeObject()
-        {
-            return NativeObject;
-        }
-        
-        /// <summary>
         /// String representation for debugging
         /// </summary>
         public override string ToString()
         {
-            return $"Knowledge[{Name}] ({Category}, Index: {Index}, Valid: {IsValid})";
+            return $"Knowledge[{Name}] ({Category}, Valid: {IsValid})";
         }
     }
     
