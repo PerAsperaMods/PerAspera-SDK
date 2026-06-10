@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- Import SDK versioning -->
   <Import Project="..\Version.props" />
   
@@ -22,6 +22,5 @@
   <ItemGroup>
     <ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
     <ProjectReference Include="..\PerAspera.GameAPI\PerAspera.GameAPI.csproj" />
-    <ProjectReference Include="..\PerAspera.GameAPI.Commands\PerAspera.GameAPI.Commands.csproj" />
   </ItemGroup>
 </Project>

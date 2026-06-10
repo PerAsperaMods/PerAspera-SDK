@@ -1,29 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<!-- Import SDK versioning -->
 	<Import Project="..\Version.props" />
-	
+
+	<!--
+	  CONSOLIDATION 2026-06 (audit SDK-CRITICAL-REVIEW §1.1) :
+	  cette assembly absorbe PerAspera.Core + PerAspera.Core.IL2CppExtensions
+	  (+ PerAspera.Abstractions, qui était un placeholder vide).
+	  Les namespaces sont inchangés : PerAspera.Core et PerAspera.Core.IL2CPP.
+	-->
 	<PropertyGroup>
 		<AssemblyName>PerAspera.Core</AssemblyName>
 		<RootNamespace>PerAspera.Core</RootNamespace>
 		<PackageId>PerAspera.Core</PackageId>
-		<Version>1.1.0</Version>
-		<IsPackable>true</IsPackable>
-		<Description>Per Aspera Core - Low-level utilities and IL2CPP extensions for mod development</Description>
-		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities</PackageTags>
+		<Description>Per Aspera SDK Core - logging, utilities and low-level IL2CPP interop extensions (merged assembly)</Description>
+		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities;interop</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
-		<!-- Auto-generate package on build -->
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<!-- Package output path -->
-		<PackageOutputPath>F:\ModPeraspera\nuget-packages</PackageOutputPath>
-		<!-- Enable all Unity references for SDK -->
-		<IncludeAllUnityReferences>true</IncludeAllUnityReferences>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nuget-packages</PackageOutputPath>
 	</PropertyGroup>
 
-	<!-- BepInEx packages only - removed game assemblies for standalone compilation -->
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 	</ItemGroup>
-
-
 </Project>

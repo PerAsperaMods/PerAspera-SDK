@@ -82,9 +82,10 @@
        No manual references needed here. -->
 
   <!-- Enforce the architecture rule "no reflection outside IL2CppExtensions"
-       (RS0030 warnings, see BannedSymbols.txt). IL2CppExtensions is the one
-       project whose job IS reflection, so it is exempt. -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'PerAspera.Core.IL2CppExtensions'">
+       (RS0030 warnings, see BannedSymbols.txt). Depuis la consolidation 2026-06,
+       IL2CppExtensions vit dans PerAspera.Core — c'est l'assembly exemptée
+       (son rôle EST la réflexion encapsulée). -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'PerAspera.Core'">
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
