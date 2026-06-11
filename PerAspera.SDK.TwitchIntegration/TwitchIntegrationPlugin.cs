@@ -5,6 +5,7 @@ using BepInEx.Unity.IL2CPP;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events;
 using PerAspera.GameAPI.Events.Native;
+using PerAspera.GameAPI.Wrappers;
 
 namespace PerAspera.SDK.TwitchIntegration
 {
@@ -12,15 +13,14 @@ namespace PerAspera.SDK.TwitchIntegration
     /// Clean BepInX plugin for Twitch integration using correct SDK Events system
     /// 
     /// APPROACH:
-    /// - Use EventsAutoStartPlugin.EnhancedEvents for event subscription
-    /// - Subscribe to BuildingSpawnedNativeEvent and BuildingDespawnedNativeEvent
+    /// - Subscribe to NativeEventHub events for building notifications
     /// - Delegate to TwitchIntegrationManager for actual logic
     /// - Simple Task-based initialization without complex event dependencies
-    /// 
+    ///
     /// EVENT SYSTEM:
-    /// - EnhancedEvents.Subscribe(eventType, handler) for typed events
-    /// - Building events: BuildingSpawnedNativeEvent, BuildingDespawnedNativeEvent
-    /// - Automatic wrapper conversion from native to SDK types
+    /// - NativeEventHub.Subscribe(NativeGameEvent.*, handler) for native game events
+    /// - Building events: BuildingBuilt + BuildingInternalRemove via NativeEventHub
+    /// - NativeEventExtensions.ResolveBuilding(keeper) resolves Handle → Building
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("PerAspera.GameAPI.Events")]
@@ -31,10 +31,6 @@ namespace PerAspera.SDK.TwitchIntegration
         public const string PluginVersion = "1.0.0";
         
         private new readonly LogAspera Log = new LogAspera("TwitchIntegrationPlugin");
-        
-        // Event handlers for unsubscription
-        private Action<BuildingSpawnedNativeEvent>? _buildingSpawnedHandler;
-        private Action<BuildingDespawnedNativeEvent>? _buildingDespawnedHandler;
         
         /// <summary>
         /// Plugin initialization
@@ -87,71 +83,44 @@ namespace PerAspera.SDK.TwitchIntegration
         }
         
         /// <summary>
-        /// Subscribe to building events using correct SDK Events system
+        /// Subscribe to building events via NativeEventHub for Twitch notifications.
+        /// <para>Uses <c>BuildingBuilt</c> (construction complete) and <c>BuildingInternalRemove</c>
+        /// (building removed from world). Resolves the sender Handle to a <see cref="Building"/>
+        /// via <see cref="NativeEventExtensions.ResolveBuilding"/>.</para>
         /// </summary>
         private void SubscribeToBuildingEvents()
         {
             try
             {
-                // Store handlers for unsubscription
-                _buildingSpawnedHandler = OnBuildingSpawned;
-                _buildingDespawnedHandler = OnBuildingDespawned;
-                
-                // Subscribe to building events using EnhancedEvents
-                // Note: Using string-based subscription as per SDK documentation
-                EnhancedEvents.Subscribe("Native:BuildingSpawned", data =>
+                NativeEventHub.Subscribe(NativeGameEvent.BuildingBuilt, args =>
                 {
-                    if (data is BuildingSpawnedNativeEvent spawnedEvent)
-                        _buildingSpawnedHandler(spawnedEvent);
+                    try
+                    {
+                        var keeper = BaseGameWrapper.GetCurrent()?.NativeBaseGame?.keeper;
+                        var building = args.ResolveBuilding(keeper);
+                        var name = building?.buildingType?.name ?? "Unknown Building";
+                        TwitchIntegrationManager.QueueMessage($"🏗️ New building constructed: {name}");
+                    }
+                    catch (Exception ex) { Log.Warning($"Building built notification error: {ex.Message}"); }
                 });
-                
-                EnhancedEvents.Subscribe("Native:BuildingDespawned", data =>
+
+                NativeEventHub.Subscribe(NativeGameEvent.BuildingInternalRemove, args =>
                 {
-                    if (data is BuildingDespawnedNativeEvent despawnedEvent)
-                        _buildingDespawnedHandler(despawnedEvent);
+                    try
+                    {
+                        var keeper = BaseGameWrapper.GetCurrent()?.NativeBaseGame?.keeper;
+                        var building = args.ResolveBuilding(keeper);
+                        var name = building?.buildingType?.name ?? "Unknown Building";
+                        TwitchIntegrationManager.QueueMessage($"💥 Building destroyed: {name}");
+                    }
+                    catch (Exception ex) { Log.Warning($"Building removed notification error: {ex.Message}"); }
                 });
-                
-                Log.Info("✅ Subscribed to building events for Twitch notifications");
+
+                Log.Info("✅ Subscribed to building events via NativeEventHub");
             }
             catch (Exception ex)
             {
                 Log.Error($"❌ Failed to subscribe to building events: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Handle building spawned events
-        /// </summary>
-        private void OnBuildingSpawned(BuildingSpawnedNativeEvent eventData)
-        {
-            try
-            {
-                var buildingName = eventData.BuildingTypeKey ?? "Unknown Building";
-                TwitchIntegrationManager.QueueMessage($"🏗️ New building constructed: {buildingName}");
-                
-                Log.Debug($"Building spawned notification queued: {buildingName}");
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"Error handling building spawned event: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Handle building despawned events
-        /// </summary>
-        private void OnBuildingDespawned(BuildingDespawnedNativeEvent eventData)
-        {
-            try
-            {
-                var buildingName = eventData.BuildingTypeKey ?? "Unknown Building";
-                TwitchIntegrationManager.QueueMessage($"💥 Building destroyed: {buildingName}");
-                
-                Log.Debug($"Building despawned notification queued: {buildingName}");
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"Error handling building despawned event: {ex.Message}");
             }
         }
         
@@ -168,12 +137,8 @@ namespace PerAspera.SDK.TwitchIntegration
                 // Note: SDK Events system may not support unsubscription
                 try
                 {
-                    // Attempt to unsubscribe if the system supports it
-                    if (_buildingSpawnedHandler != null)
-                    {
-                        // EnhancedEvents.Unsubscribe() might not exist
-                        Log.Debug("Building event handlers cleared");
-                    }
+                        // NativeEventHub subscriptions are cleared on ClearAllSubscriptions() via EventSystemIntegration.Shutdown()
+                    Log.Debug("Building event handlers will be cleared on SDK shutdown");
                 }
                 catch (Exception ex)
                 {

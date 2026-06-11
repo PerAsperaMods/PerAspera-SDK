@@ -1,17 +1,21 @@
 using BepInEx;
 using PerAspera.ModSDK;
 using PerAspera.GameAPI;
+using PerAspera.GameAPI.Binding;
 using PerAspera.GameAPI.Events;
+using PerAspera.GameAPI.Events.Integration;
+using PerAspera.GameAPI.Events.SDK;
 using BepInEx.Unity.IL2CPP;
 using PerAspera.Core;
 
 namespace PerAspera.ModSDK
 {
     /// <summary>
-    /// Plugin principal PerAspera SDK - Fournit l'infrastructure de modding compl�te
+    /// Plugin principal PerAspera SDK - Fournit l'infrastructure de modding compl�te
     /// Uses new event architecture (PerAspera.GameAPI.Events v2)
     /// </summary>
-    [BepInPlugin("peraaspera.modsdk", "PerAspera ModSDK", "1.0.0")]
+    [BepInPlugin("peraspera.modsdk", "PerAspera ModSDK", "1.0.0")]
+    [BepInDependency("PerAspera.GameAPI.Events", BepInDependency.DependencyFlags.HardDependency)]
     [BepInProcess("Per Aspera.exe")]
     public class PerAsperaSDKPlugin : BasePlugin
     {
@@ -27,10 +31,13 @@ namespace PerAspera.ModSDK
                 // ? 1. Initialize ModSDK core
                 ModSDK.Initialize("PerAspera.ModSDK", "1.0.0");
                 
-                // ? 2. Initialize native event system
+                // 2. Initialize native event system
                 InitializeNativeEventSystem();
-                
-                _logger.Info("? PerAspera ModSDK ready - mods can now subscribe to events!");
+
+                // 3. Validate string-based bindings once game is ready (dev assurance-life)
+                EnhancedEventBus.SubscribeToGameCommandsReady(_ => SdkBindingValidator.Validate());
+
+                _logger.Info("PerAspera ModSDK ready - mods can now subscribe to events!");
             }
             catch (System.Exception ex)
             {
@@ -40,14 +47,14 @@ namespace PerAspera.ModSDK
         }
 
         /// <summary>
-        /// Initialise le syst�me d'interception des �v�nements natifs du jeu
-        /// Uses new PerAspera.GameAPI.Events architecture v2
+        /// Initialise le système d'interception des événements natifs du jeu.
+        /// Uses new PerAspera.GameAPI.Events architecture v2.
         /// </summary>
         private void InitializeNativeEventSystem()
         {
             try
             {
-                _logger.Info("?? Initializing native game event system (v2)...");
+                _logger.Info("🚀 Initializing native game event system (v2)...");
                 
                 // NOTE: New event system (PerAspera.GameAPI.Events) is automatically initialized
                 // via its own native event patches. No manual initialization needed.
@@ -62,11 +69,11 @@ namespace PerAspera.ModSDK
                     }
                     catch (System.Exception ex)
                     {
-                        _logger.Warning($"?? Failed to publish event {eventName}: {ex.Message}");
+                        _logger.Warning($"⚠️ Failed to publish event {eventName}: {ex.Message}");
                     }
                 };
                 
-                _logger.Info("? Native event system ready - events are being captured and forwarded");
+                _logger.Info("✅ Native event system ready - events are being captured and forwarded");
             }
             catch (System.Exception ex)
             {
@@ -82,9 +89,9 @@ namespace PerAspera.ModSDK
         {
             try
             {
-                _logger.Info("?? Shutting down PerAspera ModSDK...");
+                _logger.Info("🛑 Shutting down PerAspera ModSDK...");
                 
-                _logger.Info("? PerAspera ModSDK shut down cleanly");
+                _logger.Info("✅ PerAspera ModSDK shut down cleanly");
             }
             catch (System.Exception ex)
             {

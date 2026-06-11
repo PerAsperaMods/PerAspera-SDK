@@ -27,6 +27,12 @@
     <GameLibsDir>$(BepInExInteropDir)</GameLibsDir>
   </PropertyGroup>
 
+  <!-- Standalone only (parent root props already declares it): bare "Type" = System.Type,
+       kills CS0104 ambiguity with the game's interop assemblies. -->
+  <ItemGroup Condition="!Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')">
+    <Using Include="System.Type" Alias="Type" />
+  </ItemGroup>
+
   <!-- Per Aspera SDK - Shared build configuration -->
   <PropertyGroup>
     <SdkRoot>$(MSBuildThisFileDirectory)</SdkRoot>
@@ -74,5 +80,14 @@
   <!-- LOCAL dev: wildcard game DLL references are added by the shared target
        in root Directory.Build.targets (AddGameLibReferences target).
        No manual references needed here. -->
+
+  <!-- Enforce the architecture rule "no reflection outside IL2CppExtensions"
+       (RS0030 warnings, see BannedSymbols.txt). Depuis la consolidation 2026-06,
+       IL2CppExtensions vit dans PerAspera.Core — c'est l'assembly exemptée
+       (son rôle EST la réflexion encapsulée). -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'PerAspera.Core'">
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
 
 </Project>

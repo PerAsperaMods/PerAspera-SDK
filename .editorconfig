@@ -1,0 +1,27 @@
+# Per Aspera SDK — editor/analyzer settings (kept in sync with the workspace root
+# .editorconfig so the SDK behaves the same when cloned standalone).
+# charset utf-8 prevents the mojibake reencoding seen in some sources (em-dashes → "â€").
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# RS0030 = BannedApiAnalyzers (reflexion interdite hors PerAspera.Core.IL2CppExtensions).
+# Warning pour l'instant — passera en error une fois les ~290 violations migrées.
+dotnet_diagnostic.RS0030.severity = warning
+
+[*.{csproj,props,targets}]
+indent_style = tab
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

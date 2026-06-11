@@ -30,11 +30,13 @@ namespace PerAspera.Core
         //------------------------------------------------------
 
         /// <summary>
-        /// Sets a field or property value using reflection
+        /// Sets a field or property value using reflection.
+        /// RS0030 suppressed: intentional generic reflection for arbitrary IL2CPP objects.
         /// </summary>
         /// <param name="obj">Target object</param>
         /// <param name="fieldName">Field or property name</param>
         /// <param name="value">Value to set</param>
+#pragma warning disable RS0030
         public static void SetFieldOrProp(object obj, string fieldName, object value)
         {
             if (obj == null || string.IsNullOrEmpty(fieldName)) 
@@ -57,14 +59,17 @@ namespace PerAspera.Core
                 prop.SetValue(obj, value);
             }
         }
+#pragma warning restore RS0030
 
         /// <summary>
-        /// Gets a float value from field or property, with default fallback
+        /// Gets a float value from field or property, with default fallback.
+        /// RS0030 suppressed: intentional generic reflection for arbitrary IL2CPP objects.
         /// </summary>
         /// <param name="obj">Target object</param>
         /// <param name="fieldName">Field or property name</param>
         /// <param name="defaultValue">Default value if not found</param>
         /// <returns>Float value or default</returns>
+#pragma warning disable RS0030
         public static float GetFloatFieldOrProp(object obj, string fieldName, float defaultValue = 0f)
         {
             if (obj == null || string.IsNullOrEmpty(fieldName)) 
@@ -84,6 +89,7 @@ namespace PerAspera.Core
 
             return defaultValue;
         }
+#pragma warning restore RS0030
 
         //------------------------------------------------------
         // MULTI-NAME GETTER (FIELD / PROPERTY / METHOD)

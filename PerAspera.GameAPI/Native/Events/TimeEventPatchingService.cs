@@ -97,23 +97,25 @@ namespace PerAspera.GameAPI.Native.Events
         private bool CreateTimeMethodHook(System.Type targetType, string methodName, string eventType)
         {
             if (!ValidateMethodForPatching(targetType, methodName))
-            {
                 return false;
-            }
 
             try
             {
-                var method = targetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-                
-                // Create harmony patches with event type context
-                var prefix = new HarmonyMethod(typeof(TimeEventPatchingService), nameof(TimePrefix));
-                var postfix = new HarmonyMethod(typeof(TimeEventPatchingService), nameof(TimePostfix));
+                // AccessTools.Method : RS0030-safe Harmony helper (returns null if not found)
+                var method = AccessTools.Method(targetType, methodName);
+                if (method == null)
+                {
+                    _log.Debug($"Method {targetType.Name}.{methodName} not found — skipped");
+                    return false;
+                }
+
+                var prefix  = new HarmonyMethod(AccessTools.Method(typeof(TimeEventPatchingService), nameof(TimePrefix)));
+                var postfix = new HarmonyMethod(AccessTools.Method(typeof(TimeEventPatchingService), nameof(TimePostfix)));
 
                 _harmony.Patch(method, prefix: prefix, postfix: postfix);
 
                 var patchKey = $"{targetType.Name}.{methodName}";
                 _patchedMethods[patchKey] = eventType;
-                
                 _log.Debug($"✓ Hooked {patchKey} for {eventType} events");
                 return true;
             }
@@ -247,36 +249,11 @@ namespace PerAspera.GameAPI.Native.Events
         /// </summary>
         /// <param name="instance">Game instance</param>
         /// <returns>Day information or null</returns>
-        private static object ExtractDayInformation(object instance)
+        private static object? ExtractDayInformation(object instance)
         {
-            try
-            {
-                var instanceType = instance.GetType();
-
-                // Try common day property names
-                var dayProperties = new[] { "currentDay", "day", "CurrentDay", "Day", "dayNumber", "DayNumber" };
-                
-                foreach (var propName in dayProperties)
-                {
-                    var property = instanceType.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
-                    if (property != null && property.CanRead)
-                    {
-                        return property.GetValue(instance);
-                    }
-
-                    var field = instanceType.GetField(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
-                    {
-                        return field.GetValue(instance);
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            // Typed access: use IL2CppExtensions (RS0030-exempt in Core) rather than probing
+            return instance.GetMemberValue<object>("currentDay")
+                ?? instance.GetMemberValue<object>("day");
         }
 
         /// <summary>
@@ -284,36 +261,10 @@ namespace PerAspera.GameAPI.Native.Events
         /// </summary>
         /// <param name="instance">Game instance</param>
         /// <returns>Speed information or null</returns>
-        private static object ExtractSpeedInformation(object instance)
+        private static object? ExtractSpeedInformation(object instance)
         {
-            try
-            {
-                var instanceType = instance.GetType();
-
-                // Try common speed property names
-                var speedProperties = new[] { "timeSpeed", "speed", "TimeSpeed", "Speed", "gameSpeed", "GameSpeed" };
-                
-                foreach (var propName in speedProperties)
-                {
-                    var property = instanceType.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
-                    if (property != null && property.CanRead)
-                    {
-                        return property.GetValue(instance);
-                    }
-
-                    var field = instanceType.GetField(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
-                    {
-                        return field.GetValue(instance);
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return instance.GetMemberValue<object>("timeSpeed")
+                ?? instance.GetMemberValue<object>("speed");
         }
 
         /// <summary>
@@ -321,36 +272,10 @@ namespace PerAspera.GameAPI.Native.Events
         /// </summary>
         /// <param name="instance">Game instance</param>
         /// <returns>Pause state or null</returns>
-        private static object ExtractPauseState(object instance)
+        private static object? ExtractPauseState(object instance)
         {
-            try
-            {
-                var instanceType = instance.GetType();
-
-                // Try common pause property names
-                var pauseProperties = new[] { "isPaused", "paused", "IsPaused", "Paused", "gamePaused", "GamePaused" };
-                
-                foreach (var propName in pauseProperties)
-                {
-                    var property = instanceType.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
-                    if (property != null && property.CanRead)
-                    {
-                        return property.GetValue(instance);
-                    }
-
-                    var field = instanceType.GetField(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
-                    {
-                        return field.GetValue(instance);
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return instance.GetMemberValue<object>("isPaused")
+                ?? instance.GetMemberValue<object>("paused");
         }
 
         /// <summary>

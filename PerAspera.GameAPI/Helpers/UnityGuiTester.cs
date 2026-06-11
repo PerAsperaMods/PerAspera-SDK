@@ -1,4 +1,5 @@
 using System;
+using HarmonyLib;
 using UnityEngine;
 using PerAspera.Core;
 
@@ -44,22 +45,15 @@ namespace PerAspera.GameAPI.Helpers
             try
             {
                 // Test wrapper GUI.enabled - utiliser reflection pour éviter erreur compilation
-                var guiType = System.Type.GetType("UnityEngine.GUI");
-                if (guiType != null)
-                {
-                    var enabledProperty = guiType.GetProperty("enabled");
-                    if (enabledProperty != null)
-                    {
-                        bool enabled = (bool)(enabledProperty.GetValue(null) ?? false);
-                        LogAspera.LogInfo($"✓ GUI.enabled GET: {enabled}");
-                        
-                        enabledProperty.SetValue(null, true);
-                        LogAspera.LogInfo("✓ GUI.enabled SET: Success");
-                        
-                        _guiEnabled = true;
-                        return;
-                    }
-                }
+                // Direct access to GUI.enabled — no reflection needed
+                bool enabled = GUI.enabled;
+                LogAspera.LogInfo($"✓ GUI.enabled GET: {enabled}");
+
+                GUI.enabled = true;
+                LogAspera.LogInfo("✓ GUI.enabled SET: Success");
+
+                _guiEnabled = true;
+                return;
                 
                 LogAspera.LogError("✗ GUI.enabled property not found (stripped)");
             }
@@ -74,19 +68,17 @@ namespace PerAspera.GameAPI.Helpers
             try
             {
                 // Test si GUILayout.Label existe
-                var labelMethod = typeof(GUILayout).GetMethod("Label", new[] { typeof(string) });
+                // AccessTools.Method — RS0030-exempt (HarmonyLib)
+                var labelMethod = AccessTools.Method(typeof(GUILayout), "Label", new[] { typeof(string) });
                 LogAspera.LogInfo($"✓ GUILayout.Label method exists: {labelMethod != null}");
 
-                // Test si BeginVertical existe
-                var beginVertical = typeof(GUILayout).GetMethod("BeginVertical", new Type[0]);
+                var beginVertical = AccessTools.Method(typeof(GUILayout), "BeginVertical", new Type[0]);
                 LogAspera.LogInfo($"✓ GUILayout.BeginVertical method exists: {beginVertical != null}");
 
-                // Test si EndVertical existe
-                var endVertical = typeof(GUILayout).GetMethod("EndVertical", new Type[0]);
+                var endVertical = AccessTools.Method(typeof(GUILayout), "EndVertical", new Type[0]);
                 LogAspera.LogInfo($"✓ GUILayout.EndVertical method exists: {endVertical != null}");
 
-                // Test si Toggle existe
-                var toggle = typeof(GUILayout).GetMethod("Toggle", new[] { typeof(bool) });
+                var toggle = AccessTools.Method(typeof(GUILayout), "Toggle", new[] { typeof(bool) });
                 LogAspera.LogInfo($"✓ GUILayout.Toggle method exists: {toggle != null}");
 
                 _guiLayoutAvailable = beginVertical != null && endVertical != null;
@@ -106,7 +98,8 @@ namespace PerAspera.GameAPI.Helpers
                 LogAspera.LogInfo($"✓ GUIStyle type exists: {guiStyleType != null}");
 
                 // Test GUI.skin
-                var skinProperty = typeof(GUI).GetProperty("skin");
+                // AccessTools.Property — RS0030-exempt (HarmonyLib)
+                var skinProperty = AccessTools.Property(typeof(GUI), "skin");
                 LogAspera.LogInfo($"✓ GUI.skin property exists: {skinProperty != null}");
 
                 _guiStyleAvailable = guiStyleType != null && skinProperty != null;

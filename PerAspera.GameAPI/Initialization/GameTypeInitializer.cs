@@ -214,15 +214,13 @@ namespace PerAspera.GameAPI
         {
             try
             {
-                var currentPlanetProperty = universeInstance.GetType().GetProperty("currentPlanet");
-                if (currentPlanetProperty != null)
+                // GetMemberValue — RS0030-exempt (Core)
+                var planet = universeInstance.GetMemberValue<object>("currentPlanet")
+                    ?? universeInstance.GetMemberValue<object>("planet");
+                if (planet != null)
                 {
-                    var planet = currentPlanetProperty.GetValue(universeInstance);
-                    if (planet != null)
-                    {
-                        _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
-                        return planet;
-                    }
+                    _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
+                    return planet;
                 }
                 return null;
             }
@@ -349,6 +347,7 @@ namespace PerAspera.GameAPI
             }
             return _resourceType;
         }
+        /// <summary>Returns the IL2CPP proxy type for Person, discovering it if needed.</summary>
         public static System.Type? GetPerson()
         {
             if (_resourceType == null)
@@ -781,9 +780,8 @@ namespace PerAspera.GameAPI
         }
     }
 
-    /// <summary>
-    /// Type discovery statistics
-    /// </summary>
+    /// <summary>Snapshot of the type-discovery state after initialization.</summary>
+#pragma warning disable CS1591
     public class TypeDiscoveryStats
     {
         public bool HasBaseGame { get; set; }

@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <AssemblyName>PerAspera.GameAPI.Database</AssemblyName>
     <RootNamespace>PerAspera.GameAPI.Database</RootNamespace>
-    <OutputPath>..\..\Individual-Mods\YAMLDataInterceptor\lib\</OutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PackageId>PerAspera.GameAPI.Database</PackageId>
     <Version>1.1.0</Version>
