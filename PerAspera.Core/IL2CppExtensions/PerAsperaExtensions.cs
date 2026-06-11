@@ -237,15 +237,15 @@ namespace PerAspera.Core.IL2CPP
         }
 
         /// <summary>
-        /// Executes a console command with the given arguments
+        /// ExecuteCommand n'existe pas sur InteractionManager (verifie InteropDump 2026-06-11).
+        /// La methode reelle est ExecuteRule(InteractionRule) — non accessible via une string de commande.
+        /// Utiliser PerAspera.GameAPI.Commands pour executer des commandes mod.
         /// </summary>
+        [System.Obsolete("ExecuteConsoleCommand : InteractionManager.ExecuteCommand est un binding fantome. Utiliser PerAspera.GameAPI.Commands a la place.")]
         public static void ExecuteConsoleCommand(string command, params object[] args)
         {
-            var interactionManager = GetInteractionManager();
-            if (interactionManager == null) return;
-
-            // Use SafeInvoke to execute the command
-            ReflectionHelpers.SafeInvoke(interactionManager, "ExecuteCommand", command, args);
+            // Binding fantome — InteractionManager n'a pas de methode ExecuteCommand(string, object[]).
+            // Voir InteropDump/ScriptsAssembly/InteractionManager.cs : seule methode publique est ExecuteRule(InteractionRule).
         }
     }
 

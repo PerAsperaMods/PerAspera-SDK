@@ -40,28 +40,12 @@ namespace PerAspera.GameAPI.Wrappers
         }
 
         /// <summary>
-        /// Notification pour un dialogue.
-        /// Tente DialoguePresenter.NotifyDialogue via InvokeMethod, sinon route vers StartDialogue.
+        /// Alias vers StartDialogue — DialoguePresenter.NotifyDialogue n'existe pas dans le jeu
+        /// (verifie InteropDump 2026-06-11 : aucune methode NotifyDialogue sur DialoguePresenter).
         /// </summary>
+        [System.Obsolete("NotifyDialogue etait un binding fantome. Utiliser StartDialogue directement.")]
         public static void NotifyDialogue(string factionKey, string personKey, string dialogueKey)
-        {
-            try
-            {
-                var presenterType = ReflectionHelpers.FindType("DialoguePresenter");
-                var presenter = presenterType != null
-                    ? ReflectionHelpers.GetSingletonInstance(presenterType)
-                    : null;
-                if (presenter != null)
-                {
-                    ReflectionHelpers.SafeInvoke(presenter, "NotifyDialogue", factionKey, personKey, dialogueKey);
-                    return;
-                }
-            }
-            catch { }
-
-            // Fallback : route vers StartDialogue
-            StartDialogue(factionKey, personKey, dialogueKey);
-        }
+            => StartDialogue(factionKey, personKey, dialogueKey);
 
         /// <summary>
         /// Verifie si un dialogue est present via DialogueManager.ContainsDialogue (public static type).

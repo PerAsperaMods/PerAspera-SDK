@@ -21,12 +21,13 @@ namespace PerAspera.GameAPI.Binding
 
         private static readonly List<BindingCheck> _checks = new()
         {
-            // DialogueWrapper.cs:33 — Universe.StartDialogue(params)
+            // DialogueWrapper.cs:33 — Universe.StartDialogue(Il2CppReferenceArray<Object>) - verifie InteropDump 2026-06-11
             new("Universe",          "StartDialogue",    IsMethod: true,  "DialogueWrapper.cs"),
-            // DialogueWrapper.cs:56 — DialoguePresenter.NotifyDialogue(params)
-            new("DialoguePresenter", "NotifyDialogue",   IsMethod: true,  "DialogueWrapper.cs"),
-            // PerAsperaExtensions.cs:248 — InteractionManager.ExecuteCommand(string, object[])
-            new("InteractionManager","ExecuteCommand",   IsMethod: true,  "PerAsperaExtensions.cs"),
+            // DialogueManager - ContainsDialogue(string) public static - verifie InteropDump 2026-06-11
+            new("DialogueManager",   "ContainsDialogue", IsMethod: true,  "DialogueWrapper.cs"),
+            // RETIRES (bindings fantomes confirmes 2026-06-11) :
+            // - DialoguePresenter.NotifyDialogue — n'existe pas (EnqueueDialogue/StartDialogue sont les vraies methodes)
+            // - InteractionManager.ExecuteCommand — n'existe pas (seule methode publique : ExecuteRule(InteractionRule))
         };
 
         /// <summary>
