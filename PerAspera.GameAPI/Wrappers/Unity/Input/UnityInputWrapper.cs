@@ -138,6 +138,9 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
             return null;
         }
         
+        // RS0030 — délibéré : Unity.InputSystem est stripé en IL2CPP, reflection = seul accès possible.
+        // Dual-path : réflexion d'abord, fallback UnityEngine.Input direct.
+#pragma warning disable RS0030
         /// <summary>
         /// Get method via reflection with caching for performance
         /// </summary>
@@ -273,6 +276,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.Input
             );
         }
         
+#pragma warning restore RS0030
         /// <summary>
         /// Input system status for diagnostics
         /// </summary>

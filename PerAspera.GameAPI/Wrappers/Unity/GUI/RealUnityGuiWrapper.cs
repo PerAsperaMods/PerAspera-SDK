@@ -135,6 +135,9 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             return null;
         }
         
+        // RS0030 — délibéré : Unity.IMGUI est stripé en IL2CPP, reflection = seul accès possible.
+        // Dual-path : réflexion d'abord, fallback no-op (GUILayout non disponible autrement).
+#pragma warning disable RS0030
         /// <summary>
         /// Get method via reflection with caching
         /// </summary>
@@ -313,6 +316,7 @@ namespace PerAspera.GameAPI.Wrappers.Unity.GUI
             );
         }
         
+#pragma warning restore RS0030
         /// <summary>
         /// GUI system status for diagnostics
         /// </summary>
