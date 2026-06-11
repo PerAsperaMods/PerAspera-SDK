@@ -273,6 +273,31 @@ namespace PerAspera.Core.IL2CPP
             }
         }
 
+        /// <summary>Returns true if the type has a public or non-public instance/static method with the given name.</summary>
+        public static bool HasMethod(System.Type type, string methodName)
+        {
+            if (type == null || string.IsNullOrEmpty(methodName)) return false;
+            try
+            {
+                return type.GetMethod(methodName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static) != null;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>Returns true if the type has a public or non-public field or property with the given name.</summary>
+        public static bool HasMember(System.Type type, string memberName)
+        {
+            if (type == null || string.IsNullOrEmpty(memberName)) return false;
+            try
+            {
+                var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+                return type.GetField(memberName, flags) != null
+                    || type.GetProperty(memberName, flags) != null;
+            }
+            catch { return false; }
+        }
+
         /// <summary>
         /// Get singleton instance by type
         /// </summary>

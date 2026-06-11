@@ -1,7 +1,10 @@
 using BepInEx;
 using PerAspera.ModSDK;
 using PerAspera.GameAPI;
+using PerAspera.GameAPI.Binding;
 using PerAspera.GameAPI.Events;
+using PerAspera.GameAPI.Events.Integration;
+using PerAspera.GameAPI.Events.SDK;
 using BepInEx.Unity.IL2CPP;
 using PerAspera.Core;
 
@@ -28,10 +31,13 @@ namespace PerAspera.ModSDK
                 // ? 1. Initialize ModSDK core
                 ModSDK.Initialize("PerAspera.ModSDK", "1.0.0");
                 
-                // ? 2. Initialize native event system
+                // 2. Initialize native event system
                 InitializeNativeEventSystem();
-                
-                _logger.Info("? PerAspera ModSDK ready - mods can now subscribe to events!");
+
+                // 3. Validate string-based bindings once game is ready (dev assurance-life)
+                EnhancedEventBus.SubscribeToGameCommandsReady(_ => SdkBindingValidator.Validate());
+
+                _logger.Info("PerAspera ModSDK ready - mods can now subscribe to events!");
             }
             catch (System.Exception ex)
             {
