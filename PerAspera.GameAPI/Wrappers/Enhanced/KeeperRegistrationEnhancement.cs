@@ -21,6 +21,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
     /// DOC REFERENCES: F:\ModPeraspera\Internal_doc\IMPLEMENTATION\Feature1-Registration-Implementation.cs
     /// </summary>
     [BepInPlugin("peraspera.sdk.keeper.registration", "Keeper Registration Enhancement", "1.0.0")]
+    [BepInDependency("PerAspera.GameAPI.Events", BepInDependency.DependencyFlags.HardDependency)]
     public class RegistrationEnhancementPlugin : BasePlugin
     {
         private static ManualLogSource? logger;

@@ -11,7 +11,8 @@ namespace PerAspera.ModSDK
     /// Plugin principal PerAspera SDK - Fournit l'infrastructure de modding compl�te
     /// Uses new event architecture (PerAspera.GameAPI.Events v2)
     /// </summary>
-    [BepInPlugin("peraaspera.modsdk", "PerAspera ModSDK", "1.0.0")]
+    [BepInPlugin("peraspera.modsdk", "PerAspera ModSDK", "1.0.0")]
+    [BepInDependency("PerAspera.GameAPI.Events", BepInDependency.DependencyFlags.HardDependency)]
     [BepInProcess("Per Aspera.exe")]
     public class PerAsperaSDKPlugin : BasePlugin
     {
