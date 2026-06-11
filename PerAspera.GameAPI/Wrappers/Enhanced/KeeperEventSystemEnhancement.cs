@@ -411,13 +411,14 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Events
                 
                 // Get BaseGame type from the instance
                 var baseGameType = baseGameInstance.GetType();
-                var updateMethod = baseGameType.GetMethod("Update");
-                
+                // AccessTools.Method — RS0030-exempt (HarmonyLib)
+                var updateMethod = AccessTools.Method(baseGameType, "Update");
+
                 if (updateMethod != null)
                 {
-                    var postfix = typeof(EventPatches).GetMethod(nameof(BaseGameUpdatePostfix));
+                    var postfix = AccessTools.Method(typeof(EventPatches), nameof(BaseGameUpdatePostfix));
                     harmony.Patch(updateMethod, postfix: new HarmonyMethod(postfix));
-                    
+
                     _isPatched = true;
                     _log.Info("✅ BaseGame.Update patch applied dynamically");
                 }

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
+using HarmonyLib;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Commands.Native;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
 
@@ -211,20 +213,20 @@ namespace PerAspera.GameAPI.Commands.Core
 
             try
             {
-                // Use reflection to find resource and amount properties
+                // Use IL2CppExtensions.GetMemberValue — RS0030-exempt (Core)
                 var commandType = command.GetType();
-                var properties = commandType.GetProperties();
+                var properties = AccessTools.GetDeclaredProperties(commandType);
 
                 foreach (var prop in properties)
                 {
                     if (prop.Name.Contains("Resource") && prop.PropertyType == typeof(string))
                     {
-                        resourceName = (string)prop.GetValue(command);
+                        resourceName = command.GetMemberValue<string>(prop.Name);
                     }
-                    else if ((prop.Name.Contains("Amount") || prop.Name.Contains("Quantity")) && 
+                    else if ((prop.Name.Contains("Amount") || prop.Name.Contains("Quantity")) &&
                              (prop.PropertyType == typeof(float) || prop.PropertyType == typeof(double) || prop.PropertyType == typeof(int)))
                     {
-                        var value = prop.GetValue(command);
+                        var value = command.GetMemberValue<object>(prop.Name);
                         amount = Convert.ToSingle(value);
                     }
                 }

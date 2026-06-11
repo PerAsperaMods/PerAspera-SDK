@@ -1,6 +1,6 @@
 using System;
-using System.Reflection;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
 
 namespace PerAspera.GameAPI.Commands.Native
@@ -63,72 +63,26 @@ namespace PerAspera.GameAPI.Commands.Native
                 // Initialize GameTypeInitializer first
                 GameTypeInitializer.Initialize();
 
-                // Get BaseGame instance
-                var baseGameType = GameTypeInitializer.GetBaseGameType();
-                if (baseGameType == null)
-                {
-                    _logger.Warning("BaseGame type not found");
-                    return false;
-                }
-
-                var baseGameInstance = baseGameType.GetProperty("Instance", 
-                    BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
-
+                // BaseGame.self : public static BaseGame — typed, InteropDump ligne 1634
+                var baseGameInstance = BaseGame.self;
                 if (baseGameInstance == null)
                 {
-                    _logger.Warning("BaseGame instance not found");
+                    _logger.Warning("BaseGame.self is null");
                     return false;
                 }
 
-                // Find CommandBus on BaseGame
-                object? commandBusInstance = null;
-                var commandBusProperty = baseGameType.GetProperty("CommandBus", BindingFlags.Public | BindingFlags.Instance);
-                if (commandBusProperty != null)
-                {
-                    commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
-                }
+                // Find CommandBus on BaseGame via IL2CppExtensions.GetMemberValue (RS0030-exempt in Core)
+                var commandBusInstance = baseGameInstance.GetMemberValue<object>("commandBus")
+                    ?? baseGameInstance.GetMemberValue<object>("CommandBus");
 
                 if (commandBusInstance == null)
                 {
-                    // Try field search
-                    var commandBusFields = baseGameType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    foreach (var field in commandBusFields)
-                    {
-                        if (field.Name.Contains("CommandBus") || field.Name.Contains("commandBus"))
-                        {
-                            commandBusInstance = field.GetValue(baseGameInstance);
-                            if (commandBusInstance != null) break;
-                        }
-                    }
-                }
-
-                if (commandBusInstance == null)
-                {
-                    _logger.Warning("CommandBus instance not found");
+                    _logger.Warning("CommandBus not found on BaseGame");
                     return false;
                 }
 
-                // Find Keeper (similar approach)
-                object? keeperInstance = null;
-                var keeperProperty = baseGameType.GetProperty("Keeper", BindingFlags.Public | BindingFlags.Instance);
-                if (keeperProperty != null)
-                {
-                    keeperInstance = keeperProperty.GetValue(baseGameInstance);
-                }
-
-                if (keeperInstance == null)
-                {
-                    // Try field search for Keeper
-                    var keeperFields = baseGameType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    foreach (var field in keeperFields)
-                    {
-                        if (field.Name.Contains("Keeper") || field.Name.Contains("keeper"))
-                        {
-                            keeperInstance = field.GetValue(baseGameInstance);
-                            if (keeperInstance != null) break;
-                        }
-                    }
-                }
+                // Keeper via typed property — BaseGame.keeper : Keeper (InteropDump ligne 4011)
+                var keeperInstance = (object?)baseGameInstance.keeper;
 
                 // Initialize with found instances (keeper can be null for now)
                 _instance = new CommandBusAccessor(commandBusInstance, keeperInstance);
@@ -168,7 +122,7 @@ namespace PerAspera.GameAPI.Commands.Native
             {
                 _keeperWrapper = null;
                 _logger.Warning("Keeper instance not available");
-            } // ? CORRECTION: Accolade fermante et else corrig�
+            } // ? CORRECTION: Accolade fermante et else corrig�
 
             _factory = NativeCommandFactory.Instance;
 

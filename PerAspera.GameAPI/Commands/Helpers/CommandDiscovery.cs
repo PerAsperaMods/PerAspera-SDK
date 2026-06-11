@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using HarmonyLib;
 using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Commands.Helpers
@@ -40,13 +41,8 @@ namespace PerAspera.GameAPI.Commands.Helpers
 
                 _log.Debug($"Found InteractionParser type");
 
-                // Get GetCommands() method
-                var getCommandsMethod = parserType.GetMethod(
-                    "GetCommands",
-                    BindingFlags.Static | BindingFlags.Public,
-                    null,
-                    Array.Empty<Type>(),
-                    null);
+                // AccessTools.Method — RS0030-exempt (HarmonyLib)
+                var getCommandsMethod = AccessTools.Method(parserType, "GetCommands");
 
                 if (getCommandsMethod == null)
                 {
@@ -60,7 +56,8 @@ namespace PerAspera.GameAPI.Commands.Helpers
                 object commandsArray = null;
                 try
                 {
-                    commandsArray = getCommandsMethod.Invoke(null, null);
+                    // ReflectionHelpers.SafeInvoke — RS0030-exempt (Core)
+                commandsArray = ReflectionHelpers.SafeInvoke(null, getCommandsMethod);
                 }
                 catch (Exception ex)
                 {

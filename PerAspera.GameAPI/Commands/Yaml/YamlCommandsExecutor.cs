@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
@@ -28,14 +26,9 @@ namespace PerAspera.GameAPI.Commands.Yaml
     {
         private static readonly LogAspera _log = new LogAspera("YamlCommandsExecutor");
 
-        // Cached reflected types (resolved once at first call)
-        private static System.Type? _textActionType;
-        private static System.Type? _consoleType;
-        private static System.Type? _interactionManagerType;
-
         // Native game context — set via Initialize(GameCommandsReadyEvent)
-        private static object? _playerFaction;   // native Faction (IHandleable)
-        private static object? _gameEventBus;    // native GameEventBus
+        private static IHandleable? _playerFaction;   // native Faction as IHandleable
+        private static GameEventBus? _gameEventBus;   // native GameEventBus
 
         /// <summary>
         /// Initializes the native game context from a GameCommandsReadyEvent.
@@ -49,12 +42,13 @@ namespace PerAspera.GameAPI.Commands.Yaml
         public static void Initialize(GameCommandsReadyEvent evt)
         {
             if (evt == null) { _log.Warning("Initialize: event is null"); return; }
-            _playerFaction = evt.NativePlayerFaction;
-            var universe = evt.NativeUniverse;
-            _gameEventBus = universe?.GetType()
-                .GetProperty("gameEventBus", BindingFlags.Public | BindingFlags.Instance)
-                ?.GetValue(universe);
-            _log.Info($"\u2705 GameContext initialized \u2014 faction={_playerFaction?.GetType().Name}, universe={universe?.GetType().Name}");
+            // GetAsIHandleable: IL2CPP cast via pointer — typed, no RS0030
+            // Faction implements IHandleable natively; use pointer reconstruction
+            var factionBase = evt.NativePlayerFaction as Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase;
+            _playerFaction = factionBase != null ? new IHandleable(factionBase.Pointer) : null;
+            // Universe.gameEventBus : public GameEventBus property — typed, confirmed InteropDump ligne 3253
+            _gameEventBus = evt.NativeUniverse?.gameEventBus;
+            _log.Info($"\u2705 GameContext initialized \u2014 faction={evt.NativePlayerFaction?.GetType().Name}");
         }
 
         /// <summary>
@@ -166,26 +160,13 @@ namespace PerAspera.GameAPI.Commands.Yaml
                     ? action.Arguments.ToArray()
                     : Array.Empty<string>();
 
-                // Resolve TextAction type once
-                _textActionType ??= ReflectionHelpers.FindType("TextAction");
-                if (_textActionType == null)
-                {
-                    _log.Warning($"⚠️ TextAction type not found for '{action.Command}', falling back to console");
-                    return ExecuteViaConsole(action);
-                }
 
-                // Create native TextAction(string command, string[] arguments)
-                object? nativeTextAction = Activator.CreateInstance(_textActionType, action.Command, args);
-                if (nativeTextAction == null)
-                {
-                    _log.Warning($"⚠️ TextAction instantiation failed for '{action.Command}', falling back to console");
-                    return ExecuteViaConsole(action);
-                }
-
-                // Set optional fields via reflection
+                // TextAction(string command, [Optional] Il2CppStringArray) — typed ctor, no RS0030
+                var nativeTextAction = new TextAction(action.Command);
+                // daysDelay / showInFrontend : typed properties on the interop proxy
                 if (action.DaysDelay > 0f)
-                    _textActionType.GetField("daysDelay")?.SetValue(nativeTextAction, action.DaysDelay);
-                _textActionType.GetField("showInFrontend")?.SetValue(nativeTextAction, action.ShowInFrontend);
+                    nativeTextAction.daysDelay = action.DaysDelay;
+                nativeTextAction.showInFrontend = action.ShowInFrontend;
 
                 // Dispatch via InteractionManager
                 if (DispatchNativeTextAction(nativeTextAction))
@@ -212,38 +193,18 @@ namespace PerAspera.GameAPI.Commands.Yaml
         {
             try
             {
-                // Resolve Console type once
-                _consoleType ??= ReflectionHelpers.FindType("Console");
-                if (_consoleType == null)
-                {
-                    _log.Error($"❌ [Console] Console type not found for '{action.Command}'");
-                    return false;
-                }
-
-                // Get singleton instance
-                var instanceProp = _consoleType.GetProperty(
-                    "instance",
-                    BindingFlags.Static | BindingFlags.Public);
-                var consoleInstance = instanceProp?.GetValue(null);
+                // Console.instance : public static Console — typed, confirmed InteropDump ligne 1279
+                // Console.ExecuteCommandString(string) : public void — typed, ligne 1659
+                var consoleInstance = Console.instance;
                 if (consoleInstance == null)
                 {
                     _log.Error($"❌ [Console] Console.instance is null for '{action.Command}'");
                     return false;
                 }
 
-                // Get ExecuteCommandString method
-                var execMethod = _consoleType.GetMethod(
-                    "ExecuteCommandString",
-                    BindingFlags.Public | BindingFlags.Instance);
-                if (execMethod == null)
-                {
-                    _log.Error($"❌ [Console] ExecuteCommandString method not found");
-                    return false;
-                }
-
                 string commandStr = BuildConsoleCommandString(action);
                 _log.Debug($"[Console] Sending: {commandStr}");
-                execMethod.Invoke(consoleInstance, new object[] { commandStr });
+                consoleInstance.ExecuteCommandString(commandStr);
                 _log.Info($"✅ [Console] '{commandStr}' executed");
                 return true;
             }
@@ -281,7 +242,7 @@ namespace PerAspera.GameAPI.Commands.Yaml
         /// Uses stored player faction + gameEventBus — set via Initialize().
         /// Selects the 4-param static overload to avoid AmbiguousMatchException.
         /// </summary>
-        private static bool DispatchNativeTextAction(object nativeTextAction)
+        private static bool DispatchNativeTextAction(TextAction nativeTextAction)
         {
             if (_playerFaction == null || _gameEventBus == null)
             {
@@ -291,55 +252,9 @@ namespace PerAspera.GameAPI.Commands.Yaml
 
             try
             {
-                _interactionManagerType ??= ReflectionHelpers.FindType("InteractionManager");
-                if (_interactionManagerType == null)
-                {
-                    _log.Warning("InteractionManager type not found");
-                    return false;
-                }
-
-                // IL2CPP interface cast: Faction → IHandleable via native pointer.
-                // Reflection.Invoke rejects passing Faction where IHandleable is expected,
-                // so we reconstruct IHandleable from the Faction's Il2Cpp pointer.
-                var iHandleableType = ReflectionHelpers.FindType("IHandleable");
-                if (iHandleableType == null)
-                {
-                    _log.Warning("IHandleable type not found");
-                    return false;
-                }
-                var factionBase = _playerFaction as Il2CppObjectBase;
-                if (factionBase == null)
-                {
-                    _log.Warning("_playerFaction is not an Il2CppObjectBase");
-                    return false;
-                }
-                var iHandleableInstance = Activator.CreateInstance(iHandleableType, factionBase.Pointer);
-
-                // Use GetMethods() + param-count filter to avoid AmbiguousMatchException.
-                // Target: static DispatchAction(IHandleable, GameEventBus, TextAction, string) — 4 params.
-                MethodInfo? dispatchMethod = null;
-                foreach (var m in _interactionManagerType.GetMethods(BindingFlags.Public | BindingFlags.Static))
-                {
-                    if (m.Name == "DispatchAction" && m.GetParameters().Length == 4)
-                    {
-                        dispatchMethod = m;
-                        break;
-                    }
-                }
-
-                if (dispatchMethod == null)
-                {
-                    _log.Warning("InteractionManager.DispatchAction(4-param static) not found");
-                    return false;
-                }
-
-                dispatchMethod.Invoke(null, new object[] { iHandleableInstance, _gameEventBus, nativeTextAction, "mod" });
-                return true;
-            }
-            catch (System.Reflection.TargetInvocationException)
-            {
-                // IL2CPP marshaling exception on return path — the dispatch already happened.
-                // Unity logs "Dispatch Action ..." before this exception, confirming success.
+                // InteractionManager.DispatchAction(IHandleable, GameEventBus, TextAction, string)
+                // public static void — typed, confirmed InteropDump ligne 766. Zero reflection.
+                InteractionManager.DispatchAction(_playerFaction, _gameEventBus, nativeTextAction, "mod");
                 return true;
             }
             catch (Exception ex)

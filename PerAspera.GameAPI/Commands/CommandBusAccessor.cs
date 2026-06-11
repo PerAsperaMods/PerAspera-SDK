@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI;
 using PerAspera.GameAPI.Events.SDK;
 
@@ -184,57 +185,12 @@ namespace PerAspera.GameAPI.Commands
         /// </summary>
         private static object? GetCommandBusInstance()
         {
-            if (_commandBusType == null)
-            {
-                return null;
-            }
-
             try
             {
-                // Try to get singleton instance
-                var instanceProperty = _commandBusType.GetProperty("Instance", 
-                    BindingFlags.Public | BindingFlags.Static);
-
-                if (instanceProperty != null)
-                {
-                    var instance = instanceProperty.GetValue(null);
-                    if (instance != null)
-                    {
-                        _log.Debug("Got command bus instance from Instance property");
-                        return instance;
-                    }
-                }
-
-                // Try alternative singleton patterns
-                var currentProperty = _commandBusType.GetProperty("Current",
-                    BindingFlags.Public | BindingFlags.Static);
-
-                if (currentProperty != null)
-                {
-                    var instance = currentProperty.GetValue(null);
-                    if (instance != null)
-                    {
-                        _log.Debug("Got command bus instance from Current property");
-                        return instance;
-                    }
-                }
-
-                // Try to find instance field
-                var instanceField = _commandBusType.GetField("_instance",
-                    BindingFlags.NonPublic | BindingFlags.Static);
-
-                if (instanceField != null)
-                {
-                    var instance = instanceField.GetValue(null);
-                    if (instance != null)
-                    {
-                        _log.Debug("Got command bus instance from _instance field");
-                        return instance;
-                    }
-                }
-
-                _log.Debug("Command bus instance not yet available");
-                return null;
+                // BaseGame.self + GetMemberValue \u2014 RS0030-exempt (typed + Core)
+                var bg = BaseGame.self;
+                return bg?.GetMemberValue<object>("commandBus")
+                    ?? bg?.GetMemberValue<object>("CommandBus");
             }
             catch (Exception ex)
             {

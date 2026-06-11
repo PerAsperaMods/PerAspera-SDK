@@ -55,27 +55,6 @@ namespace PerAspera.GameAPI.Events.Helpers
             return operation.Equals("Remove", StringComparison.OrdinalIgnoreCase);
         }
         
-        // ==================== EVENT FILTERING ====================
-        
-        /// <summary>
-        /// Create a filter function for specific building types
-        /// </summary>
-        public static Func<object, bool> BuildingTypeFilter(params string[] buildingTypes)
-        {
-            return (eventData) =>
-            {
-                if (TryGetEventData<BuildingSpawnedNativeEvent>(eventData, out var building))
-                {
-                    foreach (var type in buildingTypes)
-                    {
-                        if (building.BuildingTypeKey.Equals(type, StringComparison.OrdinalIgnoreCase))
-                            return true;
-                    }
-                }
-                return false;
-            };
-        }
-        
         // ==================== LOGGING HELPERS ====================
         
         /// <summary>

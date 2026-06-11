@@ -395,6 +395,64 @@ namespace PerAspera.GameAPI.Events.SDK
     }
 
     /// <summary>
+    /// Fires once per session when a game session begins — new game or loaded save.
+    /// Anchored on <c>GevUniverseNewGameStarted</c> / <c>GevUniverseContinueEndedGame</c> via NativeEventHub.
+    /// Replaces polling <c>BaseGame.alreadyWokeUp</c> and fixes session reset on reload.
+    /// ✅ Use to reset per-session state; subscribe via <c>EnhancedEventBus.SubscribeToGameSessionStarted</c>.
+    /// </summary>
+    /// <example>
+    /// EnhancedEventBus.SubscribeToGameSessionStarted(evt =>
+    ///     LogAspera.Info(evt.IsNewGame ? "Nouvelle partie !" : "Partie chargée !"));
+    /// </example>
+    public class GameSessionStartedEvent : SDKEventBase
+    {
+        public override string EventType => "GameSessionStarted";
+
+        /// <summary>Direct interop access to BaseGame.</summary>
+        public BaseGame NativeBaseGame { get; }
+
+        /// <summary>Direct interop access to Universe (available when the native event fires).</summary>
+        public Universe? NativeUniverse { get; }
+
+        /// <summary>True for a new game, false for a loaded save (<c>GevUniverseContinueEndedGame</c>).</summary>
+        public bool IsNewGame { get; }
+
+        public GameSessionStartedEvent(BaseGame baseGame, Universe? universe, bool isNewGame)
+        {
+            NativeBaseGame = baseGame;
+            NativeUniverse = universe;
+            IsNewGame = isNewGame;
+        }
+    }
+
+    /// <summary>
+    /// Fires once per session on the first frame where <c>canvasRefs.notificationPresenter</c>
+    /// is non-null — the moment the native UI hub is ready for notifications.
+    /// Fixes the class of timing bugs where <c>GameFullyLoadedEvent</c> fires before the UI hub.
+    /// ✅ Use this instead of <c>GameFullyLoadedEvent</c> whenever you need to show native notifications.
+    /// </summary>
+    /// <example>
+    /// EnhancedEventBus.SubscribeToGameUIReady(evt =>
+    ///     GameUI.ShowNotification("UI ready!", NotificationUrgency.Info));
+    /// </example>
+    public class GameUIReadyEvent : SDKEventBase
+    {
+        public override string EventType => "GameUIReady";
+
+        /// <summary>Direct interop access to BaseGame.</summary>
+        public BaseGame NativeBaseGame { get; }
+
+        /// <summary>The native canvas refs — <c>notificationPresenter</c> is guaranteed non-null when this fires.</summary>
+        public GameCanvasReferences CanvasRefs { get; }
+
+        public GameUIReadyEvent(BaseGame baseGame, GameCanvasReferences canvasRefs)
+        {
+            NativeBaseGame = baseGame;
+            CanvasRefs = canvasRefs;
+        }
+    }
+
+    /// <summary>
     /// Event triggered when BaseGame.OnFinishLoading() completes
     /// Fires at the exact moment the game's loading process finishes
     /// ✅ Use this for mods that need to run immediately after game loading

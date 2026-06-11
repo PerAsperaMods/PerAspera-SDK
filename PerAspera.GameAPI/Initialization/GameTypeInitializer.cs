@@ -214,15 +214,13 @@ namespace PerAspera.GameAPI
         {
             try
             {
-                var currentPlanetProperty = universeInstance.GetType().GetProperty("currentPlanet");
-                if (currentPlanetProperty != null)
+                // GetMemberValue — RS0030-exempt (Core)
+                var planet = universeInstance.GetMemberValue<object>("currentPlanet")
+                    ?? universeInstance.GetMemberValue<object>("planet");
+                if (planet != null)
                 {
-                    var planet = currentPlanetProperty.GetValue(universeInstance);
-                    if (planet != null)
-                    {
-                        _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
-                        return planet;
-                    }
+                    _log.Debug("📡 Found currentPlanet via Universe.currentPlanet");
+                    return planet;
                 }
                 return null;
             }

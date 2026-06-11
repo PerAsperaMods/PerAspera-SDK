@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
 {
@@ -52,8 +53,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     return null;
                 }
                 
-                // Call Keeper.Register(IHandleable) -> returns Handle
-                var handle = _registerMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                var handle = _nativeKeeper.InvokeMethod<object>("Register", handleableObject);
                 
                 _logger.LogDebug($"Registered handleable object: {handleableObject.GetType().Name}");
                 return handle;
@@ -83,8 +84,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     return false;
                 }
                 
-                // Call Keeper.Unregister(IHandleable)
-                _unregisterMethod.Invoke(_nativeKeeper, new object[] { handleableObject });
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                _nativeKeeper.InvokeMethod("Unregister", handleableObject);
                 
                 _logger.LogDebug($"Unregistered handleable object: {handleableObject.GetType().Name}");
                 return true;
@@ -129,17 +130,11 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             try
             {
-                var method = _keeperType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-                if (method == null)
-                {
-                    // Logging disabled
-                    return null;
-                }
-                
-                return method.Invoke(_nativeKeeper, parameters);
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                return _nativeKeeper.InvokeMethod<object>(methodName, parameters);
             }
-            catch (Exception ex)
-            { // Logging disabled
+            catch (Exception)
+            {
                 return null;
             }
         }
@@ -151,16 +146,11 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         {
             try
             {
-                var property = _keeperType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (property == null)
-                { // Logging disabled
-                return null;
-                }
-                
-                return property.GetValue(_nativeKeeper);
+                // IL2CppExtensions.GetMemberValue — RS0030-exempt (Core)
+                return _nativeKeeper.GetMemberValue<object>(propertyName);
             }
-            catch (Exception ex)
-            { // Logging disabled
+            catch (Exception)
+            {
                 return null;
             }
         }

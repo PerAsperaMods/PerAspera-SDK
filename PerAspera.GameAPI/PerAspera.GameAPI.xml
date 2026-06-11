@@ -689,14 +689,6 @@
             <param name="cargo">Cargo to check</param>
             <returns>True if building can accept the cargo</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Climate.Domain.Atmosphere.PlanetaryAtmosphere.AcceptCargo(System.Object,Cargo)">
-            <summary>
-            Make a building accept a cargo
-            </summary>
-            <param name="building">Target building object</param>
-            <param name="cargo">Cargo to accept</param>
-            <returns>True if cargo was accepted successfully</returns>
-        </member>
         <member name="M:PerAspera.GameAPI.Climate.Domain.Atmosphere.PlanetaryAtmosphere.FindCargoByResource(System.Object)">
             <summary>
             Find cargo by resource type
@@ -3056,7 +3048,7 @@
         <member name="T:PerAspera.GameAPI.Commands.CustomModifierRegistry">
              <summary>
              Registry for custom YAML enhancement modifier handlers registered by mods.
-             Checked by <see cref="T:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch"/> after native Enable() runs.
+             Checked by <see cref="!:Patches.EnhancementsEnablePatch"/> after native Enable() runs.
             
              Usage mirrors <see cref="T:PerAspera.GameAPI.Commands.CustomCommandRegistry"/>:
               1. Register a handler in your plugin Load().
@@ -3267,7 +3259,7 @@
             Execute any game console command string via Console.instance.ExecuteCommandString.
             </summary>
             <param name="cmd">Full command string, e.g. "BunchOfResources" or "FactionAddResourceDistributed water 500"</param>
-            <returns>true if the command was dispatched; false if Console type/method not found</returns>
+            <returns>true if the command was dispatched; false if Console not ready</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Helpers.ResourceCommandHelper.ExecuteResourceImportCommand(System.String,System.String,System.Single)">
             <summary>
@@ -3574,6 +3566,11 @@
              - command: ShowSpaceportResources
                arguments: []
              </code>
+            
+             MIGRATION 2026-06-10 — réécrit en accès typé via PortProjectWrapper.
+             Élimine ~48 RS0030 (GetProperty/GetValue sur Faction/SpacePortComponent/PortProject/ResourceType/CargoQuantity).
+             Source de vérité : Tools\InteropDump\ScriptsAssembly\Faction.cs (spacePorts),
+             SpacePortComponent.cs (portProject), PortProject.cs (stage/done/developmentResources).
              </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.IModTextAction">
@@ -4667,109 +4664,66 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper">
-            <summary>
-            IL2CPP wrapper for native CommandBase classes with type safety
-            Provides bridge to CommandBase hierarchy (CmdImportResource, CmdUnlockBuilding, etc.)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.#ctor(System.Object)">
-            <summary>
-            Initialize wrapper with native Command instance
-            </summary>
-            <param name="nativeCommand">Native command instance to wrap</param>
+             <summary>
+             Wrapper over native CommandBase instances.
+             All property/method access delegates to IL2CppExtensions (RS0030-exempt in Core),
+             eliminating direct reflection (GetProperty/GetMethod/Invoke) from GameAPI layer.
+            
+             MIGRATION 2026-06-10 - rewrite en delegues IL2CppExtensions.
+             Elimine ~30 RS0030 (GetMethod/GetProperty/Invoke en GameAPI).
+             Source de verite : Tools/InteropDump/ScriptsAssembly/PerAspera.Commands/CommandBase.cs
+               - faction      : virtual Faction
+               - senderFaction: Faction field (writable)
+               - isValid()    : virtual bool
+               - ToTabbedString(): virtual string
+             </summary>
         </member>
         <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.NativeCommand">
-            <summary>
-            Native Command instance (for direct IL2CPP access)
-            </summary>
+            <summary>Native command as object.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.CommandType">
-            <summary>
-            Type of the native command
-            </summary>
+            <summary>Runtime type of the native command. GetType() is not RS0030-banned.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.CommandName">
-            <summary>
-            Command name (derived from type)
-            </summary>
+            <summary>Command name derived from type (strips "Cmd" prefix).</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.IsValid">
             <summary>
-            Call native IsValid() method if available
+            Calls isValid() via IL2CppExtensions.InvokeMethod (RS0030-exempt in Core).
             </summary>
-            <returns>True if command is valid, false otherwise</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetDescription">
             <summary>
-            Get human-readable string representation via ToTabbedString()
+            Returns ToTabbedString() via IL2CppExtensions.InvokeMethod (RS0030-exempt in Core).
             </summary>
-            <returns>Human-readable description of the command</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetFaction">
             <summary>
-            Get Faction property if available
+            Gets faction via IL2CppExtensions.GetMemberValue (RS0030-exempt in Core).
             </summary>
-            <returns>Faction object or null if not available</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.SetFaction(System.Object)">
             <summary>
-            Set Faction property if available
+            Sets senderFaction via IL2CppExtensions.SetMemberValue (RS0030-exempt in Core).
             </summary>
-            <param name="faction">Faction object to set</param>
-            <returns>True if faction was set successfully, false otherwise</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetProperty(System.String)">
             <summary>
-            Get property value by name via reflection
+            Generic property getter via IL2CppExtensions.GetMemberValue (RS0030-exempt in Core).
             </summary>
-            <param name="propertyName">Name of the property to get</param>
-            <returns>Property value or null if not found</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.SetProperty(System.String,System.Object)">
             <summary>
-            Set property value by name via reflection
+            Generic property setter via IL2CppExtensions.SetMemberValue (RS0030-exempt in Core).
             </summary>
-            <param name="propertyName">Name of the property to set</param>
-            <param name="value">Value to set</param>
-            <returns>True if property was set successfully, false otherwise</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.InvokeMethod(System.String,System.Object[])">
             <summary>
-            Invoke method on native command via reflection
+            Generic method invoke via IL2CppExtensions.InvokeMethod (RS0030-exempt in Core).
             </summary>
-            <param name="methodName">Name of the method to invoke</param>
-            <param name="parameters">Method parameters</param>
-            <returns>Method return value or null if method not found or failed</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.IsCommandType(System.String)">
-            <summary>
-            Check if command is a specific type (e.g., "CmdImportResource")
-            </summary>
-            <param name="commandTypeName">Type name to check against</param>
-            <returns>True if command matches the specified type name</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.ValidateCommandType">
-            <summary>
-            Validate that the wrapped object is a command type
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetIsValidMethod">
-            <summary>
-            Get IsValid method via reflection
-            </summary>
-            <returns>IsValid MethodInfo or null if not found</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.GetToTabbedStringMethod">
-            <summary>
-            Get ToTabbedString method via reflection
-            </summary>
-            <returns>ToTabbedString MethodInfo or null if not found</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBaseWrapper.ToString">
-            <summary>
-            Returns string representation of the command
-            </summary>
-            <returns>String representation</returns>
+            <summary>True if the type name matches (case-insensitive). Uses GetType().Name (not RS0030-banned).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Native.IL2CPPInterop.CommandBusWrapper">
             <summary>
@@ -5288,49 +5242,6 @@
             </summary>
             <returns>String with diagnostic information</returns>
         </member>
-        <member name="T:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch">
-             <summary>
-             Harmony Postfix on <c>Enhancements.Enable(EnhancementType, bool)</c>.
-            
-             After the native Enable() runs (which stores all modifier values in the game's
-             internal modifierValues dictionary), this postfix reads the raw modifier strings
-             from the EnhancementType and invokes any registered handler in
-             <see cref="T:PerAspera.GameAPI.Commands.CustomModifierRegistry"/> for each custom modifier key found.
-            
-             This mirrors <see cref="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch"/> for the Commands system:
-             the game's own parsing runs untouched, then we piggyback on top for our custom keys.
-             </summary>
-             <example>
-             <code>
-             # enhancements.yaml
-             enhancement_routing_optimization_1:
-               modifiers:
-                 - "drone_hop_capacity: 1"   # custom key — native ignores it, our handler fires
-                 - "extraction_time: -0.05"  # native key — native handles it, no custom handler needed
-            
-             // Plugin.cs
-             Commands.RegisterModifier("drone_hop_capacity", (name, delta) => {
-                 RoutingPatch.ExtraHopCapacity += (int)delta;
-             });
-             </code>
-             </example>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch.Postfix(System.Object,EnhancementType)">
-            <summary>
-            Postfix: runs after native Enable(). Iterates modifier strings on the enabled
-            EnhancementType and calls registered handlers for custom modifier keys.
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Commands.Patches.EnhancementsEnablePatch.TryParseModifierString(System.String,System.String@,System.Single@)">
-            <summary>
-            Parse a YAML modifier string of the form "key: value" into its components.
-            Handles both integer and float values. Examples:
-              "worker_speed: 0.05"   → ("worker_speed", 0.05f)
-              "building_limit: 50"   → ("building_limit", 50f)
-              "has_feature: true"    → ("has_feature", 1f)
-              "has_feature: false"   → ("has_feature", 0f)
-            </summary>
-        </member>
         <member name="T:PerAspera.GameAPI.Commands.Patches.NativeDispatchInterceptPatch">
              <summary>
              Harmony prefix on InteractionManager.DispatchAction that intercepts any TextAction
@@ -5597,7 +5508,7 @@
             Arguments are space-separated; arguments containing spaces are quoted.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.DispatchNativeTextAction(System.Object)">
+        <member name="M:PerAspera.GameAPI.Commands.Yaml.YamlCommandsExecutor.DispatchNativeTextAction(TextAction)">
             <summary>
             Dispatch a native TextAction through the game's static InteractionManager.DispatchAction.
             Uses stored player faction + gameEventBus — set via Initialize().
@@ -5649,6 +5560,747 @@
             </summary>
             <param name="filePath">Absolute path to the YAML file</param>
             <returns>List of action definitions, or empty list if file not found or parse fails</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.EarthEntityRegistry">
+            <summary>
+            Registre statique des entités terrestres déclarées par les mods.
+            Le SDK lui-même ne livre aucune entité — c'est une responsabilité des mods consommateurs.
+            <para>
+            Cycle de vie typique :
+            <code>
+            // Dans le plugin BepInEx du mod :
+            EarthEntityRegistry.Register(new HeliosCorp());
+            EarthEntityRegistry.Register(new EsaCountry());
+            // ...
+            EarthEntityRegistry.OnRegistered += entity => LogAspera.Info($"Entity: {entity.Id}");
+            </code>
+            </para>
+            </summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Economy.EarthEntityRegistry.OnRegistered">
+            <summary>Déclenché après chaque enregistrement réussi.</summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Economy.EarthEntityRegistry.OnUnregistered">
+            <summary>Déclenché après chaque suppression réussie.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.EarthEntityRegistry.Register(PerAspera.GameAPI.Economy.Models.IEarthEntity)">
+            <summary>
+            Enregistre une entité. Lance <see cref="T:System.ArgumentException"/> si l'Id est déjà pris.
+            </summary>
+            <param name="entity">Entité à enregistrer. Son <c>Id</c> doit être unique.</param>
+            <exception cref="T:System.ArgumentNullException">entity ou entity.Id est null.</exception>
+            <exception cref="T:System.ArgumentException">Un entité avec ce même Id existe déjà.</exception>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.EarthEntityRegistry.Unregister(System.String)">
+            <summary>
+            Supprime une entité par son Id. Retourne false si l'Id est inconnu.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.EarthEntityRegistry.Get(System.String)">
+            <summary>
+            Retourne l'entité correspondant à l'Id, ou null si absente.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.EarthEntityRegistry.All">
+            <summary>
+            Retourne une copie en lecture seule de toutes les entités enregistrées.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.EarthEntityRegistry.Clear">
+            <summary>
+            Vide le registre (utile pour les tests ou le rechargement de save).
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.EarthEntityType">
+            <summary>Types d'entités terrestres (pays, corporations).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.TradeDirection">
+            <summary>Direction d'un échange commercial.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Economy.Models.TradeDirection.MarsToEarth">
+            <summary>Export depuis Mars vers la Terre.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Economy.Models.TradeDirection.EarthToMars">
+            <summary>Import depuis la Terre vers Mars.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.ReputationTier">
+            <summary>
+            Palier de réputation avec une entité terrestre.
+            Les seuils exacts sont configurables via <see cref="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Thresholds"/>.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.IEarthEntity">
+            <summary>
+            Contrat d'une entité terrestre (pays ou corporation) visible par le SDK.
+            Les entités concrètes sont déclarées par les mods consommateurs, jamais par le SDK.
+            </summary>
+            <example>
+            public class HeliosCorp : EarthEntity
+            {
+                public HeliosCorp() : base("corp_helios", "Helios Corp", EarthEntityType.Corporation) { }
+                public override float GetOfferedPrice(string resourceKey) => resourceKey == "resource_iron" ? 1.5f : 1.0f;
+            }
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.Id">
+            <summary>Identifiant stable (slug), ex: "corp_helios", "country_esa".</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.DisplayName">
+            <summary>Nom affiché (localisation à la charge du mod).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.Type">
+            <summary>Type : pays ou corporation.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.Reputation">
+            <summary>Score de réputation de cette entité.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.DemandedResources">
+            <summary>Clés de ressources YAML demandées par cette entité (ex: "resource_iron").</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.IEarthEntity.Budget">
+            <summary>Budget fictif en unité monnaie-mod (non géré par le SDK).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.IEarthEntity.GetOfferedPrice(System.String)">
+            <summary>Prix offert par l'entité pour un achat de cette ressource (unité monnaie/unité).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.EarthEntity">
+            <summary>
+            Implémentation de base d'une entité terrestre.
+            Les mods héritent de cette classe et surchargent <see cref="M:PerAspera.GameAPI.Economy.Models.EarthEntity.GetOfferedPrice(System.String)"/> si nécessaire.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.Id">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.DisplayName">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.Type">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.Reputation">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.DemandedResources">
+            <inheritdoc/>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.EarthEntity.Budget">
+            <inheritdoc/>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.EarthEntity.#ctor(System.String,System.String,PerAspera.GameAPI.Economy.Models.EarthEntityType)">
+            <summary>Initialise l'entité avec ses données de base.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.EarthEntity.GetOfferedPrice(System.String)">
+            <inheritdoc/>
+            <remarks>Par défaut retourne 1.0 (prix neutre). Surcharger pour moduler par ressource.</remarks>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.OrbitalStock">
+             <summary>
+             Registre du stock orbital : ressources collectées par les projets spatiaux
+             en attente d'être achetées par des entités terrestres.
+             <para>
+             Ce stock est géré côté SDK (pas de stock natif "orbital" dans Per Aspera).
+             Alimenté par <c>OrbitalStockService</c> sur <see cref="T:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent"/>.
+             </para>
+             </summary>
+             <example>
+             // Crédit après export
+             orbitalStock.Credit("resource_iron", 500f, "mission_arean_survey");
+            
+             // Débit pour livraison
+             if (!orbitalStock.TryDebit("resource_iron", 100f, "trade_offer_abc"))
+                 return TradeResult.Fail("Stock orbital insuffisant");
+            
+             // Abonnement aux changements
+             orbitalStock.OnChanged += (key, delta, total) =>
+                 LogAspera.Info($"Orbital [{key}] Δ{delta:+0.#;-0.#} → {total}");
+             </example>
+        </member>
+        <member name="E:PerAspera.GameAPI.Economy.Models.OrbitalStock.OnChanged">
+            <summary>
+            Déclenché à chaque modification : (resourceKey, delta, newTotal).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.OrbitalStock.Get(System.String)">
+            <summary>Retourne le stock courant pour une ressource (0 si absente).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.OrbitalStock.Snapshot">
+            <summary>Retourne un snapshot (copie) du stock complet.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.OrbitalStock.Credit(System.String,System.Single,System.String)">
+            <summary>
+            Crédite une ressource dans le stock orbital.
+            </summary>
+            <param name="resourceKey">Clé YAML de la ressource.</param>
+            <param name="amount">Quantité à ajouter (doit être &gt; 0).</param>
+            <param name="source">Source du crédit (ex: nom de projet, pour traçabilité).</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.OrbitalStock.TryDebit(System.String,System.Single,System.String)">
+            <summary>
+            Tente de débiter une ressource. Retourne false si le stock est insuffisant
+            (atomique : rien n'est modifié en cas d'échec).
+            </summary>
+            <param name="resourceKey">Clé YAML de la ressource.</param>
+            <param name="amount">Quantité à retirer (doit être &gt; 0).</param>
+            <param name="reason">Raison du débit (pour traçabilité).</param>
+            <returns>True si le débit a réussi.</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.ReputationDelta">
+            <summary>
+            Enregistre un delta de réputation avec sa raison et son sol.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationDelta.Delta">
+            <summary>Variation appliquée (positive = amélioration, négative = dégradation).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationDelta.Reason">
+            <summary>Raison textuelle du changement (ex: "trade_completed", "twitch_vote").</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationDelta.Sol">
+            <summary>Sol martien au moment de la variation.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.ReputationScore">
+            <summary>
+            Score de réputation d'une entité terrestre, clampé entre -100 et +100.
+            Thread-safe pour la lecture (snapshot + event). Non thread-safe pour <see cref="M:PerAspera.GameAPI.Economy.Models.ReputationScore.Apply(System.Single,System.String,System.Double)"/>.
+            </summary>
+            <example>
+            rep.Apply(+10f, "trade_completed");
+            rep.OnChanged += d => LogAspera.Info($"Rep: {d.Delta:+0.#;-0.#} ({d.Reason})");
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Thresholds">
+            <summary>Seuils de palier (modifiables globalement avant l'init des entités).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Value">
+            <summary>Valeur courante, clampée dans [-100, +100].</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Tier">
+            <summary>Palier calculé depuis <see cref="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Value"/> et <see cref="P:PerAspera.GameAPI.Economy.Models.ReputationScore.Thresholds"/>.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.ReputationScore.History">
+            <summary>Historique des variations (lecture seule).</summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.Economy.Models.ReputationScore.OnChanged">
+            <summary>Déclenché à chaque variation.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.ReputationScore.#ctor(System.Single)">
+            <summary>Construit un score à la valeur initiale donnée (défaut 0 = Neutral).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Models.ReputationScore.Apply(System.Single,System.String,System.Double)">
+            <summary>
+            Applique un delta et notifie les abonnés.
+            </summary>
+            <param name="delta">Variation (+/-). Sera clampé si la valeur résultante dépasse ±100.</param>
+            <param name="reason">Raison textuelle (ex: "trade_completed").</param>
+            <param name="sol">Sol courant (0 si non fourni).</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.TradeOffer">
+            <summary>
+            Offre de commerce émise par une entité terrestre.
+            Immuable une fois créée. Publiée dans <c>TradeService.ActiveOffers</c>.
+            </summary>
+            <example>
+            var offer = new TradeOffer
+            {
+                Id             = Guid.NewGuid().ToString(),
+                EntityId       = "corp_helios",
+                ResourceKey    = "resource_iron",
+                Quantity       = 500f,
+                PricePerUnit   = 1.5f,
+                Direction      = TradeDirection.MarsToEarth,
+                ExpiresOnSol   = currentSol + 10,
+                ReputationDelta = 5f,
+            };
+            tradeService.PostOffer(offer);
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.Id">
+            <summary>Identifiant unique de l'offre.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.EntityId">
+            <summary>Id de l'entité terrestre qui propose cet échange.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.ResourceKey">
+            <summary>Clé YAML de la ressource concernée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.Quantity">
+            <summary>Quantité (en unités du jeu).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.PricePerUnit">
+            <summary>Prix par unité (en unité monnaie-mod).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.Direction">
+            <summary>Direction de l'échange.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.ExpiresOnSol">
+            <summary>Sol d'expiration de l'offre.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeOffer.ReputationDelta">
+            <summary>Impact de réputation si l'offre est acceptée.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Models.TradeTransaction">
+            <summary>
+            Transaction conclue, résultat de l'acceptation d'une <see cref="T:PerAspera.GameAPI.Economy.Models.TradeOffer"/>.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.Id">
+            <summary>Identifiant unique.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.Sol">
+            <summary>Sol martien de la transaction.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.EntityId">
+            <summary>Id de l'entité terrestre impliquée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.ResourceKey">
+            <summary>Clé YAML de la ressource.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.Quantity">
+            <summary>Quantité échangée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.PricePerUnit">
+            <summary>Prix par unité au moment de la transaction.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.Direction">
+            <summary>Direction de l'échange.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Models.TradeTransaction.ReputationDeltaApplied">
+            <summary>Delta de réputation appliqué lors de la transaction.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.IncidentTrigger">
+            <summary>
+            Enregistrement d'un déclencheur d'incident diplomatique.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.IncidentTrigger.Tier">
+            <summary>Palier qui déclenche l'incident.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.IncidentTrigger.OnEnter">
+            <summary>True = déclencher à l'entrée dans le palier, False = à la sortie.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.IncidentTrigger.Fired">
+            <summary>True si déjà déclenché pour ce palier (anti-spam).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.DiplomacyService">
+            <summary>
+            Service de gestion des relations diplomatiques avec les entités terrestres.
+            <para>Fonctions :</para>
+            <list type="bullet">
+              <item><description>Appliquer des deltas de réputation + émettre <see cref="T:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent"/>.</description></item>
+              <item><description>Déclencher des incidents (<see cref="T:PerAspera.GameAPI.Events.SDK.DiplomaticIncidentEvent"/>) sur changement de palier.</description></item>
+              <item><description>Miroir du score de réputation dans le blackboard principal du jeu
+              (<c>main.rep_{entityId}</c>) pour que les règles YAML natives déclenchent quêtes/embargos.</description></item>
+            </list>
+            <code>
+            var diplomacy = new DiplomacyService();
+            diplomacy.ApplyReputationDelta("corp_helios", +10f, "trade_completed", currentSol);
+            diplomacy.RegisterIncidentTrigger("embargo_helios", "corp_helios", ReputationTier.Hostile);
+            diplomacy.MirrorToBlackboard("corp_helios");  // main.rep_corp_helios = valeur
+            </code>
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.DiplomacyService.ApplyReputationDelta(System.String,System.Single,System.String,System.Double)">
+            <summary>
+            Applique un delta de réputation à une entité enregistrée.
+            Émet <see cref="T:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent"/> et, si le palier change, vérifie les incidents.
+            </summary>
+            <param name="entityId">Id de l'entité terrestre.</param>
+            <param name="delta">Variation (+/-).</param>
+            <param name="reason">Raison textuelle (ex: "trade_completed", "twitch_vote").</param>
+            <param name="sol">Sol courant (0 si non fourni).</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.DiplomacyService.RegisterIncidentTrigger(System.String,System.String,PerAspera.GameAPI.Economy.Models.ReputationTier,System.Boolean)">
+            <summary>
+            Enregistre un déclencheur d'incident diplomatique sur changement de palier.
+            </summary>
+            <param name="incidentKey">Clé de l'incident (ex: "embargo_helios").</param>
+            <param name="entityId">Entité concernée.</param>
+            <param name="tier">Palier qui déclenche l'incident.</param>
+            <param name="onEnter">True = entrer dans le palier, False = sortir.</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.DiplomacyService.MirrorToBlackboard(System.String,System.String)">
+            <summary>
+            Active le miroir de réputation d'une entité dans le blackboard principal du jeu.
+            La variable <c>main.{blackboardKeyPrefix}{entityId}</c> = valeur float ±100
+            est mise à jour à chaque changement de réputation.
+            <para>Cela permet aux Criterion YAML natifs de déclencher des quêtes/embargos :
+            <c>main.rep_corp_helios &lt; -50 → mission_embargo_helios</c>.</para>
+            </summary>
+            <param name="entityId">Id de l'entité à mirrorer.</param>
+            <param name="blackboardKeyPrefix">Préfixe de la clé blackboard (défaut "rep_").</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.DiplomacyService.UnmirrorFromBlackboard(System.String)">
+            <summary>Désactive le miroir pour une entité.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig">
+            <summary>
+            Configuration du simulateur de marché terrestre.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.PriceVolatility">
+            <summary>Volatilité des prix (0 = stable, 1 = très volatile). Défaut 0.15.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.MinOffersPerSolPerEntity">
+            <summary>Nombre d'offres générées par sol (par entité). Défaut 0–2.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.MaxOffersPerSolPerEntity">
+            <summary>Maximum d'offres générées par sol par entité. Défaut 2.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.OfferLifetimeSols">
+            <summary>Durée de vie d'une offre en sols. Défaut 10.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.TierPriceMultipliers">
+            <summary>Multiplicateur de prix selon le palier de réputation (Hostile → Allied).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig.Seed">
+            <summary>
+            Seed pour la génération reproductible des offres (derive from initial sol to be save-stable).
+            Si 0, utilise le sol courant comme seed.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.EarthMarketSimulator">
+            <summary>
+            Simule le marché terrestre : génère des offres de commerce à chaque sol
+            en fonction des entités enregistrées, de leur réputation et d'une marche aléatoire des prix.
+            <para>
+            Brancher sur <c>EnhancedEventBus.Subscribe("MartianDayPassed", simulator.OnSolTick)</c>.
+            </para>
+            <para>
+            Reproductibilité : la seed est dérivée du sol pour garantir les mêmes offres
+            après un save/load au même sol.
+            </para>
+            <code>
+            var sim = new EarthMarketSimulator(tradeService, new MarketSimulatorConfig { Seed = 42 });
+            EnhancedEventBus.Subscribe("MartianDayPassed", sim.OnSolTick);
+            </code>
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.EarthMarketSimulator.Config">
+            <summary>Config courante (lecture seule).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.EarthMarketSimulator.#ctor(PerAspera.GameAPI.Economy.Services.TradeService,PerAspera.GameAPI.Economy.Services.MarketSimulatorConfig)">
+            <summary>
+            Initialise le simulateur.
+            </summary>
+            <param name="tradeService">Service de commerce auquel les offres générées seront postées.</param>
+            <param name="config">Configuration (optionnel — utilise les valeurs par défaut si null).</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.EarthMarketSimulator.OnSolTick(System.Object)">
+            <summary>
+            Handler à brancher sur <c>EnhancedEventBus.Subscribe("MartianDayPassed", ...)</c>.
+            Génère les offres pour ce sol et purge les offres expirées (via TradeService.Tick).
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.OrbitalStockService">
+            <summary>
+            Service SDK qui maintient le stock orbital à partir des projets spatiaux complétés.
+            <para>Principe :</para>
+            <list type="bullet">
+              <item>Les mods déclarent quels projets sont des exports orbitaux via <see cref="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.RegisterExportProject(System.String)"/>.</item>
+              <item>À chaque <see cref="T:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent"/>, si le projet est enregistré,
+              ses ressources collectées sont créditées dans <see cref="P:PerAspera.GameAPI.Economy.Services.OrbitalStockService.Stock"/>.</item>
+              <item>À chaque <see cref="T:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent"/>, un log d'avertissement
+              est émis — les ressources en attente ne sont pas créditées.</item>
+            </list>
+            <para>Usage :</para>
+            <code>
+            var service = new OrbitalStockService();
+            service.RegisterExportProject("mission_arean_survey");
+            // Brancher sur les events natifs (SpaceProjectEventPatchingService doit être actif) :
+            EnhancedEventBus.Subscribe(SpecialProjectCompletedNativeEvent.Key, service.OnProjectCompleted);
+            EnhancedEventBus.Subscribe(PortProjectCancelledNativeEvent.Key,    service.OnProjectCancelled);
+            </code>
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.OrbitalStockService.Stock">
+            <summary>Stock orbital géré par ce service.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.RegisterExportProject(System.String)">
+            <summary>
+            Déclare qu'un projet spécial YAML est un export orbital.
+            À sa complétion, ses ressources collectées créditeront <see cref="P:PerAspera.GameAPI.Economy.Services.OrbitalStockService.Stock"/>.
+            </summary>
+            <param name="projectKey"><c>SpecialProjectType.name</c> dans le YAML du jeu.</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.UnregisterExportProject(System.String)">
+            <summary>Retire un projet de la liste des exports.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.IsExportProject(System.String)">
+            <summary>True si le projet est déclaré comme export orbital.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.OnProjectCompleted(System.Object)">
+            <summary>
+            Handler pour <see cref="F:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent.Key"/>.
+            À brancher via <c>EnhancedEventBus.Subscribe</c>.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.OrbitalStockService.OnProjectCancelled(System.Object)">
+            <summary>
+            Handler pour <see cref="F:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent.Key"/>.
+            À brancher via <c>EnhancedEventBus.Subscribe</c>.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.ReputationEffectsBinder">
+            <summary>
+            Lie les paliers de réputation à des <see cref="T:PerAspera.GameAPI.Overrides.Models.GetterOverride`1"/> du jeu.
+            <para>
+            Quand la réputation d'une entité change de palier, le binder active/désactive
+            ou met à jour des overrides enregistrés dans <see cref="T:PerAspera.GameAPI.Overrides.Registry.GetterOverrideRegistry"/>.
+            </para>
+            <para>
+            Override supporté confirmé dans le dump interop :<br/>
+            <c>Faction.GetSpaceProjectResourceCostDivisor()</c> — divise le coût des ressources
+            de projets spatiaux. Valeur 1.0 = pas d'effet, 2.0 = moitié prix, 0.5 = double prix.
+            </para>
+            <para>
+            Pour chaque entité mirrorée, un override distinct est enregistré avec la clé
+            <c>Faction.GetSpaceProjectResourceCostDivisor_{entityId}</c> afin d'éviter les conflits.
+            </para>
+            <code>
+            var binder = new ReputationEffectsBinder();
+            // Lier l'entité "corp_helios" à l'override de coût d'import
+            binder.BindEntity("corp_helios", new float[] { 0.5f, 0.75f, 1.0f, 1.5f, 2.0f });
+            // S'abonner aux changements :
+            EnhancedEventBus.Subscribe(ReputationChangedEvent.Key, binder.OnReputationChanged);
+            </code>
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.ReputationEffectsBinder.BindEntity(System.String,System.Single[])">
+            <summary>
+            Lie une entité terrestre à l'override <c>Faction.GetSpaceProjectResourceCostDivisor</c>.
+            À chaque changement de palier, le diviseur est mis à jour selon <paramref name="tierDivisors"/>.
+            </summary>
+            <param name="entityId">Id de l'entité (doit être dans <see cref="T:PerAspera.GameAPI.Economy.EarthEntityRegistry"/>).</param>
+            <param name="tierDivisors">
+            Tableau de 5 valeurs (Hostile→Allied). Défaut si null :
+            0.5 (Hostile), 0.75 (Wary), 1.0 (Neutral), 1.5 (Friendly), 2.0 (Allied).
+            </param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.ReputationEffectsBinder.UnbindEntity(System.String)">
+            <summary>Retire le binding et l'override pour une entité.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.ReputationEffectsBinder.OnReputationChanged(System.Object)">
+            <summary>
+            Handler à brancher sur <c>EnhancedEventBus.Subscribe(ReputationChangedEvent.Key, ...)</c>.
+            Met à jour l'override si l'entité est liée et que le palier a changé.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.TradeResult">
+            <summary>Résultat d'une tentative d'acceptation d'offre commerciale.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.TradeResult.Success">
+            <summary>True si la transaction a été effectuée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.TradeResult.FailureReason">
+            <summary>Raison de l'échec (null si succès).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.TradeResult.Transaction">
+            <summary>Détails de la transaction (null si échec).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeResult.Ok(PerAspera.GameAPI.Economy.Models.TradeTransaction)">
+            <summary>Crée un résultat de succès.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeResult.Fail(System.String)">
+            <summary>Crée un résultat d'échec.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Services.TradeService">
+            <summary>
+            Service de commerce entre Mars et les entités terrestres.
+            <para>Gère les offres actives, leur expiration, et l'exécution des transactions.</para>
+            <para>Dépendances :</para>
+            <list type="bullet">
+              <item><description><see cref="T:PerAspera.GameAPI.Economy.Services.OrbitalStockService"/> — pour débiter le stock orbital (ventes).</description></item>
+              <item><description><see cref="T:PerAspera.GameAPI.Economy.Services.DiplomacyService"/> — pour appliquer les deltas de réputation.</description></item>
+              <item><description><see cref="T:PerAspera.GameAPI.Wrappers.FactionWrapper"/> joueur — pour créditer/débiter la monnaie.</description></item>
+            </list>
+            <para>La clé monnaie (<c>moneyResourceKey</c>) est fournie par le mod — le SDK ne définit
+            aucune ressource monnaie.</para>
+            <code>
+            var trade = new TradeService(orbitalService, diplomacy, "resource_terrian_credits");
+            trade.PostOffer(new TradeOffer { EntityId="corp_helios", ResourceKey="resource_iron", ... });
+            var result = trade.Accept(offerId, () => FactionWrapper.GetPlayerFaction());
+            </code>
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeService.#ctor(PerAspera.GameAPI.Economy.Services.OrbitalStockService,PerAspera.GameAPI.Economy.Services.DiplomacyService,System.String)">
+            <summary>
+            Initialise le service.
+            </summary>
+            <param name="orbital">Service de stock orbital (pour débits ventes).</param>
+            <param name="diplomacy">Service de diplomatie (pour réputation).</param>
+            <param name="moneyResourceKey">Clé YAML de la ressource monnaie du mod.</param>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Services.TradeService.ActiveOffers">
+            <summary>Retourne la liste des offres actives (non expirées).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeService.PostOffer(PerAspera.GameAPI.Economy.Models.TradeOffer)">
+            <summary>
+            Publie une offre commerciale. Si une offre avec le même Id existe déjà, elle est écrasée.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeService.RetractOffer(System.String)">
+            <summary>Retire une offre de la liste active (ex : expirée manuellement).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeService.Accept(System.String,System.Func{PerAspera.GameAPI.Wrappers.FactionWrapper},System.Double,System.Double)">
+            <summary>
+            Accepte une offre et exécute la transaction.
+            <para>Vente (Mars→Terre) : débite le stock orbital + crédite la monnaie au joueur.</para>
+            <para>Achat (Terre→Mars) : débite la monnaie du joueur + enregistre une livraison différée.</para>
+            </summary>
+            <param name="offerId">Id de l'offre à accepter.</param>
+            <param name="getPlayerFaction">Callback qui retourne le wrapper faction joueur courant.</param>
+            <param name="currentSol">Sol courant (pour les délais de livraison).</param>
+            <param name="deliveryDelaySols">Nombre de sols avant livraison (achat uniquement).</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Services.TradeService.Tick(System.Double,System.Func{PerAspera.GameAPI.Wrappers.FactionWrapper})">
+            <summary>
+            À appeler à chaque sol (brancher sur <c>MartianDayEventData</c> ou <c>OnDaysPassed</c>).
+            Traite les expirations d'offres et les livraisons différées.
+            </summary>
+            <param name="currentSol">Sol courant.</param>
+            <param name="getPlayerFaction">Callback faction joueur (pour les livraisons).</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper">
+            <summary>
+            Wrapper typé pour <c>PortProject</c> (pipeline orbital d'un SpacePortComponent).
+            Expose les données du projet en cours : stage courant, ressources collectées, état.
+            <para>Membres vérifiés dans <c>Tools\InteropDump\ScriptsAssembly\PortProject.cs</c> :
+            <c>stageKey</c> (string field), <c>stageCompletionFactor</c> (float), <c>done</c> (bool),
+            <c>developmentResources</c> (Dictionary&lt;ResourceType, CargoQuantity&gt;),
+            <c>specialProject.type.name</c> (string).</para>
+            </summary>
+            <example>
+            var wrapper = new PortProjectWrapper(portProject);
+            if (wrapper.Done)
+                foreach (var (res, qty) in wrapper.GetDevelopmentResources())
+                    OrbitalStock.Credit(res, qty, wrapper.ProjectKey);
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.NativePortProject">
+            <summary>Proxy interop typé exposé (accès bas-niveau si besoin).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.#ctor(PortProject)">
+            <summary>Construit un wrapper autour d'un proxy interop typé.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.#ctor(System.Object)">
+            <summary>Construit un wrapper depuis un object non typé (compatibilité).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.ProjectKey">
+            <summary>Clé du projet spatial (<c>SpecialProject.type.name</c>). Vide si non disponible.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.StageKey">
+            <summary>Clé du stage courant (<c>PortProject._stageKey</c>). Ex: "gather", "trade", "complete".</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.StageCompletionFactor">
+            <summary>Progression du stage courant (0–1).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.Done">
+            <summary>True si le projet est terminé (<c>PortProject.done</c>).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.Removed">
+            <summary>True si le projet a été retiré (<c>PortProject.removed</c>).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.ResourcesMet">
+            <summary>True si les ressources requises ont été collectées (<c>PortProject.resourcesMet</c>).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.GetDevelopmentResources">
+            <summary>
+            Retourne le snapshot des ressources collectées par ce port.
+            Clés = <c>ResourceType.name</c> (ex: "resource_iron"), valeurs en unités (<c>CargoQuantity.ToFloat()</c>).
+            Retourne un dictionnaire vide si le projet est null ou sans ressources.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Economy.Wrappers.PortProjectWrapper.FromNative(PortProject)">
+            <summary>Factory — retourne null si le projet natif est null.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Enhancements.CustomModifierRegistry">
+            <summary>
+            Registry for custom enhancement modifier handlers.
+            Mods register handlers for YAML modifier keys unknown to the native game.
+            When <see cref="T:PerAspera.GameAPI.Enhancements.EnhancementsEnablePatch"/> fires on <c>Enhancements.Enable()</c>,
+            it iterates the <c>EnhancementType.modifiers</c> strings, and for each key found here
+            invokes the registered delegate with the parsed float value.
+            </summary>
+            <example>
+            // In your plugin Load():
+            CustomModifierRegistry.Register("drone_hop_bonus", delta =>
+            {
+                RoutingPatch.ExtraHopCapacity += (int)delta;
+                LogAspera.Info($"[MkAspera] drone_hop_bonus applied: {delta}");
+            });
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.RegisteredKeys">
+            <summary>All currently registered modifier keys (case-insensitive).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.Register(System.String,System.Action{System.Single})">
+            <summary>
+            Register a handler for a custom modifier key.
+            Replaces any existing handler for the same key.
+            </summary>
+            <param name="key">Modifier key as declared in YAML (case-insensitive).</param>
+            <param name="handler">Delegate called with the parsed float value when an enhancement bearing this key is enabled.</param>
+            <example>
+            CustomModifierRegistry.Register("ami_routing_modifier", delta =>
+                RoutingPatch.ExtraHopCapacity += (int)delta);
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.Unregister(System.String)">
+            <summary>Removes the handler for <paramref name="key"/>, if any.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.IsRegistered(System.String)">
+            <summary>Returns true if a handler is registered for <paramref name="key"/>.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.TryInvoke(System.String,System.Single)">
+            <summary>
+            Attempt to invoke the handler registered for <paramref name="key"/>.
+            </summary>
+            <returns>True if a handler was found and invoked, false if key is unknown.</returns>
+            <example>
+            // Used internally by EnhancementsEnablePatch — you normally don't call this directly.
+            bool handled = CustomModifierRegistry.TryInvoke("drone_hop_bonus", 2f);
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.CustomModifierRegistry.Clear">
+            <summary>Removes all registered handlers. Intended for tests or plugin teardown.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Enhancements.EnhancementsEnablePatch">
+             <summary>
+             Harmony Postfix on <c>Enhancements.Enable(EnhancementType, bool)</c>.
+             After the native system applies its known modifiers, this patch iterates
+             <c>EnhancementType.modifiers</c> (typed IL2CPP field — <c>List&lt;string&gt;</c>)
+             and dispatches unknown keys to <see cref="T:PerAspera.GameAPI.Enhancements.CustomModifierRegistry"/>.
+            
+             Native keys (handled automatically by the game) are silently skipped — only keys
+             with a registered handler in <see cref="T:PerAspera.GameAPI.Enhancements.CustomModifierRegistry"/> produce a callback.
+             </summary>
+             <example>
+             // In your plugin Awake() / Load():
+             EnhancementsEnablePatch.Apply(harmony);
+            
+             // Then register handlers:
+             CustomModifierRegistry.Register("drone_hop_bonus", delta =>
+                 RoutingPatch.ExtraHopCapacity += (int)delta);
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.EnhancementsEnablePatch.Apply(HarmonyLib.Harmony)">
+            <summary>
+            Apply this patch manually against a Harmony instance.
+            Call once from your plugin's initialization — safe to call multiple times
+            (subsequent calls are no-ops because Harmony deduplicates patches).
+            </summary>
+            <example>
+            var harmony = new Harmony("com.mymod.id");
+            EnhancementsEnablePatch.Apply(harmony);
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Enhancements.EnhancementsEnablePatch.Postfix(EnhancementType)">
+            <summary>
+            Postfix — runs after the native Enable() has finished.
+            Reads the typed <c>EnhancementType.modifiers</c> field and dispatches
+            any modifier key registered in <see cref="T:PerAspera.GameAPI.Enhancements.CustomModifierRegistry"/>.
+            </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Constants.NativeEventConstants">
             <summary>
@@ -5862,6 +6514,12 @@
         </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameCommandsReady">
             <summary>Event: Game first Update tick — InteractionManager and Console are guaranteed ready. Use this to dispatch game commands from YAML.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameSessionStarted">
+            <summary>Event: Game session started (new game or loaded save) — anchored on GevUniverseNewGameStarted/ContinueEndedGame via NativeEventHub.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.GameUIReady">
+            <summary>Event: canvasRefs.notificationPresenter is ready — use this to show native notifications (GameFullyLoadedEvent timing fix).</summary>
         </member>
         <member name="F:PerAspera.GameAPI.Events.Constants.SDKEventConstants.BlackboardInitialized">
             <summary>Event: Blackboard system initialized (variable storage ready)</summary>
@@ -6147,14 +6805,7 @@
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeSDKBasedGameDetection">
             <summary>
-            Initialize SDK-based game state detection (replacing problematic Harmony patches)
-            Uses existing SDK wrapper system for clean game initialization detection
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameInitializationPatches">
-            <summary>
-            DEPRECATED: Apply Harmony patches for game initialization detection
-            Replaced by SDK-based detection for better reliability
+            Initialize SDK-based game state detection.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeWrapperFactory">
@@ -6169,33 +6820,23 @@
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.InitializeGameHubDetector">
             <summary>
-            Initialize native event subscriptions for GameHub detection
-            Much more reliable than patches - listens to actual game events
+            Initialize game lifecycle detection via NativeEventHub + Harmony patches.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyBaseGamePatches">
             <summary>
-            Apply BaseGame Harmony patches for OnLoadFinished event
+            Apply BaseGame Harmony patches and wire NativeEventHub lifecycle subscriptions.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.WireSessionLifecycleEvents">
+            <summary>
+            Subscribe to native session lifecycle events via NativeEventHub.
+            Replaces dead EnhancedEventBus.Subscribe&lt;UniverseNewGameStartedNativeEvent&gt; subscriptions.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.ApplyGameHubPatches">
             <summary>
             Apply GameHub Harmony patches for immediate detection (works in menu)
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.OnGameStarted(PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent)">
-            <summary>
-            Handle new game started - BaseGame should be accessible now
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.OnGameLoaded(PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent)">
-            <summary>
-            Handle game loaded - BaseGame should be accessible now
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.EmitGameHubInitializedEvent(System.String)">
-            <summary>
-            Emit GameHubInitializedEvent when BaseGame is confirmed accessible
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.EventsAutoStartPlugin.Unload">
@@ -6295,11 +6936,6 @@
         <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsResourceRemoval(System.String)">
             <summary>
             Check if resource operation is a removal
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.BuildingTypeFilter(System.String[])">
-            <summary>
-            Create a filter function for specific building types
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Helpers.EventHelpers.IsSignificantClimateChange(PerAspera.GameAPI.Events.Data.ClimateEventData,System.Single)">
@@ -6428,6 +7064,21 @@
             ✅ Use this for planet-level initialization hooks
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameSessionStarted(System.Action{PerAspera.GameAPI.Events.SDK.GameSessionStartedEvent})">
+            <summary>
+            Subscribe to GameSessionStarted event.
+            Fires once per session when a new game or loaded save begins, anchored on the native
+            <c>GevUniverseNewGameStarted</c> / <c>GevUniverseContinueEndedGame</c> events.
+            ✅ Replaces <c>BaseGame.alreadyWokeUp</c> polling; reliably resets on every session.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToGameUIReady(System.Action{PerAspera.GameAPI.Events.SDK.GameUIReadyEvent})">
+            <summary>
+            Subscribe to GameUIReady event.
+            Fires once per session on the first frame where <c>canvasRefs.notificationPresenter</c> is non-null.
+            ✅ Use this instead of <c>GameFullyLoadedEvent</c> when you need to show native notifications.
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.SubscribeToOnLoadFinished(System.Action{PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent})">
             <summary>
             Subscribe to OnLoadFinished event
@@ -6477,8 +7128,9 @@
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Subscribe(System.String,System.Action{System.Object})">
             <summary>
-            Subscribe to a named event with object-based handler
-            For compatibility with string-based event subscriptions
+            Subscribe to a named event with object-based handler.
+            The handler fires whenever <c>Publish(eventType, data)</c> is called with the same string key,
+            regardless of the data type.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Unsubscribe(System.String,System.Action{System.Object})">
@@ -6504,14 +7156,14 @@
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.Publish(System.String,System.Object)">
             <summary>
-            Publish an event to all registered handlers
+            Publish an event to all registered handlers — dispatches to both type-keyed and string-keyed subscribers.
             </summary>
-            <param name="eventType">Type of the event</param>
-            <param name="eventData">Event data to publish</param>
+            <param name="eventType">Event type constant (e.g. <see cref="!:SDKEventConstants.GameCommandsReady"/>)</param>
+            <param name="eventData">Event data object</param>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EnhancedEventBus.ClearAllSubscriptions">
             <summary>
-            Clear all event subscriptions
+            Clear all event subscriptions (typed + named).
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Integration.EventSystemStats">
@@ -6521,652 +7173,356 @@
         </member>
         <member name="T:PerAspera.GameAPI.Events.Integration.EventSystemIntegration">
             <summary>
-            Automatic integration bridge that connects native game events to SDK event system
-            Replaces legacy ModEventBus with enhanced wrapper conversion
+            Lightweight integration bridge for the SDK event system.
+            Performs one-time post-load initialization (instance registry refresh).
+            All native event routing is now handled by <see cref="T:PerAspera.GameAPI.Events.Native.NativeEventHub"/>.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.Initialize">
             <summary>
-            Initialize the enhanced event system integration
-            Replaces legacy event routing with wrapper-enabled system
+            Initialize the event system integration.
+            Subscribes to <see cref="T:PerAspera.GameAPI.Events.SDK.GameFullyLoadedEvent"/> to refresh the instance registry.
             </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ConnectToLegacyEventSystem">
-            <summary>
-            Connect to existing EventSystem and route events through enhanced bus
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.FindEventSystemType">
-            <summary>
-            Find the existing EventSystem type using reflection
-            </summary>
-            <returns>EventSystem type or null if not found</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.SetupEventSystemBridge(System.Type)">
-            <summary>
-            Setup bridge between legacy EventSystem and enhanced event bus
-            Forwards EnhancedEventBus events → ModSDK.Systems.EventSystem for backwards compatibility
-            </summary>
-            <param name="eventSystemType">Legacy EventSystem type</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ForwardEventToLegacySystem(System.String,System.Object)">
-            <summary>
-            Harmony postfix: Forward events from EnhancedEventBus to legacy EventSystem
-            Called after every EnhancedEventBus.Publish(string, object) call
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.RouteNativeEvent(System.String,System.Object)">
-            <summary>
-            Route a native game event through the enhanced system
-            This is called by the event patching system
-            </summary>
-            <param name="eventType">Native event type</param>
-            <param name="nativeEventData">Raw native event data</param>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.ConvertNativeToSDKEvent(System.String,System.Object)">
-            <summary>
-            Convert raw native event data to appropriate SDK event object
-            </summary>
-            <param name="eventType">Event type constant</param>
-            <param name="nativeEventData">Raw native data</param>
-            <returns>SDK event object</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.Shutdown">
-            <summary>
-            Shutdown the event system integration
-            </summary>
+            <summary>Shutdown the event system integration.</summary>
         </member>
         <member name="P:PerAspera.GameAPI.Events.Integration.EventSystemIntegration.IsInitialized">
-            <summary>
-            Get integration status
-            </summary>
-            <returns>True if integration is active</returns>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent">
-            <summary>
-            Native event: Building spawned/created
-            DOC: BaseGame.md - OnEvent_BuildingDespawned (Building sender, ref GameEvent evt)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.Building">
-            <summary>Building instance that was spawned (SDK wrapper)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.BuildingTypeKey">
-            <summary>Building type key (e.g., "SolarPanel", "Mine")</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.OwnerFaction">
-            <summary>Owner faction of the building (SDK wrapper)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.PositionX">
-            <summary>Position X coordinate</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedNativeEvent.PositionY">
-            <summary>Position Y coordinate</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDespawnedNativeEvent">
-            <summary>
-            Native event: Building destroyed/despawned
-            DOC: BaseGame.md - OnEvent_BuildingDespawned (Building sender, ref GameEvent evt)
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradedNativeEvent">
-            <summary>
-            Native event: Building upgraded or type changed
-            DOC: BaseGame.md - OnEvent_BuildingChangeBuildingTypeOrDeferredUpgradedTo (Building sender, ref GameEvent evt)
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingScrappedNativeEvent">
-            <summary>
-            Native event: Building finished scrapping
-            DOC: BaseGame.md - OnEvent_BuildingFinishScrapping (Building sender, ref GameEvent evt)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingScrappedNativeEvent.ResourcesReturned">
-            <summary>Resources returned from scrapping (if any)</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingPreRemoveNativeEvent">
-            <summary>
-            Native event: Building pre-removal (before despawn)
-            DOC: Universe.md - OnEvent_BuildingPreRemove (Building sender, ref GameEvent evt)
-            Triggered BEFORE building is actually removed (cleanup phase)
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingSpawnedSpatialAddNativeEvent">
-            <summary>
-            Native event: Building spawned spatial add (routing/pathfinding system)
-            DOC: Universe.md - OnEvent_BuildingSpawnedSpatialAdd (Building sender, ref GameEvent evt)
-            Triggered when building added to spatial grid (may differ from UI spawn)
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingSpawnedSpatialAddNativeEvent.AddedToSpatialGrid">
-            <summary>Added to spatial grid</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalAddNativeEvent">
-            <summary>
-            Native event: Building internal add (core game system)
-            Maps to: GevBuildingInternalAdd
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalAddNewNativeEvent">
-            <summary>
-            Native event: Building internal add new (fresh building creation)
-            Maps to: GevBuildingInternalAddNew
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalLoadNativeEvent">
-            <summary>
-            Native event: Building internal load (loading from save)
-            Maps to: GevBuildingInternalLoad
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingInternalRemoveNativeEvent">
-            <summary>
-            Native event: Building internal remove (core game system)
-            Maps to: GevBuildingInternalRemove
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingBuiltNativeEvent">
-            <summary>
-            Native event: Building completed construction (built and ready)
-            Maps to: GevBuildingBuilt
-            Different from Spawned - this is when construction finishes
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingBuiltNativeEvent.ConstructionTime">
-            <summary>Construction time in game ticks</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent">
-            <summary>
-            Native event: Citizen born in a building
-            Maps to: GevBuildingCitizenBorn
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent.CitizenInstance">
-            <summary>Citizen information (wrapped if possible)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenBornNativeEvent.PopulationCount">
-            <summary>Population count after birth</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent">
-            <summary>
-            Native event: Citizen starving in a building
-            Maps to: GevBuildingCitizenStarving
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent.MissingResource">
-            <summary>Missing resource causing starvation</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenStarvingNativeEvent.StarvationTime">
-            <summary>Starvation duration in ticks</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent">
-            <summary>
-            Native event: Citizen died in a building
-            Maps to: GevBuildingCitizenDied
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent.CauseOfDeath">
-            <summary>Cause of death</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCitizenDiedNativeEvent.PopulationCount">
-            <summary>Population count after death</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent">
-            <summary>
-            Native event: Factory/building produced a resource
-            Maps to: GevFactoryProducedResource
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProducedResourceType">
-            <summary>Resource type that was produced (SDK ResourceType wrapper)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProducedResourceKey">
-            <summary>Resource type key (e.g., "water", "silicon")</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.AmountProduced">
-            <summary>Amount produced</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingFactoryProducedResourceNativeEvent.ProductionEfficiency">
-            <summary>Production efficiency at time of production</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingBeforeChangeBuildingTypeNativeEvent">
-            <summary>
-            Native event: Building before changing building type
-            Maps to: GevBuildingBeforeChangeBuildingType
-            Triggered BEFORE the type change happens
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent">
-            <summary>
-            Native event: Building was attacked
-            Maps to: GevBuildingAttacked
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.Attacker">
-            <summary>Attacking faction/entity (could be Faction or other entity)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.DamageAmount">
-            <summary>Damage amount dealt</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAttackedNativeEvent.HealthAfterAttack">
-            <summary>Building health after attack</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent">
-            <summary>
-            Native event: Building destroyed by damage
-            Maps to: GevBuildingDestroyedByDamage
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent.DamageSource">
-            <summary>Source of damage that destroyed building</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDestroyedByDamageNativeEvent.FinalDamageAmount">
-            <summary>Final damage amount that caused destruction</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent">
-            <summary>
-            Native event: Building damaged by asteroid
-            Maps to: GevBuildingDamagedByAsteroid
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.AsteroidInstance">
-            <summary>Asteroid impact information</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.AsteroidDamage">
-            <summary>Damage dealt by asteroid</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDamagedByAsteroidNativeEvent.ImpactX">
-            <summary>Impact coordinates</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent">
-            <summary>
-            Native event: Building ran out of power
-            Maps to: GevBuildingOutOfPower
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent.PowerDemand">
-            <summary>Power demand when outage occurred</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOutOfPowerNativeEvent.AvailablePower">
-            <summary>Available power when outage occurred</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent">
-            <summary>
-            Native event: Building operational state changed
-            Maps to: GevBuildingOperativeChanged
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.WasOperational">
-            <summary>Previous operational state</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.IsOperational">
-            <summary>Current operational state</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingOperativeChangedNativeEvent.StateChangeReason">
-            <summary>Reason for state change</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent">
-            <summary>
-            Native event: Building audio-relevant property changed
-            Maps to: GevBuildingAudioRelevantPropertyChanged
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.ChangedProperty">
-            <summary>Property that changed (for audio system)</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.PreviousValue">
-            <summary>Previous value</summary>
+            <summary>True if integration is active.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.NativeEventExtensions">
+             <summary>
+             Extension methods for resolving <see cref="T:PerAspera.GameAPI.Events.Native.NativeGameEventArgs"/> sender/target
+             <c>Handle</c>s to concrete game objects.
+            
+             All methods use typed interop (zero reflection). Pass the game-owned
+             <c>Keeper</c> (<c>universe.keeper</c> or <c>baseGame.keeper</c>) or
+             <c>Universe</c> instance — both are available after <c>GameCommandsReadyEvent</c>.
+            
+             Sender semantics per event family:
+             <list type="table">
+               <listheader><term>Family</term><description>Sender is…</description></listheader>
+               <item><term>Building* events</term><description>The Building that changed. Use <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveBuilding(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Keeper)"/>.</description></item>
+               <item><term>Faction* events</term><description>The Faction involved. Use <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Universe)"/>.</description></item>
+               <item><term>Drone* events</term><description>The Drone. Use <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveDroneFromFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Faction)"/> (search faction.drones).</description></item>
+               <item><term>Way* events</term><description>The Way. Use <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveWayFromFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Faction)"/>.</description></item>
+               <item><term>Planet* events</term><description>The Planet (singleton). Access via <c>universe.planet</c> directly.</description></item>
+               <item><term>Universe* events</term><description>The Universe. Access via <c>baseGame.universe</c> directly.</description></item>
+             </list>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveBuilding(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Keeper)">
+            <summary>
+            Resolve the <c>sender</c> Handle to a <see cref="T:Building"/>.
+            Uses <c>Keeper._HandleToBuildingSafe</c> — returns <c>null</c> if the
+            handle is invalid or the building has already been despawned.
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="keeper"><c>universe.keeper</c> or <c>baseGame.keeper</c>.</param>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.BuildingBuilt, args => {
+                var building = args.ResolveBuilding(universe.keeper);
+                LogAspera.Info($"Built: {building?.buildingType?.id}");
+            });
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveBuildingTarget(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Keeper)">
+            <summary>
+            Resolve the <c>target</c> Handle to a <see cref="T:Building"/>.
+            Use for events that carry a secondary building context
+            (e.g. <c>BuildingAfterChangeBuildingType</c> where target is the new type's building).
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="keeper"><c>universe.keeper</c> or <c>baseGame.keeper</c>.</param>
+            <example>
+            var oldBuilding = args.ResolveBuilding(keeper);
+            var newBuilding = args.ResolveBuildingTarget(keeper);
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Universe)">
+            <summary>
+            Resolve the <c>sender</c> Handle to a <see cref="T:Faction"/> by matching against
+            <c>universe.factions</c> (O(n), typically 2–4 factions).
+            Returns <c>null</c> if not found.
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="universe">The Universe instance (available after GameCommandsReady).</param>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.FactionShipArrived, args => {
+                var faction = args.ResolveFaction(universe);
+                LogAspera.Info($"Ship arrived for: {faction?.factionName}");
+            });
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveFactionTarget(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Universe)">
+            <summary>
+            Resolve the <c>target</c> Handle to a <see cref="T:Faction"/>.
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="universe">The Universe instance.</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveDroneFromFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Faction)">
+            <summary>
+            Resolve the <c>sender</c> Handle to a <see cref="T:Drone"/> by searching
+            <c>faction.drones</c> (<c>List&lt;Drone&gt;</c>) for the matching Handle.
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="faction">Faction to search — typically <c>universe.playerFaction</c>.</param>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.DroneSpawned, args => {
+                var drone = args.ResolveDroneFromFaction(universe.playerFaction);
+            });
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveWayFromFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Faction)">
+            <summary>
+            Resolve the <c>sender</c> Handle to a <see cref="T:Way"/> by searching
+            <c>faction.ways</c> (<c>List&lt;Way&gt;</c>) for the matching Handle.
+            </summary>
+            <param name="args">The event args.</param>
+            <param name="faction">Faction to search — typically <c>universe.playerFaction</c>.</param>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.WayBuilt, args => {
+                var way = args.ResolveWayFromFaction(universe.playerFaction);
+            });
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.HandleEquals(Handle,Handle)">
+            <summary>Returns true when two Handles refer to the same live object.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.Native.NativeGameEventArgs">
+             <summary>
+             Arguments passed to <see cref="T:PerAspera.GameAPI.Events.Native.NativeEventHub"/> handlers.
+             Wraps the raw native <c>GameEvent</c> struct captured at dispatch time.
+            
+             Layout of <c>GameEvent</c> (72 bytes, blittable):
+             <list type="bullet">
+               <item><description><c>sender</c> — Handle of the object that fired the event (typically the Building/Faction/Drone etc.).</description></item>
+               <item><description><c>target</c> — Optional second entity (context-dependent, e.g. target building for an upgrade).</description></item>
+               <item><description><c>payload</c> — Union of event-specific data (<c>building</c>, <c>drone</c>, <c>faction</c>, <c>key</c>…).</description></item>
+             </list>
+             Use the extension methods in <c>NativeEventExtensions</c> to resolve
+             <c>Handle → Building / Faction</c> without reflection.
+             </summary>
+             <example>
+             NativeEventHub.Subscribe(NativeGameEvent.BuildingBuilt, args => {
+                 var building = args.ResolveBuilding(universe.keeper);
+                 Log.Info($"Built: {building?.buildingType?.id}");
+             });
+             </example>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingAudioRelevantPropertyChangedNativeEvent.NewValue">
-            <summary>New value</summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeGameEventArgs.EventType">
+            <summary>The managed event identifier (resolved from the native eventUid).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent">
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeGameEventArgs.RawEvent">
             <summary>
-            Native event: Building cluster range extension changed
-            Maps to: GevBuildingExtendsClusterRangeChanged
+            Raw native event struct — <c>sender</c>/<c>target</c> handles and the
+            <c>payload</c> union are accessible as typed fields (PerAspera.Events.GameEvent).
             </summary>
         </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.PreviousRange">
-            <summary>Previous cluster range</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.NewRange">
-            <summary>New cluster range</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingExtendsClusterRangeChangedNativeEvent.AffectedCluster">
-            <summary>Affected cluster</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingToggledScrappingNativeEvent">
-            <summary>
-            Native event: Building scrapping toggled
-            Maps to: GevBuildingToggledScrapping
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingToggledScrappingNativeEvent.ScrappingEnabled">
-            <summary>Whether scrapping was enabled or disabled</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingCanceledScrappingNativeEvent">
-            <summary>
-            Native event: Building scrapping cancelled
-            Maps to: GevBuildingCanceledScrapping
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingCanceledScrappingNativeEvent.CancellationReason">
-            <summary>Reason for cancellation</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingStartedScrappingNativeEvent">
-            <summary>
-            Native event: Building started scrapping
-            Maps to: GevBuildingStartedScrapping
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingStartedScrappingNativeEvent.EstimatedScrappingTime">
-            <summary>Expected scrapping time</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingStartedRebuildNativeEvent">
-            <summary>
-            Native event: Building started rebuild process
-            Maps to: GevBuildingStartedRebuild
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingStartedRebuildNativeEvent.EstimatedRebuildTime">
-            <summary>Expected rebuild time</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeCanceledNativeEvent">
-            <summary>
-            Native event: Building upgrade cancelled
-            Maps to: GevBuildingUpgradeCanceled
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeCanceledNativeEvent.CancellationReason">
-            <summary>Reason for upgrade cancellation</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent">
-            <summary>
-            Native event: Building upgrade started
-            Maps to: GevBuildingUpgradeStarted
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent.EstimatedUpgradeTime">
-            <summary>Expected upgrade time</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeStartedNativeEvent.RequiredResources">
-            <summary>Resources required for upgrade</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent">
-            <summary>
-            Native event: Building upgrade toggled
-            Maps to: GevBuildingUpgradeToggled
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent.UpgradeEnabled">
-            <summary>Whether upgrade queue was enabled or disabled</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingUpgradeToggledNativeEvent.TargetUpgradeType">
-            <summary>Target upgrade type</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent">
-            <summary>
-            Native event: Building district changed active state
-            Maps to: GevBuildingDistrictChangedActive
-            </summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.District">
-            <summary>District that changed</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.WasActive">
-            <summary>Previous active state</summary>
-        </member>
-        <member name="P:PerAspera.GameAPI.Events.Native.BuildingDistrictChangedActiveNativeEvent.IsActive">
-            <summary>Current active state</summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.ClimateEvents">
-            <summary>
-            Native climate events from Planet class
-            Triggered by NativeEventPatcher when Planet setter methods are called
-            DOC: Planet.md - climate fields and setter methods
-            </summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.TemperatureChanged">
-            <summary>Event key for temperature changes (SetAverageTemperature, SetTemperature)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.CO2PressureChanged">
-            <summary>Event key for CO2 pressure changes (SetCO2Pressure)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.O2PressureChanged">
-            <summary>Event key for O2 pressure changes (SetO2Pressure, SetOxygenPressure)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.N2PressureChanged">
-            <summary>Event key for N2 pressure changes (SetN2Pressure, SetNitrogenPressure)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.GHGPressureChanged">
-            <summary>Event key for GHG pressure changes (SetGHGPressure, SetGreenhouseGasPressure)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.TotalPressureChanged">
-            <summary>Event key for total pressure changes (SetTotalPressure, SetPressure)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.WaterStockChanged">
-            <summary>Event key for water stock changes (SetWaterStock, SetWater)</summary>
-        </member>
-        <member name="F:PerAspera.GameAPI.Events.Native.ClimateEvents.ArgonPressureChanged">
-            <summary>Event key for argon pressure changes (SetArgonPressure)</summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateTemperatureEvent(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for temperature change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateCO2Event(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for CO2 pressure change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateO2Event(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for O2 pressure change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateN2Event(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for N2 pressure change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateGHGEvent(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for GHG pressure change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateWaterStockEvent(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for water stock change
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.ClimateEvents.CreateTotalPressureEvent(System.Single,System.Single,System.Int32)">
-            <summary>
-            Create climate event data for total pressure change
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.DroneSpawnedNativeEvent">
-            <summary>
-            Native event: Drone spawned/created
-            DOC: BaseGame.md - Drone event handlers (lambda subscriptions)
-            </summary>
-        </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.DroneDespawnedNativeEvent">
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeGameEventArgs.SenderHandle">
             <summary>
-            Native event: Drone despawned/destroyed
+            The Handle of the object that fired this event (Building, Faction, Drone, etc.).
+            Pass to <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveBuilding(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Keeper)"/> or
+            <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventExtensions.ResolveFaction(PerAspera.GameAPI.Events.Native.NativeGameEventArgs,Universe)"/> to get the actual object.
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.EnhancedEventBus">
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeGameEventArgs.TargetHandle">
             <summary>
-            Enhanced event bus that automatically converts native IL2CPP instances to SDK wrappers
-            Provides type-safe event handling with automatic wrapper conversion
+            Optional secondary Handle (target context, e.g. new type in a type change event).
+            Null/<c>Handle.Null</c> when not used by the event.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Subscribe(System.String,System.Action{System.Object})">
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeGameEventArgs.Payload">
             <summary>
-            Subscribe to an event with automatic wrapper conversion
+            Union payload — event-specific data (attack damage, key string, faction sub-data, etc.).
+            Access via typed fields: <c>Payload.building</c>, <c>Payload.faction</c>, <c>Payload.key</c>.
             </summary>
-            <param name="eventType">Event type constant</param>
-            <param name="handler">Event handler (will receive converted wrappers)</param>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Unsubscribe(System.String,System.Action{System.Object})">
-            <summary>
-            Unsubscribe from an event
-            </summary>
-            <param name="eventType">Event type constant</param>
-            <param name="handler">Event handler to remove</param>
+        <member name="T:PerAspera.GameAPI.Events.Native.NativeEventHub">
+             <summary>
+             Typed bridge to the game's native <c>GameEventBus</c>.
+            
+             A single Harmony Postfix on <c>GameEventBus.DispatchInternal</c> — the choke point
+             every native event flows through (immediate AND deferred) — dispatches to managed
+             handlers registered per <see cref="T:PerAspera.GameAPI.Events.Native.NativeGameEvent"/>. Event UIDs are resolved
+             lazily via the typed static <c>Gev*</c> interop properties (zero reflection).
+            
+             PROTOTYPE STATUS (2026-06): the struct-by-value patch parameter must be validated
+             in game once — enable <see cref="P:PerAspera.GameAPI.Events.Native.NativeEventHub.TraceAllEvents"/> and check the BepInEx log.
+             </summary>
+             <example>
+             // In plugin Load():
+             var harmony = new Harmony("com.mymod.id");
+             NativeEventHub.Apply(harmony);
+            
+             // Remplace le polling de BaseGame.alreadyWokeUp :
+             NativeEventHub.Subscribe(NativeGameEvent.UniverseNewGameStarted,
+                 _ => LogAspera.Info("Partie démarrée !"));
+            
+             NativeEventHub.Subscribe(NativeGameEvent.FactionShipArrived,
+                 args => LogAspera.Info("Cargo arrivé !"));
+             </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.Publish(System.String,System.Object)">
+        <member name="P:PerAspera.GameAPI.Events.Native.NativeEventHub.TraceAllEvents">
             <summary>
-            Publish an event with automatic wrapper conversion
+            When true, every native event passing through the bus is logged
+            (name + uid). Diagnostic / prototype-validation tool — leave off in production.
             </summary>
-            <param name="eventType">Event type constant</param>
-            <param name="eventData">Event data (will be converted)</param>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.PrepareEventForDelivery(System.Object)">
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.Apply(HarmonyLib.Harmony)">
             <summary>
-            Prepare event data for delivery by converting native instances to wrappers
+            Apply the Harmony patch on <c>GameEventBus.DispatchInternal</c>.
+            Call once from your plugin's Load() — safe to call multiple times.
             </summary>
-            <param name="eventData">Raw event data</param>
-            <returns>Event data with wrappers</returns>
+            <example>NativeEventHub.Apply(new Harmony("com.mymod.id"));</example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.SetAutoConversion(System.Boolean)">
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.Subscribe(PerAspera.GameAPI.Events.Native.NativeGameEvent,System.Action{PerAspera.GameAPI.Events.Native.NativeGameEventArgs})">
             <summary>
-            Enable or disable automatic wrapper conversion
+            Register a handler for a native game event.
             </summary>
-            <param name="enabled">True to enable conversion</param>
+            <param name="gameEvent">Event to listen to.</param>
+            <param name="handler">Called synchronously after the game's own listeners ran.</param>
+            <returns>True if registered, false if the native event UID could not be resolved.</returns>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.BuildingBuilt,
+                args => LogAspera.Info("Bâtiment construit !"));
+            </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.IsAutoConversionEnabled">
-            <summary>
-            Get current auto conversion status
-            </summary>
-            <returns>True if auto conversion is enabled</returns>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.Unsubscribe(PerAspera.GameAPI.Events.Native.NativeGameEvent,System.Action{PerAspera.GameAPI.Events.Native.NativeGameEventArgs})">
+            <summary>Remove a previously registered handler.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetSubscribedEventTypes">
-            <summary>
-            Get all subscribed event types
-            </summary>
-            <returns>Collection of event type names</returns>
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.Clear">
+            <summary>Remove all handlers (plugin teardown / tests).</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetSubscriberCount(System.String)">
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.DispatchInternalPostfix(PerAspera.Events.GameEvent)">
             <summary>
-            Get subscriber count for a specific event type
+            Postfix on <c>GameEventBus.DispatchInternal(GameEvent evt, IHandleable senderObjectHint)</c>.
+            Parameter name MUST be <c>evt</c> (HarmonyX maps IL2CPP parameters by exact name).
             </summary>
-            <param name="eventType">Event type to check</param>
-            <returns>Number of subscribers</returns>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.ClearAllSubscriptions">
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.ResolveUid(PerAspera.GameAPI.Events.Native.NativeGameEvent)">
             <summary>
-            Clear all subscriptions (for testing/cleanup)
+            Resolve the runtime eventUid of a <see cref="T:PerAspera.GameAPI.Events.Native.NativeGameEvent"/> via the typed
+            static <c>Gev*</c> interop property of its owner class. Cached after first call.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.PublishLegacyEvent(System.String,System.Object)">
+        <member name="M:PerAspera.GameAPI.Events.Native.NativeEventHub.ResolveAll">
             <summary>
-            Bridge method for legacy EventSystem compatibility
-            Allows existing code to work through enhanced bus
+            Resolve ALL event UIDs eagerly — fills the reverse map so that
+            <see cref="P:PerAspera.GameAPI.Events.Native.NativeEventHub.TraceAllEvents"/> shows names instead of raw uids.
+            Call after the game is loaded (UIDs are registered during native static init).
             </summary>
+            <returns>Number of events successfully resolved.</returns>
+            <example>
+            NativeEventHub.ResolveAll();
+            NativeEventHub.TraceAllEvents = true;
+            </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.NormalizeEventKey(System.String)">
+        <member name="T:PerAspera.GameAPI.Events.Native.NativeGameEvent">
             <summary>
-            Normalize legacy event keys to new format
+            Managed mirror of every native <c>GameEventType</c> exposed by the game
+            (the static <c>Gev*</c> properties on Building, Faction, Universe, Planet…).
+            Generated from Tools/InteropDump (2026-06) — 121 events, 11 owner classes.
+            Use with <see cref="M:PerAspera.GameAPI.Events.Native.NativeEventHub.Subscribe(PerAspera.GameAPI.Events.Native.NativeGameEvent,System.Action{PerAspera.GameAPI.Events.Native.NativeGameEventArgs})"/>.
             </summary>
-            <param name="eventKey">Original event key</param>
-            <returns>Normalized event key</returns>
+            <example>
+            NativeEventHub.Subscribe(NativeGameEvent.UniverseDayPassed, args =>
+                LogAspera.Info("Un sol martien est passé !"));
+            </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Native.EnhancedEventBus.GetStats">
+        <member name="T:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent">
             <summary>
-            Get statistics about event bus performance
+            Émis en Postfix de <c>PortProject.SetStage(SpaceportStage)</c>.
+            Couvre toutes les transitions Gather → Trade → Complete (et annulation).
             </summary>
-            <returns>Performance statistics</returns>
+            <example>
+            EnhancedEventBus.Subscribe(PortProjectStageChangedNativeEvent.Key, e =>
+            {
+                var ev = (PortProjectStageChangedNativeEvent)e;
+                if (ev.NewStageKey == "complete") OrbitalStockService.Instance.Flush(ev.ProjectKey);
+            });
+            </example>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.EventBusStats">
-            <summary>
-            Statistics about event bus performance and state
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent.NativePortProject">
+            <summary>Référence au PortProject natif (proxy interop).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.FactionCloseAllWindowsNativeEvent">
-            <summary>
-            Native event: Faction requested close all windows
-            DOC: BaseGame.md - OnEvent_FactionCloseAllWindows (Faction sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent.ProjectKey">
+            <summary>Clé du projet : <c>SpecialProject.type.name</c> (ex: "mission_arean_survey").</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.VeinOrSiteRevealedNativeEvent">
-            <summary>
-            Native event: Vein or site revealed to faction
-            DOC: BaseGame.md - OnEvent_OnVeinOrSiteRevealed (Faction sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent.PreviousStageKey">
+            <summary>Clé du stage précédent : <c>SpaceportStage.key</c>. Vide si premier stage.</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.GameStateChangedNativeEvent">
-            <summary>
-            Native event: Game state changed (pause/speed/load/etc.)
-            DOC: Universe.md - Game state management methods
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent.NewStageKey">
+            <summary>Clé du nouveau stage : <c>SpaceportStage.key</c>.</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.ResourceChangedNativeEvent">
+        <member name="T:PerAspera.GameAPI.Events.Native.SpecialProjectLaunchedNativeEvent">
             <summary>
-            Native event: Resource amount changed (added/removed/set)
-            DOC: GameEventPayload.md - payload with resource data
+            Émis en Postfix de <c>SpecialProject.DispatchLaunchActions()</c>.
+            Indique un lancement orbital (rocket fired).
             </summary>
+            <example>
+            EnhancedEventBus.Subscribe(SpecialProjectLaunchedNativeEvent.Key, e =>
+            {
+                var ev = (SpecialProjectLaunchedNativeEvent)e;
+                LogAspera.Info($"Project {ev.ProjectKey} launched #{ev.Launches}");
+            });
+            </example>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseExplosionNativeEvent">
-            <summary>
-            Native event: Explosion in universe
-            DOC: BaseGame.md - OnEvent_UniverseExplosion (Universe sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectLaunchedNativeEvent.NativeSpecialProject">
+            <summary>Référence au SpecialProject natif (proxy interop).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseHideVeinNativeEvent">
-            <summary>
-            Native event: Vein hidden in universe
-            DOC: BaseGame.md - OnEvent_UniverseHideVein (Universe sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectLaunchedNativeEvent.ProjectKey">
+            <summary>Clé du projet : <c>SpecialProject.type.name</c>.</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseStatsUpdatedNativeEvent">
-            <summary>
-            Native event: Universe stats updated
-            DOC: Universe.md - GevUniverseStatsUpdated
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectLaunchedNativeEvent.Launches">
+            <summary>Nombre total de lancements après cet événement (<c>SpecialProject.launches</c>).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseSwapFactionNativeEvent">
+        <member name="T:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent">
             <summary>
-            Native event: Faction swapped
-            DOC: Universe.md - GevUniverseSwapFaction
+            Émis en Postfix de <c>SpecialProject.Complete()</c>.
+            Fournit un snapshot des ressources collectées au moment de la complétion.
             </summary>
+            <example>
+            EnhancedEventBus.Subscribe(SpecialProjectCompletedNativeEvent.Key, e =>
+            {
+                var ev = (SpecialProjectCompletedNativeEvent)e;
+                foreach (var (res, qty) in ev.GatheredResources)
+                    OrbitalStock.Credit(res, qty, ev.ProjectKey);
+            });
+            </example>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseGameOverNativeEvent">
-            <summary>
-            Native event: Game over
-            DOC: Universe.md - GevUniverseGameOver
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent.NativeSpecialProject">
+            <summary>Référence au SpecialProject natif (proxy interop).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent">
-            <summary>
-            Native event: New game started
-            DOC: Universe.md - GevUniverseNewGameStarted
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent.ProjectKey">
+            <summary>Clé du projet : <c>SpecialProject.type.name</c>.</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent">
+        <member name="P:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent.GatheredResources">
             <summary>
-            Native event: Continue ended game
-            DOC: Universe.md - GevUniverseContinueEndedGame
+            Snapshot des ressources collectées au moment de Complete().
+            Clés = <c>ResourceType.name</c>. Quantités en unités (float, via <c>CargoQuantity.ToFloat()</c>).
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.WayDespawnedNativeEvent">
+        <member name="T:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent">
             <summary>
-            Native event: Way (road/path) despawned
-            DOC: BaseGame.md - OnEvent_WayDespawned (Way sender, ref GameEvent evt)
+            Émis en Postfix de <c>SpecialProject.RecoverGatheredResources(SpacePortComponent)</c>.
+            Signale une annulation de projet — les ressources collectées sont remboursées au joueur.
+            Ne pas créditer le stock orbital sur cet événement.
             </summary>
+            <example>
+            EnhancedEventBus.Subscribe(PortProjectCancelledNativeEvent.Key, e =>
+            {
+                var ev = (PortProjectCancelledNativeEvent)e;
+                OrbitalStockService.Instance.InvalidatePending(ev.ProjectKey);
+            });
+            </example>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.WayUpgradedNativeEvent">
-            <summary>
-            Native event: Way upgraded
-            DOC: BaseGame.md - OnEvent_WayUpgraded (Way sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent.NativeSpecialProject">
+            <summary>Référence au SpecialProject natif (proxy interop).</summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Native.WayOperativeChangedNativeEvent">
-            <summary>
-            Native event: Way operative status changed (active/inactive)
-            DOC: BaseGame.md - OnEvent_WayOperativeChanged (Way sender, ref GameEvent evt)
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent.ProjectKey">
+            <summary>Clé du projet : <c>SpecialProject.type.name</c>.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.Patches.BaseGamePatches">
             <summary>
@@ -7200,32 +7556,97 @@
             Common method to emit GameHubInitializedEvent
             </summary>
         </member>
-        <member name="T:PerAspera.GameAPI.Events.Patches.GameInitializationPatches">
+        <member name="T:PerAspera.GameAPI.Events.SDK.OrbitalResourceSentEvent">
             <summary>
-            SDK-based game initialization detection (NO MORE HARMONY PATCHES)
-            Uses existing SDK wrapper system instead of problematic IL2CPP patches
+            Émis par <c>OrbitalStockService</c> quand une ressource est créditée dans le stock orbital
+            suite à la complétion d'un projet spatial exporté.
             </summary>
+            <example>
+            EnhancedEventBus.Subscribe(OrbitalResourceSentEvent.Key, e =>
+            {
+                var ev = (OrbitalResourceSentEvent)e;
+                hudPanel.Refresh(ev.ResourceKey, ev.NewOrbitalTotal);
+            });
+            </example>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.InitializeSDKBasedEvents">
-            <summary>
-            Initialize game events using SDK wrapper detection instead of IL2CPP patches
-            Called from EventsAutoStartPlugin after SDK wrappers are ready
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OrbitalResourceSentEvent.ResourceKey">
+            <summary>Clé YAML de la ressource (<c>ResourceType.name</c>).</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TryGetBaseGame">
-            <summary>
-            Try to get BaseGame using existing SDK wrapper system
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OrbitalResourceSentEvent.Quantity">
+            <summary>Quantité créditée.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.TriggerGameHubInitialized(BaseGame)">
-            <summary>
-            Trigger GameHubInitialized event using SDK wrapper
-            </summary>
+        <member name="P:PerAspera.GameAPI.Events.SDK.OrbitalResourceSentEvent.NewOrbitalTotal">
+            <summary>Nouveau total orbital après crédit.</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Events.Patches.GameInitializationPatches.ScheduleSDKBasedCheck">
+        <member name="P:PerAspera.GameAPI.Events.SDK.OrbitalResourceSentEvent.SourceProjectKey">
+            <summary>Clé du projet source (ex: "mission_arean_survey").</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.TradeCompletedEvent">
             <summary>
-            Schedule periodic SDK-based check for game initialization
+            Émis par <c>TradeService</c> quand une transaction commerciale est conclue.
             </summary>
+            <example>
+            EnhancedEventBus.Subscribe(TradeCompletedEvent.Key, e =>
+            {
+                var ev = (TradeCompletedEvent)e;
+                Logger.Info($"Trade: {ev.Transaction.Quantity} {ev.Transaction.ResourceKey} → {ev.Transaction.EntityId}");
+            });
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.TradeCompletedEvent.Transaction">
+            <summary>Détails complets de la transaction.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent">
+            <summary>
+            Émis par <c>DiplomacyService</c> quand la réputation d'une entité terrestre change.
+            </summary>
+            <example>
+            EnhancedEventBus.Subscribe(ReputationChangedEvent.Key, e =>
+            {
+                var ev = (ReputationChangedEvent)e;
+                if (ev.NewTier != ev.OldTier) hudPanel.ShowTierChange(ev.EntityId, ev.NewTier);
+            });
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.EntityId">
+            <summary>Id de l'entité concernée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.Delta">
+            <summary>Variation appliquée (peut être moindre que demandé si clampée).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.NewValue">
+            <summary>Nouvelle valeur (clampée ±100).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.OldTier">
+            <summary>Palier avant la variation.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.NewTier">
+            <summary>Palier après la variation.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.ReputationChangedEvent.Reason">
+            <summary>Raison textuelle (ex: "trade_completed", "twitch_vote").</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.DiplomaticIncidentEvent">
+            <summary>
+            Émis par <c>DiplomacyService</c> quand un seuil de réputation configuré est franchi.
+            Permet aux mods YAML de déclencher des quêtes ou embargos via le miroir blackboard.
+            </summary>
+            <example>
+            EnhancedEventBus.Subscribe(DiplomaticIncidentEvent.Key, e =>
+            {
+                var ev = (DiplomaticIncidentEvent)e;
+                if (ev.IncidentKey == "embargo_helios") FactionWrapper.GetPlayer()?.ApplyImportPenalty();
+            });
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.DiplomaticIncidentEvent.EntityId">
+            <summary>Id de l'entité impliquée.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.DiplomaticIncidentEvent.IncidentKey">
+            <summary>Clé de l'incident déclaré par le mod (ex: "embargo_helios").</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.DiplomaticIncidentEvent.TriggerTier">
+            <summary>Palier ayant déclenché l'incident.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.ModSystemInitializedEvent">
             <summary>
@@ -7485,6 +7906,45 @@
         </member>
         <member name="P:PerAspera.GameAPI.Events.SDK.PlanetCreatedEvent.UniverseWrapper">
             <summary>SDK wrapper for Universe (parent)</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameSessionStartedEvent">
+            <summary>
+            Fires once per session when a game session begins — new game or loaded save.
+            Anchored on <c>GevUniverseNewGameStarted</c> / <c>GevUniverseContinueEndedGame</c> via NativeEventHub.
+            Replaces polling <c>BaseGame.alreadyWokeUp</c> and fixes session reset on reload.
+            ✅ Use to reset per-session state; subscribe via <c>EnhancedEventBus.SubscribeToGameSessionStarted</c>.
+            </summary>
+            <example>
+            EnhancedEventBus.SubscribeToGameSessionStarted(evt =>
+                LogAspera.Info(evt.IsNewGame ? "Nouvelle partie !" : "Partie chargée !"));
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameSessionStartedEvent.NativeBaseGame">
+            <summary>Direct interop access to BaseGame.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameSessionStartedEvent.NativeUniverse">
+            <summary>Direct interop access to Universe (available when the native event fires).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameSessionStartedEvent.IsNewGame">
+            <summary>True for a new game, false for a loaded save (<c>GevUniverseContinueEndedGame</c>).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Events.SDK.GameUIReadyEvent">
+            <summary>
+            Fires once per session on the first frame where <c>canvasRefs.notificationPresenter</c>
+            is non-null — the moment the native UI hub is ready for notifications.
+            Fixes the class of timing bugs where <c>GameFullyLoadedEvent</c> fires before the UI hub.
+            ✅ Use this instead of <c>GameFullyLoadedEvent</c> whenever you need to show native notifications.
+            </summary>
+            <example>
+            EnhancedEventBus.SubscribeToGameUIReady(evt =>
+                GameUI.ShowNotification("UI ready!", NotificationUrgency.Info));
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameUIReadyEvent.NativeBaseGame">
+            <summary>Direct interop access to BaseGame.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Events.SDK.GameUIReadyEvent.CanvasRefs">
+            <summary>The native canvas refs — <c>notificationPresenter</c> is guaranteed non-null when this fires.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Events.SDK.OnLoadFinishedEvent">
             <summary>
@@ -8823,6 +9283,39 @@
             </summary>
             <returns>Diagnostic information string</returns>
         </member>
+        <member name="T:PerAspera.GameAPI.Native.Events.SpaceProjectEventPatchingService">
+            <summary>
+            Service de patching pour les événements liés aux projets spatiaux (SpacePort).
+            <para>Hooks Harmony Postfix sur :</para>
+            <list type="bullet">
+              <item><description><c>PortProject.SetStage(SpaceportStage)</c> → <see cref="T:PerAspera.GameAPI.Events.Native.PortProjectStageChangedNativeEvent"/></description></item>
+              <item><description><c>SpecialProject.Complete()</c> → <see cref="T:PerAspera.GameAPI.Events.Native.SpecialProjectCompletedNativeEvent"/></description></item>
+              <item><description><c>SpecialProject.DispatchLaunchActions()</c> → <see cref="T:PerAspera.GameAPI.Events.Native.SpecialProjectLaunchedNativeEvent"/></description></item>
+              <item><description><c>SpecialProject.RecoverGatheredResources(SpacePortComponent)</c> → <see cref="T:PerAspera.GameAPI.Events.Native.PortProjectCancelledNativeEvent"/></description></item>
+            </list>
+            <para>Membres vérifiés dans <c>Tools\InteropDump\ScriptsAssembly\PortProject.cs</c>
+            et <c>SpecialProject.cs</c>. Complete() est privée native mais exposée publique
+            par le publicizer BepInEx.</para>
+            <para>Risque SetStage : peut être inliné par il2cpp. Fallback documenté :
+            patcher <c>PortProject.OnTick</c> avec détection delta <c>stage</c>.</para>
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.SpaceProjectEventPatchingService.#ctor(HarmonyLib.Harmony)">
+            <summary>Initialise le service de patching pour les projets spatiaux.</summary>
+            <param name="harmony">Instance Harmony partagée.</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.SpaceProjectEventPatchingService.GetEventType">
+            <inheritdoc />
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.SpaceProjectEventPatchingService.InitializeEventHooks">
+            <inheritdoc />
+        </member>
+        <member name="M:PerAspera.GameAPI.Native.Events.SpaceProjectEventPatchingService.BuildGatheredSnapshot(SpecialProject)">
+            <summary>
+            Construit un snapshot des ressources collectées en parcourant les PortProjects actifs.
+            Utilise <c>PortProject.developmentResources</c> (<c>Dictionary&lt;ResourceType, CargoQuantity&gt;</c>).
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Native.Events.TimeEventPatchingService">
             <summary>
             Time event patching service for Per Aspera
@@ -9059,6 +9552,12 @@
             <summary>
             Publish an event - called by NativeEventPatcher patches
             ModSDK will hook this to forward to its EventSystem
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Overrides.Models.IGetterOverrideInfo">
+            <summary>
+            Non-generic interface for GetterOverride — allows the registry to access
+            IsEnabled/Category without reflection (RS0030-clean).
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Overrides.Models.GetterOverride`1">
@@ -9833,6 +10332,131 @@
             <summary>
             Force reinitialize all styles (useful for theme changes or testing).
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.GamePanel">
+            <summary>
+            Managed mirror of <c>UIManager.PanelKey</c> (interop dump: UIManager.cs:25).
+            Values MUST stay in the same order as the native enum.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.GameModal">
+            <summary>
+            Managed mirror of <c>UIManager.ModalKey</c> (interop dump: UIManager.cs:12).
+            Values MUST stay in the same order as the native enum.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.NotificationUrgency">
+            <summary>Managed mirror of <c>Notification.Urgency</c>.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.GameUI">
+             <summary>
+             Typed façade over the game's native UI system.
+            
+             Entry point chain (all typed interop, no reflection):
+             <c>BaseGame.canvasRefs : GameCanvasReferences</c> → UiManager, PopupManager,
+             NotificationPresenter, and every native panel (buildingScreenPanel,
+             knowledgeBasePanel, resourcesPanel…).
+            
+             Requires the game UI to be loaded — call after <c>GameFullyLoadedEvent</c>
+             (all members return null/false safely before that).
+             </summary>
+             <example>
+             // Native popup with a callback button:
+             GameUI.ShowPopup("Trade Complete", "Helios Corp", "You earned 500 credits.", "OK",
+                 () => LogAspera.Info("popup closed"));
+            
+             // Open / close native panels:
+             GameUI.OpenPanel(GamePanel.PlanetStats);
+             GameUI.CloseCurrentPanel();
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.CanvasRefs">
+            <summary>
+            The game's UI reference hub (null until the game scene is loaded).
+            Exposes every native panel typed: buildingScreenPanel, knowledgeBasePanel,
+            techTreePanel, resourcesPanel, dialoguePresenter, tooltipPresenter…
+            </summary>
+            <example>var kb = GameUI.CanvasRefs?.knowledgeBasePanel;</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.UiManager">
+            <summary>Native UI manager — panel/modal lifecycle (null before game load).</summary>
+            <example>GameUI.UiManager?.ClosePanel(UIManager.PanelKey.PlanetStats);</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.Popups">
+            <summary>Native popup manager (null before game load).</summary>
+            <example>GameUI.Popups?.CloseAllNonModalPopups();</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.Notifications">
+            <summary>Native notification presenter (null before game load).</summary>
+            <example>GameUI.Notifications?.AddNotification(myNotification);</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.IsReady">
+            <summary>True when the native UI is initialized and usable.</summary>
+            <example>if (GameUI.IsReady) GameUI.OpenPanel(GamePanel.PlanetStats);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.ShowPopup(System.String,System.String,System.String,System.String,System.Action,System.Boolean)">
+            <summary>
+            Show a native game popup (same visual as tech-unlocked popups) with one button.
+            Wraps <c>PopupManager.ShowGenericPopup</c> — the managed callback is converted
+            to an IL2CPP delegate via <c>DelegateSupport</c>.
+            </summary>
+            <param name="title">Popup title (plain text, not a localization key).</param>
+            <param name="subtitle">Subtitle line under the title.</param>
+            <param name="description">Body text.</param>
+            <param name="buttonLabel">Label of the single action button.</param>
+            <param name="onButton">Optional managed callback invoked when the button is clicked.</param>
+            <param name="canCloseWithEsc">Allow closing with Escape (default true).</param>
+            <returns>True if the popup was shown, false if the UI is not ready.</returns>
+            <example>
+            GameUI.ShowPopup("Embargo!", "Helios Corp", "Reputation dropped below -50.", "Understood");
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.OpenPanel(PerAspera.GameAPI.UI.GamePanel,System.Boolean)">
+            <summary>
+            Open a native side panel (PlanetStats, ResourceStats, BuildingTable…).
+            </summary>
+            <param name="panel">Panel to open.</param>
+            <param name="closeIfAlreadyOpen">Toggle behavior when already open.</param>
+            <returns>True if dispatched to the native UIManager.</returns>
+            <example>GameUI.OpenPanel(GamePanel.FactionGraphs);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.ClosePanel(PerAspera.GameAPI.UI.GamePanel)">
+            <summary>Close a native side panel.</summary>
+            <example>GameUI.ClosePanel(GamePanel.PlanetStats);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.CloseCurrentPanel">
+            <summary>Close whatever panel is currently open (no-op if none).</summary>
+            <example>GameUI.CloseCurrentPanel();</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.GameUI.CurrentPanel">
+            <summary>The currently open native panel (GamePanel.None if none).</summary>
+            <example>if (GameUI.CurrentPanel == GamePanel.PlanetStats) { ... }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.OpenModal(PerAspera.GameAPI.UI.GameModal,System.Boolean)">
+            <summary>
+            Open a native modal window (tech tree, knowledge base, space projects…).
+            </summary>
+            <example>GameUI.OpenModal(GameModal.SpaceProject);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.CloseModal(PerAspera.GameAPI.UI.GameModal)">
+            <summary>Close a native modal window.</summary>
+            <example>GameUI.CloseModal(GameModal.Techtree);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.GameUI.ShowNotification(System.String,PerAspera.GameAPI.UI.NotificationUrgency,System.Single)">
+            <summary>
+            EXPERIMENTAL — show a native notification in the right-side notification feed.
+            Builds a <c>Notification</c> from scratch (public ctor + writable fields confirmed
+            in the interop dump). Text resolution goes through <c>displayName</c>;
+            the <c>textId</c> localization path is untested for non-localized strings —
+            validate in game before shipping a mod that relies on it.
+            </summary>
+            <param name="displayName">Text shown in the notification item.</param>
+            <param name="urgency">Urgency column (Info / Warning / Urgent).</param>
+            <param name="timeoutDays">Lifetime in game days before auto-expiry (0 = no expiry).</param>
+            <returns>True if handed to the native NotificationPresenter.</returns>
+            <example>
+            GameUI.ShowNotification("Cargo arrived in orbit", NotificationUrgency.Info, timeoutDays: 2f);
+            </example>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper">
             <summary>
@@ -11233,6 +11857,28 @@
             Use negative amount to remove. Amount is truncated to whole units.
             </summary>
             <example>faction.AddResource("resource_water", 500f);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetResourceStockTyped(System.String)">
+            <summary>
+            Stock total de la faction pour une ressource, via <c>Faction.GetResourceQuantity(ResourceType)</c>.
+            Plus performant que <see cref="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetResourceStock(System.String)"/> (pas d'agrégation bâtiment-par-bâtiment).
+            Retourne 0 si la faction ou le type de ressource est introuvable.
+            </summary>
+            <example>float iron = faction.GetResourceStockTyped("resource_iron");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.TryRemoveResource(System.String,System.Single)">
+            <summary>
+            Retire des ressources de la faction de manière atomique côté SDK.
+            Vérifie le stock avant de débiter ; retourne false sans modifier le stock si insuffisant.
+            Utilise <c>Faction.AddResource(ResourceType, int)</c> avec montant négatif.
+            </summary>
+            <param name="resourceKey">Clé YAML de la ressource (ex: "resource_iron").</param>
+            <param name="amount">Quantité à retirer (doit être &gt; 0).</param>
+            <returns>True si le débit a été effectué, false si stock insuffisant ou paramètres invalides.</returns>
+            <example>
+            if (!faction.TryRemoveResource("resource_iron", 100f))
+                return TradeResult.Fail("Stock insuffisant");
+            </example>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRelationshipWith(PerAspera.GameAPI.Wrappers.FactionWrapper)">
             <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
@@ -12856,40 +13502,37 @@
             <summary>Check if a geographic point is inside this POI's bounds</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourceCommandHelper">
-            <summary>
-            Resource command execution utilities that handle IHandleable casting internally
-            to avoid exposing native types to mods.
-            </summary>
+             <summary>
+             Resource command execution utilities.
+             Creates TextAction instances and dispatches them via InteractionManager (typed, zero reflection).
+            
+             MIGRATION 2026-06-10 - rewrite en acces type.
+             Elimine ~38 RS0030 (AppDomain.GetAssemblies, GetMethod, GetProperty, ctor.Invoke).
+             Source de verite :
+               Tools/InteropDump/ScriptsAssembly/TextAction.cs        : TextAction(string command, [Optional] Il2CppStringArray)
+               Tools/InteropDump/ScriptsAssembly/InteractionManager.cs : DispatchAction(IHandleable, GameEventBus, TextAction, string) public static
+               Tools/InteropDump/ScriptsAssembly/Faction.cs            : _gameEventBus GameEventBus (public property, ligne 13469)
+             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(IHandleable,System.String,System.Single)">
+        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.ExecuteResourceImportCommand(IHandleable,System.String,System.Single,GameEventBus)">
             <summary>
-            Executes a resource import command for the specified faction using the given resource type.
-            Handles IHandleable casting internally to avoid exposing native types to mods.
+            Execute a resource import command for the given faction.
+            Calls InteractionManager.DispatchAction directly (typed, zero reflection).
             </summary>
-            <param name="factionHandle">The faction handle wrapper to execute the command for</param>
-            <param name="resourceType">The resource type (e.g., "WATER", "CHG", "ICE", "NITROGEN", "OXYGEN")</param>
-            <param name="amount">The amount of resource to add (default: 1000)</param>
-            <returns>True if the command executed successfully, false otherwise</returns>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.GetNativeFactionFromHandle(PerAspera.GameAPI.Wrappers.HandleWrapper)">
-            <summary>
-            Get native faction object from handle using KeeperMap
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.GetGameEventBusFromFaction(System.Object)">
-            <summary>
-            Get GameEventBus from native faction object
-            </summary>
+            <param name="handleable">The faction as IHandleable.</param>
+            <param name="resourceType">Resource key (e.g. "WATER", "OXYGEN", "Ice").</param>
+            <param name="amount">Quantity to add (default 1000).</param>
+            <param name="bus">GameEventBus from the faction (Faction._gameEventBus). Pass null to dispatch without bus.</param>
+            <returns>True on success.</returns>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.CreateNativeTextAction(System.String,System.Single)">
             <summary>
-            Create native TextAction object
+            Create a TextAction for the given resource type and amount.
+            Uses the typed TextAction(string command) constructor from the interop proxy.
             </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.ResourceCommandHelper.DispatchActionInternal(System.Object,System.Object,System.Object,System.String)">
-            <summary>
-            Execute DispatchAction using cached method
-            </summary>
+            <param name="resourceType">Resource key, will be normalised.</param>
+            <param name="amount">Quantity.</param>
+            <returns>A new TextAction, or null on error.</returns>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.ResourcesPanelWrapper">
              <summary>
@@ -13738,32 +14381,37 @@
             <summary>Geographic position — x = latitude, y = longitude (degrees).</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.DialogueWrapper">
-            <summary>
-            Wrapper léger pour interagir avec le système de dialogues du jeu.
-            Utilise la réflexion pour éviter une dépendance forte sur les assemblies IL2CPP.
-            </summary>
+             <summary>
+             Wrapper leger pour interagir avec le systeme de dialogues du jeu.
+            
+             MIGRATION 2026-06-11 - rewrite en acces type / IL2CppExtensions.
+             Elimine ~22 RS0030 (GetType/GetMethod/Invoke sur Universe, DialoguePresenter, DialogueManager).
+             Source de verite :
+               Tools/InteropDump/ScriptsAssembly/Universe.cs          : StartDialogue(Il2CppReferenceArray[Object]) public static
+               Tools/InteropDump/ScriptsAssembly/DialogueManager.cs   : ContainsDialogue(string) public static (ligne 230)
+               Tools/InteropDump/ScriptsAssembly/DialoguePresenter.cs : instance-based, no static NotifyDialogue
+             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.StartDialogue(System.String,System.String,System.String)">
             <summary>
-            Tente de démarrer un dialogue en appelant une méthode statique native probable.
-            Signature attendue (exemples) : Universe.StartDialogue(string factionKey, string personKey, string dialogueKey)
+            Tente de demarrer un dialogue via Universe.StartDialogue.
+            Delegue a IL2CppExtensions.InvokeMethod (RS0030-exempt dans Core).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.NotifyDialogue(System.String,System.String,System.String)">
             <summary>
-            Notification pour un dialogue (ex: NotifyMandatoryDialogue via commandes du moteur)
-            Si une méthode dédiée existe, tente de l'appeler.
+            Notification pour un dialogue.
+            Tente DialoguePresenter.NotifyDialogue via InvokeMethod, sinon route vers StartDialogue.
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.ContainsDialogue(System.String)">
             <summary>
-            Vérifie de manière heuristique si un dialogue est présent via DialogueManager.ContainsDialogue
+            Verifie si un dialogue est present via DialogueManager.ContainsDialogue (public static type).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.BuildDialogue(System.String,System.String,PerAspera.GameAPI.Wrappers.DialogueLine[])">
             <summary>
-            Helper pour construire un objet représentant un dialogue léger côté mod (non-persisté).
-            Utile pour tests et génération dynamique de dialogues avant conversion en YAML/TextAsset.
+            Helper pour construire un objet representant un dialogue leger cote mod (non-persiste).
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Swarm">

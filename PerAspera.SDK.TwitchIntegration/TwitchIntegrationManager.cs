@@ -126,13 +126,6 @@ namespace PerAspera.SDK.TwitchIntegration
                 // Load config if not already loaded
                 _config ??= TwitchConfiguration.Load();
                 
-                // Subscribe to building events for Twitch notifications (requires IRC)
-                if (_config?.EnableBuildingNotifications == true && _ircClient != null)
-                {
-                    SubscribeToBuildingEvents();
-                    Log.Info("✅ Building event notifications enabled");
-                }
-                
                 // Initialize PubSub for channel points (independent of IRC)
                 if (_config?.EnableChannelPoints == true)
                 {
@@ -154,44 +147,6 @@ namespace PerAspera.SDK.TwitchIntegration
             catch (Exception ex)
             {
                 Log.Error($"❌ Failed to complete Twitch integration: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Subscribe to building events for automatic Twitch notifications.
-        /// Uses EnhancedEvents to monitor building construction and destruction in real-time.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// // Automatically called when building notifications are enabled
-        /// SubscribeToBuildingEvents();
-        /// // Now chat will see: "🏗️ New building constructed: Solar Panel"
-        /// </code>
-        /// </example>
-        /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/Events.md">SDK Events Documentation</seealso>
-        private static void SubscribeToBuildingEvents()
-        {
-            try
-            {
-                // Subscribe using discovered SDK Events capability
-                // Use EnhancedEvents directly instead of EventsAutoStartPlugin
-                EnhancedEvents.Subscribe("Native:BuildingSpawned", data =>
-                {
-                    if (data is BuildingSpawnedNativeEvent spawnedEvent)
-                        OnBuildingSpawned(spawnedEvent);
-                });
-                
-                EnhancedEvents.Subscribe("Native:BuildingDespawned", data =>
-                {
-                    if (data is BuildingDespawnedNativeEvent despawnedEvent)
-                        OnBuildingDespawned(despawnedEvent);
-                });
-                
-                Log.Info("✅ Subscribed to building events for Twitch notifications");
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"❌ Failed to subscribe to building events: {ex.Message}");
             }
         }
         
@@ -234,64 +189,6 @@ namespace PerAspera.SDK.TwitchIntegration
             catch (Exception ex)
             {
                 Log.Error($"❌ Failed to initialize PubSub: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Handle building construction events and send notification to Twitch chat.
-        /// Triggered automatically when buildings are placed on Mars.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// // Event fired when player builds a Solar Panel
-        /// // Chat receives: "🏗️ New building constructed: Solar Panel"
-        /// OnBuildingSpawned(new BuildingSpawnedNativeEvent { BuildingTypeKey = "Solar Panel" });
-        /// </code>
-        /// </example>
-        /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/Events.md">SDK Events Documentation</seealso>
-        private static void OnBuildingSpawned(BuildingSpawnedNativeEvent buildingEvent)
-        {
-            try
-            {
-                if (_config?.EnableBuildingNotifications != true) return;
-                
-                var buildingName = buildingEvent.BuildingTypeKey ?? "Unknown Building";
-                QueueMessage($"🏗️ New building constructed: {buildingName}");
-                
-                Log.Debug($"Building spawned notification sent: {buildingName}");
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"Error in building spawn notification: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Handle building destruction events and send notification to Twitch chat.
-        /// Triggered automatically when buildings are destroyed or deconstructed.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// // Event fired when a building is destroyed
-        /// // Chat receives: "💥 Building destroyed: Mining Outpost"
-        /// OnBuildingDespawned(new BuildingDespawnedNativeEvent { BuildingTypeKey = "Mining Outpost" });
-        /// </code>
-        /// </example>
-        /// <seealso href="https://github.com/PerAsperaMods/.github/tree/main/Organization-Wiki/sdk/Events.md">SDK Events Documentation</seealso>
-        private static void OnBuildingDespawned(BuildingDespawnedNativeEvent buildingEvent)
-        {
-            try
-            {
-                if (_config?.EnableBuildingNotifications != true) return;
-                
-                var buildingName = buildingEvent.BuildingTypeKey ?? "Unknown Building";
-                QueueMessage($"💥 Building destroyed: {buildingName}");
-                
-                Log.Debug($"Building despawned notification sent: {buildingName}");
-            }
-            catch (Exception ex)
-            {
-                Log.Warning($"Error in building despawn notification: {ex.Message}");
             }
         }
         

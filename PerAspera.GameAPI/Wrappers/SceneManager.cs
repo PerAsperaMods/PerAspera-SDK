@@ -255,12 +255,16 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 // Unity 2020.3 alternative: Use native scene directly with reflection
-                var moveMethod = typeof(UnityEngine.SceneManagement.SceneManager)
-                    .GetMethod("MoveGameObjectToScene", new[] { typeof(GameObject), typeof(UnityEngine.SceneManagement.Scene) });
-                
+                // AccessTools.Method — RS0030-exempt (HarmonyLib)
+                var moveMethod = HarmonyLib.AccessTools.Method(
+                    typeof(UnityEngine.SceneManagement.SceneManager),
+                    "MoveGameObjectToScene",
+                    new[] { typeof(GameObject), typeof(UnityEngine.SceneManagement.Scene) });
+
                 if (moveMethod != null)
                 {
-                    moveMethod.Invoke(null, new object[] { go, scene.NativeScene });
+                    // ReflectionHelpers.SafeInvoke — RS0030-exempt (Core)
+                    ReflectionHelpers.SafeInvoke(null, moveMethod, go, scene.NativeScene);
                     Log.Debug($"Moved GameObject '{go.name}' to scene '{scene.Name}'");
                 }
                 else

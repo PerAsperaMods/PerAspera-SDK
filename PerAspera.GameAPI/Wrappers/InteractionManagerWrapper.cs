@@ -2,8 +2,11 @@ using System;
 using System.Reflection;
 using System.Linq;
 using BepInEx.Logging;
+using Il2CppInterop.Runtime.InteropTypes;
+using HarmonyLib;
 using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
+using PerAspera.Events;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -79,12 +82,12 @@ namespace PerAspera.GameAPI.Wrappers
                 return false;
             }
             
-            // If handleable is a wrapper, get the native object
-            if (handleable.GetType().GetMethod("GetNativeObject") != null)
+            // Unwrap wrapper object if it has GetNativeObject — IL2CppExtensions (RS0030-exempt)
+            if (AccessTools.Method(handleable.GetType(), "GetNativeObject") != null)
             {
                 try
                 {
-                    handleable = handleable.GetType().GetMethod("GetNativeObject").Invoke(handleable, null);
+                    handleable = handleable.InvokeMethod<object>("GetNativeObject");
                     Log.LogInfo($"✅ Extracted native object from wrapper: {handleable?.GetType().Name ?? "null"}");
                 }
                 catch (Exception ex)
@@ -126,15 +129,18 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 Log.LogInfo($"🚀 Dispatching Action: {textAction?.ToString() ?? "null"} Context: {context}");
-                
-                // Invoke the static method
-                method.Invoke(null, new object[] { 
-                    handleable, 
-                    gameEventBus, 
-                    textAction, 
-                    context 
-                });
-                
+
+                // Use typed InteractionManager.DispatchAction — InteropDump ligne 766
+                var nativeHandleable = handleable is Il2CppObjectBase hb ? new IHandleable(hb.Pointer) : handleable as IHandleable;
+                var nativeBus = gameEventBus as GameEventBus;
+                var nativeAction = textAction as TextAction;
+                if (nativeHandleable == null || nativeBus == null || nativeAction == null)
+                {
+                    Log.LogError("❌ DispatchAction: failed to cast arguments to typed IL2CPP types");
+                    return false;
+                }
+                InteractionManager.DispatchAction(nativeHandleable, nativeBus, nativeAction, context);
+
                 Log.LogInfo($"✅ DispatchAction successful: {context}");
                 return true;
             }
@@ -177,10 +183,25 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 Log.LogInfo($"🚀 Dispatching GameEvent using method: {method}");
-                
-                // Invoke the static method
-                method.Invoke(null, new object[] { handleable, gameEventBus, gameEvent });
-                
+
+                // Use typed InteractionManager.DispatchAction — InteropDump ligne 780
+                var nativeHandleable = handleable is Il2CppObjectBase hb ? new IHandleable(hb.Pointer) : handleable as IHandleable;
+                var nativeBus = gameEventBus as GameEventBus;
+                if (nativeHandleable == null || nativeBus == null || gameEvent == null)
+                {
+                    Log.LogError("❌ DispatchEvent: failed to cast arguments to typed IL2CPP types");
+                    return false;
+                }
+                if (gameEvent is GameEvent nativeEvent)
+                {
+                    InteractionManager.DispatchAction(nativeHandleable, nativeBus, nativeEvent);
+                }
+                else
+                {
+                    Log.LogError("❌ DispatchEvent: gameEvent is not a GameEvent struct");
+                    return false;
+                }
+
                 Log.LogInfo($"✅ DispatchEvent successful");
                 return true;
             }
@@ -232,10 +253,19 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 
                 Log.LogInfo($"🚀 Dispatching {nativeActions.Count} Actions: {context}");
-                
-                // Invoke the static method
-                method.Invoke(null, new object[] { handleable, gameEventBus, nativeActions, context });
-                
+
+                // Build typed Il2CppSystem.Collections.Generic.List<TextAction>
+                var il2Actions = new Il2CppSystem.Collections.Generic.List<TextAction>();
+                foreach (var a in nativeActions) { if (a is TextAction ta) il2Actions.Add(ta); }
+                var nativeHandleable = handleable is Il2CppObjectBase hb ? new IHandleable(hb.Pointer) : handleable as IHandleable;
+                var nativeBus = gameEventBus as GameEventBus;
+                if (nativeHandleable == null || nativeBus == null)
+                {
+                    Log.LogError("❌ DispatchActions: failed to cast arguments");
+                    return false;
+                }
+                InteractionManager.DispatchActions(nativeHandleable, nativeBus, il2Actions, context);
+
                 Log.LogInfo($"✅ DispatchActions successful: {context}");
                 return true;
             }

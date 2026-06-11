@@ -4,6 +4,7 @@ using PerAspera.GameAPI.Events.Constants;
 using PerAspera.GameAPI.Events.Integration;
 using PerAspera.GameAPI.Events.SDK;
 using System;
+using System.Collections.Generic;
 
 namespace PerAspera.GameAPI.Events.Patches
 {
@@ -12,6 +13,7 @@ namespace PerAspera.GameAPI.Events.Patches
     {
         private static readonly LogAspera _logger = new LogAspera("BaseGameUpdatePatches");
         private static bool _commandsReadyFired = false;
+        private static bool _uiReadyFired = false;
 
         // Throttle "not ready yet" log to once every 60 frames to avoid spam
         private static int _pollFrameCount = 0;
@@ -23,50 +25,40 @@ namespace PerAspera.GameAPI.Events.Patches
         [HarmonyPatch(typeof(BaseGame), "Update")]
         public static void Update_Postfix(BaseGame __instance)
         {
-            if (_commandsReadyFired || !GameLoadComplete)
-                return;
+            if (!GameLoadComplete) return;
 
             try
             {
-                // ── Direct interop access — zero reflection ─────────────────
-                // Path: BaseGame → universe → playerFaction → interactionManager
-                // All types are from PerAspera.GameLibs.Complete (interop DLLs).
-                var universe = __instance.universe;
-                if (universe == null)
+                // ── Poll 1: InteractionManager → GameCommandsReadyEvent ──────
+                if (!_commandsReadyFired)
                 {
-                    LogThrottled("⏳ universe is null — retry next frame");
-                    return;
+                    var universe = __instance.universe;
+                    if (universe == null) { LogThrottled("⏳ universe is null — retry next frame"); goto checkUI; }
+
+                    var playerFaction = universe.playerFaction;
+                    if (playerFaction == null) { LogThrottled("⏳ playerFaction is null — retry next frame"); goto checkUI; }
+
+                    if (playerFaction.interactionManager == null) { LogThrottled("⏳ interactionManager is null — retry next frame"); goto checkUI; }
+
+                    _commandsReadyFired = true;
+                    var planet = universe.planet;
+                    _logger.Info("🎯 InteractionManager ready — emitting GameCommandsReadyEvent");
+                    var evt = new GameCommandsReadyEvent(__instance, universe, planet, playerFaction);
+                    EnhancedEventBus.Publish(SDKEventConstants.GameCommandsReady, evt);
+                    _logger.Info("✅ GameCommandsReadyEvent dispatched");
                 }
 
-                var playerFaction = universe.playerFaction;
-                if (playerFaction == null)
+                checkUI:
+                // ── Poll 2: notificationPresenter → GameUIReadyEvent ─────────
+                // canvasRefs is populated after GameFullyLoaded — poll independently each frame.
+                if (!_uiReadyFired && __instance.canvasRefs?.notificationPresenter != null)
                 {
-                    LogThrottled("⏳ playerFaction is null — retry next frame");
-                    return;
+                    _uiReadyFired = true;
+                    _logger.Info("🖥️ canvasRefs.notificationPresenter ready — emitting GameUIReadyEvent");
+                    var uiEvt = new GameUIReadyEvent(__instance, __instance.canvasRefs);
+                    EnhancedEventBus.Publish(SDKEventConstants.GameUIReady, uiEvt);
+                    _logger.Info("✅ GameUIReadyEvent dispatched");
                 }
-
-                // interactionManager is a plain public field on Faction (not a singleton)
-                if (playerFaction.interactionManager == null)
-                {
-                    LogThrottled("⏳ interactionManager is null — retry next frame");
-                    return;
-                }
-
-                // All systems go — fire once
-                _commandsReadyFired = true;
-
-                // universe.planet is public property — available after WakeUp (SKILL: universe.planet ✅)
-                // Defensive null check in case of edge case (early load, save reload, etc.)
-                var planet = universe.planet;
-
-                _logger.Info("🎯 InteractionManager ready — emitting GameCommandsReadyEvent");
-                _logger.Info($"   BaseGame={__instance.GetType().Name}, Universe={universe.GetType().Name}, " +
-                             $"Planet={(planet != null ? planet.GetType().Name : "null (edge case)")}, " +
-                             $"Faction={playerFaction.GetType().Name}");
-
-                var evt = new GameCommandsReadyEvent(__instance, universe, planet, playerFaction);
-                EnhancedEventBus.Publish(SDKEventConstants.GameCommandsReady, evt);
-                _logger.Info("✅ GameCommandsReadyEvent dispatched — game commands are now executable");
             }
             catch (Exception ex)
             {
@@ -84,9 +76,10 @@ namespace PerAspera.GameAPI.Events.Patches
         internal static void ResetForNewSession()
         {
             _commandsReadyFired = false;
+            _uiReadyFired = false;
             _pollFrameCount = 0;
             GameLoadComplete = false;
-            _logger.Info("🔄 GameCommandsReady flag reset for new game session");
+            _logger.Info("🔄 Session flags reset (GameCommandsReady + GameUIReady)");
         }
     }
 }

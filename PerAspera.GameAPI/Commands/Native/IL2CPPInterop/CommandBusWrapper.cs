@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
 {
@@ -54,8 +55,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                     return false;
                 }
                 
-                // Invoke Dispatch<T>(command)
-                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                _nativeCommandBus.InvokeMethod("Dispatch", (object)command);
                 
                 _logger.LogDebug($"Command dispatched: {typeof(T).Name}");
                 return true;
@@ -88,8 +89,8 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
                 return false;
                 }
                 
-                // Invoke dispatch
-                var result = dispatchMethod.Invoke(_nativeCommandBus, new object[] { command });
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                _nativeCommandBus.InvokeMethod("Dispatch", command);
                 // Logging disabled
                 return true;
             }
@@ -216,60 +217,18 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         /// Create CommandBusWrapper using GameTypeInitializer for automatic CommandBus discovery
         /// </summary>
         /// <returns>CommandBusWrapper instance or null if CommandBus not found</returns>
-        public static CommandBusWrapper CreateFromGame()
+        public static CommandBusWrapper? CreateFromGame()
         {
             try
             {
-                // Initialize GameTypeInitializer if needed
-                GameTypeInitializer.Initialize();
-
-                // Get BaseGame instance
-                var baseGameType = GameTypeInitializer.GetBaseGameType();
-                if (baseGameType == null)
-                { // Logging disabled
-                return null;
-                }
-
-                var baseGameInstance = baseGameType.GetProperty("Instance", 
-                    BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
-
-                if (baseGameInstance == null)
-                { // Logging disabled
-                return null;
-                }
-
-                // Try to find CommandBus on BaseGame instance
-                var commandBusProperty = baseGameType.GetProperty("CommandBus", 
-                    BindingFlags.Public | BindingFlags.Instance);
-
-                if (commandBusProperty != null)
-                {
-                    var commandBusInstance = commandBusProperty.GetValue(baseGameInstance);
-                    if (commandBusInstance != null)
-                    { // Logging disabled
+                // BaseGame.self — typed, InteropDump ligne 1634; GetMemberValue — RS0030-exempt (Core)
+                var commandBusInstance = BaseGame.self?.GetMemberValue<object>("commandBus")
+                    ?? BaseGame.self?.GetMemberValue<object>("CommandBus");
+                if (commandBusInstance == null) return null;
                 return new CommandBusWrapper(commandBusInstance);
-                    }
-                }
-
-                // Try alternative field names
-                var commandBusFields = baseGameType.GetFields(
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-                foreach (var field in commandBusFields)
-                {
-                    if (field.Name.Contains("CommandBus") || field.Name.Contains("commandBus"))
-                    {
-                        var commandBusInstance = field.GetValue(baseGameInstance);
-                        if (commandBusInstance != null)
-                        { // Logging disabled
-                return new CommandBusWrapper(commandBusInstance);
-                        }
-                    }
-                } // Logging disabled
-                return null;
             }
-            catch (Exception ex)
-            { // Logging disabled
+            catch (Exception)
+            {
                 return null;
             }
         }    }

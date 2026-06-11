@@ -81,7 +81,7 @@ namespace PerAspera.GameAPI.Native.Events
         {
             try
             {
-                var method = targetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+                var method = AccessTools.Method(targetType, methodName);
                 if (method == null)
                 {
                     _log.Debug($"Method {methodName} not found on {targetType.Name}");
@@ -201,7 +201,7 @@ namespace PerAspera.GameAPI.Native.Events
 
             try
             {
-                var method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+                var method = AccessTools.Method(type, methodName);
                 if (method == null)
                     return false;
 

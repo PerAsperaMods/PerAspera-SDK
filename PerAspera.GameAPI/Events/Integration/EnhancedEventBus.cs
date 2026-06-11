@@ -15,6 +15,8 @@ namespace PerAspera.GameAPI.Events.Integration
     {
         private static readonly LogAspera _logger = new LogAspera("EnhancedEventBus");
         private static readonly Dictionary<System.Type, List<Delegate>> _eventHandlers = new();
+        // String-keyed handlers for Subscribe(string, Action<object>) — separate from type-keyed dict
+        private static readonly Dictionary<string, List<Action<object>>> _namedHandlers = new();
         private static bool _autoConversionEnabled = true;
 
         // ==================== SYSTEM EVENT SUBSCRIPTIONS ====================
@@ -132,6 +134,33 @@ namespace PerAspera.GameAPI.Events.Integration
         }
 
         /// <summary>
+        /// Subscribe to GameSessionStarted event.
+        /// Fires once per session when a new game or loaded save begins, anchored on the native
+        /// <c>GevUniverseNewGameStarted</c> / <c>GevUniverseContinueEndedGame</c> events.
+        /// ✅ Replaces <c>BaseGame.alreadyWokeUp</c> polling; reliably resets on every session.
+        /// </summary>
+        public static void SubscribeToGameSessionStarted(Action<GameSessionStartedEvent> onGameSessionStarted)
+        {
+            if (onGameSessionStarted == null)
+                throw new ArgumentNullException(nameof(onGameSessionStarted));
+            _logger.Info("Subscribed to GameSessionStarted event");
+            RegisterHandler(typeof(GameSessionStartedEvent), onGameSessionStarted);
+        }
+
+        /// <summary>
+        /// Subscribe to GameUIReady event.
+        /// Fires once per session on the first frame where <c>canvasRefs.notificationPresenter</c> is non-null.
+        /// ✅ Use this instead of <c>GameFullyLoadedEvent</c> when you need to show native notifications.
+        /// </summary>
+        public static void SubscribeToGameUIReady(Action<GameUIReadyEvent> onGameUIReady)
+        {
+            if (onGameUIReady == null)
+                throw new ArgumentNullException(nameof(onGameUIReady));
+            _logger.Info("Subscribed to GameUIReady event");
+            RegisterHandler(typeof(GameUIReadyEvent), onGameUIReady);
+        }
+
+        /// <summary>
         /// Subscribe to OnLoadFinished event
         /// Fires when BaseGame.OnFinishLoading() completes
         /// ✅ Use this for mods that need to run immediately after game loading finishes
@@ -237,8 +266,9 @@ namespace PerAspera.GameAPI.Events.Integration
         }
 
         /// <summary>
-        /// Subscribe to a named event with object-based handler
-        /// For compatibility with string-based event subscriptions
+        /// Subscribe to a named event with object-based handler.
+        /// The handler fires whenever <c>Publish(eventType, data)</c> is called with the same string key,
+        /// regardless of the data type.
         /// </summary>
         public static void Subscribe(string eventType, Action<object> handler)
         {
@@ -248,14 +278,9 @@ namespace PerAspera.GameAPI.Events.Integration
                 throw new ArgumentNullException(nameof(handler));
 
             _logger.Info($"Subscribed to event type: {eventType}");
-            
-            // Store handler in a special registry for string-based events
-            var stringEventType = eventType.GetType();
-            if (!_eventHandlers.ContainsKey(stringEventType))
-            {
-                _eventHandlers[stringEventType] = new List<Delegate>();
-            }
-            _eventHandlers[stringEventType].Add(handler);
+            if (!_namedHandlers.ContainsKey(eventType))
+                _namedHandlers[eventType] = new List<Action<object>>();
+            _namedHandlers[eventType].Add(handler);
         }
 
         /// <summary>
@@ -268,8 +293,7 @@ namespace PerAspera.GameAPI.Events.Integration
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
-            var stringEventType = eventType.GetType();
-            if (_eventHandlers.TryGetValue(stringEventType, out var handlers))
+            if (_namedHandlers.TryGetValue(eventType, out var handlers))
             {
                 handlers.Remove(handler);
                 _logger.Info($"Unsubscribed from event type: {eventType}");
@@ -359,20 +383,21 @@ namespace PerAspera.GameAPI.Events.Integration
         }
 
         /// <summary>
-        /// Publish an event to all registered handlers
+        /// Publish an event to all registered handlers — dispatches to both type-keyed and string-keyed subscribers.
         /// </summary>
-        /// <param name="eventType">Type of the event</param>
-        /// <param name="eventData">Event data to publish</param>
+        /// <param name="eventType">Event type constant (e.g. <see cref="SDKEventConstants.GameCommandsReady"/>)</param>
+        /// <param name="eventData">Event data object</param>
         public static void Publish(string eventType, object eventData)
         {
             try
             {
                 if (eventData == null) return;
 
+                // Type-keyed dispatch (typed Subscribe<T> registrations)
                 var dataType = eventData.GetType();
                 if (_eventHandlers.TryGetValue(dataType, out var handlers))
                 {
-                    foreach (var handler in handlers)
+                    foreach (var handler in new List<Delegate>(handlers))
                     {
                         try
                         {
@@ -385,6 +410,20 @@ namespace PerAspera.GameAPI.Events.Integration
                         }
                     }
                 }
+
+                // String-keyed dispatch (Subscribe(string, Action<object>) registrations)
+                if (_namedHandlers.TryGetValue(eventType, out var namedList))
+                {
+                    foreach (var handler in new List<Action<object>>(namedList))
+                    {
+                        try { handler(eventData); }
+                        catch (Exception ex)
+                        {
+                            var inner = ex.InnerException ?? ex;
+                            _logger.Error($"Named handler failed for {eventType}: [{inner.GetType().Name}] {inner.Message}");
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -393,15 +432,17 @@ namespace PerAspera.GameAPI.Events.Integration
         }
 
         /// <summary>
-        /// Clear all event subscriptions
+        /// Clear all event subscriptions (typed + named).
         /// </summary>
         public static void ClearAllSubscriptions()
         {
             try
             {
-                var totalHandlers = _eventHandlers.Values.Sum(handlers => handlers.Count);
+                var totalHandlers = _eventHandlers.Values.Sum(handlers => handlers.Count)
+                    + _namedHandlers.Values.Sum(handlers => handlers.Count);
                 _eventHandlers.Clear();
-                _logger.Info($"Cleared {totalHandlers} event handlers from {_eventHandlers.Count} event types");
+                _namedHandlers.Clear();
+                _logger.Info($"Cleared {totalHandlers} event handlers");
             }
             catch (Exception ex)
             {

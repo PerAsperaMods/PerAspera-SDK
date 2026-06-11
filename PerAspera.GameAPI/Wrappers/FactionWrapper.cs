@@ -192,6 +192,46 @@ namespace PerAspera.GameAPI.Wrappers
             return true;
         }
 
+        /// <summary>
+        /// Stock total de la faction pour une ressource, via <c>Faction.GetResourceQuantity(ResourceType)</c>.
+        /// Plus performant que <see cref="GetResourceStock"/> (pas d'agrégation bâtiment-par-bâtiment).
+        /// Retourne 0 si la faction ou le type de ressource est introuvable.
+        /// </summary>
+        /// <example>float iron = faction.GetResourceStockTyped("resource_iron");</example>
+        public float GetResourceStockTyped(string resourceKey)
+        {
+            var f = NativeFaction;
+            var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey) as ResourceType;
+            if (f == null || resourceType == null) return 0f;
+            return f.GetResourceQuantity(resourceType);
+        }
+
+        /// <summary>
+        /// Retire des ressources de la faction de manière atomique côté SDK.
+        /// Vérifie le stock avant de débiter ; retourne false sans modifier le stock si insuffisant.
+        /// Utilise <c>Faction.AddResource(ResourceType, int)</c> avec montant négatif.
+        /// </summary>
+        /// <param name="resourceKey">Clé YAML de la ressource (ex: "resource_iron").</param>
+        /// <param name="amount">Quantité à retirer (doit être &gt; 0).</param>
+        /// <returns>True si le débit a été effectué, false si stock insuffisant ou paramètres invalides.</returns>
+        /// <example>
+        /// if (!faction.TryRemoveResource("resource_iron", 100f))
+        ///     return TradeResult.Fail("Stock insuffisant");
+        /// </example>
+        public bool TryRemoveResource(string resourceKey, float amount)
+        {
+            if (amount <= 0f) return false;
+            var f = NativeFaction;
+            var resourceType = KeeperTypeRegistry.GetResourceType(resourceKey) as ResourceType;
+            if (f == null || resourceType == null) return false;
+
+            var current = f.GetResourceQuantity(resourceType);
+            if (current < amount) return false;
+
+            f.AddResource(resourceType, -(int)amount);
+            return true;
+        }
+
         // ==================== RELATIONS ====================
 
         /// <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
@@ -282,9 +322,13 @@ namespace PerAspera.GameAPI.Wrappers
         /// <example>faction.ExecuteResourceImportCommand("resource_water", 1000f);</example>
         public bool ExecuteResourceImportCommand(string resourceType, float amount = 1000f)
         {
-            var mgr = GetInteractionManager();
-            var action = ResourceCommandHelper.CreateNativeTextAction(resourceType, amount);
-            return mgr.DispatchAction(GetNativeObject(), GetGameEventBus(), action, "ExecuteResourceImportCommand");
+            var handleable = GetAsIHandleable();
+            if (handleable == null) return false;
+            var textAction = ResourceCommandHelper.CreateNativeTextAction(resourceType, amount);
+            if (textAction == null) return false;
+            var bus = NativeFaction?._gameEventBus;
+            InteractionManager.DispatchAction(handleable, bus, textAction, "ExecuteResourceImportCommand");
+            return true;
         }
 
         /// <summary>Execute a custom resource command by type name.</summary>
@@ -300,7 +344,7 @@ namespace PerAspera.GameAPI.Wrappers
                 }
                 float amount = parameters?.ContainsKey("amount") == true
                     ? Convert.ToSingle(parameters["amount"]) : 1000f;
-                return ResourceCommandHelper.ExecuteResourceImportCommand(handleable, commandType, amount);
+                return ResourceCommandHelper.ExecuteResourceImportCommand(handleable, commandType, amount, NativeFaction?._gameEventBus);
             }
             catch (Exception ex)
             {
@@ -343,16 +387,9 @@ namespace PerAspera.GameAPI.Wrappers
                     return false;
                 }
 
-                var dispatchMethod = commandBus.GetType()
-                    .GetMethod("Dispatch", BindingFlags.Instance | BindingFlags.Public);
-                if (dispatchMethod?.IsGenericMethod == true)
-                {
-                    dispatchMethod.MakeGenericMethod(cmdType).Invoke(commandBus, new object[] { cmdInstance });
-                    return true;
-                }
-
-                WrapperLog.Error("Generic Dispatch not available on CommandBus");
-                return false;
+                // IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+                commandBus.InvokeMethod("Dispatch", cmdInstance);
+                return true;
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using HarmonyLib;
 using PerAspera.Core;
 
 namespace PerAspera.GameAPI.Overrides.Validation
@@ -19,7 +20,8 @@ namespace PerAspera.GameAPI.Overrides.Validation
         {
             try
             {
-                var method = targetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+                // AccessTools.Method — RS0030-exempt (HarmonyLib)
+                var method = AccessTools.Method(targetType, methodName);
 
                 if (method == null)
                 {

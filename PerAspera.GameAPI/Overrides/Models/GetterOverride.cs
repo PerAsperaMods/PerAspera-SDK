@@ -3,11 +3,22 @@ using System;
 namespace PerAspera.GameAPI.Overrides.Models
 {
     /// <summary>
+    /// Non-generic interface for GetterOverride — allows the registry to access
+    /// IsEnabled/Category without reflection (RS0030-clean).
+    /// </summary>
+    public interface IGetterOverrideInfo
+    {
+        bool IsEnabled { get; }
+        string Category { get; }
+        string Key { get; }
+    }
+
+    /// <summary>
     /// Generic getter override configuration for any type
     /// Supports type-safe value overrides with validation and events
     /// </summary>
     /// <typeparam name="T">The return type of the getter method to override</typeparam>
-    public class GetterOverride<T>
+    public class GetterOverride<T> : IGetterOverrideInfo
     {
         private T _currentValue;
         private bool _isEnabled;

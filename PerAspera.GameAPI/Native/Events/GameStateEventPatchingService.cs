@@ -210,7 +210,7 @@ namespace PerAspera.GameAPI.Native.Events
 
             try
             {
-                var method = targetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+                var method = AccessTools.Method(targetType, methodName);
                 
                 // Create harmony patches with event type context
                 var prefix = new HarmonyMethod(typeof(GameStateEventPatchingService), nameof(GameStatePrefix));
@@ -521,21 +521,7 @@ namespace PerAspera.GameAPI.Native.Events
         {
             try
             {
-                var instanceType = instance.GetType();
-
-                var property = instanceType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (property != null && property.CanRead)
-                {
-                    return property.GetValue(instance);
-                }
-
-                var field = instanceType.GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field != null)
-                {
-                    return field.GetValue(instance);
-                }
-
-                return null;
+                return instance.GetMemberValue<object>(propertyName);
             }
             catch (Exception)
             {

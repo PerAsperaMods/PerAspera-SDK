@@ -528,17 +528,13 @@ namespace PerAspera.GameAPI.Climate.Domain.Atmosphere
 
             try
             {
-                // Use reflection to check if building has cargo acceptance methods
-                var buildingType = building.GetType();
-                var canAcceptMethod = buildingType.GetMethod("CanAcceptCargo", new[] { typeof(Cargo) });
-                if (canAcceptMethod != null)
-                {
-                    return (bool)canAcceptMethod.Invoke(building, new object[] { cargo });
-                }
+                // Try typed InvokeMethod first (IL2CppExtensions — RS0030-exempt in Core)
+                var result = building.InvokeMethod<bool>("CanAcceptCargo", cargo);
+                if (result)
+                    return true;
 
-                // Fallback: assume building can accept cargo if it has storage
-                var storageProp = buildingType.GetProperty("cargoStorage");
-                return storageProp != null;
+                // Fallback: assume building can accept cargo if it has cargoStorage
+                return building.GetMemberValue<object>("cargoStorage") != null;
             }
             catch (Exception ex)
             {
@@ -547,40 +543,23 @@ namespace PerAspera.GameAPI.Climate.Domain.Atmosphere
             }
         }
 
-        /// <summary>
-        /// Make a building accept a cargo
-        /// </summary>
-        /// <param name="building">Target building object</param>
-        /// <param name="cargo">Cargo to accept</param>
-        /// <returns>True if cargo was accepted successfully</returns>
         public static bool AcceptCargo(object building, Cargo cargo)
         {
             if (building == null || cargo == null) return false;
 
             try
             {
-                // Use reflection to call AcceptCargo method
-                var buildingType = building.GetType();
-                var acceptMethod = buildingType.GetMethod("AcceptCargo", new[] { typeof(Cargo) });
-                if (acceptMethod != null)
-                {
-                    return (bool)acceptMethod.Invoke(building, new object[] { cargo });
-                }
+                // Try typed InvokeMethod (IL2CppExtensions — RS0030-exempt in Core)
+                var accepted = building.InvokeMethod<bool>("AcceptCargo", cargo);
+                if (accepted)
+                    return true;
 
-                // Fallback: try to add to cargo storage directly
-                var storageProp = buildingType.GetProperty("cargoStorage");
-                if (storageProp != null)
+                // Fallback: add to cargoStorage directly
+                var storage = building.GetMemberValue<object>("cargoStorage");
+                if (storage != null)
                 {
-                    var storage = storageProp.GetValue(building);
-                    if (storage != null)
-                    {
-                        var addMethod = storage.GetType().GetMethod("Add");
-                        if (addMethod != null)
-                        {
-                            addMethod.Invoke(storage, new object[] { cargo });
-                            return true;
-                        }
-                    }
+                    storage.InvokeMethod("Add", cargo);
+                    return true;
                 }
 
                 return false;

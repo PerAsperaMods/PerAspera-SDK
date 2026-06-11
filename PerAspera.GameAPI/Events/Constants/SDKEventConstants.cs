@@ -28,6 +28,12 @@ namespace PerAspera.GameAPI.Events.Constants
         
         /// <summary>Event: Game first Update tick — InteractionManager and Console are guaranteed ready. Use this to dispatch game commands from YAML.</summary>
         public const string GameCommandsReady = "GameCommandsReady";
+
+        /// <summary>Event: Game session started (new game or loaded save) — anchored on GevUniverseNewGameStarted/ContinueEndedGame via NativeEventHub.</summary>
+        public const string GameSessionStarted = "GameSessionStarted";
+
+        /// <summary>Event: canvasRefs.notificationPresenter is ready — use this to show native notifications (GameFullyLoadedEvent timing fix).</summary>
+        public const string GameUIReady = "GameUIReady";
         
         /// <summary>Event: Blackboard system initialized (variable storage ready)</summary>
         public const string BlackboardInitialized = "BlackboardInitialized";

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Commands.Constants;
 
 namespace PerAspera.GameAPI.Commands.Builders
@@ -134,21 +135,21 @@ namespace PerAspera.GameAPI.Commands.Builders
             if (vector3 == null)
                 throw new ArgumentNullException(nameof(vector3));
                 
-            // Try to extract X, Y, Z from vector3 object using reflection
-            var type = vector3.GetType();
-            var xProp = type.GetProperty("x") ?? type.GetProperty("X");
-            var yProp = type.GetProperty("y") ?? type.GetProperty("Y");
-            var zProp = type.GetProperty("z") ?? type.GetProperty("Z");
-            
-            if (xProp != null && yProp != null && zProp != null)
+            // GetMemberValue<float> via IL2CppExtensions (RS0030-exempt in Core)
+            // Handles Unity Vector3 (x/y/z) and any other XYZ struct/class
+            float x = vector3.GetMemberValue<float>("x");
+            float y = vector3.GetMemberValue<float>("y");
+            float z = vector3.GetMemberValue<float>("z");
+
+            if (x == 0f && y == 0f && z == 0f)
             {
-                var x = Convert.ToSingle(xProp.GetValue(vector3));
-                var y = Convert.ToSingle(yProp.GetValue(vector3));
-                var z = Convert.ToSingle(zProp.GetValue(vector3));
-                return Position(x, y, z);
+                // Try uppercase as fallback (MemberValue checks both field and property)
+                x = vector3.GetMemberValue<float>("X");
+                y = vector3.GetMemberValue<float>("Y");
+                z = vector3.GetMemberValue<float>("Z");
             }
-            
-            throw new ArgumentException("Vector3 object must have x, y, z or X, Y, Z properties", nameof(vector3));
+
+            return Position(x, y, z);
         }
         
         /// <summary>

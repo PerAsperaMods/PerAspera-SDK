@@ -103,50 +103,18 @@ namespace PerAspera.GameAPI.Wrappers
         {
             try
             {
-                System.Type? consoleType = null;
-
-                // Try ScriptsAssembly first (as seen in ILSpy)
-                consoleType = Type.GetType("Console, ScriptsAssembly", false);
-                if (consoleType == null)
-                {
-                    // Fallback: search through all loaded assemblies
-                    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                    {
-                        consoleType = assembly.GetType("Console");
-                        if (consoleType != null)
-                        {
-                            Log.LogInfo($"✅ Found Console type in assembly: {assembly.GetName().Name}");
-                            break;
-                        }
-                    }
-                }
-
-                if (consoleType == null)
-                {
-                    Log.LogWarning("⚠️ Console type not found in any loaded assembly");
-                    return null;
-                }
-
-                // Get the static instance property
-                var instanceProperty = consoleType.GetProperty("instance", BindingFlags.Static | BindingFlags.Public);
-                if (instanceProperty == null)
-                {
-                    Log.LogWarning("⚠️ Console.instance property not found");
-                    return null;
-                }
-
-                var nativeInstance = instanceProperty.GetValue(null);
+                // Console.instance \u2014 typed static property (InteropDump ligne 1279)
+                var nativeInstance = Console.instance;
                 if (nativeInstance == null)
                 {
-                    Log.LogWarning("⚠️ Console.instance is null");
+                    Log.LogWarning("\u26a0\ufe0f Console.instance is null");
                     return null;
                 }
-
                 return new ConsoleWrapper(nativeInstance);
             }
             catch (Exception ex)
             {
-                Log.LogError($"❌ Failed to get Console instance: {ex.Message}");
+                Log.LogError($"\u274c Failed to get Console instance: {ex.Message}");
                 return null;
             }
         }

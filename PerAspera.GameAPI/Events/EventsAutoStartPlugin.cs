@@ -63,50 +63,19 @@ namespace PerAspera.GameAPI.Events
         }
 
         /// <summary>
-        /// Initialize SDK-based game state detection (replacing problematic Harmony patches)
-        /// Uses existing SDK wrapper system for clean game initialization detection
+        /// Initialize SDK-based game state detection.
         /// </summary>
         private void InitializeSDKBasedGameDetection()
         {
             try
             {
                 Log.LogInfo("🔧 Initializing SDK-based game detection...");
-                
-                // Use existing SDK wrapper architecture instead of raw IL2CPP patches
-                Patches.GameInitializationPatches.InitializeSDKBasedEvents();
-                
-                // Initialize GameHub Detector MonoBehaviour
                 InitializeGameHubDetector();
-                
                 Log.LogInfo("✅ SDK-based game detection initialized successfully");
             }
             catch (System.Exception ex)
             {
                 Log.LogError($"❌ Failed to initialize SDK-based game detection: {ex.Message}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// DEPRECATED: Apply Harmony patches for game initialization detection
-        /// Replaced by SDK-based detection for better reliability
-        /// </summary>
-        private void ApplyGameInitializationPatches()
-        {
-            try
-            {
-                Log.LogInfo("Applying game initialization patches...");
-                
-                var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.GameInitialization");
-                
-                // Apply patches from GameInitializationPatches class
-                harmony.PatchAll(typeof(Patches.GameInitializationPatches));
-                
-                Log.LogInfo("✅ Game initialization patches applied successfully");
-            }
-            catch (System.Exception ex)
-            {
-                Log.LogError($"❌ Failed to apply game initialization patches: {ex.Message}");
                 throw;
             }
         }
@@ -146,58 +115,113 @@ namespace PerAspera.GameAPI.Events
         }
 
         /// <summary>
-        /// Initialize native event subscriptions for GameHub detection
-        /// Much more reliable than patches - listens to actual game events
+        /// Initialize game lifecycle detection via NativeEventHub + Harmony patches.
         /// </summary>
         private void InitializeGameHubDetector()
         {
             try
             {
-                Log.LogInfo("🔧 Setting up native event subscriptions for GameHub detection...");
-
-                // Subscribe to native game start events
-                EnhancedEventBus.Subscribe<PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent>(OnGameStarted);
-                
-                EnhancedEventBus.Subscribe<PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent>(OnGameLoaded);
-
-                Log.LogInfo("✅ Native event subscriptions setup successfully");
-                Log.LogInfo("🎯 Will emit GameHubInitializedEvent when game starts/loads");
-                Log.LogInfo("🎮 Game initialization events (GameHubInitialized, GameFullyLoaded) ready");
-                
-                // ALSO apply GameHub Harmony patches for immediate detection (works in menu)
-                Log.LogInfo("🔧 Applying GameHub Harmony patches for immediate detection...");
+                Log.LogInfo("🔧 Applying GameHub Harmony patches...");
                 ApplyGameHubPatches();
-                
-                // Apply BaseGame patches for OnLoadFinished event
-                Log.LogInfo("🔧 Applying BaseGame Harmony patches for OnLoadFinished event...");
+
+                Log.LogInfo("🔧 Applying BaseGame patches + NativeEventHub...");
                 ApplyBaseGamePatches();
+
+                Log.LogInfo("✅ Game lifecycle detection ready (NativeEventHub + Harmony)");
             }
             catch (System.Exception ex)
             {
-                Log.LogError($"❌ Failed to setup GameHub native event detection: {ex.Message}");
+                Log.LogError($"❌ Failed to setup game lifecycle detection: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Apply BaseGame Harmony patches for OnLoadFinished event
+        /// Apply BaseGame Harmony patches and wire NativeEventHub lifecycle subscriptions.
         /// </summary>
         private void ApplyBaseGamePatches()
         {
             try
             {
                 var harmony = new HarmonyLib.Harmony("PerAspera.GameAPI.Events.BaseGame");
-                
-                // Apply BaseGame patches for OnLoadFinished + GameFullyLoaded events
                 harmony.PatchAll(typeof(Patches.BaseGamePatches));
-                
-                // Apply BaseGame.Update one-shot patch for GameCommandsReadyEvent
                 harmony.PatchAll(typeof(Patches.BaseGameUpdatePatches));
-                
-                Log.LogInfo("✅ BaseGame Harmony patches applied successfully (incl. GameCommandsReady)");
+
+                // Wire NativeEventHub — single patch on GameEventBus.DispatchInternal
+                Native.NativeEventHub.Apply(harmony);
+                WireSessionLifecycleEvents();
+
+                Log.LogInfo("✅ BaseGame patches applied (GameCommandsReady + GameUIReady + NativeEventHub)");
             }
             catch (System.Exception ex)
             {
                 Log.LogError($"❌ Failed to apply BaseGame patches: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Subscribe to native session lifecycle events via NativeEventHub.
+        /// Replaces dead EnhancedEventBus.Subscribe&lt;UniverseNewGameStartedNativeEvent&gt; subscriptions.
+        /// </summary>
+        private static void WireSessionLifecycleEvents()
+        {
+            Native.NativeEventHub.Subscribe(Native.NativeGameEvent.UniverseNewGameStarted, _ =>
+            {
+                _staticLogger?.LogInfo("🎮 [NativeHub] UniverseNewGameStarted — resetting session");
+                _gameHubInitialized = false;
+                Patches.BaseGameUpdatePatches.ResetForNewSession();
+                EmitSessionEvents(isNewGame: true);
+            });
+
+            Native.NativeEventHub.Subscribe(Native.NativeGameEvent.UniverseContinueEndedGame, _ =>
+            {
+                _staticLogger?.LogInfo("🎮 [NativeHub] UniverseContinueEndedGame — resetting session");
+                _gameHubInitialized = false;
+                Patches.BaseGameUpdatePatches.ResetForNewSession();
+                EmitSessionEvents(isNewGame: false);
+            });
+        }
+
+        private static void EmitSessionEvents(bool isNewGame)
+        {
+            try
+            {
+                var baseGame = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
+                if (baseGame == null)
+                {
+                    _staticLogger?.LogWarning("⚠️ BaseGame not yet available — session events deferred to GameCommandsReady");
+                    return;
+                }
+
+                var universe = baseGame.universe;
+
+                // New lifecycle event
+                var sessionEvt = new GameSessionStartedEvent(baseGame, universe, isNewGame);
+                EnhancedEventBus.Publish(SDKEventConstants.GameSessionStarted, sessionEvt);
+                _staticLogger?.LogInfo($"✅ GameSessionStartedEvent dispatched (isNewGame={isNewGame})");
+
+                // Legacy backward-compat events
+                if (!_gameHubInitialized)
+                {
+                    _gameHubInitialized = true;
+                    EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized,
+                        new GameHubInitializedEvent((object)baseGame, isReady: true));
+                    EnhancedEventBus.Publish(SDKEventConstants.GameHubReady,
+                        new GameHubReadyEvent(sceneLoaded: true, managerReady: true));
+                    if (universe != null)
+                    {
+                        try
+                        {
+                            EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded,
+                                new GameFullyLoadedEvent((object)baseGame, (object)universe,
+                                    (object?)universe.planet ?? (object)universe));
+                        }
+                        catch { /* planet may be null on very fast loads */ }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                _staticLogger?.LogError($"❌ EmitSessionEvents failed: {ex.Message}");
             }
         }
 
@@ -221,87 +245,7 @@ namespace PerAspera.GameAPI.Events
             }
         }
 
-        /// <summary>
-        /// Handle new game started - BaseGame should be accessible now
-        /// </summary>
-        private static void OnGameStarted(PerAspera.GameAPI.Events.Native.UniverseNewGameStartedNativeEvent evt)
-        {
-            _staticLogger?.LogInfo($"🎮 New game started: {evt.GameMode} - attempting to emit GameHubInitializedEvent");
-            Patches.BaseGameUpdatePatches.ResetForNewSession();
-            EmitGameHubInitializedEvent("NewGameStarted");
-        }
-
-        /// <summary>
-        /// Handle game loaded - BaseGame should be accessible now
-        /// </summary>
-        private static void OnGameLoaded(PerAspera.GameAPI.Events.Native.UniverseContinueEndedGameNativeEvent evt)
-        {
-            _staticLogger?.LogInfo($"🎮 Game loaded: {evt.SaveGameName} - attempting to emit GameHubInitializedEvent");
-            Patches.BaseGameUpdatePatches.ResetForNewSession();
-            EmitGameHubInitializedEvent("GameLoaded");
-        }
-
         private static bool _gameHubInitialized = false;
-
-        /// <summary>
-        /// Emit GameHubInitializedEvent when BaseGame is confirmed accessible
-        /// </summary>
-        private static void EmitGameHubInitializedEvent(string triggerSource)
-        {
-            try
-            {
-                if (_gameHubInitialized)
-                {
-                    _staticLogger?.LogInfo($"⚠️ GameHubInitializedEvent already emitted, skipping {triggerSource}");
-                    return;
-                }
-
-                _staticLogger?.LogInfo($"🎯 {triggerSource} triggered - checking BaseGame accessibility...");
-
-                // Access BaseGame through SDK wrapper
-                var baseGame = GameTypeInitializer.GetBaseGameInstance() as BaseGame;
-                if (baseGame != null)
-                {
-                    _staticLogger?.LogInfo("🎮 BaseGame confirmed accessible - emitting all SDK events");
-                    
-                    // Create and emit GameHubInitializedEvent 
-                    var gameHubEvent = new GameHubInitializedEvent(
-                        (object)baseGame,
-                        isReady: true
-                    );
-                    EnhancedEventBus.Publish(SDKEventConstants.GameHubInitialized, gameHubEvent);
-                    _staticLogger?.LogInfo($"✅ GameHubInitializedEvent emitted via {triggerSource}");
-                    
-                    // Emit GameHubReadyEvent (what CommandsDemo expects)
-                    var gameHubReadyEvent = new GameHubReadyEvent(
-                        sceneLoaded: true,
-                        managerReady: true
-                    );
-                    EnhancedEventBus.Publish(SDKEventConstants.GameHubReady, gameHubReadyEvent);
-                    _staticLogger?.LogInfo($"✅ GameHubReadyEvent emitted via {triggerSource}");
-                    
-                    // Emit GameFullyLoadedEvent (backup for CommandsDemo)
-                    var gameFullyLoadedEvent = new GameFullyLoadedEvent(
-                        (object)baseGame,
-                        (object)baseGame, // universe  baseGame.getUniverse() noramlement
-                        null // planet might not be available yet
-                    );
-                    EnhancedEventBus.Publish(SDKEventConstants.GameFullyLoaded, gameFullyLoadedEvent);
-                    _staticLogger?.LogInfo($"✅ GameFullyLoadedEvent emitted via {triggerSource}");
-                    
-                    _gameHubInitialized = true;
-                    _staticLogger?.LogInfo($"🎯 All SDK events emitted successfully via {triggerSource}");
-                }
-                else
-                {
-                    _staticLogger?.LogWarning($"⚠️ BaseGame not yet accessible via {triggerSource}, will wait for next event");
-                }
-            }
-            catch (System.Exception ex)
-            {
-                _staticLogger?.LogError($"❌ Error emitting GameHubInitializedEvent via {triggerSource}: {ex.Message}");
-            }
-        }
         /// <summary>
         /// Plugin shutdown
         /// </summary>

@@ -179,6 +179,28 @@ namespace PerAspera.Core.IL2CPP
         }
 
         /// <summary>
+        /// Safe invocation of an already-resolved <see cref="System.Reflection.MethodBase"/>.
+        /// Use this overload when the method was obtained via <c>AccessTools.Method()</c>
+        /// or similar — avoids the string-based lookup and removes CS0121 ambiguity.
+        /// </summary>
+        /// <param name="instance">Target instance (null for static methods).</param>
+        /// <param name="method">Pre-resolved method to invoke.</param>
+        /// <param name="parameters">Arguments to pass.</param>
+        /// <returns>Return value or null on failure.</returns>
+        public static object? SafeInvoke(object? instance, MethodBase method, params object[] parameters)
+        {
+            if (method == null) return null;
+            try
+            {
+                return method.Invoke(instance, parameters.Length > 0 ? parameters : null);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Safe field/property access
         /// </summary>
         /// <param name="instance">Target instance</param>

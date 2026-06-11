@@ -320,32 +320,19 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
             
             try
             {
-                // Try direct int conversion
+                // IL2CppExtensions.InvokeMethod/GetMemberValue — RS0030-exempt (Core)
                 if (handle is int intValue) return intValue;
-                
-                // Try ToInt() method
-                var toIntMethod = handle.GetType().GetMethod("ToInt");
-                if (toIntMethod != null)
-                {
-                    var result = toIntMethod.Invoke(handle, null);
-                    if (result is int value) return value;
-                }
-                
-                // Try Value property
-                var valueProperty = handle.GetType().GetProperty("Value");
-                if (valueProperty != null)
-                {
-                    var result = valueProperty.GetValue(handle);
-                    if (result is int value) return value;
-                }
-                
-                // Try ToString() and parse
+
+                var toIntResult = handle.InvokeMethod<object>("ToInt");
+                if (toIntResult is int iv) return iv;
+
+                var valueResult = handle.GetMemberValue<object>("Value");
+                if (valueResult is int vv) return vv;
+
                 var stringValue = handle.ToString();
                 if (int.TryParse(stringValue, out var parsedValue))
-                {
                     return parsedValue;
-                }
-                
+
                 return null;
             }
             catch

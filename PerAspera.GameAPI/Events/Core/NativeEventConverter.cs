@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using PerAspera.Core;
+using PerAspera.Core.IL2CPP;
 
 namespace PerAspera.GameAPI.Events.Core
 {
@@ -36,7 +37,8 @@ namespace PerAspera.GameAPI.Events.Core
 
                 try
                 {
-                    var currentValue = property.GetValue(eventObject);
+                    // IL2CppExtensions.GetMemberValue/SetMemberValue — RS0030-exempt (Core)
+                    var currentValue = eventObject.GetMemberValue<object>(property.Name);
                     if (currentValue == null)
                         continue;
 
@@ -46,7 +48,7 @@ namespace PerAspera.GameAPI.Events.Core
                         // Only set if we actually converted something
                         if (property.CanWrite)
                         {
-                            property.SetValue(eventObject, convertedValue);
+                            eventObject.SetMemberValue(property.Name, convertedValue);
                             converted = true;
                             _logger.Debug($"Converted {eventType.Name}.{property.Name} to wrapper");
                         }
@@ -193,8 +195,9 @@ namespace PerAspera.GameAPI.Events.Core
                     if (!property.CanRead || !property.CanWrite)
                         continue;
 
-                    var value = property.GetValue(originalEvent);
-                    property.SetValue(copy, value);
+                    // IL2CppExtensions.GetMemberValue/SetMemberValue — RS0030-exempt (Core)
+                    var value = originalEvent.GetMemberValue<object>(property.Name);
+                    copy.SetMemberValue(property.Name, value);
                 }
 
                 // Convert the copy

@@ -40,40 +40,19 @@ namespace PerAspera.GameAPI.Commands.Helpers
         /// Execute any game console command string via Console.instance.ExecuteCommandString.
         /// </summary>
         /// <param name="cmd">Full command string, e.g. "BunchOfResources" or "FactionAddResourceDistributed water 500"</param>
-        /// <returns>true if the command was dispatched; false if Console type/method not found</returns>
+        /// <returns>true if the command was dispatched; false if Console not ready</returns>
         public static bool ExecuteConsoleCommand(string cmd)
         {
             try
             {
-                if (!_typeSearched)
-                {
-                    _typeSearched = true;
-                    _consoleType = FindGameConsoleType();
-                    if (_consoleType != null)
-                        _executeMethod = _consoleType.GetMethod("ExecuteCommandString",
-                            BindingFlags.Public | BindingFlags.Instance);
-
-                    if (_consoleType == null)
-                        _log.Warning("[ConsoleCmd] Console type not found in any loaded assembly — console commands unavailable");
-                    else if (_executeMethod == null)
-                        _log.Warning($"[ConsoleCmd] ExecuteCommandString not found on {_consoleType.FullName} (assembly={_consoleType.Assembly.GetName().Name})");
-                    else
-                        _log.Info($"[ConsoleCmd] Console ready: {_consoleType.FullName} in {_consoleType.Assembly.GetName().Name}");
-                }
-
-                if (_consoleType == null || _executeMethod == null)
-                    return false;
-
-                var instanceProp = _consoleType.GetProperty("instance",
-                    BindingFlags.Static | BindingFlags.Public);
-                var console = instanceProp?.GetValue(null);
+                // Console.instance / ExecuteCommandString \u2014 typed, InteropDump lignes 1279 + 1659
+                var console = Console.instance;
                 if (console == null)
                 {
-                    _log.Warning("[ConsoleCmd] Console.instance is null — game not ready?");
+                    _log.Warning("[ConsoleCmd] Console.instance is null \u2014 game not ready?");
                     return false;
                 }
-
-                _executeMethod.Invoke(console, new object[] { cmd });
+                console.ExecuteCommandString(cmd);
                 return true;
             }
             catch (Exception ex)

@@ -77,16 +77,16 @@ namespace PerAspera.GameAPI.Native.Events
         {
             try
             {
-                var method = _planetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+                var method = AccessTools.Method(_planetType, methodName);
                 if (method == null)
                 {
                     _log.Warning($"Method {methodName} not found on Planet");
                     return false;
                 }
 
-                var postfixMethod = typeof(ClimateEventPatchingService).GetMethod(
-                    $"{methodName}_Postfix",
-                    BindingFlags.NonPublic | BindingFlags.Static);
+                var postfixMethod = AccessTools.Method(
+                    typeof(ClimateEventPatchingService),
+                    $"{methodName}_Postfix");
 
                 if (postfixMethod == null)
                 {

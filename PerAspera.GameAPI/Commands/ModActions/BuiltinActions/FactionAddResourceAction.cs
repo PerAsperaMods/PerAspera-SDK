@@ -48,35 +48,16 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
                 return false;
             }
 
-            // Cache Faction.AddResource(ResourceType, int) on first call
-            if (!_methodSearched)
+            // Use typed Faction.AddResource(ResourceType, int) — InteropDump (RS0030-clean)
+            if (faction is Faction nativeFaction && nativeResourceType is ResourceType rt)
             {
-                _methodSearched = true;
-                var factionType = faction!.GetType();
-
-                // Try exact signature first
-                _addResourceMethod = factionType.GetMethod("AddResource",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                    null, new[] { nativeResourceType.GetType(), typeof(int) }, null);
-
-                // Fallback: any 2-param overload named AddResource
-                if (_addResourceMethod == null)
-                {
-                    _addResourceMethod = factionType
-                        .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                        .FirstOrDefault(m => m.Name == "AddResource" && m.GetParameters().Length == 2);
-                }
-
-                if (_addResourceMethod == null)
-                    _log.Warning($"[{CommandName}] Faction.AddResource(ResourceType, int) not found on {factionType.Name}");
-                else
-                    _log.Info($"[{CommandName}] Faction.AddResource ready (found on {factionType.Name})");
+                nativeFaction.AddResource(rt, (int)amountF);
+                _log.Info($"[{CommandName}] Added {(int)amountF}x '{resourceKey}'");
+                return true;
             }
 
-            if (_addResourceMethod == null)
-                return false;
-
-            _addResourceMethod.Invoke(faction, new object[] { nativeResourceType, (int)amountF });
+            // Fallback via IL2CppExtensions.InvokeMethod — RS0030-exempt (Core)
+            faction.InvokeMethod("AddResource", nativeResourceType, (int)amountF);
             _log.Info($"[{CommandName}] Added {(int)amountF}x '{resourceKey}'");
             return true;
         }

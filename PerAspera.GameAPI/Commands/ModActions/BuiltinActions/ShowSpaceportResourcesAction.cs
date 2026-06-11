@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
-using System.Reflection;
 using PerAspera.Core;
+using PerAspera.GameAPI.Economy.Wrappers;
 using PerAspera.GameAPI.Events.SDK;
 
 namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
@@ -15,6 +14,11 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
     /// - command: ShowSpaceportResources
     ///   arguments: []
     /// </code>
+    ///
+    /// MIGRATION 2026-06-10 — réécrit en accès typé via PortProjectWrapper.
+    /// Élimine ~48 RS0030 (GetProperty/GetValue sur Faction/SpacePortComponent/PortProject/ResourceType/CargoQuantity).
+    /// Source de vérité : Tools\InteropDump\ScriptsAssembly\Faction.cs (spacePorts),
+    /// SpacePortComponent.cs (portProject), PortProject.cs (stage/done/developmentResources).
     /// </summary>
     public class ShowSpaceportResourcesAction : IModTextAction
     {
@@ -29,38 +33,22 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
 
             try
             {
-                var factionType = faction!.GetType();
+                // Faction.spacePorts : List<SpacePortComponent> — typé, confirmé dump ligne 13142
+                var spacePorts = faction!.spacePorts;
 
-                // faction.spacePorts → List<SpacePortComponent>
-                // In IL2CPP proxies (BepInEx 6), native fields are exposed as C# properties.
-                var spacePortsProp = factionType.GetProperty("spacePorts",
-                    BindingFlags.Public | BindingFlags.Instance);
-                var spacePorts = spacePortsProp?.GetValue(faction);
-
-                if (spacePorts == null)
+                if (spacePorts == null || spacePorts.Count == 0)
                 {
-                    _log.Warning("[SpaceportDebug] 'spacePorts' property not found or null on Faction");
-                    return false;
-                }
-
-                var enumerable = spacePorts as IEnumerable;
-                if (enumerable == null)
-                {
-                    _log.Warning($"[SpaceportDebug] spacePorts is not IEnumerable: {spacePorts.GetType().Name}");
-                    return false;
+                    _log.Info("[SpaceportDebug] No active spaceports found.");
+                    return true;
                 }
 
                 int portIndex = 0;
-                foreach (var spRaw in enumerable)
+                foreach (var port in spacePorts)
                 {
-                    if (spRaw == null) continue;
-                    var spType = spRaw.GetType();
+                    if (port == null) continue;
 
-                    // portProject → PortProject
-                    var portProjectProp = spType.GetProperty("portProject",
-                        BindingFlags.Public | BindingFlags.Instance);
-                    var portProject = portProjectProp?.GetValue(spRaw);
-
+                    // SpacePortComponent.portProject : PortProject — typé, confirmé dump ligne 162
+                    var portProject = port.portProject;
                     if (portProject == null)
                     {
                         _log.Info($"[SpaceportDebug] SpacePort[{portIndex}]: no portProject");
@@ -68,38 +56,25 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
                         continue;
                     }
 
-                    var ppType = portProject.GetType();
+                    // PortProjectWrapper : accès typé à stageKey, resourcesMet, developmentResources
+                    var wrapper = new PortProjectWrapper(portProject);
+                    _log.Info($"[SpaceportDebug] SpacePort[{portIndex}] project='{wrapper.ProjectKey}'" +
+                              $" stage='{wrapper.StageKey}' resourcesMet={wrapper.ResourcesMet}" +
+                              $" done={wrapper.Done}");
 
-                    // specialProject.key for the project name
-                    var spProp = ppType.GetProperty("specialProject", BindingFlags.Public | BindingFlags.Instance);
-                    var specialProject = spProp?.GetValue(portProject);
-                    string projectName = GetStringField(specialProject, "key") ?? "?";
-
-                    // resourcesMet
-                    var resMetProp = ppType.GetProperty("resourcesMet", BindingFlags.Public | BindingFlags.Instance);
-                    bool resourcesMet = (bool)(resMetProp?.GetValue(portProject) ?? false);
-
-                    _log.Info($"[SpaceportDebug] SpacePort[{portIndex}] project='{projectName}' resourcesMet={resourcesMet}");
-
-                    // developmentResources → Dictionary<ResourceType, CargoQuantity>
-                    var devResProp = ppType.GetProperty("developmentResources",
-                        BindingFlags.Public | BindingFlags.Instance);
-                    var devResources = devResProp?.GetValue(portProject);
-
-                    if (devResources == null)
+                    var devRes = wrapper.GetDevelopmentResources();
+                    if (devRes.Count == 0)
                     {
-                        _log.Info("  developmentResources=null");
+                        _log.Info("  developmentResources=(vide)");
                     }
                     else
                     {
-                        LogDictionary(devResources);
+                        foreach (var (resKey, qty) in devRes)
+                            _log.Info($"  {resKey}: {qty:F1}");
                     }
 
                     portIndex++;
                 }
-
-                if (portIndex == 0)
-                    _log.Info("[SpaceportDebug] No active spaceports found.");
 
                 return true;
             }
@@ -108,85 +83,6 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
                 _log.Warning($"[SpaceportDebug] Exception: {ex.Message}");
                 return false;
             }
-        }
-
-        private static void LogDictionary(object dict)
-        {
-            try
-            {
-                // Try IDictionary first
-                if (dict is IDictionary idict)
-                {
-                    foreach (DictionaryEntry entry in idict)
-                        _log.Info($"  {GetResourceName(entry.Key)}: {GetCargoFloat(entry.Value):F1}");
-                    return;
-                }
-
-                // IL2CPP Dictionary — iterate via reflection
-                var dictType = dict.GetType();
-                var keysProperty = dictType.GetProperty("Keys", BindingFlags.Public | BindingFlags.Instance);
-                var valuesProperty = dictType.GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-                var keys = keysProperty?.GetValue(dict) as IEnumerable;
-                var values = valuesProperty?.GetValue(dict) as IEnumerable;
-
-                if (keys == null || values == null)
-                {
-                    _log.Info($"  [cannot iterate dictionary of type {dictType.Name}]");
-                    return;
-                }
-
-                var keyList = new System.Collections.Generic.List<object>();
-                foreach (var k in keys) keyList.Add(k);
-                var valueList = new System.Collections.Generic.List<object>();
-                foreach (var v in values) valueList.Add(v);
-
-                for (int i = 0; i < Math.Min(keyList.Count, valueList.Count); i++)
-                    _log.Info($"  {GetResourceName(keyList[i])}: {GetCargoFloat(valueList[i]):F1}");
-            }
-            catch (Exception ex)
-            {
-                _log.Warning($"  [LogDictionary error: {ex.Message}]");
-            }
-        }
-
-        private static string GetResourceName(object resourceType)
-        {
-            if (resourceType == null) return "null";
-            try
-            {
-                var t = resourceType.GetType();
-                var nameProp = t.GetProperty("name", BindingFlags.Public | BindingFlags.Instance)
-                            ?? t.GetProperty("Name", BindingFlags.Public | BindingFlags.Instance)
-                            ?? t.GetProperty("key", BindingFlags.Public | BindingFlags.Instance);
-                return nameProp?.GetValue(resourceType)?.ToString() ?? resourceType.GetType().Name;
-            }
-            catch { return "?"; }
-        }
-
-        private static float GetCargoFloat(object cargoQty)
-        {
-            if (cargoQty == null) return 0f;
-            try
-            {
-                var toFloat = cargoQty.GetType().GetMethod("ToFloat",
-                    BindingFlags.Public | BindingFlags.Instance);
-                return (float)(toFloat?.Invoke(cargoQty, null) ?? 0f);
-            }
-            catch { return 0f; }
-        }
-
-        private static string? GetStringField(object? obj, string fieldName)
-        {
-            if (obj == null) return null;
-            try
-            {
-                var t = obj.GetType();
-                return (t.GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance)
-                          ?.GetValue(obj)
-                     ?? t.GetField(fieldName, BindingFlags.Public | BindingFlags.Instance)
-                          ?.GetValue(obj))?.ToString();
-            }
-            catch { return null; }
         }
     }
 }

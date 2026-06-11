@@ -512,6 +512,17 @@
             <param name="parameters">Method parameters</param>
             <returns>Method result or null if failed</returns>
         </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.SafeInvoke(System.Object,System.Reflection.MethodBase,System.Object[])">
+            <summary>
+            Safe invocation of an already-resolved <see cref="T:System.Reflection.MethodBase"/>.
+            Use this overload when the method was obtained via <c>AccessTools.Method()</c>
+            or similar — avoids the string-based lookup and removes CS0121 ambiguity.
+            </summary>
+            <param name="instance">Target instance (null for static methods).</param>
+            <param name="method">Pre-resolved method to invoke.</param>
+            <param name="parameters">Arguments to pass.</param>
+            <returns>Return value or null on failure.</returns>
+        </member>
         <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.SafeGetValue(System.Object,System.String)">
             <summary>
             Safe field/property access

@@ -278,32 +278,15 @@ namespace PerAspera.GameAPI.Native
         {
             try
             {
-                // Utilise la réflexion directe pour trouver BaseGame
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                foreach (var assembly in assemblies)
+                // BaseGame.self : public static BaseGame -- typed, confirmed InteropDump ligne 1634
+                var instance = BaseGame.self;
+                if (instance != null)
                 {
-                    if (assembly.GetName().Name?.Contains("Assembly-CSharp") == true ||
-                        assembly.GetName().Name?.Contains("PerAspera") == true)
-                    {
-                        var baseGameType = assembly.GetType("BaseGame");
-                        if (baseGameType != null)
-                        {
-                            // Recherche la propriété statique Instance
-                            var instanceProperty = baseGameType.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                            if (instanceProperty != null)
-                            {
-                                var instance = instanceProperty.GetValue(null);
-                                if (instance != null)
-                                {
-                                    Log.Info($"Found BaseGame.Instance via reflection");
-                                    return instance;
-                                }
-                            }
-                        }
-                    }
+                    Log.Info("Found BaseGame.self typed singleton");
+                    return instance;
                 }
 
-                Log.Warning("BaseGame instance not found via reflection");
+                Log.Warning("BaseGame.self is null");
                 return null;
             }
             catch (Exception ex)
@@ -320,18 +303,15 @@ namespace PerAspera.GameAPI.Native
         {
             try
             {
-                var universeProperty = baseGameInstance.GetType().GetProperty("universe");
-                if (universeProperty != null)
+                // BaseGame._universe : public static Universe -- typed, confirmed InteropDump ligne 3898
+                var universe = BaseGame._universe;
+                if (universe != null)
                 {
-                    var universe = universeProperty.GetValue(baseGameInstance);
-                    if (universe != null)
-                    {
-                        Log.Info("Found Universe via BaseGame.universe");
-                        return universe;
-                    }
+                    Log.Info("Found Universe via BaseGame._universe");
+                    return universe;
                 }
 
-                Log.Warning("Universe property not found on BaseGame");
+                Log.Warning("Universe not found on BaseGame");
                 return null;
             }
             catch (Exception ex)
@@ -348,18 +328,16 @@ namespace PerAspera.GameAPI.Native
         {
             try
             {
-                var planetProperty = universeInstance.GetType().GetProperty("currentPlanet");
-                if (planetProperty != null)
+                // Universe.planet : public Planet -- typed, confirmed InteropDump (get_planet)
+                var universe = universeInstance as Universe;
+                var planet = universe?.planet;
+                if (planet != null)
                 {
-                    var planet = planetProperty.GetValue(universeInstance);
-                    if (planet != null)
-                    {
-                        Log.Info("Found currentPlanet via Universe.currentPlanet");
-                        return planet;
-                    }
+                    Log.Info("Found planet via Universe.planet");
+                    return planet;
                 }
 
-                Log.Warning("currentPlanet property not found on Universe");
+                Log.Warning("planet not found on Universe");
                 return null;
             }
             catch (Exception ex)
@@ -398,33 +376,21 @@ namespace PerAspera.GameAPI.Native
 
         private static void ValidateBaseGameInstance(object instance)
         {
-            // Vérifier que BaseGame a les propriétés attendues
-            var type = instance.GetType();
-            var hasUniverse = type.GetProperty("universe") != null;
-            if (!hasUniverse)
-            {
-                Log.Warning("BaseGame instance validation: missing 'universe' property");
-            }
+            // Typed check: BaseGame._universe static field confirms the proxy is intact
+            if (instance is not BaseGame bg)
+                Log.Warning("BaseGame instance validation: instance is not a BaseGame typed proxy");
         }
 
         private static void ValidateUniverseInstance(object instance)
         {
-            var type = instance.GetType();
-            var hasCurrentPlanet = type.GetProperty("currentPlanet") != null;
-            if (!hasCurrentPlanet)
-            {
-                Log.Warning("Universe instance validation: missing 'currentPlanet' property");
-            }
+            if (instance is not Universe)
+                Log.Warning("Universe instance validation: instance is not a Universe typed proxy");
         }
 
         private static void ValidatePlanetInstance(object instance)
         {
-            var type = instance.GetType();
-            var hasAtmosphere = type.GetProperty("atmosphere") != null;
-            if (!hasAtmosphere)
-            {
-                Log.Warning("Planet instance validation: missing 'atmosphere' property");
-            }
+            if (instance is not Planet)
+                Log.Warning("Planet instance validation: instance is not a Planet typed proxy");
         }
     }
 }

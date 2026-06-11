@@ -123,7 +123,7 @@
 **Rôle :** point d'accès central aux objets du jeu (BaseGame, Universe, Planet).  
 **Classes clés :**
 - `GameTypeInitializer` — découverte des types/instances du jeu (`GetBaseGameInstance()`)
-- `ModEventBus` + services `*EventPatchingService` (Base, Building, Climate, GameState, Resource, Time)
+- `EventPatchingService` variants — `SpaceProjectEventPatchingService` (alive), autres supprimés 2026-06
 - `TypeDiscoveryCache`, `ResourceTypeDiscovery` — cache de découverte de types
 - `Models` — `AtmosphereData`, `ClimateSnapshot`, `TerraformingStatus`
 - `Patches` — `PlanetPatches`, `EnergyPatches`
@@ -136,11 +136,11 @@
 **Rôle :** détection du démarrage du jeu et bus d'événements SDK.  
 **Classes clés :**
 - `EventsAutoStartPlugin` — plugin BepInEx qui démarre automatiquement la détection
-- `GameHubDetector` — MonoBehaviour qui poll `GameTypeInitializer.GetBaseGameInstance()` jusqu'à disponibilité, puis publie :
-  - `EarlyModsReadyEvent` (BaseGame disponible)
-  - `GameHubInitializedEvent` (compatibilité)
-  - `GameFullyLoadedEvent` (Universe + Planet disponibles)
-- `EnhancedEventBus` — `Publish(eventName, event)`, `Subscribe(eventName, handler)`
+- `NativeEventHub` — Postfix unique sur `GameEventBus.DispatchInternal`, 121 events natifs
+- `NativeEventExtensions` — `ResolveBuilding(keeper)`, `ResolveFaction(universe)`, `ResolveDroneFromFaction(faction)`, `ResolveWayFromFaction(faction)`
+- `BaseGameUpdatePatches` — poll lifecycle → `GameCommandsReadyEvent` + `GameUIReadyEvent`
+- `EnhancedEventBus` — `Publish/Subscribe` + helpers `SubscribeTo*(handler)`
+- Lifecycle events : `GameSessionStartedEvent` (ancrage natif GevUniverse*), `GameCommandsReadyEvent`, `GameUIReadyEvent`
 
 **Utiliser quand :** s'abonner à l'initialisation du jeu, écouter des événements cross-mod.
 

@@ -92,13 +92,10 @@ namespace PerAspera.GameAPI.Overrides.Registry
         public static bool IsOverrideActive(string className, string methodName)
         {
             var key = $"{className}.{methodName}";
-
-            if (!_overrides.TryGetValue(key, out var obj))
-                return false;
-
-            // Use reflection to access IsEnabled property (works for any GetterOverride<T>)
-            var isEnabledProp = obj.GetType().GetProperty("IsEnabled");
-            return isEnabledProp?.GetValue(obj) as bool? ?? false;
+            // IGetterOverrideInfo.IsEnabled — interface cast, zero reflection
+            return _overrides.TryGetValue(key, out var obj)
+                && obj is IGetterOverrideInfo info
+                && info.IsEnabled;
         }
 
         /// <summary>
@@ -115,11 +112,9 @@ namespace PerAspera.GameAPI.Overrides.Registry
         /// </summary>
         public static IEnumerable<object> GetOverridesByCategory(string category)
         {
+            // IGetterOverrideInfo.Category — interface cast, zero reflection
             return _overrides.Values.Where(o =>
-            {
-                var categoryProp = o.GetType().GetProperty("Category");
-                return categoryProp?.GetValue(o) as string == category;
-            });
+                o is IGetterOverrideInfo info && info.Category == category);
         }
 
         /// <summary>
@@ -166,11 +161,9 @@ namespace PerAspera.GameAPI.Overrides.Registry
             var stats = new RegistryStatistics
             {
                 TotalOverrides = _overrides.Count,
+                // IGetterOverrideInfo.IsEnabled — interface cast, zero reflection
                 ActiveOverrides = _overrides.Values.Count(o =>
-                {
-                    var isEnabledProp = o.GetType().GetProperty("IsEnabled");
-                    return isEnabledProp?.GetValue(o) as bool? ?? false;
-                })
+                    o is IGetterOverrideInfo info && info.IsEnabled)
             };
 
             // Count by type
@@ -183,8 +176,7 @@ namespace PerAspera.GameAPI.Overrides.Registry
             // Count by category
             foreach (var o in _overrides.Values)
             {
-                var categoryProp = o.GetType().GetProperty("Category");
-                var category = categoryProp?.GetValue(o) as string ?? "Unknown";
+                var category = (o is IGetterOverrideInfo info ? info.Category : null) ?? "Unknown";
                 stats.OverridesByCategory[category] = stats.OverridesByCategory.GetValueOrDefault(category) + 1;
             }
 
