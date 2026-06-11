@@ -266,12 +266,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
                 
                 if (entity != null && __result != default(Handle))
                 {
-                    // Handle is already the right type
-                    var handleValue = ExtractHandleValue(__result);
-                    if (handleValue.HasValue)
-                    {
-                        KeeperRegistrationTracker.TrackRegistration(entity, handleValue.Value);
-                    }
+                    KeeperRegistrationTracker.TrackRegistration(entity, __result.index);
                 }
             }
             catch (Exception ex)
@@ -294,14 +289,7 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
                 
                 if (entity != null)
                 {
-                    // Get handle before unregistration - IHandleable has handle property
-                    var handle = entity.handle;
-                    var handleValue = ExtractHandleValue(handle);
-                    
-                    if (handleValue.HasValue)
-                    {
-                        KeeperRegistrationTracker.TrackUnregistration(entity, handleValue.Value);
-                    }
+                    KeeperRegistrationTracker.TrackUnregistration(entity, entity.handle.index);
                 }
             }
             catch (Exception ex)
@@ -310,36 +298,6 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
             }
         }
         
-        /// <summary>
-        /// Extract integer value from Handle object
-        /// Handle types may vary, so try multiple approaches
-        /// </summary>
-        private static int? ExtractHandleValue(object? handle)
-        {
-            if (handle == null) return null;
-            
-            try
-            {
-                // IL2CppExtensions.InvokeMethod/GetMemberValue — RS0030-exempt (Core)
-                if (handle is int intValue) return intValue;
-
-                var toIntResult = handle.InvokeMethod<object>("ToInt");
-                if (toIntResult is int iv) return iv;
-
-                var valueResult = handle.GetMemberValue<object>("Value");
-                if (valueResult is int vv) return vv;
-
-                var stringValue = handle.ToString();
-                if (int.TryParse(stringValue, out var parsedValue))
-                    return parsedValue;
-
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
     }
 
     /// <summary>
