@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Linq;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Commands.Native.IL2CPPInterop;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Native.Services
 {
     /// <summary>
@@ -328,3 +330,4 @@ namespace PerAspera.GameAPI.Commands.Native.Services
         }
     }
 }
+#pragma warning restore CS1591

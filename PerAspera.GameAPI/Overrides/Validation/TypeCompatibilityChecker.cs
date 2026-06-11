@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Reflection;
 using HarmonyLib;
 using PerAspera.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Validation
 {
     /// <summary>
@@ -137,3 +139,4 @@ namespace PerAspera.GameAPI.Overrides.Validation
         Error
     }
 }
+#pragma warning restore CS1591

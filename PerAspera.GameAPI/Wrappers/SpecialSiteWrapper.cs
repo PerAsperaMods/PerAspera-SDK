@@ -1,7 +1,9 @@
-using System;
+﻿using System;
 using PerAspera.Core;
 using UnityEngine;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -32,3 +34,4 @@ namespace PerAspera.GameAPI.Wrappers
         public float Longitude => _native?.geoPosition.y ?? 0f;
     }
 }
+#pragma warning restore CS1591

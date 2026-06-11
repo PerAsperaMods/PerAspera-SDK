@@ -1,5 +1,7 @@
-using PerAspera.GameAPI.Events.Core;
+﻿using PerAspera.GameAPI.Events.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.SDK
 {
     // ==================== MOD SYSTEM EVENTS ====================
@@ -57,3 +59,4 @@ namespace PerAspera.GameAPI.Events.SDK
         }
     }
 }
+#pragma warning restore CS1591

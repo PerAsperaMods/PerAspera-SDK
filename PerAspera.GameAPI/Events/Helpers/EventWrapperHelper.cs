@@ -1,6 +1,8 @@
-#nullable enable
+﻿#nullable enable
 using PerAspera.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Helpers
 {
     /// <summary>
@@ -20,3 +22,4 @@ namespace PerAspera.GameAPI.Events.Helpers
         public static KnowledgeType? CreateKnowledgeWrapper(object? native) => native as KnowledgeType;
     }
 }
+#pragma warning restore CS1591

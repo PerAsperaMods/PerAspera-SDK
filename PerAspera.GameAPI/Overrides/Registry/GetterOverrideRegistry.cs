@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI.Overrides.Models;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Registry
 {
     /// <summary>
@@ -242,3 +244,4 @@ namespace PerAspera.GameAPI.Overrides.Registry
 
     #endregion
 }
+#pragma warning restore CS1591

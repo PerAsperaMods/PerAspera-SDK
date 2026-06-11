@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using PerAspera.Core;
 using PerAspera.GameAPI.Economy.Wrappers;
 using PerAspera.GameAPI.Events.SDK;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
 {
     /// <summary>
@@ -86,3 +88,4 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
         }
     }
 }
+#pragma warning restore CS1591

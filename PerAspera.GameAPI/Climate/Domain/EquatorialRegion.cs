@@ -1,9 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Domain
 {
     /// <summary>
@@ -209,3 +211,4 @@ namespace PerAspera.GameAPI.Climate.Domain
         }
     }
 }
+#pragma warning restore CS1591

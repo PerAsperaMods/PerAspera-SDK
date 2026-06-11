@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Constants;
 using PerAspera.GameAPI.Events.Integration;
@@ -6,6 +6,8 @@ using PerAspera.GameAPI.Events.SDK;
 using System;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Patches
 {
     [HarmonyPatch]
@@ -83,3 +85,4 @@ namespace PerAspera.GameAPI.Events.Patches
         }
     }
 }
+#pragma warning restore CS1591

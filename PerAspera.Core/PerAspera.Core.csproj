@@ -16,6 +16,8 @@
 		<PackageTags>per-aspera;core;il2cpp;bepinex;utilities;interop</PackageTags>
 		<IsSharedLibrary>true</IsSharedLibrary>
 		<PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nuget-packages</PackageOutputPath>
+		<!-- CS1591: suppress for auto-generated files (MyPluginInfo.cs from BepInEx.PluginInfoProps) -->
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

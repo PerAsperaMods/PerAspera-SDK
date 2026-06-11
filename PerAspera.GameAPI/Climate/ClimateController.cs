@@ -11,6 +11,8 @@ using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate.Integration;
 using System.Linq;
 
+
+#pragma warning disable CS1591
 // Aliases pour éviter le conflit Unity.Atmosphere vs PerAspera.GameAPI.Climate.Atmosphere
 
 namespace PerAspera.GameAPI.Climate
@@ -498,3 +500,4 @@ namespace PerAspera.GameAPI.Climate
         }
     }
 }
+#pragma warning restore CS1591

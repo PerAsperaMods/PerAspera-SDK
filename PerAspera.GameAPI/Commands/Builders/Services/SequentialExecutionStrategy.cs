@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PerAspera.GameAPI.Commands.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Builders.Services
 {
     /// <summary>
@@ -157,3 +159,4 @@ namespace PerAspera.GameAPI.Commands.Builders.Services
         }
     }
 }
+#pragma warning restore CS1591

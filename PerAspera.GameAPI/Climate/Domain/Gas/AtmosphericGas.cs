@@ -1,7 +1,9 @@
-using System;
+﻿using System;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.Core.IL2CPP;
 
+
+#pragma warning disable CS1591
 public class AtmosphericGas
 {
     private readonly object _nativePlanet;
@@ -48,3 +50,4 @@ public class AtmosphericGas
 
     public override string ToString() => $"{Symbol}: {PartialPressure:F2}kPa ({Percentage:F1}%)";
 }
+#pragma warning restore CS1591

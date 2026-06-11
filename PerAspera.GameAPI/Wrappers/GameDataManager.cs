@@ -1,10 +1,12 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Database;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -270,3 +272,4 @@ namespace PerAspera.GameAPI.Wrappers
         }
     }
 }
+#pragma warning restore CS1591

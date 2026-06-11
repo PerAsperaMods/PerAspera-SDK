@@ -1,5 +1,7 @@
 ﻿using PerAspera.Core.IL2CPP;
 
+
+#pragma warning disable CS1591
 /// <summary>
 /// Represents a terraforming effect on climate
 /// </summary>
@@ -26,3 +28,4 @@ public class TerraformingEffect
 
     public override string ToString() => $"{Name}: {TemperatureEffect:+0.00;-0.00;0}K";
 }
+#pragma warning restore CS1591

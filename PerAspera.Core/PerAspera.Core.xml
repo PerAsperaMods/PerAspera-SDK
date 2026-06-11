@@ -339,15 +339,25 @@
              </code>
              </example>
         </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.GetNativeObject">
+            <summary>Returns the underlying native IL2CPP object, or null if the wrapper is invalid.</summary>
+        </member>
         <member name="P:PerAspera.Core.IL2CPP.NativeWrapper`1.IsValidWrapper">
             <summary>True when the wrapped native object is non-null. Honest: a wrapper
             constructed with null reports false (no placeholder object is substituted).</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.GetNativeType">
+            <summary>Returns the runtime type of the native object, or null if the wrapper is invalid.</summary>
         </member>
         <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.#ctor(`0)">
             <summary>
             Wraps the given native object. Null is tolerated (the wrapper is then invalid:
             <see cref="P:PerAspera.Core.IL2CPP.NativeWrapper`1.IsValidWrapper"/> = false and all accessors return default).
             </summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.CallNative``1(System.String,System.Object[])">
+            <summary>Invoke a method on the native object and return its result.
+            Returns default(TResult) if the native object is null or the method throws.</summary>
         </member>
         <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.CallNativeVoid(System.String,System.Object[])">
             <summary>
@@ -356,8 +366,30 @@
             <returns>True when the method was found and invoked without error —
             callers implementing a fallback (e.g. direct field write) must check this.</returns>
         </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.GetNativeField``1(System.String,System.Nullable{System.Reflection.BindingFlags})">
+            <summary>Read a field from the native object by name. Returns default on null native or reflection error.</summary>
+        </member>
         <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.SetNativeField``1(System.String,``0,System.Nullable{System.Reflection.BindingFlags})">
+            <summary>Write a value to a field on the native object by name.</summary>
             <returns>True when the field was found and written.</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.GetNativeProperty``1(System.String)">
+            <summary>Read a property from the native object by calling its getter.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.SetNativeProperty``1(System.String,``0)">
+            <summary>Write a property on the native object by calling its setter.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.CallStaticNative``1(System.Type,System.String,System.Object[])">
+            <summary>Invoke a static method on a native type and return its result.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.ValidateNativeObject(System.String)">
+            <summary>Logs a warning and returns false if the native object is null. Use as a guard at the top of methods.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.DebugNativeStructure(System.Boolean,System.Boolean)">
+            <summary>Logs all fields and methods of the native object to the BepInEx console. Useful for reverse-engineering unknown types.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.NativeWrapper`1.DebugGameEventBus">
+            <summary>Searches the native object's fields and methods for anything named "eventbus" and logs the results.</summary>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.PerAsperaExtensions">
             <summary>

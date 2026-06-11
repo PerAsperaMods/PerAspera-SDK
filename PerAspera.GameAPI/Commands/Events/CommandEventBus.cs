@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Events
 {
     /// <summary>
@@ -127,4 +129,4 @@ namespace PerAspera.GameAPI.Commands.Events
         }
     }
 }
-
+#pragma warning restore CS1591

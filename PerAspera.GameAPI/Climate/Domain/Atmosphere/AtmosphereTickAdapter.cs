@@ -2,6 +2,8 @@
 using PerAspera.GameAPI.Climate;
 using System;
 
+
+#pragma warning disable CS1591
 public class AtmosphereTickAdapter : ITick
 {
     // TODO: Implement AtmosphereGrid
@@ -28,3 +30,4 @@ public class AtmosphereTickAdapter : ITick
         // _grid.Tick(deltaDays);
     }
 }
+#pragma warning restore CS1591

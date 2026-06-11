@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI.Events.SDK;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Integration
 {
     /// <summary>
@@ -476,3 +478,4 @@ namespace PerAspera.GameAPI.Events.Integration
         public double AverageConversionTimeMs { get; set; }
     }
 }
+#pragma warning restore CS1591

@@ -1,6 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.UI
 {
     /// <summary>
@@ -174,3 +176,4 @@ namespace PerAspera.GameAPI.UI
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,5 +1,7 @@
-using PerAspera.GameAPI.Commands.Core;
+﻿using PerAspera.GameAPI.Commands.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
 {
     /// <summary>
@@ -59,3 +61,4 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands
         }
     }
 }
+#pragma warning restore CS1591

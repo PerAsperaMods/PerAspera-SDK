@@ -2,6 +2,8 @@
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
 {
     /// <summary>
@@ -130,3 +132,4 @@ namespace PerAspera.GameAPI.Commands.Native.IL2CPPInterop
         public override string ToString() => GetDescription();
     }
 }
+#pragma warning restore CS1591

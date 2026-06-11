@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Domain.Cell
 {
     public struct CellCoord
@@ -19,3 +21,4 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
     }
 
 }
+#pragma warning restore CS1591

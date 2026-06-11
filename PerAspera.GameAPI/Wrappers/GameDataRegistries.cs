@@ -1,9 +1,11 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -140,3 +142,4 @@ namespace PerAspera.GameAPI.Wrappers
         private ManualLogSource Log => BepInEx.Logging.Logger.CreateLogSource("TechnologyRegistry");
     }
 }
+#pragma warning restore CS1591

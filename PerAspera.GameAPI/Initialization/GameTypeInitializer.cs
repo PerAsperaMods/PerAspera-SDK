@@ -347,6 +347,7 @@ namespace PerAspera.GameAPI
             }
             return _resourceType;
         }
+        /// <summary>Returns the IL2CPP proxy type for Person, discovering it if needed.</summary>
         public static System.Type? GetPerson()
         {
             if (_resourceType == null)
@@ -779,9 +780,8 @@ namespace PerAspera.GameAPI
         }
     }
 
-    /// <summary>
-    /// Type discovery statistics
-    /// </summary>
+    /// <summary>Snapshot of the type-discovery state after initialization.</summary>
+#pragma warning disable CS1591
     public class TypeDiscoveryStats
     {
         public bool HasBaseGame { get; set; }

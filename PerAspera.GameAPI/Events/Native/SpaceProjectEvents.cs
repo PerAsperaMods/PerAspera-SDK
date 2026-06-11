@@ -1,6 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using PerAspera.GameAPI.Events.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Native
 {
     // ==================== SPACE PROJECT EVENTS ====================
@@ -130,3 +132,4 @@ namespace PerAspera.GameAPI.Events.Native
             $"PortProjectCancelled: [{ProjectKey}] (Sol {MartianSol})";
     }
 }
+#pragma warning restore CS1591

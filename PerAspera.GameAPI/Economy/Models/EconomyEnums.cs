@@ -1,3 +1,4 @@
+﻿#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Economy.Models
 {
     /// <summary>Types d'entités terrestres (pays, corporations).</summary>
@@ -29,3 +30,4 @@ namespace PerAspera.GameAPI.Economy.Models
         Allied  = 4
     }
 }
+#pragma warning restore CS1591

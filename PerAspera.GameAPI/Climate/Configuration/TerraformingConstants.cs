@@ -1,3 +1,4 @@
+﻿#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Configuration
 {
     /// <summary>
@@ -128,8 +129,4 @@ namespace PerAspera.GameAPI.Climate.Configuration
         }
     }
 }
-
-
-
-
-
+#pragma warning restore CS1591

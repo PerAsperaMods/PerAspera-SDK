@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Core
 {
     /// <summary>
@@ -31,3 +33,4 @@ namespace PerAspera.GameAPI.Events.Core
         protected NativeGameEventBase(object source) : base(source) { }
     }
 }
+#pragma warning restore CS1591

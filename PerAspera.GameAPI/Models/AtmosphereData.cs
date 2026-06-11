@@ -1,5 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Models
 {
     /// <summary>
@@ -77,3 +79,4 @@ namespace PerAspera.GameAPI.Models
         }
     }
 }
+#pragma warning restore CS1591

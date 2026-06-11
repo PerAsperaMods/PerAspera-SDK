@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using PerAspera.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Caching
 {
     /// <summary>
@@ -562,3 +564,4 @@ namespace PerAspera.GameAPI.Caching
         #endregion
     }
 }
+#pragma warning restore CS1591

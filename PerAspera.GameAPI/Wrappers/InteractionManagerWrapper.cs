@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reflection;
 using System.Linq;
 using BepInEx.Logging;
@@ -8,6 +8,8 @@ using PerAspera.Core.IL2CPP;
 using PerAspera.GameAPI.Native;
 using PerAspera.Events;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -277,3 +279,4 @@ namespace PerAspera.GameAPI.Wrappers
         }
     }
 }
+#pragma warning restore CS1591

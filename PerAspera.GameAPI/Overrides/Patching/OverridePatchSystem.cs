@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using PerAspera.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Patching
 {
     /// <summary>
@@ -230,3 +232,4 @@ namespace PerAspera.GameAPI.Overrides.Patching
         }
     }
 }
+#pragma warning restore CS1591

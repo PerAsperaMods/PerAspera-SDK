@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using PerAspera.Core;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -224,3 +226,4 @@ namespace PerAspera.GameAPI.Wrappers
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Validation
 {
     /// <summary>
@@ -105,3 +107,4 @@ namespace PerAspera.GameAPI.Overrides.Validation
         }
     }
 }
+#pragma warning restore CS1591

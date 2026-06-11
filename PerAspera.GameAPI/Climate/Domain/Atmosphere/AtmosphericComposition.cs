@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.GameAPI.Climate;
 
+
+#pragma warning disable CS1591
 // Alias pour �viter le conflit avec la classe Atmosphere du jeu
 using SDKAtmosphere = PerAspera.GameAPI.Climate.Domain.Atmosphere.PlanetaryAtmosphere;
 
@@ -293,3 +295,4 @@ public class AtmosphericComposition
         return string.Join(", ", _gases.Values.Select(g => $"{g.Symbol}:{g.Percentage:F1}%"));
     }
 }
+#pragma warning restore CS1591

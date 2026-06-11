@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     public class MeshRendererWrapper : WrapperBase
@@ -25,3 +27,4 @@ namespace PerAspera.GameAPI.Wrappers
         }
     }
 }
+#pragma warning restore CS1591

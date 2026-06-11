@@ -1,7 +1,9 @@
-using Il2CppInterop.Runtime;
+﻿using Il2CppInterop.Runtime;
 using PerAspera.Core;
 using PerAspera.GameAPI.Wrappers;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.UI
 {
     /// <summary>
@@ -295,3 +297,4 @@ namespace PerAspera.GameAPI.UI
         }
     }
 }
+#pragma warning restore CS1591

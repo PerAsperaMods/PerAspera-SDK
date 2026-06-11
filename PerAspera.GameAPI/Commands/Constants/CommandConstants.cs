@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Constants
 {
     /// <summary>
@@ -276,3 +278,4 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string ApiVersion = "1.0.0";
     }
 }
+#pragma warning restore CS1591

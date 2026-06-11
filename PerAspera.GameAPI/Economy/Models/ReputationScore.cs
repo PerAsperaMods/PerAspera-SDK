@@ -1,6 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Economy.Models
 {
     /// <summary>
@@ -87,3 +89,4 @@ namespace PerAspera.GameAPI.Economy.Models
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,8 +1,10 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using PerAspera.Core;
 using System;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS1591
 // Alias pour éviter le conflit
 // TODO: Update for cellular atmosphere architecture
 // using AtmosphereSDK = PerAspera.GameAPI.Wrappers.Atmosphere;
@@ -243,3 +245,4 @@ namespace PerAspera.GameAPI.Climate.Patches
         }
     }
 }
+#pragma warning restore CS1591

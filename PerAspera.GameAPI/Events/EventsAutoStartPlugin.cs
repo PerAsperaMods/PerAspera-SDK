@@ -1,4 +1,4 @@
-using PerAspera.GameAPI.Events.Integration;
+﻿using PerAspera.GameAPI.Events.Integration;
 using PerAspera.GameAPI.Events.Core;
 using PerAspera.GameAPI;
 using PerAspera.Core;
@@ -12,6 +12,8 @@ using EnhancedEventBus = PerAspera.GameAPI.Events.Integration.EnhancedEventBus;
 using BepInEx.Logging;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Events.Constants;
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events
 {
     /// <summary>
@@ -356,3 +358,4 @@ namespace PerAspera.GameAPI.Events
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using PerAspera.Core;
 using PerAspera.GameAPI;
 
+
+#pragma warning disable CS1591
 #nullable enable
 
 namespace PerAspera.GameAPI.Native
@@ -394,3 +396,4 @@ namespace PerAspera.GameAPI.Native
         }
     }
 }
+#pragma warning restore CS1591

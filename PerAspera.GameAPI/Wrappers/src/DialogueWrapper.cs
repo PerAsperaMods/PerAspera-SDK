@@ -1,6 +1,8 @@
 ﻿using System;
 using PerAspera.Core.IL2CPP;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     /// <summary>
@@ -104,3 +106,4 @@ namespace PerAspera.GameAPI.Wrappers
         public string[] Options { get; set; }
     }
 }
+#pragma warning restore CS1591

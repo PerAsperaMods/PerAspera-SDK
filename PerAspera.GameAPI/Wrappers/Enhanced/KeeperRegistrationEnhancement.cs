@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,8 @@ using Il2CppInterop.Runtime.InteropTypes;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
 {
     /// <summary>
@@ -363,3 +365,4 @@ namespace PerAspera.GameAPI.Wrappers.Enhanced.Registration
         }
     }
 }
+#pragma warning restore CS1591

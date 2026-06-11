@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Models.OverrideStrategies
 {
     /// <summary>
@@ -40,3 +42,4 @@ namespace PerAspera.GameAPI.Overrides.Models.OverrideStrategies
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using PerAspera.Core;
 using PerAspera.Core.IL2CPP;
 using UnityEngine;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers.UI
 {
     /// <summary>
@@ -98,3 +100,4 @@ namespace PerAspera.GameAPI.Wrappers.UI
         public override string ToString() => $"UIPanelWrapper({_nativeType?.Name ?? "Unknown"})";
     }
 }
+#pragma warning restore CS1591

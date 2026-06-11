@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Il2CppInterop.Runtime.Injection;
 using PerAspera.GameAPI.Events.Core;
@@ -9,6 +9,8 @@ using PerAspera.Core;
 using PerAspera.GameAPI.Events.Integration;
 using BepInEx.Logging;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.Detector
 {
     /// <summary>
@@ -184,3 +186,4 @@ namespace PerAspera.GameAPI.Events.Detector
         }
     }
 }
+#pragma warning restore CS1591

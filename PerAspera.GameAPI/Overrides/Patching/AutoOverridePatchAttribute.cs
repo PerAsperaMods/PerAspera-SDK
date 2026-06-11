@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Overrides.Patching
 {
     /// <summary>
@@ -68,3 +70,4 @@ namespace PerAspera.GameAPI.Overrides.Patching
         public global::System.Type? ReturnType { get; set; }
     }
 }
+#pragma warning restore CS1591

@@ -459,48 +459,48 @@
         </member>
         <member name="P:PerAspera.GameAPI.Climate.AtmosphereGrid.Cells">
             <summary>
-            Toutes les cellules de la grille (pour compatibilité avec les tests)
+            Toutes les cellules de la grille (pour compatibilit� avec les tests)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.#ctor">
             <summary>
-            Constructeur pour les tests (sans planète native)
+            Constructeur pour les tests (sans plan�te native)
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.SyncWithNativePlanet">
             <summary>
-            Synchronise les valeurs cellulaires agrégées avec les overrides de la planète native
+            Synchronise les valeurs cellulaires agr�g�es avec les overrides de la plan�te native
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.EnableClimateControl">
             <summary>
-            Active le contrôle climatique pour cette planète
+            Active le contr�le climatique pour cette plan�te
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.DisableClimateControl">
             <summary>
-            Désactive le contrôle climatique pour cette planète
+            D�sactive le contr�le climatique pour cette plan�te
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.GetActiveCells">
             <summary>
-            Obtient toutes les cellules atmosphériques actives
-            Utilisé pour les calculs de graphiques de terraformation
+            Obtient toutes les cellules atmosph�riques actives
+            Utilis� pour les calculs de graphiques de terraformation
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.GetCell(PerAspera.GameAPI.Climate.Domain.Cell.CellCoord)">
             <summary>
-            Obtient une cellule spécifique par coordonnées
+            Obtient une cellule sp�cifique par coordonn�es
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.GetCellsInRegion(System.Single,System.Single,System.Single,System.Single)">
             <summary>
-            Obtient toutes les cellules dans une région géographique
+            Obtient toutes les cellules dans une r�gion g�ographique
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.GetGlobalAverageTemperature">
             <summary>
-            Calcule la température moyenne de toutes les cellules actives
+            Calcule la temp�rature moyenne de toutes les cellules actives
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Climate.AtmosphereGrid.GetGlobalAveragePressure">
@@ -8425,6 +8425,9 @@
             Get Resource type
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetPerson">
+            <summary>Returns the IL2CPP proxy type for Person, discovering it if needed.</summary>
+        </member>
         <member name="M:PerAspera.GameAPI.GameTypeInitializer.GetBuildingType">
             <summary>
             Get Building type
@@ -8577,9 +8580,7 @@
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.TypeDiscoveryStats">
-            <summary>
-            Type discovery statistics
-            </summary>
+            <summary>Snapshot of the type-discovery state after initialization.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Models.AtmosphereData">
             <summary>
@@ -11722,12 +11723,6 @@
             <summary>
             HarmonyX Prefix for Keeper.Unregister()
             Captures entity before unregistration for event emission
-            </summary>
-        </member>
-        <member name="M:PerAspera.GameAPI.Wrappers.Enhanced.Registration.RegistrationPatches.ExtractHandleValue(System.Object)">
-            <summary>
-            Extract integer value from Handle object
-            Handle types may vary, so try multiple approaches
             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.Enhanced.Registration.KeeperRegistrationSDK">

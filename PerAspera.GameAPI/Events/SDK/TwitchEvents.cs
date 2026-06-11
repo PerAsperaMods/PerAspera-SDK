@@ -1,4 +1,4 @@
-using Iced.Intel;
+﻿using Iced.Intel;
 using PerAspera.GameAPI;
 using PerAspera.Core;
 using PerAspera.GameAPI.Events.Core;
@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.SDK
 {
     // ==================== TWITCH INTEGRATION EVENTS ====================
@@ -431,3 +433,4 @@ namespace PerAspera.GameAPI.Events.SDK
         public string Source { get; set; } = string.Empty;
     }
 }
+#pragma warning restore CS1591

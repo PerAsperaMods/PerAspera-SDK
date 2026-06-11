@@ -1,25 +1,27 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using PerAspera.GameAPI.Climate.Domain.Cell;
 using System.Linq;
 
 
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate
 {
     public static class CellDefinition
     {
-        public const float LatSize = 5f;   // 5° par cellule
-        public const float LonSize = 5f;   // 5° par cellule
+        public const float LatSize = 5f;   // 5ï¿½ par cellule
+        public const float LonSize = 5f;   // 5ï¿½ par cellule
     }
 
     public class AtmosphereGrid
     {
         Dictionary<CellCoord, AtmosphereCell> cells;
         HashSet<AtmosphereCell> _activeCells;
-        object _nativePlanet; // Référence directe à la planète native
+        object _nativePlanet; // Rï¿½fï¿½rence directe ï¿½ la planï¿½te native
 
         /// <summary>
-        /// Toutes les cellules de la grille (pour compatibilité avec les tests)
+        /// Toutes les cellules de la grille (pour compatibilitï¿½ avec les tests)
         /// </summary>
         public Dictionary<CellCoord, AtmosphereCell> Cells => cells;
 
@@ -31,7 +33,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Constructeur pour les tests (sans planète native)
+        /// Constructeur pour les tests (sans planï¿½te native)
         /// </summary>
         public AtmosphereGrid()
         {
@@ -52,7 +54,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Synchronise les valeurs cellulaires agrégées avec les overrides de la planète native
+        /// Synchronise les valeurs cellulaires agrï¿½gï¿½es avec les overrides de la planï¿½te native
         /// </summary>
         private void SyncWithNativePlanet()
         {
@@ -63,13 +65,13 @@ namespace PerAspera.GameAPI.Climate
             float totalPressure = _activeCells.Count > 0 ? _activeCells.Select(c => c.TotalPressure).Average() : 101.325f;
 
             // TODO: Calculer les pressions partielles des gaz depuis les cellules
-            // Pour l'instant, utiliser des valeurs par défaut
+            // Pour l'instant, utiliser des valeurs par dï¿½faut
             float co2Pressure = 0.0004f; // ~400ppm CO2
             float o2Pressure = 0.21f;    // 21% O2
             float n2Pressure = 0.78f;    // 78% N2
             float h2oPressure = 0.01f;   // 1% H2O
 
-            // Appliquer les overrides directement sur la planète native
+            // Appliquer les overrides directement sur la planï¿½te native
             Patches.PlanetClimatePatches.SetClimateValue(_nativePlanet, "temperature", avgTemperature);
             Patches.PlanetClimatePatches.SetClimateValue(_nativePlanet, "CO2Pressure", co2Pressure);
             Patches.PlanetClimatePatches.SetClimateValue(_nativePlanet, "O2Pressure", o2Pressure);
@@ -78,7 +80,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Active le contrôle climatique pour cette planète
+        /// Active le contrï¿½le climatique pour cette planï¿½te
         /// </summary>
         public void EnableClimateControl()
         {
@@ -86,7 +88,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Désactive le contrôle climatique pour cette planète
+        /// Dï¿½sactive le contrï¿½le climatique pour cette planï¿½te
         /// </summary>
         public void DisableClimateControl()
         {
@@ -127,8 +129,8 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Obtient toutes les cellules atmosphériques actives
-        /// Utilisé pour les calculs de graphiques de terraformation
+        /// Obtient toutes les cellules atmosphï¿½riques actives
+        /// Utilisï¿½ pour les calculs de graphiques de terraformation
         /// </summary>
         public HashSet<AtmosphereCell> GetActiveCells()
         {
@@ -136,7 +138,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Obtient une cellule spécifique par coordonnées
+        /// Obtient une cellule spï¿½cifique par coordonnï¿½es
         /// </summary>
         public AtmosphereCell GetCell(CellCoord coord)
         {
@@ -144,7 +146,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Obtient toutes les cellules dans une région géographique
+        /// Obtient toutes les cellules dans une rï¿½gion gï¿½ographique
         /// </summary>
         public IEnumerable<AtmosphereCell> GetCellsInRegion(float minLat, float maxLat, float minLon, float maxLon)
         {
@@ -157,7 +159,7 @@ namespace PerAspera.GameAPI.Climate
         }
 
         /// <summary>
-        /// Calcule la température moyenne de toutes les cellules actives
+        /// Calcule la tempï¿½rature moyenne de toutes les cellules actives
         /// </summary>
         public float GetGlobalAverageTemperature()
         {
@@ -173,3 +175,4 @@ namespace PerAspera.GameAPI.Climate
         }
     }
 }
+#pragma warning restore CS1591

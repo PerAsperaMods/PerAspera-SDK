@@ -1,4 +1,4 @@
-using BepInEx.Unity.IL2CPP;
+﻿using BepInEx.Unity.IL2CPP;
 using LlockhamIndustries.Decals;
 using PerAspera.GameAPI.Wrappers;
 using PerAspera.Core;
@@ -12,6 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate
 {
     public class ClimatPlugin : BasePlugin
@@ -46,3 +48,4 @@ namespace PerAspera.GameAPI.Climate
 
     }
 }
+#pragma warning restore CS1591

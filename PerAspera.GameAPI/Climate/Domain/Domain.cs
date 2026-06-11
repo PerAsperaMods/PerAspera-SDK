@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Domain
 {
 
@@ -86,3 +88,4 @@ namespace PerAspera.GameAPI.Climate.Domain
 
     }
 }
+#pragma warning restore CS1591

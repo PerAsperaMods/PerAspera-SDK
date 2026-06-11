@@ -1,6 +1,8 @@
-using PerAspera.GameAPI.Economy.Models;
+﻿using PerAspera.GameAPI.Economy.Models;
 using PerAspera.GameAPI.Events.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Events.SDK
 {
     // ==================== ECONOMY SDK EVENTS ====================
@@ -117,3 +119,4 @@ namespace PerAspera.GameAPI.Events.SDK
             $"DiplomaticIncident: [{EntityId}] incident={IncidentKey} tier={TriggerTier}";
     }
 }
+#pragma warning restore CS1591

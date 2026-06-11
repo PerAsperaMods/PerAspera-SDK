@@ -1,7 +1,9 @@
-using System;
+﻿using System;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Patches;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate
 {
     /// <summary>
@@ -206,3 +208,4 @@ namespace PerAspera.GameAPI.Climate
         }
     }
 }
+#pragma warning restore CS1591

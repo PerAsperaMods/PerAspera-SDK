@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using PerAspera.Core;
@@ -6,6 +6,8 @@ using PerAspera.GameAPI.Commands.ModActions.BuiltinActions;
 using PerAspera.GameAPI.Events.SDK;
 using PerAspera.GameAPI.Wrappers;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
 {
     /// <summary>
@@ -63,3 +65,4 @@ namespace PerAspera.GameAPI.Commands.ModActions.BuiltinActions
         }
     }
 }
+#pragma warning restore CS1591

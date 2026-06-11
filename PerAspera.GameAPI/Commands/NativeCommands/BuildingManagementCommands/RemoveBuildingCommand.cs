@@ -1,5 +1,7 @@
-using PerAspera.GameAPI.Commands.Core;
+﻿using PerAspera.GameAPI.Commands.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
 {
     /// <summary>
@@ -65,3 +67,4 @@ namespace PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands
         }
     }
 }
+#pragma warning restore CS1591

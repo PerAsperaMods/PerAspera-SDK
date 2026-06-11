@@ -1,9 +1,11 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Domain.Cell
 {
     enum CellType
@@ -29,7 +31,7 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
         }
 
         // TODO: Implement cellular temperature and pressure properties
-        public float Temperature => 288.15f; // Default 15°C in Kelvin
+        public float Temperature => 288.15f; // Default 15ï¿½C in Kelvin
         public float TotalPressure => 101.325f; // Default 1 atm in kPa
 
         public void Activate()
@@ -44,3 +46,4 @@ namespace PerAspera.GameAPI.Climate.Domain.Cell
 
     }
 }
+#pragma warning restore CS1591

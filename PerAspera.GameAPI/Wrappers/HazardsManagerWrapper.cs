@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Wrappers
 {
     public class HazardsManagerWrapper : WrapperBase
@@ -36,3 +38,4 @@ namespace PerAspera.GameAPI.Wrappers
 
     }
 }
+#pragma warning restore CS1591

@@ -1,8 +1,10 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Reflection;
 using BepInEx.Logging;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.Core.IL2CPP
 {
     /// <summary>
@@ -29,12 +31,14 @@ namespace PerAspera.Core.IL2CPP
 
         protected T? _nativeObject;
 
+        /// <summary>Returns the underlying native IL2CPP object, or null if the wrapper is invalid.</summary>
         public T? GetNativeObject() => _nativeObject;
 
         /// <summary>True when the wrapped native object is non-null. Honest: a wrapper
         /// constructed with null reports false (no placeholder object is substituted).</summary>
         public bool IsValidWrapper => _nativeObject != null;
 
+        /// <summary>Returns the runtime type of the native object, or null if the wrapper is invalid.</summary>
         public System.Type? GetNativeType() => _nativeObject?.GetType();
 
         /// <summary>
@@ -48,6 +52,8 @@ namespace PerAspera.Core.IL2CPP
 
         // ==================== INVOCATION ====================
 
+        /// <summary>Invoke a method on the native object and return its result.
+        /// Returns default(TResult) if the native object is null or the method throws.</summary>
         protected TResult? CallNative<TResult>(string methodName, params object[] parameters)
         {
             var native = _nativeObject;
@@ -87,6 +93,7 @@ namespace PerAspera.Core.IL2CPP
 
         // ==================== FIELD ACCESS ====================
 
+        /// <summary>Read a field from the native object by name. Returns default on null native or reflection error.</summary>
         protected TField? GetNativeField<TField>(string fieldName, BindingFlags? bindingFlags = null)
         {
             var native = _nativeObject;
@@ -111,6 +118,7 @@ namespace PerAspera.Core.IL2CPP
             }
         }
 
+        /// <summary>Write a value to a field on the native object by name.</summary>
         /// <returns>True when the field was found and written.</returns>
         protected bool SetNativeField<TField>(string fieldName, TField value, BindingFlags? bindingFlags = null)
         {
@@ -144,14 +152,17 @@ namespace PerAspera.Core.IL2CPP
         // CallNative/CallNativeVoid already guard against null and exceptions —
         // no extra try/catch needed here.
 
+        /// <summary>Read a property from the native object by calling its getter.</summary>
         protected TProp? GetNativeProperty<TProp>(string propertyName)
             => CallNative<TProp>($"get_{propertyName}");
 
+        /// <summary>Write a property on the native object by calling its setter.</summary>
         protected bool SetNativeProperty<TProp>(string propertyName, TProp value)
             => CallNativeVoid($"set_{propertyName}", value!);
 
         // ==================== STATIC HELPERS ====================
 
+        /// <summary>Invoke a static method on a native type and return its result.</summary>
         protected static TResult? CallStaticNative<TResult>(System.Type nativeType, string methodName, params object[] parameters)
         {
             try
@@ -169,6 +180,7 @@ namespace PerAspera.Core.IL2CPP
 
         // ==================== GUARD ====================
 
+        /// <summary>Logs a warning and returns false if the native object is null. Use as a guard at the top of methods.</summary>
         protected bool ValidateNativeObject(string operationName = "")
         {
             if (_nativeObject == null)
@@ -182,6 +194,7 @@ namespace PerAspera.Core.IL2CPP
 
         // ==================== DEBUG ====================
 
+        /// <summary>Logs all fields and methods of the native object to the BepInEx console. Useful for reverse-engineering unknown types.</summary>
         public void DebugNativeStructure(bool includeInherited = true, bool includePrivate = true)
         {
             var native = _nativeObject;
@@ -200,6 +213,7 @@ namespace PerAspera.Core.IL2CPP
             }
         }
 
+        /// <summary>Searches the native object's fields and methods for anything named "eventbus" and logs the results.</summary>
         public void DebugGameEventBus()
         {
             var native = _nativeObject;
@@ -219,3 +233,4 @@ namespace PerAspera.Core.IL2CPP
         }
     }
 }
+#pragma warning restore CS1591

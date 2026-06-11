@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Events
 {
     /// <summary>
@@ -74,3 +76,4 @@ namespace PerAspera.GameAPI.Commands.Events
         }
     }
 }
+#pragma warning restore CS1591

@@ -1,9 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using PerAspera.Core;
 using PerAspera.GameAPI.Climate.Domain.Cell;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Climate.Integration
 {
     /// <summary>
@@ -232,3 +234,4 @@ namespace PerAspera.GameAPI.Climate.Integration
         }
     }
 }
+#pragma warning restore CS1591

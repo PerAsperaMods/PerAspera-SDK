@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using PerAspera.GameAPI.Commands.Core;
 using PerAspera.GameAPI.Commands.Constants;
@@ -9,6 +9,8 @@ using PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands;
 using PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands;
 using PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.NativeCommands
 {
     /// <summary>
@@ -332,3 +334,4 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
         }
     }
 }
+#pragma warning restore CS1591

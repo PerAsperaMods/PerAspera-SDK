@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
 using PerAspera.Core;
 using PerAspera.GameAPI.Commands.Constants;
 using PerAspera.GameAPI.Commands.Core;
 
+
+#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Commands.Builders
 {
     /// <summary>
@@ -351,4 +353,4 @@ namespace PerAspera.GameAPI.Commands.Builders
         }
     }
 }
-
+#pragma warning restore CS1591

@@ -1,3 +1,4 @@
+﻿#pragma warning disable CS1591
 namespace PerAspera.GameAPI.Models
 {
     /// <summary>
@@ -43,3 +44,4 @@ namespace PerAspera.GameAPI.Models
             $"O2: {OxygenPhase}";
     }
 }
+#pragma warning restore CS1591
