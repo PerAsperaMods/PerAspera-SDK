@@ -25,11 +25,19 @@
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.752" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 		<PackageReference Include="HarmonyX" Version="2.16.0" />
-		<PackageReference Include="YamlDotNet" Version="13.7.1" />
+		<PackageReference Include="YamlDotNet" Version="13.7.1" GeneratePathProperty="true" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\PerAspera.Core\PerAspera.Core.csproj" />
 		<ProjectReference Include="..\PerAspera.GameAPI.Database\PerAspera.GameAPI.Database.csproj" />
 	</ItemGroup>
+
+	<!-- YamlDotNet est la seule dépendance NuGet à livrer à côté de la DLL
+	     (YamlExtensions la charge au runtime). Copiée dans bin pour que
+	     scripts\deployment\deploy.ps1 (extraFiles) la déploie vers plugins\SDK\. -->
+	<Target Name="CopyYamlDotNetToOutput" AfterTargets="Build">
+		<Copy SourceFiles="$(PkgYamlDotNet)\lib\net6.0\YamlDotNet.dll"
+		      DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
 </Project>

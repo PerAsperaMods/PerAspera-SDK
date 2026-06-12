@@ -459,7 +459,9 @@
         </member>
         <member name="M:PerAspera.Core.IL2CPP.PerAsperaExtensions.ExecuteConsoleCommand(System.String,System.Object[])">
             <summary>
-            Executes a console command with the given arguments
+            ExecuteCommand n'existe pas sur InteractionManager (verifie InteropDump 2026-06-11).
+            La methode reelle est ExecuteRule(InteractionRule) — non accessible via une string de commande.
+            Utiliser PerAspera.GameAPI.Commands pour executer des commandes mod.
             </summary>
         </member>
         <member name="T:PerAspera.Core.IL2CPP.GameObjectExtensions">
@@ -569,6 +571,12 @@
             </summary>
             <typeparam name="T">Type to get instance for</typeparam>
             <returns>Singleton instance if found</returns>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.HasMethod(System.Type,System.String)">
+            <summary>Returns true if the type has a public or non-public instance/static method with the given name.</summary>
+        </member>
+        <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.HasMember(System.Type,System.String)">
+            <summary>Returns true if the type has a public or non-public field or property with the given name.</summary>
         </member>
         <member name="M:PerAspera.Core.IL2CPP.ReflectionHelpers.GetSingletonInstance(System.Type)">
             <summary>

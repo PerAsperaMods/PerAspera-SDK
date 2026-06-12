@@ -19,13 +19,18 @@ PerAspera.ModSDK            ← Core + GameAPI
 
 ```powershell
 # Build complet depuis F:\ModPeraspera\SDK\
-.\Build-SDK.ps1
+dotnet build SDK.sln
 
 # Build rapide (projet individuel)
-dotnet build PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj
+dotnet build PerAspera.GameAPI\PerAspera.GameAPI.csproj
 
-# Déploiement vers le jeu : Deploy-SDK-DLLs.ps1 → BepInEx\plugins\SDK\
+# Déploiement vers le jeu (depuis F:\ModPeraspera\) — build Release + copie 4 DLL :
+.\scripts\deployment\deploy.ps1 -CSharp -SdkOnly
 ```
+
+> ⚠️ Le script de déploiement build en **Release** et copie depuis `bin\Release\net6.0\`.
+> Un build Debug manuel n'est pas pris en compte par le script — vérifier le mtime de la
+> DLL déployée vs la source après tout déploiement.
 
 ## Import SDK dans les mods
 
@@ -45,5 +50,6 @@ dotnet build PerAspera.GameAPI.Wrappers\PerAspera.GameAPI.Wrappers.csproj
 ## Référence sources jeu décompilées
 
 Pour comprendre les classes natives à wrapper :
-- `F:\ModPeraspera_Raw_Extrac\PerAsperaData\ScriptsAssembly\` — C# par namespace
-- `F:\ModPeraspera\Tools\lispyExtract\` — dump plat par classe
+- `F:\ModPeraspera\Tools\InteropDump\ScriptsAssembly\` — **source de vérité** (ilspycmd, proxies typés) — vérifier ici EN PREMIER
+- `F:\ModPeraspera\Tools\lispyExtract\` — fallback — dump plat par nom de classe
+- `F:\ModPeraspera_Raw_Extrac\PerAsperaData\ScriptsAssembly\` — fallback — stubs par namespace (supersédé par InteropDump pour les lookups C#)

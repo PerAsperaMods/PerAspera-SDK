@@ -4,6 +4,19 @@
         <name>PerAspera.GameAPI</name>
     </assembly>
     <members>
+        <member name="T:PerAspera.GameAPI.Binding.SdkBindingValidator">
+            <summary>
+            Validates all remaining string-based SafeInvoke bindings in the SDK at startup.
+            Writes sdk-contract-report.txt so game updates that rename methods are caught immediately.
+            Call Validate() once on GameCommandsReady.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Binding.SdkBindingValidator.Validate(System.String)">
+            <summary>
+            Run all binding checks and write sdk-contract-report.txt.
+            Returns true when every binding resolves successfully.
+            </summary>
+        </member>
         <!-- Badly formed XML comment ignored for member "T:PerAspera.GameAPI.Caching.TypeDiscoveryCache" -->
         <member name="M:PerAspera.GameAPI.Caching.TypeDiscoveryCache.FindType(System.String)">
             <summary>
@@ -8699,6 +8712,163 @@
         <member name="P:PerAspera.GameAPI.Models.TerraformingStatus.RecommendedAction">
             <summary>Recommended next action for terraforming</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutputAutoStart">
+            <summary>
+            Auto-start plugin for the MultiOutput system: registers the <c>multiOutput</c>
+            extension schema before the datamodel loads, and applies the
+            <c>Factory.SpawnOutput</c> Postfix that injects the extra outputs.
+            </summary>
+            <example>
+            // Aucune action requise par les mods : déployer PerAspera.GameAPI.dll suffit.
+            // Déclaration via sdk.yaml (section multiOutput) ou MultiOutput.RegisterExtraOutput().
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.FactorySpawnOutputPatch">
+            <summary>
+            Postfix on <c>Factory.SpawnOutput()</c> — runs only when a native production cycle
+            actually completed (inputs consumed, productivity > 0), and injects the declared
+            extra outputs as idle cargo in the factory's stockpile
+            (<c>ICargoHolderOps_XAddIdleCargo</c>, badge null accepté — pas de [NotNull]).
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutputConfig">
+            <summary>
+            DTO of one item of the <c>multiOutput</c> section in a mod's <c>sdk.yaml</c>:
+            the extra outputs a building type produces on top of its native single output.
+            </summary>
+            <example>
+            # Mods/MonMod/sdk.yaml
+            extensions:
+              multiOutput:
+                building_water_mine:
+                  extraOutputs:
+                    - resource: resource_carbon
+                      quantity: 1
+                      scaleWithProductivity: true
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.MultiOutputConfig.ExtraOutputs">
+            <summary>Extra outputs produced at each completed production cycle.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.ExtraOutputDef">
+            <summary>One extra output declaration (YAML or code-registered).</summary>
+            <example>new ExtraOutputDef { Resource = "resource_carbon", Quantity = 1f }</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ExtraOutputDef.Resource">
+            <summary>Resource key in the datamodel (string — resolved post-load, no !tag).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ExtraOutputDef.Quantity">
+            <summary>Units produced per completed production cycle (before scaling).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ExtraOutputDef.ScaleWithProductivity">
+            <summary>Scale the quantity by the factory's current productivity (default true).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch">
+            <summary>
+            UI patch: shows the secondary outputs in the OUTPUT section of the in-world
+            building card (<c>BuildingWorldPanel</c>).
+            Injection is done at the <b>panel</b> level (its own <c>outputResource</c> list +
+            a clone of <c>outputItemPrototype</c> in <c>outputContainer</c>) — never via
+            <c>BuildingType.displayOutputs</c>, which duplicates the native output icon
+            (tested in game, Wafhien 2026-06).
+            The quantity label then refreshes automatically: the vanilla update loop
+            (<c>UpdateInputOutput → UpdateDetails</c>) walks <c>outputResource</c> /
+            <c>outputDetails</c> in lockstep and reads the stockpile via <c>GetStock</c> —
+            exactly where <see cref="T:PerAspera.GameAPI.MultiOutput.FactorySpawnOutputPatch"/> injects the cargo.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.CloneName">
+            <summary>Name tag of the ResourceDetail clones we create (used for cleanup).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.Prefix(BuildingWorldPanel)">
+            <summary>
+            Removes our clones from a previous SetBuilding pass before the vanilla
+            rebuild — idempotent whatever the vanilla cleanup actually does.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.Postfix(BuildingWorldPanel,Building)">
+            <summary>
+            After the vanilla panel setup: appends one ResourceDetail per secondary
+            output to the OUTPUT container, and extends the panel's bookkeeping lists
+            so the vanilla update loop refreshes our items too.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutputLog">
+            <summary>Internal shared logger for the MultiOutput module.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.ResolvedExtraOutput">
+            <summary>An extra output resolved against the native datamodel (ready for injection).</summary>
+            <example>foreach (var o in MultiOutput.GetExtraOutputs("building_water_mine")) { … }</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ResolvedExtraOutput.Resource">
+            <summary>Native resource produced.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ResolvedExtraOutput.Quantity">
+            <summary>Units per completed cycle (before productivity scaling).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.ResolvedExtraOutput.ScaleWithProductivity">
+            <summary>Whether the quantity scales with the factory's productivity.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.SecondaryOutputProducedArgs">
+            <summary>Event payload raised after a secondary output was injected.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.SecondaryOutputProducedArgs.BuildingKey">
+            <summary>Datamodel key of the producing building type.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.SecondaryOutputProducedArgs.ResourceKey">
+            <summary>Datamodel key of the produced resource.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.MultiOutput.SecondaryOutputProducedArgs.Quantity">
+            <summary>Units actually injected (after scaling).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutput">
+            <summary>
+            Multi-output system: lets a building type produce several resources per cycle.
+            Declarative via the <c>multiOutput</c> section of <c>sdk.yaml</c> (see
+            <see cref="T:PerAspera.GameAPI.MultiOutput.MultiOutputConfig"/>) or programmatic via <see cref="M:PerAspera.GameAPI.MultiOutput.MultiOutput.RegisterExtraOutput(System.String,System.String,System.Single,System.Boolean)"/>.
+            The native single output is untouched; extra outputs are injected as idle cargo in
+            the factory's stockpile right after each native production cycle
+            (Postfix on <c>Factory.SpawnOutput</c>).
+            </summary>
+            <example>
+            // Mod C# :
+            MultiOutput.RegisterExtraOutput("building_water_mine", "resource_carbon", 1f);
+            MultiOutput.OnSecondaryOutputProduced += a => LogAspera.Info($"{a.ResourceKey} +{a.Quantity}");
+            </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.MultiOutput.MultiOutput.Section">
+            <summary>sdk.yaml section name handled by this system.</summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.MultiOutput.MultiOutput.OnSecondaryOutputProduced">
+            <summary>Raised after a secondary output was injected into a stockpile.</summary>
+            <example>MultiOutput.OnSecondaryOutputProduced += a => { … };</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutput.Initialize">
+            <summary>
+            Declares the schema and subscribes resolution to YamlExtensions.DataLoaded.
+            Called once by <see cref="T:PerAspera.GameAPI.MultiOutput.MultiOutputAutoStart"/>; idempotent.
+            </summary>
+            <example>MultiOutput.Initialize(); // fait automatiquement par l'auto-start</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutput.RegisterExtraOutput(System.String,System.String,System.Single,System.Boolean)">
+            <summary>
+            Registers an extra output by code (same semantics as a sdk.yaml entry).
+            Safe to call from a plugin's Load(); resolution happens when the datamodel is ready.
+            </summary>
+            <param name="buildingTypeKey">Building type key (e.g. "building_water_mine").</param>
+            <param name="resourceKey">Resource key (e.g. "resource_carbon").</param>
+            <param name="quantity">Units per completed cycle.</param>
+            <param name="scaleWithProductivity">Scale by factory productivity (default true).</param>
+            <example>MultiOutput.RegisterExtraOutput("building_water_mine", "resource_carbon", 1f);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutput.GetExtraOutputs(System.String)">
+            <summary>Effective extra outputs of a building type (empty list if none).</summary>
+            <param name="buildingTypeKey">Building type key.</param>
+            <example>var outs = MultiOutput.GetExtraOutputs("building_water_mine");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutput.GetResolvedOrNull(System.String)">
+            <summary>Hot-path lookup used by the SpawnOutput patch (no allocation when absent).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Native.Events.BaseEventPatchingService">
             <summary>
             Base class for all event patching services
@@ -14395,8 +14565,8 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.NotifyDialogue(System.String,System.String,System.String)">
             <summary>
-            Notification pour un dialogue.
-            Tente DialoguePresenter.NotifyDialogue via InvokeMethod, sinon route vers StartDialogue.
+            Alias vers StartDialogue — DialoguePresenter.NotifyDialogue n'existe pas dans le jeu
+            (verifie InteropDump 2026-06-11 : aucune methode NotifyDialogue sur DialoguePresenter).
             </summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.DialogueWrapper.ContainsDialogue(System.String)">
@@ -15190,6 +15360,228 @@
             Search for members matching a pattern and save results to BepInEx/Debug/.
             </summary>
             <example>wrapper.SearchMembersInFile("type") → BepInEx/Debug/IL2CPP-Search-type-timestamp.txt</example>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.ExtensionSchema">
+            <summary>
+            Describes one extension section of the <c>sdk.yaml</c> sidecar file.
+            A consumer system (MultiOutput, GasRegistry, a third-party mod…) registers its
+            schema via <see cref="M:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry.Register(PerAspera.GameAPI.YamlExtensions.ExtensionSchema)"/> so the loader knows how
+            to deserialize, validate and report the section's items.
+            </summary>
+            <example>
+            ExtensionSchemaRegistry.Register(new ExtensionSchema(
+                section: "multiOutput",
+                targetTable: "building",
+                dtoType: typeof(MultiOutputConfig),
+                validate: o => ((MultiOutputConfig)o).ExtraOutputs.Count > 0));
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.ExtensionSchema.Section">
+            <summary>Top-level key under <c>extensions:</c> in sdk.yaml (e.g. "multiOutput").</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.ExtensionSchema.TargetTable">
+            <summary>
+            Native datamodel table the item keys refer to ("building", "resource"…).
+            Metadata for tooling and cross-validation; the loader does not resolve natives itself.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.ExtensionSchema.DtoType">
+            <summary>DTO type each item of the section is deserialized to (YamlDotNet, camelCase).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.ExtensionSchema.Validate">
+            <summary>
+            Optional semantic validation, called per item after deserialization.
+            Return false to reject the item (logged as ERROR, item skipped).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.ExtensionSchema.#ctor(System.String,System.String,System.Type,System.Func{System.Object,System.Boolean})">
+            <summary>Creates an extension schema descriptor.</summary>
+            <param name="section">Top-level key under <c>extensions:</c> (non-empty).</param>
+            <param name="targetTable">Native table the item keys refer to.</param>
+            <param name="dtoType">DTO type for item deserialization.</param>
+            <param name="validate">Optional per-item semantic validation.</param>
+            <example>new ExtensionSchema("gasEmissions", "building", typeof(List&lt;GasEmission&gt;))</example>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry">
+            <summary>
+            Static registry of <see cref="T:PerAspera.GameAPI.YamlExtensions.ExtensionSchema"/> declarations. Consumer systems
+            register their sections here BEFORE the game finishes loading YAML (typically from
+            their plugin's Load()); the loader only accepts sections that are registered.
+            Unknown sections found in a mod's sdk.yaml are logged as WARNING (the mod may
+            target an optional SDK system that is not installed).
+            </summary>
+            <example>
+            ExtensionSchemaRegistry.Register(new ExtensionSchema("multiOutput", "building", typeof(MultiOutputConfig)));
+            bool known = ExtensionSchemaRegistry.TryGet("multiOutput", out var schema);
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry.Register(PerAspera.GameAPI.YamlExtensions.ExtensionSchema)">
+            <summary>
+            Registers a section schema. Re-registering the same section replaces the
+            previous schema (last writer wins, logged).
+            </summary>
+            <param name="schema">The schema to register.</param>
+            <example>ExtensionSchemaRegistry.Register(new ExtensionSchema("gases", "resource", typeof(GasDefinition)));</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry.TryGet(System.String,PerAspera.GameAPI.YamlExtensions.ExtensionSchema@)">
+            <summary>Looks up the schema of a section.</summary>
+            <param name="section">Section name.</param>
+            <param name="schema">The schema if found.</param>
+            <example>if (ExtensionSchemaRegistry.TryGet("multiOutput", out var s)) { … }</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry.All">
+            <summary>All registered schemas (snapshot).</summary>
+            <example>foreach (var s in ExtensionSchemaRegistry.All) { … }</example>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.YamlExtensionsLog">
+            <summary>Internal shared logger for the YamlExtensions module.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader">
+             <summary>
+             Scans <c>StreamingAssets/Mods/*/sdk.yaml</c> sidecar files, deserializes each
+             registered section's items to their DTO type (YamlDotNet, camelCase), validates
+             them, and exposes the merged result to <see cref="T:PerAspera.GameAPI.YamlExtensions.YamlExtensions"/>.
+            
+             Merge semantics: mods are processed in alphabetical directory order; on item-key
+             conflict the LAST mod wins (mirrors the native <c>!replace</c> behaviour), with a
+             WARNING logged. Parsed data is also persisted to ModDatabase (table
+             <c>sdk_extensions</c>) for tooling/inspection.
+             </summary>
+             <example>
+             // Triggered automatically post-CompleteLoading by YamlExtensionsAutoStart;
+             // manual re-run (tests):
+             YamlExtensionLoader.LoadAll();
+             </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.SupportedVersion">
+            <summary>Format version of sdk.yaml this loader understands.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.IsLoaded">
+            <summary>True once a load pass has completed (even with 0 files found).</summary>
+        </member>
+        <member name="E:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.OnLoaded">
+            <summary>Raised after a load pass completes. Consumers resolve native refs here.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.ModsRoot">
+            <summary>
+            Root folder scanned for <c>*/sdk.yaml</c>. Defaults to the game's
+            <c>StreamingAssets/Mods</c>; overridable for tests.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.LoadAll">
+            <summary>
+            Runs a full load pass: scan, parse, validate, merge, persist, then raises
+            <see cref="E:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.OnLoaded"/>. Idempotent — a new pass replaces the previous store.
+            </summary>
+            <example>YamlExtensionLoader.LoadAll();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.Get(System.String,System.String)">
+            <summary>Typed lookup used by <see cref="T:PerAspera.GameAPI.YamlExtensions.YamlExtensions"/> (item or null).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.GetSection(System.String)">
+            <summary>Snapshot of all items of a section (possibly empty).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.HasSection(System.String)">
+            <summary>True if at least one item was loaded for the section.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.DeserializeItem(YamlDotNet.Serialization.ISerializer,YamlDotNet.Serialization.IDeserializer,System.Object,System.Type,System.String,System.String,System.String)">
+            <summary>
+            Re-serializes the generic YAML node then deserializes it to the schema's DTO
+            type — robust round-trip without binding the whole file to a generic graph.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.SdkYamlFile">
+            <summary>Root document shape of a sdk.yaml sidecar file.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.SdkYamlFile.SdkExtensionVersion">
+            <summary>Format version (see <see cref="F:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.SupportedVersion"/>).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.SdkYamlFile.Extensions">
+            <summary>section name → (item key → raw YAML node).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.YamlExtensions">
+             <summary>
+             Public read API over the merged <c>sdk.yaml</c> extension data.
+             Data is available once the game's YAML datamodel has finished loading
+             (the loader runs automatically after <c>YAMLLoader.CompleteLoading</c>);
+             subscribe to <see cref="E:PerAspera.GameAPI.YamlExtensions.YamlExtensions.DataLoaded"/> to resolve native references safely.
+             </summary>
+             <example>
+             // Déclaration (au Load du plugin consommateur) :
+             ExtensionSchemaRegistry.Register(new ExtensionSchema("multiOutput", "building", typeof(MultiOutputConfig)));
+            
+             // Consommation (après DataLoaded) :
+             YamlExtensions.DataLoaded += () => {
+                 var cfg = YamlExtensions.GetFor&lt;MultiOutputConfig&gt;("multiOutput", "building_ma_raffinerie");
+                 foreach (var (key, c) in YamlExtensions.GetAll&lt;MultiOutputConfig&gt;("multiOutput")) { … }
+             };
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensions.IsLoaded">
+            <summary>True once the load pass has completed.</summary>
+            <example>if (YamlExtensions.IsLoaded) { … }</example>
+        </member>
+        <member name="E:PerAspera.GameAPI.YamlExtensions.YamlExtensions.DataLoaded">
+            <summary>
+            Raised after extension data is (re)loaded. If data is already loaded when a
+            handler subscribes, the handler is invoked immediately (no race at startup).
+            </summary>
+            <example>YamlExtensions.DataLoaded += () => Resolve();</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.GetFor``1(System.String,System.String)">
+            <summary>
+            Returns the extension config of one item, or null if the item has none.
+            </summary>
+            <typeparam name="T">DTO type registered for the section.</typeparam>
+            <param name="section">Section name (e.g. "multiOutput").</param>
+            <param name="itemKey">Datamodel item key (e.g. "building_ma_raffinerie").</param>
+            <example>var cfg = YamlExtensions.GetFor&lt;MultiOutputConfig&gt;("multiOutput", "building_x");</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.GetAll``1(System.String)">
+            <summary>
+            Returns all items of a section, keyed by datamodel item key. Empty if the
+            section is unknown or no mod provides it.
+            </summary>
+            <typeparam name="T">DTO type registered for the section.</typeparam>
+            <param name="section">Section name.</param>
+            <example>foreach (var (key, cfg) in YamlExtensions.GetAll&lt;MultiOutputConfig&gt;("multiOutput")) { … }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.HasSection(System.String)">
+            <summary>True if at least one loaded mod provides data for the section.</summary>
+            <param name="section">Section name.</param>
+            <example>if (YamlExtensions.HasSection("gasEmissions")) { … }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.RegisterSchema(PerAspera.GameAPI.YamlExtensions.ExtensionSchema)">
+            <summary>
+            Convenience passthrough to <see cref="M:PerAspera.GameAPI.YamlExtensions.ExtensionSchemaRegistry.Register(PerAspera.GameAPI.YamlExtensions.ExtensionSchema)"/> —
+            declare your section before the game finishes loading YAML.
+            </summary>
+            <param name="schema">The section schema.</param>
+            <example>YamlExtensions.RegisterSchema(new ExtensionSchema("gases", "resource", typeof(GasDefinition)));</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.ExportSchemasJson">
+            <summary>
+            Exports all registered schemas as JSON (section, targetTable, dtoType) for
+            external tooling (validate_yaml_mods.py).
+            </summary>
+            <example>File.WriteAllText("sdk-extension-schemas.json", YamlExtensions.ExportSchemasJson());</example>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.YamlExtensionsAutoStart">
+            <summary>
+            Auto-start plugin: hooks <c>YAMLLoader.CompleteLoading</c> so the extension
+            sidecar files (<c>sdk.yaml</c>) are loaded right after the game's datamodel is
+            fully merged. Same auto-start pattern as <c>EventsAutoStartPlugin</c>.
+            </summary>
+            <example>
+            // Aucune action requise par les mods : déployer PerAspera.GameAPI.dll suffit.
+            // Les consommateurs s'abonnent à YamlExtensions.DataLoaded.
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.YamlExtensions.CompleteLoadingHook">
+            <summary>
+            Postfix on <c>YAMLLoader.CompleteLoading</c> — triggers the sdk.yaml load pass
+            once the native tables are populated (so consumers can resolve string refs).
+            </summary>
         </member>
         <member name="T:AtmosphericComposition">
             <summary>

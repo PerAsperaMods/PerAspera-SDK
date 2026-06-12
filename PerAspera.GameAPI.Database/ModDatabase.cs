@@ -176,6 +176,20 @@ namespace PerAspera.GameAPI.Database
                     UNIQUE(data_type, version)
                 )");
 
+            // SDK extension data (YamlExtensions sidecar sdk.yaml) — one row per
+            // (section, item); generic JSON payload, no per-type schema columns.
+            ExecuteNonQuery(@"
+                CREATE TABLE IF NOT EXISTS sdk_extensions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    section TEXT NOT NULL,
+                    item_key TEXT NOT NULL,
+                    mod_id TEXT NOT NULL,
+                    json_data TEXT NOT NULL,
+                    yaml_checksum TEXT NOT NULL,
+                    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(section, item_key)
+                )");
+
             // Create comprehensive indexes for performance
             CreateIndexes();
         }
@@ -762,6 +776,90 @@ namespace PerAspera.GameAPI.Database
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Store SDK extension data (sdk.yaml sidecar) for one section. Replaces existing
+        /// entries with the same (section, item_key) — last writer wins, matching the
+        /// YamlExtensions mod-load-order semantics.
+        /// </summary>
+        /// <param name="section">Extension section name (e.g. "multiOutput")</param>
+        /// <param name="modId">Mod that provided the data</param>
+        /// <param name="itemsJson">item key → JSON payload</param>
+        /// <param name="checksum">Checksum of the source sdk.yaml</param>
+        /// <example>
+        /// ModDatabase.Instance.StoreExtensionData("multiOutput", "MonMod",
+        ///     new Dictionary&lt;string, string&gt; { ["building_x"] = "{\"extraOutputs\":[…]}" }, checksum);
+        /// </example>
+        public void StoreExtensionData(string section, string modId, Dictionary<string, string> itemsJson, string checksum)
+        {
+            try
+            {
+                using var transaction = _connection.BeginTransaction();
+                foreach (var kvp in itemsJson)
+                {
+                    ExecuteNonQuery(
+                        @"INSERT INTO sdk_extensions (section, item_key, mod_id, json_data, yaml_checksum, last_updated)
+                          VALUES (@section, @key, @modId, @json, @checksum, CURRENT_TIMESTAMP)
+                          ON CONFLICT(section, item_key) DO UPDATE SET
+                            mod_id = @modId, json_data = @json, yaml_checksum = @checksum,
+                            last_updated = CURRENT_TIMESTAMP",
+                        new SQLiteParameter("@section", section),
+                        new SQLiteParameter("@key", kvp.Key),
+                        new SQLiteParameter("@modId", modId),
+                        new SQLiteParameter("@json", kvp.Value),
+                        new SQLiteParameter("@checksum", checksum));
+                }
+                transaction.Commit();
+                _logger.LogInfo($"✅ Stored {itemsJson.Count} sdk_extensions entries for section '{section}' (mod '{modId}')");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to store extension data for '{section}': {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Retrieve all SDK extension entries of a section, as item key → JSON payload.
+        /// </summary>
+        /// <param name="section">Extension section name (e.g. "multiOutput")</param>
+        /// <example>
+        /// var items = ModDatabase.Instance.RetrieveExtensionData("multiOutput");
+        /// </example>
+        public Dictionary<string, string> RetrieveExtensionData(string section)
+        {
+            var result = new Dictionary<string, string>();
+            try
+            {
+                using var reader = ExecuteQuery(
+                    "SELECT item_key, json_data FROM sdk_extensions WHERE section = @section",
+                    new SQLiteParameter("@section", section));
+                while (reader.Read())
+                    result[reader.GetString(0)] = reader.GetString(1);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to retrieve extension data for '{section}': {ex.Message}");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Delete all SDK extension entries provided by a mod (cleanup when a mod is removed).
+        /// </summary>
+        /// <param name="modId">Mod identifier</param>
+        /// <example>ModDatabase.Instance.CleanupExtensionData("MonMod");</example>
+        public void CleanupExtensionData(string modId)
+        {
+            try
+            {
+                ExecuteNonQuery("DELETE FROM sdk_extensions WHERE mod_id = @modId",
+                    new SQLiteParameter("@modId", modId));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to cleanup extension data for mod '{modId}': {ex.Message}");
+            }
         }
 
         /// <summary>
