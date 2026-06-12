@@ -1,136 +1,272 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using UnityEngine;
 
 namespace PerAspera.GameAPI.MultiOutput
 {
     /// <summary>
-    /// UI patch: shows the secondary outputs in the OUTPUT section of the in-world
-    /// building card (<c>BuildingWorldPanel</c>).
-    /// Injection is done at the <b>panel</b> level (its own <c>outputResource</c> list +
-    /// a clone of <c>outputItemPrototype</c> in <c>outputContainer</c>) — never via
-    /// <c>BuildingType.displayOutputs</c>, which duplicates the native output icon
-    /// (tested in game, Wafhien 2026-06).
-    /// The quantity label then refreshes automatically: the vanilla update loop
-    /// (<c>UpdateInputOutput → UpdateDetails</c>) walks <c>outputResource</c> /
-    /// <c>outputDetails</c> in lockstep and reads the stockpile via <c>GetStock</c> —
-    /// exactly where <see cref="FactorySpawnOutputPatch"/> injects the cargo.
+    /// Shared clone pool for the secondary-output UI patches.
+    ///
+    /// Design rules (learned the hard way, 2026-06-12):
+    /// <list type="bullet">
+    /// <item><b>Never Destroy a clone</b> — Destroy is deferred in Unity and the vanilla
+    /// update loop may still hold the reference within the same frame → hard crash.
+    /// Clones are pooled and toggled with SetActive instead.</item>
+    /// <item><b>Never mutate the panel's own bookkeeping</b> (<c>outputResource</c> /
+    /// <c>outputDetails</c>) — vanilla rebuilds them on its own schedule and the lists
+    /// desynchronise from our clones. We own our clones end-to-end and refresh their
+    /// quantity label ourselves in an <c>UpdateInputOutput</c> Postfix.</item>
+    /// <item><b>No .NET reflection</b> — every member used here is exposed by the typed
+    /// interop proxies (verified in Tools/InteropDump/ScriptsAssembly/, 2026-06-12).</item>
+    /// </list>
+    /// </summary>
+    internal static class MultiOutputPanelPool
+    {
+        /// <summary>Name tag of the ResourceDetail clones we create (debug/identification).</summary>
+        internal const string CloneName = "SDKMultiOutputDetail";
+
+        internal sealed class Entry
+        {
+            public ResourceDetail Detail = null!;
+            public ResourceType Resource = null!;
+        }
+
+        // Keyed by the native pointer of the panel instance (stable: Boehm GC is non-moving,
+        // and the panels are persistent presenters — at most a couple of instances per session).
+        private static readonly Dictionary<IntPtr, List<Entry>> _pools = new();
+
+        /// <summary>
+        /// Brings the clone set of <paramref name="panelPtr"/> in sync with
+        /// <paramref name="extras"/>: reuses pooled clones, instantiates missing ones,
+        /// deactivates the surplus. Pass <c>extras = null</c> to just hide everything.
+        /// Returns the number of active clones.
+        /// </summary>
+        internal static int Sync(
+            IntPtr panelPtr,
+            LayoutContainer? container,
+            ResourceDetail? prototype,
+            IReadOnlyList<ResolvedExtraOutput>? extras,
+            Func<ResourceType, Sprite?> spriteSelector)
+        {
+            if (!_pools.TryGetValue(panelPtr, out var pool))
+            {
+                pool = new List<Entry>();
+                _pools[panelPtr] = pool;
+            }
+
+            // Drop entries whose GameObject got destroyed behind our back (scene unload…)
+            pool.RemoveAll(e => !IsAlive(e.Detail));
+
+            if (extras == null || extras.Count == 0 || container == null || prototype == null)
+            {
+                foreach (var e in pool) Hide(e.Detail, container);
+                return 0;
+            }
+
+            int active = 0;
+            for (int i = 0; i < extras.Count; i++)
+            {
+                var extra = extras[i];
+                Entry entry;
+                if (i < pool.Count)
+                {
+                    entry = pool[i];
+                }
+                else
+                {
+                    var clone = UnityEngine.Object.Instantiate(prototype, container.transform, false);
+                    clone.name = CloneName;
+                    entry = new Entry { Detail = clone };
+                    pool.Add(entry);
+                }
+
+                entry.Resource = extra.Resource;
+
+                var detail = entry.Detail;
+                var sprite = spriteSelector(extra.Resource);
+                if (detail.imageIcon != null && sprite != null)
+                    detail.imageIcon.sprite = sprite;
+                detail.SetResourceTooltip(extra.Resource);
+
+                if (!detail.gameObject.activeSelf)
+                {
+                    detail.gameObject.SetActive(true);
+                    var rect = detail.GetComponent<RectTransform>();
+                    if (rect != null) container.AddChild(rect, -1, reparent: false);
+                }
+                active++;
+            }
+
+            // Surplus clones from a previous building with more extras
+            for (int i = extras.Count; i < pool.Count; i++)
+                Hide(pool[i].Detail, container);
+
+            container.SetDirty();
+            return active;
+        }
+
+        /// <summary>Active clones of a panel (empty list when none).</summary>
+        internal static List<Entry> GetEntries(IntPtr panelPtr)
+            => _pools.TryGetValue(panelPtr, out var pool) ? pool : _empty;
+
+        private static readonly List<Entry> _empty = new();
+
+        private static void Hide(ResourceDetail detail, LayoutContainer? container)
+        {
+            if (!IsAlive(detail) || !detail.gameObject.activeSelf) return;
+            var rect = detail.GetComponent<RectTransform>();
+            if (rect != null) container?.RemoveChild(rect);
+            detail.gameObject.SetActive(false);
+        }
+
+        private static bool IsAlive(ResourceDetail? detail)
+        {
+            try
+            {
+                // Unity's overloaded == reports destroyed natives as null through the proxy
+                return detail != null && detail.gameObject != null;
+            }
+            catch { return false; }
+        }
+    }
+
+    /// <summary>
+    /// In-world building card (<c>BuildingWorldPanel</c>, the hover/click card):
+    /// adds one pooled ResourceDetail per secondary output to the OUTPUT container.
     /// </summary>
     [HarmonyPatch(typeof(BuildingWorldPanel), nameof(BuildingWorldPanel.SetBuilding))]
     internal static class BuildingWorldPanelMultiOutputPatch
     {
-        /// <summary>Name tag of the ResourceDetail clones we create (used for cleanup).</summary>
-        private const string CloneName = "SDKMultiOutputDetail";
-
-        // 1 log Info par type de bâtiment (éviter le spam à chaque ouverture de panneau)
         private static readonly HashSet<string> _logged = new();
 
-        /// <summary>
-        /// Removes our clones from a previous SetBuilding pass before the vanilla
-        /// rebuild — idempotent whatever the vanilla cleanup actually does.
-        /// </summary>
-        [HarmonyPrefix]
-        public static void Prefix(BuildingWorldPanel __instance)
-        {
-            try
-            {
-                var container = __instance?.outputContainer;
-                if (container == null) return;
-
-                var root = container.transform;
-                for (int i = root.childCount - 1; i >= 0; i--)
-                {
-                    var child = root.GetChild(i);
-                    if (child == null || child.name != CloneName) continue;
-
-                    var rect = child.TryCast<RectTransform>();
-                    if (rect != null) container.RemoveChild(rect);
-                    UnityEngine.Object.Destroy(child.gameObject);
-                }
-            }
-            catch (Exception ex)
-            {
-                MultiOutputLog.Error($"Panel Prefix (cleanup) : {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// After the vanilla panel setup: appends one ResourceDetail per secondary
-        /// output to the OUTPUT container, and extends the panel's bookkeeping lists
-        /// so the vanilla update loop refreshes our items too.
-        /// </summary>
         [HarmonyPostfix]
         public static void Postfix(BuildingWorldPanel __instance, Building building)
         {
             try
             {
                 string? key = building?.buildingType?.key;
-                if (key == null) return;
+                var extras = key != null ? MultiOutput.GetResolvedOrNull(key) : null;
 
-                var extras = MultiOutput.GetResolvedOrNull(key);
-                if (extras == null) return;
-
+                // Construction mode: vanilla hides the OUTPUT section — hide our clones too.
                 var list = __instance.outputResource;
-                // Count == 0 : panneau en mode construction/sans production — ne rien ajouter.
-                if (list == null || list.Count == 0) return;
+                if (list == null || list.Count == 0) extras = null;
 
-                var container = __instance.outputContainer;
-                var proto = __instance.outputItemPrototype;
-                if (container == null || proto == null) return;
+                int shown = MultiOutputPanelPool.Sync(
+                    __instance.Pointer,
+                    __instance.outputContainer,
+                    __instance.outputItemPrototype,
+                    extras,
+                    r => __instance.GetOutputSprite(r));
 
-                var added = new List<ResourceDetail>();
-                foreach (var extra in extras)
+                if (shown > 0)
                 {
-                    if (ContainsResource(list, extra.Resource)) continue;
-
-                    var clone = UnityEngine.Object.Instantiate(
-                        proto, container.transform, false);
-                    clone.name = CloneName;
-                    clone.gameObject.SetActive(true);
-
-                    var sprite = __instance.GetOutputSprite(extra.Resource);
-                    if (clone.imageIcon != null && sprite != null)
-                        clone.imageIcon.sprite = sprite;
-                    clone.SetResourceTooltip(extra.Resource);
-
-                    var rect = clone.GetComponent<RectTransform>();
-                    if (rect != null) container.AddChild(rect, -1, reparent: false);
-
-                    list.Add(extra.Resource);
-                    added.Add(clone);
+                    RefreshTexts(__instance);   // avoid one frame of prefab placeholder text
+                    if (key != null && _logged.Add(key))
+                        MultiOutputLog.Info($"Panneau OUTPUT (carte) : +{shown} sortie(s) secondaire(s) pour {key}.");
                 }
-                if (added.Count == 0) return;
-
-                // Étendre outputDetails pour que UpdateDetails rafraîchisse nos items.
-                var old = __instance.outputDetails;
-                int oldLen = old != null ? old.Length : 0;
-                var arr = new Il2CppReferenceArray<ResourceDetail>(oldLen + added.Count);
-                for (int i = 0; i < oldLen; i++) arr[i] = old![i];
-                for (int j = 0; j < added.Count; j++) arr[oldLen + j] = added[j];
-                __instance.outputDetails = arr;
-
-                container.SetDirty();
-
-                if (_logged.Add(key))
-                    MultiOutputLog.Info($"Panneau OUTPUT : +{added.Count} sortie(s) secondaire(s) affichée(s) pour {key}.");
             }
             catch (Exception ex)
             {
-                MultiOutputLog.Error($"Panel Postfix : {ex.Message}");
+                MultiOutputLog.Error($"WorldPanel SetBuilding Postfix : {ex.Message}");
             }
         }
 
-        private static bool ContainsResource(
-            Il2CppSystem.Collections.Generic.List<ResourceType> list, ResourceType resource)
+        /// <summary>Quantity refresh — same formatter as vanilla (<c>GetOutputString</c>).</summary>
+        internal static void RefreshTexts(BuildingWorldPanel panel)
         {
-            for (int i = 0; i < list.Count; i++)
+            foreach (var entry in MultiOutputPanelPool.GetEntries(panel.Pointer))
             {
-                var r = list[i];
-                if (r != null && r.key == resource.key) return true;
+                var detail = entry.Detail;
+                if (detail == null || !detail.gameObject.activeSelf || detail.textQuantity == null)
+                    continue;
+                detail.textQuantity.text = panel.GetOutputString(
+                    panel.GetStock(entry.Resource),
+                    panel.GetMaxStockOutput(entry.Resource));
             }
-            return false;
+        }
+    }
+
+    /// <summary>
+    /// Keeps the quantity label of the world-card clones in sync with the stockpile,
+    /// on the same cadence as the vanilla refresh.
+    /// </summary>
+    [HarmonyPatch(typeof(BuildingWorldPanel), nameof(BuildingWorldPanel.UpdateInputOutput))]
+    internal static class BuildingWorldPanelMultiOutputUpdatePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(BuildingWorldPanel __instance)
+        {
+            try { BuildingWorldPanelMultiOutputPatch.RefreshTexts(__instance); }
+            catch (Exception ex) { MultiOutputLog.Error($"WorldPanel UpdateInputOutput Postfix : {ex.Message}"); }
+        }
+    }
+
+    /// <summary>
+    /// Left-side building screen (<c>BuildingScreenPanel</c>): same clone pooling on its
+    /// own OUTPUT container. No <c>GetOutputSprite</c>/<c>GetStock</c> here — the sprite
+    /// comes from <c>ResourceType.iconName</c> and the stock from
+    /// <c>Stockpile.GetTotalStock</c> (not GetOwnStockForShow — idle cargo added via
+    /// ICargoHolderOps_XAddIdleCargo has no registered slot, so GetOwnStockForShow returns 0).
+    /// </summary>
+    [HarmonyPatch(typeof(BuildingScreenPanel), nameof(BuildingScreenPanel.SetBuilding))]
+    internal static class BuildingScreenPanelMultiOutputPatch
+    {
+        private static readonly HashSet<string> _logged = new();
+
+        [HarmonyPostfix]
+        public static void Postfix(BuildingScreenPanel __instance, Building building)
+        {
+            try
+            {
+                string? key = building?.buildingType?.key;
+                var extras = key != null ? MultiOutput.GetResolvedOrNull(key) : null;
+
+                int shown = MultiOutputPanelPool.Sync(
+                    __instance.Pointer,
+                    __instance.outputContainer,
+                    __instance.outputItemPrototype,
+                    extras,
+                    r => r.iconName);
+
+                if (shown > 0)
+                {
+                    RefreshTexts(__instance);
+                    if (key != null && _logged.Add(key))
+                        MultiOutputLog.Info($"Panneau OUTPUT (écran gauche) : +{shown} sortie(s) secondaire(s) pour {key}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MultiOutputLog.Error($"ScreenPanel SetBuilding Postfix : {ex.Message}");
+            }
+        }
+
+        internal static void RefreshTexts(BuildingScreenPanel panel)
+        {
+            var stockpile = panel.building?.stockpile;
+            if (stockpile == null) return;
+
+            foreach (var entry in MultiOutputPanelPool.GetEntries(panel.Pointer))
+            {
+                var detail = entry.Detail;
+                if (detail == null || !detail.gameObject.activeSelf || detail.textQuantity == null)
+                    continue;
+                float stock = stockpile.GetTotalStock(entry.Resource).ToFloat();
+                detail.textQuantity.text = Mathf.FloorToInt(stock).ToString();
+            }
+        }
+    }
+
+    /// <summary>Quantity refresh for the left-side screen, vanilla cadence.</summary>
+    [HarmonyPatch(typeof(BuildingScreenPanel), nameof(BuildingScreenPanel.UpdateInputOutput))]
+    internal static class BuildingScreenPanelMultiOutputUpdatePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(BuildingScreenPanel __instance)
+        {
+            try { BuildingScreenPanelMultiOutputPatch.RefreshTexts(__instance); }
+            catch (Exception ex) { MultiOutputLog.Error($"ScreenPanel UpdateInputOutput Postfix : {ex.Message}"); }
         }
     }
 }

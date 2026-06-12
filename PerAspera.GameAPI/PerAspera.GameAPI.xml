@@ -8763,35 +8763,64 @@
         <member name="P:PerAspera.GameAPI.MultiOutput.ExtraOutputDef.ScaleWithProductivity">
             <summary>Scale the quantity by the factory's current productivity (default true).</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutputPanelPool">
+             <summary>
+             Shared clone pool for the secondary-output UI patches.
+            
+             Design rules (learned the hard way, 2026-06-12):
+             <list type="bullet">
+             <item><b>Never Destroy a clone</b> — Destroy is deferred in Unity and the vanilla
+             update loop may still hold the reference within the same frame → hard crash.
+             Clones are pooled and toggled with SetActive instead.</item>
+             <item><b>Never mutate the panel's own bookkeeping</b> (<c>outputResource</c> /
+             <c>outputDetails</c>) — vanilla rebuilds them on its own schedule and the lists
+             desynchronise from our clones. We own our clones end-to-end and refresh their
+             quantity label ourselves in an <c>UpdateInputOutput</c> Postfix.</item>
+             <item><b>No .NET reflection</b> — every member used here is exposed by the typed
+             interop proxies (verified in Tools/InteropDump/ScriptsAssembly/, 2026-06-12).</item>
+             </list>
+             </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.MultiOutput.MultiOutputPanelPool.CloneName">
+            <summary>Name tag of the ResourceDetail clones we create (debug/identification).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutputPanelPool.Sync(System.IntPtr,LayoutContainer,ResourceDetail,System.Collections.Generic.IReadOnlyList{PerAspera.GameAPI.MultiOutput.ResolvedExtraOutput},System.Func{ResourceType,UnityEngine.Sprite})">
+            <summary>
+            Brings the clone set of <paramref name="panelPtr"/> in sync with
+            <paramref name="extras"/>: reuses pooled clones, instantiates missing ones,
+            deactivates the surplus. Pass <c>extras = null</c> to just hide everything.
+            Returns the number of active clones.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.MultiOutput.MultiOutputPanelPool.GetEntries(System.IntPtr)">
+            <summary>Active clones of a panel (empty list when none).</summary>
+        </member>
         <member name="T:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch">
             <summary>
-            UI patch: shows the secondary outputs in the OUTPUT section of the in-world
-            building card (<c>BuildingWorldPanel</c>).
-            Injection is done at the <b>panel</b> level (its own <c>outputResource</c> list +
-            a clone of <c>outputItemPrototype</c> in <c>outputContainer</c>) — never via
-            <c>BuildingType.displayOutputs</c>, which duplicates the native output icon
-            (tested in game, Wafhien 2026-06).
-            The quantity label then refreshes automatically: the vanilla update loop
-            (<c>UpdateInputOutput → UpdateDetails</c>) walks <c>outputResource</c> /
-            <c>outputDetails</c> in lockstep and reads the stockpile via <c>GetStock</c> —
-            exactly where <see cref="T:PerAspera.GameAPI.MultiOutput.FactorySpawnOutputPatch"/> injects the cargo.
+            In-world building card (<c>BuildingWorldPanel</c>, the hover/click card):
+            adds one pooled ResourceDetail per secondary output to the OUTPUT container.
             </summary>
         </member>
-        <member name="F:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.CloneName">
-            <summary>Name tag of the ResourceDetail clones we create (used for cleanup).</summary>
+        <member name="M:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.RefreshTexts(BuildingWorldPanel)">
+            <summary>Quantity refresh — same formatter as vanilla (<c>GetOutputString</c>).</summary>
         </member>
-        <member name="M:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.Prefix(BuildingWorldPanel)">
+        <member name="T:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputUpdatePatch">
             <summary>
-            Removes our clones from a previous SetBuilding pass before the vanilla
-            rebuild — idempotent whatever the vanilla cleanup actually does.
+            Keeps the quantity label of the world-card clones in sync with the stockpile,
+            on the same cadence as the vanilla refresh.
             </summary>
         </member>
-        <member name="M:PerAspera.GameAPI.MultiOutput.BuildingWorldPanelMultiOutputPatch.Postfix(BuildingWorldPanel,Building)">
+        <member name="T:PerAspera.GameAPI.MultiOutput.BuildingScreenPanelMultiOutputPatch">
             <summary>
-            After the vanilla panel setup: appends one ResourceDetail per secondary
-            output to the OUTPUT container, and extends the panel's bookkeeping lists
-            so the vanilla update loop refreshes our items too.
+            Left-side building screen (<c>BuildingScreenPanel</c>): same clone pooling on its
+            own OUTPUT container. No <c>GetOutputSprite</c>/<c>GetStock</c> here — the sprite
+            comes from <c>ResourceType.iconName</c> and the stock from
+            <c>Stockpile.GetTotalStock</c> (not GetOwnStockForShow — idle cargo added via
+            ICargoHolderOps_XAddIdleCargo has no registered slot, so GetOwnStockForShow returns 0).
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.MultiOutput.BuildingScreenPanelMultiOutputUpdatePatch">
+            <summary>Quantity refresh for the left-side screen, vanilla cadence.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.MultiOutput.MultiOutputLog">
             <summary>Internal shared logger for the MultiOutput module.</summary>

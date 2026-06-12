@@ -27,8 +27,11 @@ namespace PerAspera.GameAPI.MultiOutput
                 var harmony = new Harmony("PerAspera.GameAPI.MultiOutput");
                 harmony.PatchAll(typeof(FactorySpawnOutputPatch));
                 harmony.PatchAll(typeof(BuildingWorldPanelMultiOutputPatch));
+                harmony.PatchAll(typeof(BuildingWorldPanelMultiOutputUpdatePatch));
+                harmony.PatchAll(typeof(BuildingScreenPanelMultiOutputPatch));
+                harmony.PatchAll(typeof(BuildingScreenPanelMultiOutputUpdatePatch));
 
-                Log.LogInfo("[MultiOut] Actif — section 'multiOutput' enregistrée, patchs SpawnOutput + BuildingWorldPanel posés.");
+                Log.LogInfo("[MultiOut] Actif — section 'multiOutput' enregistrée, patchs SpawnOutput + WorldPanel + ScreenPanel posés.");
             }
             catch (Exception ex)
             {
