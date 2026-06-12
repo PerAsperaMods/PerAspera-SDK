@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PerAspera ModSDK - Complete dependencies package (modder pack)
+
+  Provides everything needed to compile a Per Aspera mod:
+  - PerAspera SDK references (4 assemblies, consolidation 2026-06)
+  - BepInEx IL2CPP framework (NuGet)
+  - IL2CPP Interop runtime (NuGet)
+
+  Usage: place this file next to the SDK DLLs (as shipped in the modder pack zip),
+  then in your mod .csproj:  <Import Project="path/to/sdkDLL.props" />
+-->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <PerAsperaSdkDllDir>$(MSBuildThisFileDirectory)</PerAsperaSdkDllDir>
+    <IncludeAllUnityReferences>true</IncludeAllUnityReferences>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Core dependencies: Unity + BepInEx + IL2CPP -->
+  <ItemGroup>
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.49" />
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="Il2CppInterop.Runtime" Version="1.*" />
+  </ItemGroup>
+
+  <!-- PerAspera SDK assemblies (4 DLLs) -->
+  <ItemGroup>
+    <PerAsperaSdkDlls Include="
+      $(PerAsperaSdkDllDir)PerAspera.Core.dll;
+      $(PerAsperaSdkDllDir)PerAspera.GameAPI.dll;
+      $(PerAsperaSdkDllDir)PerAspera.GameAPI.Database.dll;
+      $(PerAsperaSdkDllDir)PerAspera.ModSDK.dll" />
+  </ItemGroup>
+
+  <Target Name="AddPerAsperaSdkReferences" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Include="%(PerAsperaSdkDlls.Filename)">
+        <HintPath>%(PerAsperaSdkDlls.Identity)</HintPath>
+        <Private>False</Private>
+        <SpecificVersion>False</SpecificVersion>
+      </Reference>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ValidatePerAsperaSdk" BeforeTargets="Build">
+    <Error Condition="!Exists('$(PerAsperaSdkDllDir)PerAspera.ModSDK.dll')"
+           Text="PerAspera SDK introuvable : $(PerAsperaSdkDllDir)" />
+  </Target>
+
+</Project>

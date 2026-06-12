@@ -1,0 +1,59 @@
+name: Build SDK
+description: >
+  Builds the 4 SDK assemblies in CI mode. Downloads the private game interop
+  archive (release asset on PerAsperaMods/gamelibs-per-aspera) and extracts it
+  to a fake game dir so the IsCIBuild path in Directory.Build.props/.targets
+  resolves all game references. Game DLLs never leave the private repo.
+
+inputs:
+  gamelibs-token:
+    description: PAT with contents:read on PerAsperaMods/gamelibs-per-aspera
+    required: true
+  interop-tag:
+    description: Release tag of the interop archive on the private repo
+    required: false
+    default: interop-1.8.1
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Download game interop (private)
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ inputs.gamelibs-token }}
+      run: |
+        gh release download ${{ inputs.interop-tag }} `
+          --repo PerAsperaMods/gamelibs-per-aspera `
+          --pattern "interop-*.zip" --output interop.zip
+        $fake = Join-Path $env:RUNNER_TEMP "fake-game\BepInEx\interop"
+        New-Item -ItemType Directory -Force $fake | Out-Null
+        Expand-Archive interop.zip -DestinationPath $fake
+        $count = (Get-ChildItem "$fake\*.dll").Count
+        Write-Host "Interop: $count DLLs extraites"
+        if ($count -lt 100) { Write-Error "Archive interop incomplete ($count DLLs)"; exit 1 }
+        "PERASPERAGAMEPATH=$(Join-Path $env:RUNNER_TEMP 'fake-game')" >> $env:GITHUB_ENV
+
+    - name: Build (4 assemblies, Release)
+      shell: pwsh
+      run: |
+        foreach ($p in 'PerAspera.Core','PerAspera.GameAPI','PerAspera.GameAPI.Database','PerAspera.ModSDK') {
+          Write-Host "=== $p ==="
+          dotnet build "$p\$p.csproj" -c Release --nologo
+          if ($LASTEXITCODE -ne 0) { Write-Error "Build $p echoue"; exit 1 }
+        }
+
+    - name: Stage build output
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force staging | Out-Null
+        $modsdk  = "PerAspera.ModSDK\bin\Release\net6.0"
+        $gameapi = "PerAspera.GameAPI\bin\Release\net6.0"
+        Copy-Item "$modsdk\PerAspera.*.dll" staging\
+        Copy-Item "$modsdk\PerAspera.*.xml" staging\ -ErrorAction SilentlyContinue
+        Copy-Item "$gameapi\YamlDotNet.dll" staging\
+        Get-ChildItem staging | ForEach-Object { Write-Host "  staged: $($_.Name)" }

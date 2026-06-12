@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build SDK
+        uses: ./.github/actions/build-sdk
+        with:
+          gamelibs-token: ${{ secrets.GAMELIBS_TOKEN }}
+
+      - name: Upload dev artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PerAspera-SDK-dev-${{ github.sha }}
+          path: staging/
+          retention-days: 30

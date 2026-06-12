@@ -1,8 +1,8 @@
 ﻿<Project>
   <PropertyGroup>
     <!-- PerAspera SDK Version Information -->
-    <SDKVersion>1.1.0</SDKVersion>
-    <SDKVersionPrefix>1.1.0</SDKVersionPrefix>
+    <SDKVersion>1.2.0</SDKVersion>
+    <SDKVersionPrefix>1.2.0</SDKVersionPrefix>
     <SDKVersionSuffix></SDKVersionSuffix>
     <InformationalVersion>$(SDKVersion)+$(GitCommitId)</InformationalVersion>
     
@@ -30,8 +30,8 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     
     <!-- Per Aspera Game Version Compatibility -->
-    <GameVersion>1.5.0</GameVersion>
-    <GameVersionCompatibility>1.5.x</GameVersionCompatibility>
+    <GameVersion>1.8.1</GameVersion>
+    <GameVersionCompatibility>1.8.x</GameVersionCompatibility>
     
     <!-- BepInEx Compatibility -->
     <BepInExVersion>6.0.0</BepInExVersion>

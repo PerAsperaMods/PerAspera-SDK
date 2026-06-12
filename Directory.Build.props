@@ -51,30 +51,12 @@
                game path from environment variable PERASPERAGAMEPATH.
   -->
 
-  <!-- CI/CD: publicize the 3 game assemblies at build time, glob the rest from interop -->
+  <!-- CI/CD: publicizer package only — the game references themselves are added by
+       the two-target pattern in Directory.Build.targets (GatherGameLibDllsCI /
+       AddGameLibReferencesCI). The old inline ItemGroup here produced empty HintPaths
+       (%(FullPath) metadata doesn't resolve in a static ItemGroup) — removed 2026-06. -->
   <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
-    <Reference Include="Assembly-CSharp" Publicize="true">
-      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ScriptsAssembly" Publicize="true">
-      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\ScriptsAssembly.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="PluginsAssembly" Publicize="true">
-      <HintPath>$(PERASPERAGAMEPATH)\BepInEx\interop\PluginsAssembly.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <!-- All other interop DLLs (Il2Cpp*, UnityEngine.*, Unity.*, etc.) copied as-is -->
-    <_CIInteropDll Include="$(PERASPERAGAMEPATH)\BepInEx\interop\*.dll"
-                   Exclude="$(PERASPERAGAMEPATH)\BepInEx\interop\Assembly-CSharp.dll;$(PERASPERAGAMEPATH)\BepInEx\interop\ScriptsAssembly.dll;$(PERASPERAGAMEPATH)\BepInEx\interop\PluginsAssembly.dll" />
-    <Reference Include="@(_CIInteropDll->'%(Filename)')">
-      <HintPath>%(FullPath)</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
 
   <!-- LOCAL dev: wildcard game DLL references are added by the shared target

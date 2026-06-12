@@ -1,0 +1,62 @@
+<Project>
+  <!-- Embedded in parent workspace → delegate to root Directory.Build.targets
+       (nearest-file wins for auto-import, so we must chain explicitly, same as the props). -->
+  <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets"
+          Condition="Exists('$(MSBuildThisFileDirectory)..\Directory.Build.targets')" />
+
+  <!--
+    CI / standalone game references — same two-target pattern as the workspace root
+    targets (defining and consuming items in one static ItemGroup breaks %(FullPath)
+    metadata, which is why the old inline ItemGroup in Directory.Build.props produced
+    empty HintPaths). Same explicit 19-DLL contract as local dev, 3 game assemblies
+    publicized. Active only when IsCIBuild=true (GITHUB_ACTIONS=true).
+  -->
+  <Target Name="GatherGameLibDllsCI"
+          Condition="'$(IsCIBuild)' == 'true' and Exists('$(BepInExInteropDir)')">
+    <ItemGroup>
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Il2Cppmscorlib.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Il2CppSystem.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Il2CppSystem.Core.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.CoreModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.IMGUIModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.InputLegacyModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.InputModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.UI.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.AnimationModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.PhysicsModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.TextRenderingModule.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Unity.TextMeshPro.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Unity.Entities.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Unity.Collections.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Unity.Mathematics.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\Newtonsoft.Json.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\YarnSpinner.dll" />
+      <_CIGameLibDll Include="$(BepInExInteropDir)\UnityEngine.ImageConversionModule.dll" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AddGameLibReferencesCI" BeforeTargets="ResolveAssemblyReferences"
+          DependsOnTargets="GatherGameLibDllsCI"
+          Condition="'$(IsCIBuild)' == 'true' and Exists('$(BepInExInteropDir)')">
+    <ItemGroup>
+      <!-- 3 game assemblies publicized: private setters become accessible at compile time -->
+      <Reference Include="Assembly-CSharp" Publicize="true">
+        <HintPath>$(BepInExInteropDir)\Assembly-CSharp.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+      <Reference Include="ScriptsAssembly" Publicize="true">
+        <HintPath>$(BepInExInteropDir)\ScriptsAssembly.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+      <Reference Include="PluginsAssembly" Publicize="true">
+        <HintPath>$(BepInExInteropDir)\PluginsAssembly.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+      <Reference Include="%(_CIGameLibDll.Filename)">
+        <HintPath>%(_CIGameLibDll.FullPath)</HintPath>
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+</Project>

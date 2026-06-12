@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches Version.props
+        shell: pwsh
+        run: |
+          [xml]$props = Get-Content Version.props
+          $sdkVer = ($props.Project.PropertyGroup.SDKVersion | Where-Object { $_ } | Select-Object -First 1).Trim()
+          $tagVer = $env:GITHUB_REF_NAME -replace '^v', ''
+          Write-Host "Version.props: $sdkVer | tag: $tagVer"
+          if ($tagVer -ne $sdkVer) {
+            Write-Error "Le tag v$tagVer ne correspond pas a SDKVersion=$sdkVer dans Version.props. Bumper Version.props avant de taguer."
+            exit 1
+          }
+
+      - name: Build SDK
+        uses: ./.github/actions/build-sdk
+        with:
+          gamelibs-token: ${{ secrets.GAMELIBS_TOKEN }}
+
+      - name: Package release zips
+        shell: pwsh
+        run: |
+          $ver = $env:GITHUB_REF_NAME
+
+          # 1) Player zip — racine = racine du jeu, extraction directe
+          $player = "package\player\BepInEx\plugins\SDK"
+          New-Item -ItemType Directory -Force $player | Out-Null
+          Copy-Item staging\PerAspera.*.dll $player\
+          Copy-Item staging\YamlDotNet.dll $player\
+          Compress-Archive -Path "package\player\*" -DestinationPath "PerAspera-SDK-$ver.zip"
+
+          # 2) Modder pack — DLLs + XML docs + props MSBuild
+          $modder = "package\modder"
+          New-Item -ItemType Directory -Force $modder | Out-Null
+          Copy-Item staging\* $modder\
+          Copy-Item packaging\sdkDLL.props $modder\
+          Compress-Archive -Path "$modder\*" -DestinationPath "PerAspera-SDK-$ver-modder-pack.zip"
+
+          Get-ChildItem *.zip | ForEach-Object { Write-Host "  $($_.Name) ($([math]::Round($_.Length/1KB)) KB)" }
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ver = $env:GITHUB_REF_NAME
+          gh release create $ver `
+            "PerAspera-SDK-$ver.zip#SDK (joueurs - extraire a la racine du jeu)" `
+            "PerAspera-SDK-$ver-modder-pack.zip#Modder pack (DLLs + XML + sdkDLL.props)" `
+            --title "PerAspera SDK $ver" `
+            --generate-notes
