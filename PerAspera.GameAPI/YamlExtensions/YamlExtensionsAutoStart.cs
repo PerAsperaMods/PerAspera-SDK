@@ -55,7 +55,7 @@ namespace PerAspera.GameAPI.YamlExtensions
         }
 
         [HarmonyPostfix]
-        [HarmonyPriority(Priority.Last)] // après les fixes d'index (ResourceIndexFix/ModDevHelper)
+        [HarmonyPriority(Priority.Last)] // après ResourceInitAutoStart (default priority) qui re-run PostInitialize
         public static void Postfix()
         {
             try { YamlExtensionLoader.LoadAll(); }

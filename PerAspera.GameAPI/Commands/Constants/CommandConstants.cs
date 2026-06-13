@@ -37,6 +37,7 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string UnlockSpecialProject = "UnlockSpecialProject";
         public const string GrantSectorPermission = "GrantSectorPermission";
         public const string UnlockSector = "UnlockSector";
+        public const string LockSector = "LockSector";   // custom SDK — no native equivalent
         public const string BeginQuest = "BeginQuest";
         public const string AbortQuest = "AbortQuest";
         public const string LockKnowledge = "LockKnowledge";
@@ -124,7 +125,7 @@ namespace PerAspera.GameAPI.Commands.Constants
             RevealResourceVein, RevealSpecialSite,
 
             // Knowledge & Progression
-            UnlockKnowledge, UnlockSpecialProject, GrantSectorPermission, UnlockSector,
+            UnlockKnowledge, UnlockSpecialProject, GrantSectorPermission, UnlockSector, LockSector,
             BeginQuest, AbortQuest, ResearchTechnology,
 
             // Orbital Mechanics & Hazards
@@ -199,7 +200,8 @@ namespace PerAspera.GameAPI.Commands.Constants
         public const string Building = "building";
         public const string Technology = "technology";
         public const string Knowledge = "knowledge";
-        
+        public const string SectorIndex = "sectorIndex";
+
         // Position parameters
         public const string Position = "position";
         public const string X = "x";

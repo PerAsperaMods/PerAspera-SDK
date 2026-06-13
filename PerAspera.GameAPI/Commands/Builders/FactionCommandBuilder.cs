@@ -148,7 +148,30 @@ namespace PerAspera.GameAPI.Commands.Builders
             _commands.Add(command);
             return this;
         }
-        
+
+        // Sector Commands
+
+        /// <summary>
+        /// Unlock a sector for this faction (wraps native CmdFactionUnlockSector)
+        /// </summary>
+        public FactionCommandBuilder UnlockSector(int sectorIndex)
+        {
+            var command = FactionSectorCommands.UnlockSector(_faction, sectorIndex, _globalTimeout);
+            _commands.Add(command);
+            return this;
+        }
+
+        /// <summary>
+        /// Lock a sector for this faction — sets Sector.enabled = false
+        /// Blocks all construction in the sector. Use for satellite loss, hostile events, etc.
+        /// </summary>
+        public FactionCommandBuilder LockSector(int sectorIndex)
+        {
+            var command = FactionSectorCommands.LockSector(_faction, sectorIndex, _globalTimeout);
+            _commands.Add(command);
+            return this;
+        }
+
         // Interaction Commands
         
         /// <summary>

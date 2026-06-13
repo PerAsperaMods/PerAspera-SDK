@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using PerAspera.Commands;
 using PerAspera.Core.IL2CPP;
+using PerAspera.GameAPI.Sectors;
+using UnityEngine;
 
 namespace PerAspera.GameAPI.Wrappers
 {
@@ -237,6 +239,79 @@ namespace PerAspera.GameAPI.Wrappers
         /// <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
         [Obsolete("GetRelationship/GetDiplomacyStatus/GetStanding n'existent pas sur Faction — retournait toujours null. Pas de système de diplomatie exposé.", false)]
         public float? GetRelationshipWith(FactionWrapper otherFaction) => null;
+
+        // ==================== SECTORS ====================
+
+        /// <summary>
+        /// Get a sector by its index. Returns null if index is out of range.
+        /// Index matches the argument used in YAML UnlockSector/LockSector commands.
+        /// </summary>
+        /// <example>var sector = faction.GetSector(3); // sector 3</example>
+        public SectorWrapper? GetSector(int sectorId)
+        {
+            var sectors = NativeFaction?.sectors;
+            if (sectors == null) return null;
+            foreach (var s in sectors)
+            {
+                if (s != null && s.id == sectorId)
+                    return SectorWrapper.FromNative(s);
+            }
+            return null;
+        }
+
+        /// <summary>Get all sectors belonging to this faction.</summary>
+        public List<SectorWrapper> GetAllSectors()
+        {
+            var result = new List<SectorWrapper>();
+            var sectors = NativeFaction?.sectors;
+            if (sectors == null) return result;
+            foreach (var s in sectors)
+                if (s != null) result.Add(SectorWrapper.FromNative(s));
+            return result;
+        }
+
+        /// <summary>
+        /// Find which sector a 2D position belongs to.
+        /// Uses Faction.SectorByGeographic(Vector2) → int index → sector lookup.
+        /// Returns null if position is outside all sectors.
+        /// </summary>
+        public SectorWrapper? GetSectorAtPosition(Vector2 position)
+        {
+            var f = NativeFaction;
+            if (f == null) return null;
+            int sectorId = f.SectorByGeographic(position);
+            return GetSector(sectorId);
+        }
+
+        /// <summary>
+        /// Count buildings of a given type in a specific sector.
+        /// Uses building world position to determine sector membership.
+        /// </summary>
+        /// <param name="buildingTypeId">YAML building ID (e.g. "building_ai_data_center")</param>
+        /// <param name="sectorId">Sector index to count in</param>
+        public int CountBuildingsInSector(string buildingTypeId, int sectorId)
+        {
+            var f = NativeFaction;
+            if (f == null) return 0;
+            var buildings = f.buildings;
+            if (buildings == null) return 0;
+
+            int count = 0;
+            foreach (var b in buildings)
+            {
+                if (b == null) continue;
+                if (b.buildingType?.key != buildingTypeId) continue;
+                // Building.position is already Vector2 (lat/lng)
+                if (f.SectorByGeographic(b.position) == sectorId)
+                    count++;
+            }
+            return count;
+        }
+
+        /// <summary>True if a position is within an enabled (unlocked) sector.</summary>
+        public bool IsPositionInEnabledSector(Vector2 position)
+            => NativeFaction?.IsInsideEnabledSectors(position) ?? false;
+
 
         // ==================== BUILDINGS ====================
 

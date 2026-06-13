@@ -8,6 +8,7 @@ using PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands;
 using PerAspera.GameAPI.Commands.NativeCommands.BuildingManagementCommands;
 using PerAspera.GameAPI.Commands.NativeCommands.EnvironmentUtilityCommands;
 using PerAspera.GameAPI.Commands.NativeCommands.ResourceManagementCommands;
+using PerAspera.GameAPI.Commands.NativeCommands.SectorCommands;
 
 
 #pragma warning disable CS1591
@@ -51,6 +52,10 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
                 NativeCommandTypes.ResearchTechnology => ResearchTechnologyCommand.FromParameters(parameters),
                 NativeCommandTypes.UnlockKnowledge => UnlockKnowledgeCommand.FromParameters(parameters),
                 NativeCommandTypes.LockKnowledge => LockKnowledgeCommand.FromParameters(parameters),
+
+                // Sector Commands
+                NativeCommandTypes.UnlockSector => UnlockSectorCommand.FromParameters(parameters),
+                NativeCommandTypes.LockSector => LockSectorCommand.FromParameters(parameters),
                 
                 // Interaction Commands
                 NativeCommandTypes.StartDialogue => StartDialogueCommand.FromParameters(parameters),
@@ -113,6 +118,10 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
                 NativeCommandTypes.ResearchTechnology,
                 NativeCommandTypes.UnlockKnowledge,
                 NativeCommandTypes.LockKnowledge,
+
+                // Sector Management
+                NativeCommandTypes.UnlockSector,
+                NativeCommandTypes.LockSector,
                 
                 // Interaction
                 NativeCommandTypes.StartDialogue,
@@ -184,6 +193,10 @@ namespace PerAspera.GameAPI.Commands.NativeCommands
                 NativeCommandTypes.ResearchTechnology => new[] { ParameterNames.Faction, ParameterNames.Technology },
                 NativeCommandTypes.UnlockKnowledge => new[] { ParameterNames.Faction, ParameterNames.Knowledge },
                 NativeCommandTypes.LockKnowledge => new[] { ParameterNames.Faction, ParameterNames.Knowledge },
+
+                // Sector Management
+                NativeCommandTypes.UnlockSector => new[] { ParameterNames.Faction, ParameterNames.SectorIndex },
+                NativeCommandTypes.LockSector => new[] { ParameterNames.Faction, ParameterNames.SectorIndex },
                 
                 // Interaction
                 NativeCommandTypes.StartDialogue => new[] { ParameterNames.Faction, ParameterNames.Person, ParameterNames.Dialogue },

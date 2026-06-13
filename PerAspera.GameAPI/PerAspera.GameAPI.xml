@@ -1711,6 +1711,17 @@
             Lock knowledge for this faction
             </summary>
         </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.UnlockSector(System.Int32)">
+            <summary>
+            Unlock a sector for this faction (wraps native CmdFactionUnlockSector)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.LockSector(System.Int32)">
+            <summary>
+            Lock a sector for this faction — sets Sector.enabled = false
+            Blocks all construction in the sector. Use for satellite loss, hostile events, etc.
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.Commands.Builders.FactionCommandBuilder.StartDialogue(System.Object,System.Object)">
             <summary>
             Start dialogue for this faction
@@ -2147,6 +2158,47 @@
             <summary>
             Create spawn resource vein command for faction
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionSectorCommands">
+            <summary>
+            Service for sector-related faction commands
+            Handles sector unlocking and locking (satellite loss, expansion, etc.)
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionSectorCommands.UnlockSector(System.Object,System.Int32,System.Nullable{System.TimeSpan})">
+            <summary>
+            Create an UnlockSector command — wraps native CmdFactionUnlockSector
+            </summary>
+            <param name="faction">Faction gaining access to the sector</param>
+            <param name="sectorIndex">Sector index to unlock (0-based)</param>
+            <param name="timeout">Optional execution timeout</param>
+            <example>
+            <code>
+            // Unlock sectors 1 and 2 for the player
+            Commands.ForFaction(playerFaction)
+                .UnlockSector(1)
+                .UnlockSector(2)
+                .Execute();
+            </code>
+            </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.Builders.Services.FactionSectorCommands.LockSector(System.Object,System.Int32,System.Nullable{System.TimeSpan})">
+             <summary>
+             Create a LockSector command — custom SDK command, no native equivalent
+             Sets Sector.enabled = false so IsInsideEnabledSectors() blocks construction
+             </summary>
+             <param name="faction">Faction losing access to the sector</param>
+             <param name="sectorIndex">Sector index to lock (0-based)</param>
+             <param name="timeout">Optional execution timeout</param>
+             <example>
+             <code>
+             // Lock sector 3 when a satellite is compromised
+             Commands.ForFaction(playerFaction).LockSector(3).Execute();
+            
+             // Restore access after recovery
+             Commands.ForFaction(playerFaction).UnlockSector(3).Execute();
+             </code>
+             </example>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.Builders.Services.FactionTechnologyCommands">
             <summary>
@@ -3394,6 +3446,47 @@
             Useful for optional context-dependent behaviour.
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.AddResearchPointsAction">
+            <summary>
+            Adds research points directly to the player faction (not tied to current technology).
+            <example>
+            launchActions:
+              - command: AddResearchPoints
+                arguments: ["500"]
+            </example>
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BlackboardExpressionEvaluator">
+             <summary>
+             Evaluates a math expression string, resolving variable names via a lookup delegate.
+            
+             Supports:
+               operators : +  -  *  /  (with standard precedence and unary -)
+               grouping  : ( expr )
+               literals  : integer and decimal numbers  (InvariantCulture)
+               variables : any [A-Za-z_][A-Za-z0-9_]* identifier → resolved by the lookup delegate
+               functions : min(a,b)  max(a,b)  abs(x)  floor(x)  ceil(x)  round(x)
+                           sqrt(x)   clamp(x, lo, hi)
+            
+             Thread-safety: create a new <see cref="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BlackboardExpressionEvaluator"/> per call,
+             or use the static <see cref="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BlackboardExpressionEvaluator.Evaluate(System.String,System.Func{System.String,System.Single},PerAspera.Core.LogAspera)"/> helper which does so internally.
+            
+             YAML example:
+             <code>
+             - command: SetBlackboardMath
+               arguments:
+                 - "ami_score"
+                 - "clamp(ami_base * difficulty_mult + ami_bonus, 0, 100)"
+             </code>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BlackboardExpressionEvaluator.Evaluate(System.String,System.Func{System.String,System.Single},PerAspera.Core.LogAspera)">
+            <summary>
+            Evaluate <paramref name="expression"/> and return the numeric result.
+            Unknown variables resolve to 0 (logged as warnings).
+            Returns (result=0, ok=false) on parse errors.
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.BuildingAddResourceAction">
             <summary>
             Add a resource directly to a specific building's storage.
@@ -3539,6 +3632,38 @@
             <param name="args">args[0] = resourceKey (string), args[1] = amount (float, positive)</param>
             <param name="ctx">Game context — provides faction name for the console command</param>
             <returns>true on success, false on any validation or execution failure</returns>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.SetBlackboardMathAction">
+             <summary>
+             Evaluates a math expression and writes the result into a universe blackboard variable.
+             Variable names in the expression are resolved from the same blackboard at evaluation time.
+            
+             Supported operators : + - * /  (standard precedence, unary -)
+             Grouping           : ( expr )
+             Literals           : 42  3.14  1e3
+             Variables          : any blackboard key — resolved to 0 if absent (with log warning)
+             Functions          : min(a,b)  max(a,b)  abs(x)  floor(x)  ceil(x)
+                                  round(x)  sqrt(x)   clamp(x, lo, hi)
+            
+             YAML usage:
+             <code>
+             # Simple increment (replaces AddBlackboardNumber)
+             - command: SetBlackboardMath
+               arguments: ["ami_affinity", "ami_affinity + 10"]
+            
+             # Scale from another variable
+             - command: SetBlackboardMath
+               arguments: ["ami_score", "ami_base * difficulty_mult + ami_bonus"]
+            
+             # Clamp result to a range
+             - command: SetBlackboardMath
+               arguments: ["ami_affinity", "clamp(ami_affinity + reward, 0, 100)"]
+            
+             # Combine multiple variables
+             - command: SetBlackboardMath
+               arguments: ["total_resources", "iron + aluminum * 2 + steel * 3"]
+             </code>
+             </summary>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.ModActions.BuiltinActions.ShowMessageAction">
              <summary>
@@ -4312,6 +4437,79 @@
             <summary>
             Create SetResourceAmountCommand from parameters dictionary
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.LockSectorCommand">
+             <summary>
+             Locks a sector, preventing any construction or operation within it
+             Custom SDK command — no native equivalent in Per Aspera.
+             Implemented via direct IL2CPP manipulation of Sector.enabled = false.
+             The game's IsInsideEnabledSectors() check will block all placement in locked sectors.
+             </summary>
+             <example>
+             <code>
+             // Lock sector 3 (e.g. satellite compromised)
+             Commands.ForFaction(playerFaction).LockSector(3).Execute();
+            
+             // YAML (requires SDK plugin active):
+             // actions:
+             //   - command: LockSector
+             //     arguments:
+             //       - PlayerFaction
+             //       - 3
+            
+             // Re-unlock after recovery:
+             // actions:
+             //   - command: UnlockSector
+             //     arguments:
+             //       - PlayerFaction
+             //       - 3
+             </code>
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.LockSectorCommand.Faction">
+            <summary>The faction whose sector will be locked</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.LockSectorCommand.SectorIndex">
+            <summary>Zero-based index of the sector to lock</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.LockSectorCommand.#ctor(System.Object,System.Int32)">
+            <summary>
+            Create a new LockSector command
+            </summary>
+            <param name="faction">Faction to lock sector for</param>
+            <param name="sectorIndex">Index of the sector to lock (0-based, must match a valid unlocked sector)</param>
+        </member>
+        <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.UnlockSectorCommand">
+             <summary>
+             Unlocks a sector for a faction — wraps native CmdFactionUnlockSector
+             Grants the faction access to build and operate in the specified sector
+             </summary>
+             <example>
+             <code>
+             // Unlock sector 3 for player faction
+             Commands.ForFaction(playerFaction).UnlockSector(3).Execute();
+            
+             // YAML equivalent:
+             // actions:
+             //   - command: UnlockSector
+             //     arguments:
+             //       - PlayerFaction
+             //       - 3
+             </code>
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.UnlockSectorCommand.Faction">
+            <summary>The faction that will gain access to the sector</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.UnlockSectorCommand.SectorIndex">
+            <summary>Zero-based index of the sector to unlock</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Commands.NativeCommands.SectorCommands.UnlockSectorCommand.#ctor(System.Object,System.Int32)">
+            <summary>
+            Create a new UnlockSector command
+            </summary>
+            <param name="faction">Faction to unlock sector for (e.g. "PlayerFaction" or native Faction object)</param>
+            <param name="sectorIndex">Index of the sector to unlock (0-based)</param>
         </member>
         <member name="T:PerAspera.GameAPI.Commands.NativeCommands.SpecializedCommands.AddPointsCommand">
             <summary>
@@ -10222,6 +10420,249 @@
             Initialize planet patches when Planet type is available
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.ResourceInit.ResourceInitAutoStart">
+             <summary>
+             Auto-start plugin: fixes the native loader ordering bug that crashes custom
+             Manufactured/Mined YAML resources used as building input/output.
+            
+             Root cause: YAMLLoader.CompleteLoading() calls BuildingType.PostInitialize()
+             before ResourceType.PostInitialize() assigns indices to mod resources (index == -1).
+             Building input/output structures are then built with invalid indices, and
+             ResourceAllocation.RecreateIDs() (BaseGame.StartGameplay) throws IndexOutOfRangeException.
+            
+             Fix applied automatically when PerAspera.GameAPI.dll is deployed:
+              1. Block premature BuildingType.PostInitialize() (while _MaxIndex == 0).
+              2. After CompleteLoading(): run ResourceType then BuildingType PostInitialize.
+              3. Skip BuildPanelPresenter.FillDetails() for buildings with mod outputResource.
+              4. Finalizer on BuildPanelPresenter.Start() to swallow residual panel crashes.
+             </summary>
+             <example>
+             // Aucune action requise par les mods : déployer PerAspera.GameAPI.dll suffit.
+             </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.ResourceInit.ResourceInitAutoStart.VanillaMaxResourceIndex">
+            <summary>Highest vanilla+DLC resource index. Resources above this are mod-defined.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceInit.BuildingTypePostInitGate">
+            <summary>
+            Blocks premature BuildingType.PostInitialize() while ResourceType._MaxIndex == 0.
+            CompleteLoadingFix replays it in the correct order.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceInit.CompleteLoadingFix">
+            <summary>
+            Postfix on YAMLLoader.CompleteLoading (default priority — runs before
+            YamlExtensionsAutoStart.Priority.Last): re-runs ResourceType then
+            BuildingType PostInitialize so mod resources get valid indices.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceInit.BuildPanelFillDetailsGuard">
+            <summary>
+            Skips BuildPanelPresenter.FillDetails() for buildings whose outputResource is a mod
+            resource (index > vanilla max). The internal display array is vanilla-sized only.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.ResourceInit.BuildPanelStartFinalizer">
+            <summary>
+            Finalizer on BuildPanelPresenter.Start() — swallows residual crashes so the
+            build panel never blocks, logging the exception for diagnosis.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec">
+             <summary>
+             Declares which sector modifiers each building type contributes when placed.
+             Register building types in your plugin's Load() — SectorBuildingTracker will
+             automatically apply/remove contributions when buildings are constructed/destroyed.
+             </summary>
+             <example>
+             <code>
+             // In your plugin Load():
+             SectorBuildingContributionSpec.Register("building_ai_data_center",
+                 (SectorModifierKeys.BuildingLimit, 50f)
+             );
+            
+             SectorBuildingContributionSpec.Register("building_Earth_Mars_Communication_Tower",
+                 (SectorModifierKeys.DroneCapacity, 3f),
+                 (SectorModifierKeys.RoutingQuality, 0.1f)
+             );
+            
+             SectorBuildingContributionSpec.Register("building_ai_data_center_enhanced",
+                 (SectorModifierKeys.BuildingLimit, 100f),
+                 (SectorModifierKeys.ResearchSpeed, 0.15f)
+             );
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.Register(System.String,System.ValueTuple{System.String,System.Single}[])">
+            <summary>
+            Register modifier contributions for a building type.
+            Calling Register twice for the same buildingTypeId replaces the previous registration.
+            </summary>
+            <param name="buildingTypeId">Exact YAML building ID (e.g. "building_ai_data_center")</param>
+            <param name="contributions">Modifier key-value pairs this building contributes per instance</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.Unregister(System.String)">
+            <summary>Remove the registration for a building type.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.IsRegistered(System.String)">
+            <summary>Returns true if this building type contributes sector modifiers.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.GetContributions(System.String)">
+            <summary>Get the modifier contributions for a building type. Returns empty if not registered.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.RegisteredTypes">
+            <summary>All registered building type IDs.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingContributionSpec.ClearAll">
+            <summary>Clear all registrations (e.g. on plugin unload).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Sectors.SectorBuildingTracker">
+             <summary>
+             Hooks into Building.FinishConstruction and Building.RemoveBuilding to automatically apply
+             per-sector modifier contributions declared via SectorBuildingContributionSpec.
+            
+             Call Apply(harmony) once in your plugin Load(), AFTER registering building specs.
+             </summary>
+             <example>
+             <code>
+             // In plugin Load():
+             SectorBuildingContributionSpec.Register("building_ai_data_center",
+                 (SectorModifierKeys.BuildingLimit, 50f)
+             );
+             SectorBuildingContributionSpec.Register("building_Earth_Mars_Communication_Tower",
+                 (SectorModifierKeys.DroneCapacity, 3f),
+                 (SectorModifierKeys.RoutingQuality, 0.1f)
+             );
+             SectorBuildingTracker.Apply(harmony);
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorBuildingTracker.Apply(HarmonyLib.Harmony)">
+            <summary>
+            Apply HarmonyX patches to track building construction/destruction.
+            Safe to call multiple times (deduplicates).
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Sectors.SectorModifierKeys">
+            <summary>
+            Standard modifier keys for the per-sector modifier system.
+            Use these constants when registering building contributions or reading values.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.BuildingLimit">
+            <summary>
+            Additional buildings allowed in this sector beyond global limit.
+            Default: 0. Each DataCenter adds +50.
+            Patch: SectorBuildingLimitPatch reads this to increase allowed buildings.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.DroneCapacity">
+            <summary>
+            Additional drone slots available in this sector.
+            Default: 0. Each Communication Tower adds +3.
+            Patch: SectorDroneCapacityPatch reads this per sector.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.RoutingQuality">
+            <summary>
+            Multiplier bonus on routing path quality (SPFA weight) in this sector.
+            Default: 0. Higher = drones prefer this sector's routes.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.HopCapacity">
+            <summary>
+            Extra hop capacity for drones passing through this sector.
+            Default: 0. Each relay/datacenter can add +1.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.ResearchSpeed">
+            <summary>
+            Research speed multiplier bonus contributed by AI buildings in this sector.
+            Default: 0.0. Each AI Research Lab adds +0.1 (10%).
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.PowerEfficiency">
+            <summary>
+            Power grid efficiency bonus in this sector.
+            Default: 0.0. Reserved for future power buildings.
+            </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.Sectors.SectorModifierKeys.SatelliteActive">
+            <summary>Internal key — do not use in building contributions. Managed by SectorModifierRegistry.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Sectors.SectorModifierRegistry">
+             <summary>
+             Per-sector modifier storage. Tracks float values keyed by modifier name for each sector.
+             Values are additive: multiple buildings in a sector each contribute their share.
+             Satellite coverage controls whether modifiers are active (GetTotal returns 0 without satellite).
+             </summary>
+             <example>
+             <code>
+             // Read modifier total for sector 3
+             float buildingBonus = SectorModifierRegistry.GetTotal(3, SectorModifierKeys.BuildingLimit);
+            
+             // Activate satellite for sector 3
+             SectorModifierRegistry.ActivateSatellite(3);
+            
+             // Plugin — add contribution from a building (called by SectorBuildingTracker)
+             SectorModifierRegistry.AddContribution(sectorId, buildingId, SectorModifierKeys.DroneCapacity, 3f);
+             </code>
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.ActivateSatellite(System.Int32)">
+            <summary>Mark a sector as covered by an active satellite. Enables all modifier contributions.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.DeactivateSatellite(System.Int32)">
+            <summary>Mark a sector as satellite-lost. GetTotal returns 0 for all keys until reactivated.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.HasActiveSatellite(System.Int32)">
+            <summary>Returns true if this sector has an active satellite.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.AddContribution(System.Int32,System.Int32,System.String,System.Single)">
+            <summary>
+            Add a modifier contribution from a building to a sector.
+            Typically called by SectorBuildingTracker.HandleConstructed().
+            </summary>
+            <param name="sectorId">Sector where the building was placed</param>
+            <param name="buildingId">Building.number — unique building instance ID</param>
+            <param name="key">Modifier key (use SectorModifierKeys constants)</param>
+            <param name="value">Value to add (positive delta)</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.RemoveContribution(System.Int32,System.Int32,System.String)">
+            <summary>
+            Remove a building's contribution from a sector.
+            Typically called by SectorBuildingTracker.HandleDestroyed().
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.GetTotal(System.Int32,System.String,System.Single)">
+            <summary>
+            Get the total modifier value for a key in a sector.
+            Returns defaultValue if sector has no active satellite (satellite required for modifiers to be active).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.GetTotalRaw(System.Int32,System.String,System.Single)">
+            <summary>
+            Get the total modifier regardless of satellite status.
+            For display/info only — game logic should use GetTotal().
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Sectors.SectorModifierRegistry.ActiveSatelliteSectors">
+            <summary>All sectors that have an active satellite.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.GetAllModifiers(System.Int32)">
+            <summary>All modifier keys and totals for a sector (debug/display).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.ClearAll">
+            <summary>Clear all data. Call on game unload / scene reset.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Sectors.SectorModifierRegistry.ClearSector(System.Int32)">
+            <summary>Clear modifiers for a single sector.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Sectors.SectorModifierEntry">
+            <summary>
+            Stores the total and per-building breakdown of a single modifier in a sector.
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.UI.UIGamePanel">
              <summary>
              Game-native panel using actual game sprites (BackgroundWindow_2.png).
@@ -12076,6 +12517,34 @@
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetRelationshipWith(PerAspera.GameAPI.Wrappers.FactionWrapper)">
             <summary>N'a jamais fonctionné — aucun de ces noms n'existe.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetSector(System.Int32)">
+            <summary>
+            Get a sector by its index. Returns null if index is out of range.
+            Index matches the argument used in YAML UnlockSector/LockSector commands.
+            </summary>
+            <example>var sector = faction.GetSector(3); // sector 3</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetAllSectors">
+            <summary>Get all sectors belonging to this faction.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetSectorAtPosition(UnityEngine.Vector2)">
+            <summary>
+            Find which sector a 2D position belongs to.
+            Uses Faction.SectorByGeographic(Vector2) → int index → sector lookup.
+            Returns null if position is outside all sectors.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.CountBuildingsInSector(System.String,System.Int32)">
+            <summary>
+            Count buildings of a given type in a specific sector.
+            Uses building world position to determine sector membership.
+            </summary>
+            <param name="buildingTypeId">YAML building ID (e.g. "building_ai_data_center")</param>
+            <param name="sectorId">Sector index to count in</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.IsPositionInEnabledSector(UnityEngine.Vector2)">
+            <summary>True if a position is within an enabled (unlocked) sector.</summary>
         </member>
         <member name="M:PerAspera.GameAPI.Wrappers.FactionWrapper.GetBuildings">
             <summary>All buildings of this faction (typed read of Faction.buildings).</summary>
@@ -14484,6 +14953,114 @@
             <summary>
             Check if this scene equals another
             </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.Wrappers.SectorWrapper">
+             <summary>
+             Wraps a native Per Aspera Sector, exposing geometry, state, and the per-sector modifier system.
+             Sectors are quadrilateral zones on the planet surface — each can be unlocked/locked
+             and enhanced by buildings (DataCenter → building limit, CommTower → drone capacity, etc.)
+             </summary>
+             <example>
+             <code>
+             var faction = FactionWrapper.GetPlayerFaction();
+             var sector  = faction?.GetSector(3);
+            
+             if (sector != null)
+             {
+                 bool hasSat   = sector.HasActiveSatellite;
+                 int  maxBuild = sector.GetBuildingLimit(baseLimit: 150);
+                 int  drones   = sector.GetDroneCapacity(baseCapacity: 4);
+                 LogAspera.Info($"Sector {sector.Id}: buildings={maxBuild}, drones={drones}");
+             }
+             </code>
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.NativeSector">
+            <summary>The native Sector proxy. Use for direct IL2CPP operations.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.Id">
+            <summary>Sector index (0-based, matches YAML argument for UnlockSector/LockSector).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.IsEnabled">
+            <summary>
+            Whether this sector is enabled — controls IsInsideEnabledSectors().
+            Setting to false blocks all construction in the sector.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.HasActiveSatellite">
+            <summary>True if a satellite is actively covering this sector.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.CornerA">
+            <summary>Corner A of the sector quadrilateral (2D lat/lng).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.CornerB">
+            <summary>Corner B of the sector quadrilateral (2D lat/lng).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.CornerC">
+            <summary>Corner C of the sector quadrilateral (2D lat/lng).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.Wrappers.SectorWrapper.CornerD">
+            <summary>Corner D of the sector quadrilateral (2D lat/lng).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.Contains(UnityEngine.Vector2)">
+            <summary>Returns true if a 2D position is inside this sector's bounds.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetModifier(System.String,System.Single)">
+            <summary>
+            Get the total bonus for a modifier key from all buildings in this sector.
+            Returns 0 if the sector has no active satellite.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetBuildingLimit(System.Int32)">
+            <summary>
+            Get effective building limit for this sector: base + bonus from DataCenters.
+            </summary>
+            <param name="baseLimit">The global faction building limit to add the bonus to</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetDroneCapacity(System.Int32)">
+            <summary>
+            Get effective drone capacity for this sector: base + bonus from Communication Towers.
+            </summary>
+            <param name="baseCapacity">The default sector drone capacity</param>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetRoutingQuality">
+            <summary>Get the routing quality bonus from buildings in this sector (0.0 to N).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetHopCapacity">
+            <summary>Get the extra hop capacity bonus for drones in this sector.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetResearchSpeedBonus">
+            <summary>Get research speed multiplier bonus from AI buildings (0.0 = no bonus).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.GetAllModifiers">
+            <summary>Get all active modifiers for this sector (for debug UI).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.ActivateSatellite">
+            <summary>
+            Activate satellite coverage for this sector.
+            All building contributions become effective after this call.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.DeactivateSatellite">
+            <summary>
+            Deactivate satellite coverage (e.g. satellite compromised).
+            All modifier GetTotal() calls return 0 until reactivated.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.Unlock">
+            <summary>
+            Unlock this sector — enables construction within it.
+            Prefer using UnlockSectorCommand from YAML for persistence.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.Lock">
+            <summary>
+            Lock this sector — blocks all construction (same as LockSectorCommand).
+            Use when satellite is compromised: LockSector + DeactivateSatellite.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.Wrappers.SectorWrapper.FromNative(Sector)">
+            <summary>Wrap a native Sector proxy.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.SliceMasterWrapper">
              <summary>

@@ -130,6 +130,12 @@ namespace PerAspera.GameAPI.Commands
             ModTextActionRegistry.Register(new BunchOfResourcesAction());
             ModTextActionRegistry.Register(new ClearStockpilesAction());
             ModTextActionRegistry.Register(new FinishConstructionsAction());
+
+            // Research points — faction-level (not tied to active technology)
+            ModTextActionRegistry.Register(new AddResearchPointsAction());
+
+            // Blackboard math — evaluates a full expression and writes the result
+            ModTextActionRegistry.Register(new SetBlackboardMathAction());
         }
         /// <summary>
         /// Create a new command builder for the specified command type

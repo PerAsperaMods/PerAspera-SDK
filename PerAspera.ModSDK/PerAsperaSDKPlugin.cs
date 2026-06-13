@@ -2,6 +2,7 @@ using BepInEx;
 using PerAspera.ModSDK;
 using PerAspera.GameAPI;
 using PerAspera.GameAPI.Binding;
+using SDKCommands = PerAspera.GameAPI.Commands.Commands;
 using PerAspera.GameAPI.Events;
 using PerAspera.GameAPI.Events.Integration;
 using PerAspera.GameAPI.Events.SDK;
@@ -34,8 +35,17 @@ namespace PerAspera.ModSDK
                 // 2. Initialize native event system
                 InitializeNativeEventSystem();
 
-                // 3. Validate string-based bindings once game is ready (dev assurance-life)
-                EnhancedEventBus.SubscribeToGameCommandsReady(_ => SdkBindingValidator.Validate());
+                // 3. Fire Commands static constructor NOW (at Load time, before YAML validation).
+                // This registers all builtin actions and applies Harmony patches (VerifyAction,
+                // ValidateConstraints, NativeIntercept). Must happen before YAML command validation.
+                _ = SDKCommands.IsCommandRegistered("_sdk_bootstrap_");
+
+                // 4. Update Commands context once game is ready + validate string bindings.
+                EnhancedEventBus.SubscribeToGameCommandsReady(evt =>
+                {
+                    SDKCommands.Initialize(evt);
+                    SdkBindingValidator.Validate();
+                });
 
                 _logger.Info("PerAspera ModSDK ready - mods can now subscribe to events!");
             }
