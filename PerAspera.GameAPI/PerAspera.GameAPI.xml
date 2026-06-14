@@ -8557,6 +8557,123 @@
             Safe wrapper pour GUI operations - ne fait rien si GUI n'est pas disponible
             </summary>
         </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.HubIconAutoStart">
+            <summary>
+            Auto-start plugin for the HubIcons system: registers the <c>hubIcons</c> extension schema
+            before the datamodel loads, and applies the Postfix on the lenses' <c>SetBuildingHubIcon</c>
+            that swaps the worker-hub icon according to the active-drone count.
+            </summary>
+            <example>
+            // Aucune action requise par les mods : déployer PerAspera.GameAPI.dll suffit.
+            // Déclaration via sdk.yaml (section hubIcons) ou HubIcons.RegisterHubIcon().
+            </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.NormalLensHubIconPatch">
+            <summary>Postfix on <c>NormalLens.SetBuildingHubIcon</c> — applies the custom hub icon.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.TrafficLensHubIconPatch">
+            <summary>Postfix on <c>TrafficLens.SetBuildingHubIcon</c> — applies the custom hub icon.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.HubIconRuntime">
+            <summary>
+            Shared runtime that reads the building's active-drone count and overrides the hub icon via
+            the game's own <c>BuildingView.OverrideIcon</c>. The icon is drawn by an instanced batch
+            (<c>LensSystem.iconBatchIndices : Dictionary&lt;Material,int&gt;</c>): the batch renders the
+            texture of the supplied <b>Material</b> at the sprite's Rect — NOT the sprite's own texture,
+            and a null material throws. So to show an external PNG we clone the building's
+            <c>iconMaterial</c> (correct icon shader, already a batch key) and swap its main texture to
+            our sprite's texture; the batch then registers/renders that material. Runs as a Postfix
+            after the native icon is set, so our override wins for the frame.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.HubIcons.HubIconRuntime.GetBatchMaterial(BuildingView,UnityEngine.Sprite)">
+            <summary>
+            Returns (cached) a Material that draws <paramref name="sprite"/>'s texture with the icon
+            shader, suitable as a batch key for <c>OverrideIcon</c>. Cloned from the building's
+            <c>iconMaterial</c> (or the previously captured template) with the main texture swapped.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.HubIconConfig">
+            <summary>
+            DTO of one item of the <c>hubIcons</c> section in a mod's <c>sdk.yaml</c>: the worker-hub
+            icon sprites a building type shows per active-drone count. Generic for any
+            <c>droneCapacity</c> N — declare one entry per state you want to override (0..N). States
+            you omit keep the game's native icon (empty / full).
+            </summary>
+            <example>
+            # Mods/MonMod/sdk.yaml — chemins relatifs au dossier du mod
+            extensions:
+              hubIcons:
+                building_drone_base_2:
+                  icons:
+                    1: Sprite/worker/2/Icon_WorkerRelay_2_1_2.png
+                building_drone_base_3:
+                  icons:
+                    1: Sprite/worker/3/Icon_WorkerRelay_3_1_3.png
+                    2: Sprite/worker/3/Icon_WorkerRelay_3_2_3.png
+            </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.HubIcons.HubIconConfig.Icons">
+            <summary>
+            Map of active-drone count → sprite path (relative to the providing mod's folder).
+            Key 0 = empty override, key N = full override, 1..N-1 = intermediate states.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.HubIconsLog">
+            <summary>Internal shared logger for the HubIcons module.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.HubIcons.HubIcons">
+             <summary>
+             Worker-hub icon system: lets a building type show a custom icon per active-drone count.
+             The game natively renders only two states (empty = <c>BuildingType.emptyHubIconName</c>,
+             full = <c>BuildingType.iconName</c>); this system fills the intermediate states (1..N-1)
+             and may also override empty/full. Generic for any <c>droneCapacity</c> N.
+            
+             Declarative via the <c>hubIcons</c> section of a mod's <c>sdk.yaml</c> (see
+             <see cref="T:PerAspera.GameAPI.HubIcons.HubIconConfig"/>) or programmatic via <see cref="M:PerAspera.GameAPI.HubIcons.HubIcons.RegisterHubIcon(System.String,System.Int32,UnityEngine.Sprite)"/>. Sprites
+             are loaded from PNG files relative to the providing mod's folder. The runtime swap is
+             applied by <c>HubIconAutoStart</c> (Postfix on the lens' <c>SetBuildingHubIcon</c>).
+             </summary>
+             <example>
+             // Mod C# (optionnel — la voie normale est sdk.yaml) :
+             var sprite = ...; // chargé par le mod
+             HubIcons.RegisterHubIcon("building_drone_base_2", 1, sprite);
+             </example>
+        </member>
+        <member name="F:PerAspera.GameAPI.HubIcons.HubIcons.Section">
+            <summary>sdk.yaml section name handled by this system.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.HubIcons.HubIcons.Initialize">
+            <summary>
+            Declares the schema and subscribes resolution to YamlExtensions.DataLoaded.
+            Called once by <c>HubIconAutoStart</c>; idempotent.
+            </summary>
+            <example>HubIcons.Initialize(); // fait automatiquement par l'auto-start</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.HubIcons.HubIcons.RegisterHubIcon(System.String,System.Int32,UnityEngine.Sprite)">
+            <summary>
+            Registers a hub icon by code (same effect as a sdk.yaml entry, but the caller
+            supplies the already-loaded sprite). Safe to call after the datamodel is ready.
+            </summary>
+            <param name="buildingTypeKey">Building type key (e.g. "building_drone_base_2").</param>
+            <param name="activeCount">Active-drone count this icon applies to (0 = empty, N = full).</param>
+            <param name="sprite">Sprite to display for that state.</param>
+            <example>HubIcons.RegisterHubIcon("building_drone_base_2", 1, mySprite);</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.HubIcons.HubIcons.HasConfig(System.String)">
+            <summary>True if at least one hub icon state is configured for the building type.</summary>
+            <param name="buildingTypeKey">Building type key.</param>
+            <example>if (HubIcons.HasConfig("building_drone_base_2")) { … }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.HubIcons.HubIcons.GetSprite(System.String,System.Int32)">
+            <summary>
+            Sprite to display for a building type at a given active-drone count, or null if no
+            custom icon is configured for that state (caller keeps the native icon).
+            </summary>
+            <param name="buildingTypeKey">Building type key.</param>
+            <param name="activeCount">Active-drone count.</param>
+            <example>var s = HubIcons.GetSprite("building_drone_base_3", 2);</example>
+        </member>
         <member name="T:PerAspera.GameAPI.GameTypeInitializer">
             <summary>
             Initialization system for Per Aspera game types
@@ -10886,6 +11003,32 @@
         <member name="M:PerAspera.GameAPI.UI.UISimpleRow.DrawSpacer(System.Single,System.Single)">
             <summary>Draw a spacer. Returns next Y position.</summary>
         </member>
+        <member name="T:PerAspera.GameAPI.UI.HUDSpriteCache">
+             <summary>
+             Cache de sprites de jeu pour le dessin IMGUI (HUD mods, EconomyHUD, ResourceBar...).
+            
+             Collecte les sprites depuis des Image components Unity deja charges en memoire,
+             puis les dessine via SpriteUtils.GetUvRect + GUI.DrawTextureWithTexCoords
+             -- aucune extraction CPU (GetPixels), compatible atlas non-readable.
+            
+             Usage :
+               var cache = new HUDSpriteCache();
+               cache.ScanGameObject(someGO);
+               cache.ScanAll();
+               cache.Draw("IMG_Resources_BG", rect);
+               cache.DumpToLog(log);
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.HUDSpriteCache.ScanAll">
+            <summary>Scanne TOUS les Image actifs dans la scene -- appel unique.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.HUDSpriteCache.Draw(System.String,UnityEngine.Rect,System.Boolean)">
+            <summary>
+            Dessine un sprite depuis le cache.
+            Utilise SpriteUtils.GetUvRect pour les coords atlas -- aucune extraction CPU.
+            Retourne false si le sprite n'est pas en cache.
+            </summary>
+        </member>
         <member name="T:PerAspera.GameAPI.UI.UIColors">
             <summary>
             Standardized color palette for Per Aspera UI components.
@@ -11098,6 +11241,372 @@
             <example>
             GameUI.ShowNotification("Cargo arrived in orbit", NotificationUrgency.Info, timeoutDays: 2f);
             </example>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix">
+             <summary>
+             Public configuration + game-fix entry point for the HUD resource bar overflow.
+             The bar overflows once mods add many custom resources; this paginates the two native
+             containers (mined / manufactured) using the generic <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPager"/> toolkit — native
+             rendering untouched, just windowed into pages.
+            
+             <para><b>Adaptable:</b> set <see cref="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.ResourceFilter"/> to restrict which resources appear
+             (the future sub-category filter driven by a custom YAML attribute on <c>resourceType</c>
+             plugs in here). Set <see cref="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.PageSize"/> / <see cref="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.Enabled"/> before the game scene loads.</para>
+             </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.Enabled">
+            <summary>Master switch (default on — it is a strict overflow fix).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.PageSize">
+            <summary>Items shown per page in each bar.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.ResourceFilter">
+            <summary>
+            Optional resource filter. Return false to hide a resource from the bar entirely.
+            Hook point for the upcoming YAML sub-category filtering. Null = show all.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.TransformFilter(UnityEngine.Transform)">
+            <summary>Bridges <see cref="F:PerAspera.GameAPI.UI.ResourceBar.ResourceBarFix.ResourceFilter"/> to the generic <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPager"/> (Transform-based).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.ResourceBar.ResourceBarAutoStart">
+            <summary>
+            Auto-start plugin (loads with the SDK assembly): registers <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPagerView"/> and
+            applies the <c>ResourcesPanel.Initialize</c> Postfix that attaches a pager to each bar.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.ResourceBar.ResourceBarInitPatch">
+            <summary>Attaches a <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPagerView"/> to each native resource container.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UINode">
+            <summary>
+            Fluent wrapper around a uGUI <see cref="T:UnityEngine.GameObject"/> + its <see cref="T:UnityEngine.RectTransform"/>.
+            Returned by every <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIBuilder"/> factory so callers can chain layout calls.
+            </summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UINode.Go">
+            <summary>The backing GameObject.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UINode.Rect">
+            <summary>The RectTransform (always present — added on construction if missing).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.#ctor(UnityEngine.GameObject)">
+            <summary>Wrap an existing GameObject, ensuring it carries a RectTransform.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Size(System.Single,System.Single)">
+            <summary>Set <c>sizeDelta</c> (width/height for an anchored, non-stretched rect).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Pos(System.Single,System.Single)">
+            <summary>Set <c>anchoredPosition</c> relative to the current anchors.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Anchor(UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>Set anchor min/max independently.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.AnchorPivot(System.Single,System.Single)">
+            <summary>Collapse anchors and pivot to a single point (e.g. (0,0)=bottom-left).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Pivot(System.Single,System.Single)">
+            <summary>Set the pivot.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Stretch(System.Single,System.Single,System.Single,System.Single)">
+            <summary>Stretch to fill the parent with insets (left/top/right/bottom).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.Active(System.Boolean)">
+            <summary>Toggle the GameObject active state.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.HLayout(System.Single,System.Int32,System.Int32)">
+            <summary>Add a horizontal auto-layout group to this node and return it.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UINode.VLayout(System.Single,System.Int32,System.Int32)">
+            <summary>Add a vertical auto-layout group to this node and return it.</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UIBuilder">
+             <summary>
+             Builds real Unity UI (uGUI) elements from code — the toolkit's "construction" tier
+             (the "clone a native prototype" tier lives in <c>UIClone</c>). Everything is parented under
+             the game's own canvas (via <see cref="P:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Root"/>) so scaling, the GraphicRaycaster and the
+             scene EventSystem are inherited for free.
+            
+             <para><b>Sprites:</b> pass a <see cref="T:UnityEngine.Sprite"/> from <see cref="T:PerAspera.GameAPI.UI.Toolkit.UISprites"/> (or a typed game
+             source such as <c>ResourceType.iconName</c>). uGUI renders atlas sprites natively.</para>
+             <para><b>Text:</b> uses <see cref="P:PerAspera.GameAPI.UI.Toolkit.UIFonts.Game"/> so labels match vanilla TextMeshPro.</para>
+             </summary>
+             <example>
+             var panel = UIBuilder.Panel("MyBar", UIBuilder.Root, UISprites.Get("IMG_Resources_BG"))
+                 .AnchorPivot(0, 0).Pos(160, 12).Size(440, 40);
+             panel.HLayout(spacing: 2);
+             UIBuilder.Image("icon", panel.Rect, water.iconName).rectTransform.sizeDelta = new Vector2(26, 26);
+             UIBuilder.Text("qty", panel.Rect, "1.2k", 12);
+             UIBuilder.Button("next", panel.Rect, UISprites.Get("IMG_ArrowRight"), () => pager.Next());
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Root">
+            <summary>
+            The game's root canvas transform (its <c>canvasRect</c>) — default parent for
+            top-level panels. Null before the game UI is loaded.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Node(System.String,UnityEngine.Transform)">
+            <summary>Create an empty RectTransform node under <paramref name="parent"/>.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Panel(System.String,UnityEngine.Transform,UnityEngine.Sprite,System.Nullable{UnityEngine.Color})">
+            <summary>
+            Create a panel: a node with a background <see cref="T:UnityEngine.UI.Image"/>. Pass a sprite for a
+            game-styled (9-sliced) background, or null for a flat translucent fill.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Image(System.String,UnityEngine.Transform,UnityEngine.Sprite,System.Nullable{UnityEngine.Color},System.Boolean)">
+            <summary>Create an <see cref="T:UnityEngine.UI.Image"/> showing <paramref name="sprite"/>.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Text(System.String,UnityEngine.Transform,System.String,System.Single,System.Nullable{UnityEngine.Color},TMPro.TextAlignmentOptions)">
+            <summary>Create a TextMeshPro label using the game font.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIBuilder.Button(System.String,UnityEngine.Transform,UnityEngine.Sprite,System.Action,System.Nullable{UnityEngine.Color})">
+            <summary>
+            Create a clickable <see cref="T:UnityEngine.UI.Button"/> backed by an <see cref="T:UnityEngine.UI.Image"/>. The managed
+            <paramref name="onClick"/> is marshalled to an IL2CPP <see cref="T:UnityEngine.Events.UnityAction"/>.
+            </summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1">
+             <summary>
+             Reusable clone pool over a native uGUI prototype — the toolkit's "clone a native element"
+             tier (highest visual fidelity: the clone IS a native widget). Generalises the in-game-proven
+             <c>MultiOutputPanelPool</c> pattern (2026-06-12).
+            
+             <para><b>Rules baked in (learned the hard way):</b></para>
+             <list type="bullet">
+             <item><b>Never Destroy a clone</b> — Unity defers Destroy and a vanilla update loop may still
+             hold the reference that frame → crash. Clones are pooled and toggled with SetActive.</item>
+             <item><b>Reconfigure on reuse</b> — pass a configurator to <see cref="M:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.Sync(System.Int32,System.Action{`0,System.Int32})"/>; it runs for each
+             active clone every call so labels/sprites stay current.</item>
+             <item><b>No reflection</b> — only typed interop members.</item>
+             </list>
+             </summary>
+             <typeparam name="T">Component type of the prototype (e.g. a native row/card, or a ResourceItem).</typeparam>
+             <example>
+             // Clone a native row prototype N times into a container:
+             var pool = new UIClonePool&lt;ResourceDetail&gt;(prototype, myContainer, "EconomyRow");
+             pool.Sync(resources.Count, (row, i) =&gt; {
+                 row.imageIcon.sprite = resources[i].iconName;
+                 row.textQuantity.text = amounts[i].ToString();
+             });
+             </example>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.#ctor(`0,UnityEngine.Transform,System.String)">
+            <summary>Create a pool that instantiates clones of <paramref name="prototype"/> under <paramref name="container"/>.</summary>
+            <param name="prototype">A live native widget to clone (kept untouched).</param>
+            <param name="container">Parent transform for the clones (usually a layout container).</param>
+            <param name="cloneName">Name tag applied to every clone (debug/identification).</param>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.Items">
+            <summary>All clones ever created (active + pooled-inactive).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.ActiveCount">
+            <summary>Number of clones currently active.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.Sync(System.Int32,System.Action{`0,System.Int32})">
+            <summary>
+            Bring the active clone set to exactly <paramref name="count"/>: reuse pooled clones,
+            instantiate the missing ones, deactivate the surplus. <paramref name="configure"/> runs for
+            each active clone (index 0..count-1) so it can set sprites/text. Returns active count.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.Rent">
+            <summary>Rent the next reusable clone (creating one if needed) and activate it.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIClonePool`1.HideAll">
+            <summary>Deactivate every clone (data left intact for reuse).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UIFonts">
+             <summary>
+             Provides the game's own TextMeshPro font asset so toolkit-built text matches vanilla.
+            
+             <para>Per Aspera renders all of its text with TextMeshPro using a custom SDF font
+             ("Aspera", baked as the <c>Aspera_SDF</c> atlas). A freshly created
+             <see cref="T:TMPro.TextMeshProUGUI"/> would otherwise fall back to TMP's default LiberationSans and
+             look foreign. <see cref="P:PerAspera.GameAPI.UI.Toolkit.UIFonts.Game"/> harvests the real asset at runtime — no disk loading, no
+             asset-bundle juggling — and caches it.</para>
+             </summary>
+             <example>
+             var label = UIBuilder.Text("score", parent, "1.2k");
+             // label.font is already UIFonts.Game
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIFonts.Game">
+            <summary>
+            The game's primary TMP font asset (cached). Resolves the first loaded
+            <see cref="T:TMPro.TMP_FontAsset"/> whose name contains "Aspera", else the asset used by the
+            first live <see cref="T:TMPro.TMP_Text"/>, else TMP's default. Null only before any TMP text
+            has been created by the game.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIFonts.Invalidate">
+            <summary>Force a re-resolve on next access (e.g. after a scene/font reload).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UIPager">
+             <summary>
+             Generic pagination over the child elements of any uGUI layout-group container
+             (HorizontalLayoutGroup / VerticalLayoutGroup / GridLayoutGroup). Mods will hit overflow
+             everywhere — resource bar, building lists, economy/diplomacy panels — so the paging logic
+             is container-agnostic: it operates on raw child <see cref="T:UnityEngine.Transform"/>s and toggles their
+             GameObjects so only the current page is shown. The layout group reflows automatically
+             (inactive children are ignored) and a ContentSizeFitter recenters the container.
+            
+             <para><b>Safety:</b> child GameObjects often carry sound/animation triggers
+             (e.g. PlaySound, TweenEventTrigger). <see cref="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Apply"/> only flips an item's active state
+             when it actually differs, so a stable page never re-fires those components.</para>
+             </summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPager.PageSize">
+            <summary>Max items shown per page.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIPager.Page">
+            <summary>Current page index (0-based).</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIPager.VisibleCount">
+            <summary>Number of children passing the filter.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UIPager.PageCount">
+            <summary>Number of pages (always >= 1).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPager.Exclusions">
+            <summary>
+            Transforms to leave completely untouched (never counted, never toggled) — e.g. blank
+            padding slots a view manages itself. Add to it before <see cref="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Rebuild(UnityEngine.Transform,System.Func{UnityEngine.Transform,System.Boolean})"/>.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.CountOnCurrentPage">
+            <summary>Number of real (filtered) items shown on the current page (0..PageSize).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Next">
+            <summary>Advance one page (clamped).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Prev">
+            <summary>Go back one page (clamped).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.GoTo(System.Int32)">
+            <summary>Jump to a page (clamped).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Rebuild(UnityEngine.Transform,System.Func{UnityEngine.Transform,System.Boolean})">
+            <summary>
+            Re-read the container's children and recompute the filtered visible list. Call when the
+            child count changes (items added/removed) or the filter changes. <paramref name="filter"/>
+            returns true for children that should appear in the paged set (null = all children).
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.Apply">
+            <summary>
+            Show only the current page: filtered-out children and out-of-page children are
+            deactivated, the page's children activated. Idempotent.
+            </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.VisibleAt(System.Int32)">
+            <summary>The visible child at <paramref name="visibleIndex"/> (filtered list), or null.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPager.ItemsOnPage(System.Int32)">
+            <summary>Enumerate the children on a given page (filtered list).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UIPagerView">
+             <summary>
+             Injected MonoBehaviour that drives a <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPager"/> for a target layout container and
+             renders a compact "◀ N/M ▶" control built with <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIBuilder"/>. Generic and reusable
+             for any overflowing uGUI bar/list (resource bar, building lists, future economy/diplomacy).
+            
+             <para><b>Grafted = responsive.</b> The control is parented INTO the native container itself as
+             an <c>ignoreLayout</c> child anchored to an edge (default: right-center). uGUI then keeps it
+             glued to that edge automatically as the bar resizes — no per-frame world-space repositioning,
+             no fighting the container's odd rect. <see cref="T:PerAspera.GameAPI.UI.Toolkit.UIPager"/> skips ignore-layout children, so the
+             control is never paginated.</para>
+            
+             <para>Set <see cref="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Target"/> + <see cref="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Pager"/> (and optionally <see cref="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Filter"/>) right
+             after <c>AddComponent</c>; parent this GameObject to <see cref="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Target"/> with a
+             <see cref="T:UnityEngine.UI.LayoutElement"/> (<c>ignoreLayout = true</c>). The owning plugin must call
+             <c>ClassInjector.RegisterTypeInIl2Cpp&lt;UIPagerView&gt;()</c> once before use.</para>
+             </summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UIPagerView.#ctor(System.IntPtr)">
+            <summary>IL2CPP injection constructor.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Target">
+            <summary>Container whose children are paginated (also this control's parent).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Pager">
+            <summary>Pagination logic instance.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.Filter">
+            <summary>Optional child filter (null = paginate all non-ignoreLayout children).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.EdgeAnchor">
+            <summary>Anchor point on the parent (default right-center).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.EdgePivot">
+            <summary>Pivot of the control (default left-center, so it sits just outside the edge).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.EdgeOffset">
+            <summary>Offset from the anchor (canvas units).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.ButtonSpriteName">
+            <summary>Background sprite name for the buttons (from <see cref="T:PerAspera.GameAPI.UI.Toolkit.UISprites"/>).</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.PadToPageSize">
+            <summary>Pad each page with blank slots so the container always shows <c>Pager.PageSize</c> children.</summary>
+        </member>
+        <member name="F:PerAspera.GameAPI.UI.Toolkit.UIPagerView.PlaceholderFactory">
+            <summary>Factory for a blank padding slot: (container, index) → child GameObject (null = stop).</summary>
+        </member>
+        <member name="T:PerAspera.GameAPI.UI.Toolkit.UISprites">
+             <summary>
+             Runtime sprite directory ("annuaire") for the uGUI UI toolkit.
+            
+             <para>The game ships ~1900 named sprites baked into GPU atlases. The decompiled
+             <c>PerAsperaData\Sprite\</c> folder is the documented list of those names (a catalog, NOT a
+             load source: the PNGs are already resident in the running atlases). This class harvests the
+             live <see cref="T:UnityEngine.Sprite"/> objects from the loaded UI so a mod can reference any of them by
+             name and hand them straight to a uGUI <see cref="T:UnityEngine.UI.Image"/>.</para>
+            
+             <para><b>Why uGUI, not IMGUI:</b> a uGUI <see cref="T:UnityEngine.UI.Image"/> renders an atlas sprite
+             natively (the game does it every frame). IMGUI's <c>GUI.DrawTexture*</c> cannot — the
+             atlases are compressed, non-readable GPU textures. So sprites obtained here are meant to be
+             assigned to <c>image.sprite</c>, never drawn with the legacy <c>HUDSpriteCache.Draw</c>.</para>
+             </summary>
+             <example>
+             UISprites.Refresh();                       // once, after the game UI is loaded
+             var bg = UISprites.Get("IMG_Resources_BG");
+             myImage.sprite = bg;                        // renders identical to vanilla
+             </example>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UISprites.Count">
+            <summary>Number of distinct named sprites currently indexed.</summary>
+        </member>
+        <member name="P:PerAspera.GameAPI.UI.Toolkit.UISprites.Names">
+            <summary>All indexed sprite names (for tooling / dumps).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.Refresh">
+            <summary>
+            Rebuild the index by scanning every loaded <see cref="T:UnityEngine.UI.Image"/> (including inactive
+            objects and in-memory prefabs via <c>Resources.FindObjectsOfTypeAll</c>). Safe to call
+            repeatedly — later panels add their sprites to the directory. Call once the game UI
+            exists (e.g. after <c>GameFullyLoadedEvent</c>); calling earlier just yields fewer entries.
+            </summary>
+            <returns>The number of distinct sprites indexed after the scan.</returns>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.Add(UnityEngine.Sprite)">
+            <summary>Index a single sprite by its <c>sprite.name</c> (no-op if null/blank/dup).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.AddFrom(UnityEngine.GameObject)">
+            <summary>Index every sprite found under <paramref name="root"/> (any child Image).</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.Get(System.String)">
+            <summary>The sprite registered under <paramref name="name"/>, or null.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.Has(System.String)">
+            <summary>True if a sprite named <paramref name="name"/> is indexed.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.TryGet(System.String,UnityEngine.Sprite@)">
+            <summary>Try-get variant for hot paths.</summary>
+        </member>
+        <member name="M:PerAspera.GameAPI.UI.Toolkit.UISprites.Dump(System.String)">
+            <summary>Dump every indexed sprite (name + pixel size) to the log — debugging aid.</summary>
         </member>
         <member name="T:PerAspera.GameAPI.Wrappers.BaseGameReferencesWrapper">
             <summary>
@@ -16087,6 +16596,12 @@
         <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.GetSection(System.String)">
             <summary>Snapshot of all items of a section (possibly empty).</summary>
         </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.GetProvider(System.String,System.String)">
+            <summary>
+            modId of the mod that provided an item (last writer on conflict), or null if the
+            item is unknown. Lets consumers resolve file paths relative to the mod folder.
+            </summary>
+        </member>
         <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensionLoader.HasSection(System.String)">
             <summary>True if at least one item was loaded for the section.</summary>
         </member>
@@ -16156,6 +16671,23 @@
             <summary>True if at least one loaded mod provides data for the section.</summary>
             <param name="section">Section name.</param>
             <example>if (YamlExtensions.HasSection("gasEmissions")) { … }</example>
+        </member>
+        <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.GetProviderId(System.String,System.String)">
+            <summary>
+            modId of the mod that provided an item (the one whose sdk.yaml declared it; last
+            writer on conflict), or null if unknown. Use it to resolve asset paths relative to
+            the mod folder: <c>Path.Combine(YamlExtensions.ModsRoot, providerId, relativePath)</c>.
+            </summary>
+            <param name="section">Section name (e.g. "hubIcons").</param>
+            <param name="itemKey">Datamodel item key (e.g. "building_drone_base_2").</param>
+            <example>string? mod = YamlExtensions.GetProviderId("hubIcons", "building_drone_base_2");</example>
+        </member>
+        <member name="P:PerAspera.GameAPI.YamlExtensions.YamlExtensions.ModsRoot">
+            <summary>
+            Root folder scanned for <c>*/sdk.yaml</c> (the game's <c>StreamingAssets/Mods</c>).
+            Combine with <see cref="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.GetProviderId(System.String,System.String)"/> to locate a mod's asset files.
+            </summary>
+            <example>var dir = Path.Combine(YamlExtensions.ModsRoot, modId);</example>
         </member>
         <member name="M:PerAspera.GameAPI.YamlExtensions.YamlExtensions.RegisterSchema(PerAspera.GameAPI.YamlExtensions.ExtensionSchema)">
             <summary>

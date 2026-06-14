@@ -39,13 +39,42 @@ dotnet build PerAspera.GameAPI\PerAspera.GameAPI.csproj
 <Import Project="F:\ModPeraspera\SDK_DLL\sdkDLL.props" />
 ```
 
-## Règles critiques
+## Règles techniques critiques
 
+### IL2CPP Type Safety
 - `Type` nu = `System.Type` via alias global (`Directory.Build.props`) — plus de conflit CS0104 avec les assemblies du jeu
+- Pour d'autres collisions de noms, ajouter un alias `<Using Include="..." Alias="..."/>` plutôt qu'une règle manuelle
+
+### Accès au jeu — interop typé d'abord
+> Audit complet : `F:\ModPeraspera\docs\SDK-CRITICAL-REVIEW.md`
+
+Les proxies interop typés (`Planet`, `BaseGame`, `Faction`…) sont référencés par tous les projets.
+
+**Ordre de préférence :**
+1. **Membre typé du proxy interop** — compile-time safety, IntelliSense, erreur de build si le jeu change
+2. **Wrapper SDK** — exposer le proxy typé (ex: `PlanetWrapper.NativePlanet`) et déléguer typé
+3. **`SafeInvoke`/réflexion** — uniquement pour membres natifs inaccessibles (privés/strippés). Surveillé par **RS0030**
+
+`SafeInvoke<float>("X")` échoue silencieusement (retourne `0`) — toujours vérifier dans InteropDump que le membre existe.
+
+### SDK Access Pattern
+```csharp
+var baseGame = GameApi.wrapper.basegame;   // BaseGameWrapper (méthode préférée)
+var planet   = GameApi.wrapper.planet;     // PlanetWrapper
+float kelvin = planet.NativePlanet?.GetAverageTemperature() ?? 0f;  // proxy typé
+var nativePlanet = Native.planet;          // natif IL2CPP (uniquement pour interop)
+```
+
+### Protocole SDK-First
+Avant tout patch BepInEx/Harmony, vérifier d'abord :
+1. `F:\ModPeraspera\docs\Capabilities-Matrix.md` — SDK couvre-t-il le besoin ?
+2. `F:\ModPeraspera\docs\[Class]-Enhanced.md` — capacités SDK wrapper
+3. Patcher uniquement pour les gaps confirmés.
+
+### Autres règles
 - `GameApi.wrapper.*` en priorité sur les instantiations directes
 - `LogAspera` pour tout logging (pas `Log.LogInfo` directement)
 - XML doc `<summary>` + `<example>` obligatoire sur toutes les méthodes publiques
-- Vérifier `F:\ModPeraspera\docs\` avant tout ajout d'API
 
 ## Référence sources jeu décompilées
 

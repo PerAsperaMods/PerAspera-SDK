@@ -1,4 +1,4 @@
-# Per Aspera SDK — editor/analyzer settings (kept in sync with the workspace root
+﻿# Per Aspera SDK — editor/analyzer settings (kept in sync with the workspace root
 # .editorconfig so the SDK behaves the same when cloned standalone).
 # charset utf-8 prevents the mojibake reencoding seen in some sources (em-dashes → "â€").
 root = true
@@ -15,6 +15,14 @@ indent_size = 4
 # RS0030 = BannedApiAnalyzers (reflexion interdite hors PerAspera.Core.IL2CppExtensions).
 # Warning pour l'instant — passera en error une fois les ~290 violations migrées.
 dotnet_diagnostic.RS0030.severity = warning
+
+# S104: fichiers max 500 lignes (defaut Sonar = 1000)
+dotnet_diagnostic.S104.severity = warning
+sonar_max_lines_per_file = 500
+
+# S138: fonctions max 50 lignes (defaut Sonar = 80)
+dotnet_diagnostic.S138.severity = warning
+sonar_max_lines_per_function = 50
 
 [*.{csproj,props,targets}]
 indent_style = tab

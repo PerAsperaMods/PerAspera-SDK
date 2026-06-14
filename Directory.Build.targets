@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <!-- Embedded in parent workspace → delegate to root Directory.Build.targets
        (nearest-file wins for auto-import, so we must chain explicitly, same as the props). -->
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets"
@@ -59,4 +59,44 @@
       </Reference>
     </ItemGroup>
   </Target>
+
+  <!-- ============================================================
+       PA001 : fichier max 500 lignes — inline MSBuild task (exact, sans package externe)
+       S138  : fonction max 50 lignes — via SonarAnalyzer.CSharp (severity warning)
+       Politique : warning seulement, coherent avec RS0030. Passer en error quand les
+       violations existantes sont corrigees.
+       ============================================================ -->
+  <UsingTask TaskName="CheckSourceFileLengths"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <MaxLines ParameterType="System.Int32" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+      foreach (var file in SourceFiles)
+      {
+          string path = file.GetMetadata("FullPath");
+          if (!File.Exists(path)) continue;
+          int count = File.ReadAllLines(path).Length;
+          if (count > MaxLines)
+              Log.LogWarning(null, "PA001", null, path, 0, 0, 0, 0,
+                  "File has {0} lines (max {1}). Consider splitting.",
+                  count, MaxLines);
+      }
+      return true;
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="EnforceFileLengthLimit" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_FilesToCheck Include="@(Compile)"
+                     Condition="!$([System.String]::Copy('%(FullPath)').Contains('\obj\'))" />
+    </ItemGroup>
+    <CheckSourceFileLengths SourceFiles="@(_FilesToCheck)" MaxLines="500" />
+  </Target>
+
 </Project>

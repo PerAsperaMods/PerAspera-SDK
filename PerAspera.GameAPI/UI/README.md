@@ -1,4 +1,19 @@
-# PerAspera.GameAPI.UI — IMGUI SDK Components
+# PerAspera.GameAPI.UI
+
+> ⚠️ **Pour toute nouvelle UI, utilise le toolkit uGUI : `Toolkit/` (skill `/per-aspera-ui-toolkit`).**
+> uGUI rend les sprites d'atlas du jeu et a le look natif ; **IMGUI ne le peut pas**. Les composants
+> IMGUI ci-dessous (`UIPanel`, `UIGamePanel`, `UISimplePanel`, `HUDSpriteCache`…) sont **legacy** —
+> conservés pour des overlays texte/debug seulement.
+
+## Toolkit uGUI (recommandé)
+
+`Toolkit/` : `UIBuilder`+`UINode` (Panel/Image/Text/Button), `UISprites` (sprites du jeu par nom),
+`UIFonts` (police TMP « Aspera »), `UIPager`+`UIPagerView` (pagination), `UIClone` (clone de widgets
+natifs). Exemple : `ResourceBar/ResourceBarFix.cs`. Façade UI native typée : `GameUI`.
+
+---
+
+## IMGUI SDK Components (legacy)
 
 Standardized IMGUI helpers for Per Aspera mod development. Create panels, colors, and resources displays matching the native game UI style.
 

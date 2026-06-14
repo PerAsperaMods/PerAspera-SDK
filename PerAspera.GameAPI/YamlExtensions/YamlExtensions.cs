@@ -83,6 +83,24 @@ namespace PerAspera.GameAPI.YamlExtensions
         public static bool HasSection(string section) => YamlExtensionLoader.HasSection(section);
 
         /// <summary>
+        /// modId of the mod that provided an item (the one whose sdk.yaml declared it; last
+        /// writer on conflict), or null if unknown. Use it to resolve asset paths relative to
+        /// the mod folder: <c>Path.Combine(YamlExtensions.ModsRoot, providerId, relativePath)</c>.
+        /// </summary>
+        /// <param name="section">Section name (e.g. "hubIcons").</param>
+        /// <param name="itemKey">Datamodel item key (e.g. "building_drone_base_2").</param>
+        /// <example>string? mod = YamlExtensions.GetProviderId("hubIcons", "building_drone_base_2");</example>
+        public static string? GetProviderId(string section, string itemKey)
+            => YamlExtensionLoader.GetProvider(section, itemKey);
+
+        /// <summary>
+        /// Root folder scanned for <c>*/sdk.yaml</c> (the game's <c>StreamingAssets/Mods</c>).
+        /// Combine with <see cref="GetProviderId"/> to locate a mod's asset files.
+        /// </summary>
+        /// <example>var dir = Path.Combine(YamlExtensions.ModsRoot, modId);</example>
+        public static string ModsRoot => YamlExtensionLoader.ModsRoot;
+
+        /// <summary>
         /// Convenience passthrough to <see cref="ExtensionSchemaRegistry.Register"/> —
         /// declare your section before the game finishes loading YAML.
         /// </summary>

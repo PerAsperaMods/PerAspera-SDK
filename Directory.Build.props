@@ -1,9 +1,9 @@
-<Project>
-  <!-- Embedded in parent workspace → delegate to root Directory.Build.props -->
+﻿<Project>
+  <!-- Embedded in parent workspace â†’ delegate to root Directory.Build.props -->
   <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props"
           Condition="Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')" />
 
-  <!-- Standalone SDK repo → load local gamelibs.props (gitignored, created by Setup-DevEnvironment.ps1) -->
+  <!-- Standalone SDK repo â†’ load local gamelibs.props (gitignored, created by Setup-DevEnvironment.ps1) -->
   <Import Project="$(MSBuildThisFileDirectory)gamelibs.props"
           Condition="!Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props') and Exists('$(MSBuildThisFileDirectory)gamelibs.props')" />
 
@@ -44,17 +44,17 @@
   <!--
     Game assembly references for SDK projects.
     
-    LOCAL dev: DLLs come from GameLibsDir (root\gamelibs\) — generated once by
+    LOCAL dev: DLLs come from GameLibsDir (root\gamelibs\) â€” generated once by
                Generate-GameLibs.ps1, auto-triggered on first build.
     
     CI/CD:     Publicized on-the-fly via BepInEx.AssemblyPublicizer.MSBuild +
                game path from environment variable PERASPERAGAMEPATH.
   -->
 
-  <!-- CI/CD: publicizer package only — the game references themselves are added by
+  <!-- CI/CD: publicizer package only â€” the game references themselves are added by
        the two-target pattern in Directory.Build.targets (GatherGameLibDllsCI /
        AddGameLibReferencesCI). The old inline ItemGroup here produced empty HintPaths
-       (%(FullPath) metadata doesn't resolve in a static ItemGroup) — removed 2026-06. -->
+       (%(FullPath) metadata doesn't resolve in a static ItemGroup) â€” removed 2026-06. -->
   <ItemGroup Condition="'$(IsCIBuild)' == 'true'">
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
   </ItemGroup>
@@ -65,11 +65,20 @@
 
   <!-- Enforce the architecture rule "no reflection outside IL2CppExtensions"
        (RS0030 warnings, see BannedSymbols.txt). Depuis la consolidation 2026-06,
-       IL2CppExtensions vit dans PerAspera.Core — c'est l'assembly exemptée
-       (son rôle EST la réflexion encapsulée). -->
+       IL2CppExtensions vit dans PerAspera.Core â€” c'est l'assembly exemptÃ©e
+       (son rÃ´le EST la rÃ©flexion encapsulÃ©e). -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'PerAspera.Core'">
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+
+
+  <!-- Code metrics: S104 = fichier max 500 lignes, S138 = fonction max 50 lignes.
+       Severity = warning (pas error) — meme politique que RS0030.
+       Pour monter en error : changer severity dans .editorconfig.
+       Si version introuvable: verifier la derniere version sur nuget.org -->
+  <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

@@ -205,12 +205,14 @@ var resource = GameApi.wrapper.resourcetype;
 ---
 
 ### `PerAspera.GameAPI.UI` — Layer 6
-**Rôle :** panneaux HUD, overlays, fenêtres Unity IMGUI.  
+**Rôle :** UI uGUI au look natif (framework moderne) + façade typée sur l'UI native du jeu.  
 **Classes clés :**
-- `Components` — `UIPanel`, `UIGamePanel`, `UISimplePanel`, `UIResourceRow`, `UISimpleRow`, `UIOverlaySystem`, `UISceneHelper`
-- `Core` — `UIColors`, `UIStyles`
+- `Toolkit` ✅ **(à utiliser)** — `UIBuilder`+`UINode`, `UISprites`, `UIFonts`, `UIPager`, `UIPagerView`, `UIClone`
+- `ResourceBar` — `ResourceBarFix` (exemple : pagination des barres natives, auto-actif)
+- `GameUI` — façade typée sur l'UI native (popups, panneaux, notifications)
+- `Components`/`Core` ⚠️ *legacy IMGUI* (`UIPanel`, `UIGamePanel`, `HUDSpriteCache`…) — IMGUI ne rend pas les atlas, éviter pour du neuf
 
-**Skill associée :** agent `per-aspera-sdk-ui`
+**Skill associée :** `/per-aspera-ui-toolkit` · agent `per-aspera-sdk-ui`
 
 ---
 

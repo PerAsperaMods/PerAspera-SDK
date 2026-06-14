@@ -124,6 +124,19 @@ namespace PerAspera.GameAPI.YamlExtensions
             }
         }
 
+        /// <summary>
+        /// modId of the mod that provided an item (last writer on conflict), or null if the
+        /// item is unknown. Lets consumers resolve file paths relative to the mod folder.
+        /// </summary>
+        internal static string? GetProvider(string section, string itemKey)
+        {
+            lock (_lock)
+            {
+                return _providers.TryGetValue(section, out var items) &&
+                       items.TryGetValue(itemKey, out var modId) ? modId : null;
+            }
+        }
+
         /// <summary>True if at least one item was loaded for the section.</summary>
         internal static bool HasSection(string section)
         {
